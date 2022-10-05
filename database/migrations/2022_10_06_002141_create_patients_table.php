@@ -1,0 +1,71 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('patients', function (Blueprint $table) {
+            $table->id();
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+            $table->enum('gender', ['Male', 'Female']);
+            $table->date('date_of_birth')->nullable();
+            $table->bigInteger('region_id')->unsigned()->nullable();
+            $table->bigInteger('district_id')->unsigned()->nullable();
+            $table->bigInteger('ward_id')->unsigned()->nullable();
+            $table->string('national_id')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('occupation')->nullable();
+            $table->bigInteger('consultation_item_id')->unsigned();
+            $table->timestamp('created_at')->nullable();
+            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->timestamp('updated_at')->nullable();
+
+            $table->foreign('region_id')
+                ->references('id')
+                ->on('regions')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreign('district_id')
+                ->references('id')
+                ->on('districts')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreign('ward_id')
+                ->references('id')
+                ->on('wards')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreign('consultation_item_id')
+                ->references('id')
+                ->on('items')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('patients');
+    }
+};

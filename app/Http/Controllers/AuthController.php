@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+class AuthController extends Controller
+{
+    use ApiResponse;
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $credentials = $request->only('username', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if ($user->status == 'Inactive') {
+                return $this->sendResponse(null, Response::HTTP_FORBIDDEN,
+                    'You do not have access to the system.');
+            }
+
+            $token = Str::random(32);
+            $user->api_token = $token;
+            $user->save();
+
+            return $this->sendResponse([
+                'api_token' => $token,
+                'user' => $user
+            ], Response::HTTP_OK, 'Logged in successfully.');
+        } else {
+            return $this->sendResponse(null, Response::HTTP_UNAUTHORIZED,
+                'Incorrect username/password combination.');
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user) {
+            $user->api_token = null;
+            $user->save();
+
+            return $this->sendResponse(null, Response::HTTP_OK, 'Logged out successfully.');
+        }
+
+        return $this->sendResponse(null, Response::HTTP_NOT_FOUND, 'User not found.');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required',
+            'api_token' => 'required',
+        ]);
+
+        $user = $request->user();
+
+        if (Auth::attempt(['email' => $user->email, 'password' => $request->current_password])) {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return $this->sendResponse($user, Response::HTTP_OK, 'Password changed successfully.');
+        }
+
+        return $this->sendResponse(null, Response::HTTP_UNPROCESSABLE_ENTITY,
+            'Incorrect current password.');
+    }
+}
