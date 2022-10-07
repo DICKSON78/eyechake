@@ -71,121 +71,121 @@ const CreateUser = ({ modal, fetchUsers }) => {
   };
 
   return (
-    <>
-    {loading ? <LinearProgress /> : null}
-    <CardContent>
-      {handleFeedback()}
-      <Form ref={formRef}>
-        <Grid
-          container
-          spacing={2}
+    <React.Fragment>
+      {loading ? <LinearProgress /> : null}
+      <CardContent>
+        {handleFeedback()}
+        <Form ref={formRef}>
+          <Grid
+            container
+            spacing={2}
+          >
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={nameRef}
+                label="Name"
+                fullWidth
+                required
+                onChange={(value) => setFormData({ ...formData, name: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={emailRef}
+                label="Email"
+                fullWidth
+                required
+                onChange={(value) => setFormData({ ...formData, email: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={phoneRef}
+                label="Phone"
+                fullWidth
+                required
+                rules={[validationRules.phone]}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={roleRef}
+                label="Role"
+                fullWidth
+                required
+                options={["Admin", "Customer"]}
+                value={formData.role}
+                onChange={(value) => setFormData({ ...formData, role: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                label="Password"
+                fullWidth
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment
+                      position="end"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </InputAdornment>
+                  ),
+                }}
+                onChange={(value) => setFormData({ ...formData, password: value })}
+              />
+            </Grid>
+          </Grid>
+        </Form>
+      </CardContent>
+      <Divider />
+      <CardActions>
+        <Box flexGrow={1}/>
+        <Button
+          variant="text"
+          onClick={() => modal.close()}
         >
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={nameRef}
-              label="Name"
-              fullWidth
-              required
-              onChange={(value) => setFormData({ ...formData, name: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={emailRef}
-              label="Email"
-              fullWidth
-              required
-              onChange={(value) => setFormData({ ...formData, email: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={phoneRef}
-              label="Phone"
-              fullWidth
-              required
-              rules={[validationRules.phone]}
-              onChange={(value) => setFormData({ ...formData, phone: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Select
-              ref={roleRef}
-              label="Role"
-              fullWidth
-              required
-              options={["Admin", "Customer"]}
-              value={formData.role}
-              onChange={(value) => setFormData({ ...formData, role: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={passwordRef}
-              type={showPassword ? "text" : "password"}
-              label="Password"
-              fullWidth
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment
-                    position="end"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(value) => setFormData({ ...formData, password: value })}
-            />
-          </Grid>
-        </Grid>
-      </Form>
-    </CardContent>
-    <Divider />
-    <CardActions>
-      <Box flexGrow={1}/>
-      <Button
-        variant="text"
-        onClick={() => modal.close()}
-      >
-        Cancel
-      </Button>
-      <Button
-        disabled={loading}
-        variant="text"
-        onClick={handleSubmit}
-      >
-        Save
-      </Button>
-    </CardActions>
-    </>
+          Cancel
+        </Button>
+        <Button
+          disabled={loading}
+          variant="text"
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
+      </CardActions>
+    </React.Fragment>
   );
 };
 

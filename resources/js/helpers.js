@@ -116,40 +116,43 @@ export const getValidationRules = () => {
  * @returns {string}
  */
 export const formatError = (errorBody) => {
-  let errorMessage = "";
-  let statusCode = errorBody.response
-    ? parseInt(errorBody.response.status)
-    : 500;
-  switch (statusCode) {
-    case 401: // auth errors
-    case 403: {
-      let data = errorBody.response.data;
-      if (data.message) {
-        errorMessage = data.message;
-      }
-    }
-      break;
-    case 404:
-      errorMessage = "The requested resource was not found.";
-      break;
-    case 422: {
-      // validation errors
-      let data = errorBody.response.data;
-      if (data.message) {
-        errorMessage = data.message;
-      }
+  let message = "Something went wrong.";
 
-      if (data.data) {
-        let errors = [];
-        Object.keys(data.data).forEach((e, i) => errors.push(data.data[e][0]));
-        errorMessage = errors.join("\n");
+  if (errorBody.response) {
+    const statusCode = parseInt(errorBody.response.status);
+    switch (statusCode) {
+      case 401: {
+        message = "You were logged out.";
       }
+        break;
+      case 403: {
+        let data = errorBody.response.data;
+        if (data.message) {
+          message = data.message;
+        }
+      }
+        break;
+      case 404:
+        message = "The requested resource was not found.";
+        break;
+      case 422: {
+        // validation errors
+        let data = errorBody.response.data;
+        if (data.message) {
+          message = data.message;
+        }
+
+        if (data.data) {
+          let errors = [];
+          Object.keys(data.data).forEach((e, i) => errors.push(data.data[e][0]));
+          message = errors.join("\n");
+        }
+      }
+        break;
     }
-      break;
-    default:
-      errorMessage = "Something went wrong.";
-      break;
+  } else if (errorBody.request) {
+    message = "Network connectivity error.";
   }
 
-  return errorMessage;
+  return message;
 };

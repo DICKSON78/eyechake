@@ -61,88 +61,88 @@ const ChangePassword = ({ modal }) => {
   };
 
   return (
-    <>
-    {loading ? <LinearProgress /> : null}
-    <CardContent>
-      {handleFeedback()}
-      <Form ref={formRef}>
-        <Grid
-          container
-          spacing={2}
+    <React.Fragment>
+      {loading ? <LinearProgress /> : null}
+      <CardContent>
+        {handleFeedback()}
+        <Form ref={formRef}>
+          <Grid
+            container
+            spacing={2}
+          >
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={currentPasswordRef}
+                type={showPassword ? "text" : "password"}
+                label="Current Password"
+                fullWidth
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment
+                      position="end"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </InputAdornment>
+                  ),
+                }}
+                onChange={(value) => setFormData({ ...formData, current_password: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={newPasswordRef}
+                type={showPassword ? "text" : "password"}
+                label="New Password"
+                fullWidth
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment
+                      position="end"
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </InputAdornment>
+                  ),
+                }}
+                onChange={(value) => setFormData({ ...formData, new_password: value })}
+              />
+            </Grid>
+          </Grid>
+        </Form>
+      </CardContent>
+      <Divider />
+      <CardActions>
+        <Box flexGrow={1}/>
+        <Button
+          variant="text"
+          onClick={() => modal.close()}
         >
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={currentPasswordRef}
-              type={showPassword ? "text" : "password"}
-              label="Current Password"
-              fullWidth
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment
-                    position="end"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(value) => setFormData({ ...formData, current_password: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={newPasswordRef}
-              type={showPassword ? "text" : "password"}
-              label="New Password"
-              fullWidth
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment
-                    position="end"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </InputAdornment>
-                ),
-              }}
-              onChange={(value) => setFormData({ ...formData, new_password: value })}
-            />
-          </Grid>
-        </Grid>
-      </Form>
-    </CardContent>
-    <Divider />
-    <CardActions>
-      <Box flexGrow={1}/>
-      <Button
-        variant="text"
-        onClick={() => modal.close()}
-      >
-        Cancel
-      </Button>
-      <Button
-        disabled={loading}
-        variant="text"
-        onClick={handleSubmit}
-      >
-        Save
-      </Button>
-    </CardActions>
-    </>
+          Cancel
+        </Button>
+        <Button
+          disabled={loading}
+          variant="text"
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
+      </CardActions>
+    </React.Fragment>
   );
 };
 

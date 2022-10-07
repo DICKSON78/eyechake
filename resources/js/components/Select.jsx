@@ -58,7 +58,7 @@ class Select extends React.Component {
   }
 
   render() {
-    const { containerProps, label, placeholder, required, options, optionsText, optionsValue, clearable, ...rest } = this.props;
+    const { containerProps, label, placeholder, required, options, optionsText, optionsValue, clearable, endAdornment, ...rest } = this.props;
     return (
       <Box
         component="div"
@@ -104,15 +104,16 @@ class Select extends React.Component {
             ) : undefined
           }
           IconComponent={ArrowDropDownIcon}
-          endAdornment={clearable && this.state.value ? (
-            <InputAdornment
-              position="end"
-              sx={{ cursor: "pointer", mr: 2 }}
-              onClick={() => this._onChange(undefined, true)}
-            >
-              <CloseIcon fontSize="small"/>
-            </InputAdornment>
-          ) : null
+          endAdornment={
+            clearable && this.state.value ? (
+              <InputAdornment
+                position="end"
+                sx={{ cursor: "pointer", mr: 2 }}
+                onClick={() => this._onChange(undefined, true)}
+              >
+                <CloseIcon fontSize="small"/>
+              </InputAdornment>
+            ) : endAdornment
           }
         >
           {options.map(e => (

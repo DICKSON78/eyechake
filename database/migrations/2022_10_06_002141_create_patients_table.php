@@ -26,7 +26,6 @@ return new class extends Migration
             $table->string('national_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('occupation')->nullable();
-            $table->bigInteger('consultation_item_id')->unsigned();
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();
@@ -46,11 +45,6 @@ return new class extends Migration
                 ->on('wards')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->foreign('consultation_item_id')
-                ->references('id')
-                ->on('items')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
             $table->foreign('created_by')
                 ->references('id')
                 ->on('users')

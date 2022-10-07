@@ -61,75 +61,75 @@ const LogIn = () => {
   };
 
   return (
-    <>
-    <Paper variant="outlined">
-      {loading &&
-      <LinearProgress
-        sx={{
-          borderTopLeftRadius: (theme) => theme.shape.borderRadius,
-          borderTopRightRadius: (theme) => theme.shape.borderRadius
-        }}
-      />}
-      <Box p={2}>
-        <Box
-          component="img"
-          display="block"
-          width={80}
-          mb={2}
-          mx="auto"
-          alt="Logo"
-          src={logo}
-        />
-
-        {handleFeedback()}
-
-        <Form ref={formRef}>
-          <TextField
-            ref={usernameRef}
-            placeholder="Username"
-            fullWidth
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <UsernameIcon />
-                </InputAdornment>
-              ),
-            }}
-            containerProps={{ sx: { mb: 2 } }}
-            onChange={(value) => setFormData({ ...formData, username: value })}
+    <React.Fragment>
+      <Paper variant="outlined">
+        {loading &&
+        <LinearProgress
+          sx={{
+            borderTopLeftRadius: (theme) => theme.shape.borderRadius,
+            borderTopRightRadius: (theme) => theme.shape.borderRadius
+          }}
+        />}
+        <Box p={2}>
+          <Box
+            component="img"
+            display="block"
+            width={80}
+            mb={2}
+            mx="auto"
+            alt="Logo"
+            src={logo}
           />
-          <TextField
-            ref={passwordRef}
-            placeholder="Password"
-            type="password"
+
+          {handleFeedback()}
+
+          <Form ref={formRef}>
+            <TextField
+              ref={usernameRef}
+              placeholder="Username"
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <UsernameIcon />
+                  </InputAdornment>
+                ),
+              }}
+              containerProps={{ sx: { mb: 2 } }}
+              onChange={(value) => setFormData({ ...formData, username: value })}
+            />
+            <TextField
+              ref={passwordRef}
+              placeholder="Password"
+              type="password"
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                  </InputAdornment>
+                ),
+              }}
+              containerProps={{ sx: { mb: 2 } }}
+              onChange={(value) => setFormData({ ...formData, password: value })}
+            />
+          </Form>
+          <Button
+            disabled={loading}
             fullWidth
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                </InputAdornment>
-              ),
-            }}
-            containerProps={{ sx: { mb: 2 } }}
-            onChange={(value) => setFormData({ ...formData, password: value })}
-          />
-        </Form>
-        <Button
-          disabled={loading}
-          fullWidth
-          disableElevation
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleSubmit}
-        >
-          Login
-        </Button>
-      </Box>
-    </Paper>
-    </>
+            disableElevation
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={handleSubmit}
+          >
+            Login
+          </Button>
+        </Box>
+      </Paper>
+    </React.Fragment>
   );
 };
 

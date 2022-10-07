@@ -64,7 +64,8 @@ class Modal extends React.Component {
                 title={this.state.title}
                 subheader={this.state.subtitle}
                 titleTypographyProps={{
-                  variant: "h6"
+                  variant: "h6",
+                  fontWeight: "400"
                 }}
                 subheaderTypographyProps={{
                   variant: "subtitle2"

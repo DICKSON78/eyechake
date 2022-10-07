@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\LensTypesController;
+use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\UnitsOfMeasureController;
@@ -45,4 +46,5 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/regions', RegionsController::class);
     $router->apiResource('/districts', DistrictsController::class);
     $router->apiResource('/wards', WardsController::class);
+    $router->apiResource('/patients', PatientsController::class);
 });

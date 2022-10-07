@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,9 +10,11 @@ class Patient extends Model
 {
     use HasFactory;
 
+    protected $appends = ['full_name'];
+
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region', 'district', 'ward_id',
-        'national_id', 'phone', 'occupation', 'consultation_item_id', 'created_by',
+        'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
+        'national_id', 'phone', 'occupation', 'created_by',
     ];
 
     public function region()
@@ -29,13 +32,19 @@ class Patient extends Model
         return $this->belongsTo(Ward::class, 'ward_id');
     }
 
-    public function consultation_item()
-    {
-        return $this->belongsTo(Item::class, 'consultation_item_id');
-    }
-
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function getFullNameAttribute()
+    {
+        $name = sprintf('%s %s %s', $this->first_name, $this->middle_name, $this->last_name);
+        return preg_replace('/\s{2,}/', ' ', trim($name));
+    }
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i');
     }
 }

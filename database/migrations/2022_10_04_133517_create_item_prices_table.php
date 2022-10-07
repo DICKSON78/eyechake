@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('item_id')->unsigned();
             $table->bigInteger('payment_mode_id')->unsigned();
-            $table->double('price')->unsigned();
+            $table->double('unit_price')->unsigned();
             $table->timestamps();
 
             $table->foreign('item_id')

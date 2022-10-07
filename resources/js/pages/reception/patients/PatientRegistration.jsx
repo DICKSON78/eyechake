@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Alert, Button, Card, CardContent, Divider, Grid, InputAdornment, LinearProgress, Stack } from "@mui/material";
+import AddIcon from "@mui/icons-material/AddRounded";
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Modal from "../../../components/Modal";
+import Form from "../../../components/Form";
+import TextField from "../../../components/TextField";
+import DatePicker from "../../../components/DatePicker";
+import Select from "../../../components/Select";
+import CreateRegion from "../../settings/subdivisions/CreateRegion";
+import CreateDistrict from "../../settings/subdivisions/CreateDistrict";
+import CreateWard from "../../settings/subdivisions/CreateWard";
 
-import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Stack } from "@mui/material";
-import Page, { Header as PageHeader } from "../../components/Page";
-import Modal from "../../components/Modal";
-import Form from "../../components/Form";
-import TextField from "../../components/TextField";
-import DatePicker from "../../components/DatePicker";
-import Select from "../../components/Select";
-
-import { useFetch, usePost } from "../../hooks";
-import { formatError } from "../../helpers";
+import { useFetch, usePost } from "../../../hooks";
+import { formatDateForDb, formatError } from "../../../helpers";
 
 const PatientRegistration = () => {
+
+  const navigate = useNavigate();
 
   const modalRef = useRef();
   const formRef = useRef();
@@ -26,25 +32,14 @@ const PatientRegistration = () => {
   const nationalIdRef = useRef();
   const phoneRef = useRef();
   const occupationRef = useRef();
-  const consultationItemRef = useRef();
 
-  const { data: consultationItems } = useFetch("api/items", {
+  const { data: regions, setData: setRegions } = useFetch("api/regions", {
     status: "Active",
-    is_consultation_item: "Yes",
-    perPage: 500
+    per_page: 500
   }, true, [], (response) => response.data.data.data);
-  const { data: regions } = useFetch("api/regions", {
-    status: "Active",
-    perPage: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: districts } = useFetch("api/districts", {
-    status: "Active",
-    perPage: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: wards } = useFetch("api/wards", {
-    status: "Active",
-    perPage: 500
-  }, true, [], (response) => response.data.data.data);
+
+  const [region, setRegion] = useState(null);
+  const [district, setDistrict] = useState(null);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -58,10 +53,23 @@ const PatientRegistration = () => {
     national_id: null,
     phone: null,
     occupation: null,
-    consultation_item_id: null,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/patients", formData);
+  const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {
+    status: "Active",
+    per_page: 500,
+    region_id: formData.region_id
+  }, false, [], (response) => response.data.data.data);
+  const { data: wards, setData: setWards, handleFetch: fetchWards } = useFetch("api/wards", {
+    status: "Active",
+    per_page: 500,
+    district_id: formData.district_id
+  }, false, [], (response) => response.data.data.data);
+
+  const { data, loading, error, handlePost } = usePost("api/patients", {
+    ...formData,
+    date_of_birth: (formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null)
+  });
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -72,15 +80,80 @@ const PatientRegistration = () => {
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
-        //
+        navigate(`/reception/patients/${data.data.id}/check-in`);
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    setFormData({ ...formData, district_id: null });
+    setDistricts([]);
+    setDistrict(null);
+
+    if (region) {
+      fetchDistricts();
+    }
+  }, [region]);
+
+  useEffect(() => {
+    setFormData({ ...formData, ward_id: null });
+    setWards([]);
+
+    if (district) {
+      fetchWards();
+    }
+  }, [district]);
 
 
   useEffect(() => {
     document.title = `Patient Registration - ${window.APP_NAME}`;
   }, []);
+
+  const openCreateRegionModal = () => {
+    let component = (
+      <CreateRegion
+        modal={modalRef.current}
+        onSuccess={(responseData) => {
+          setRegions([...regions, responseData]);
+          setFormData({ ...formData, region_id: responseData.id });
+          setRegion(responseData);
+        }}
+      />
+    );
+
+    modalRef.current.open("Create Region", component);
+  };
+
+  const openCreateDistrictModal = () => {
+    let component = (
+      <CreateDistrict
+        modal={modalRef.current}
+        region={region}
+        onSuccess={(responseData) => {
+          setDistricts([...districts, responseData]);
+          setFormData({ ...formData, district_id: responseData.id });
+          setDistrict(responseData);
+        }}
+      />
+    );
+
+    modalRef.current.open("Create District", component);
+  };
+
+  const openCreateWardModal = () => {
+    let component = (
+      <CreateWard
+        modal={modalRef.current}
+        district={district}
+        onSuccess={(responseData) => {
+          setWards([...wards, responseData]);
+          setFormData({ ...formData, ward_id: responseData.id });
+        }}
+      />
+    );
+
+    modalRef.current.open("Create Ward", component);
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -202,8 +275,22 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   options={regions}
+                  optionsText="name"
+                  optionsValue="id"
                   value={formData.region_id || ""}
-                  onChange={(value) => setFormData({ ...formData, region_id: value })}
+                  endAdornment={
+                    <InputAdornment
+                      position="end"
+                      sx={{ cursor: "pointer", mr: 2 }}
+                      onClick={openCreateRegionModal}
+                    >
+                      <AddIcon fontSize="small"/>
+                    </InputAdornment>
+                  }
+                  onChange={(value) => {
+                    setRegion(regions.find((e) => e.id === value));
+                    setFormData({ ...formData, region_id: value });
+                  }}
                 />
               </Grid>
               <Grid
@@ -221,7 +308,21 @@ const PatientRegistration = () => {
                   optionsText="name"
                   optionsValue="id"
                   value={formData.district_id || ""}
-                  onChange={(value) => setFormData({ ...formData, district_id: value })}
+                  endAdornment={
+                    region ?
+                      <InputAdornment
+                        position="end"
+                        sx={{ cursor: "pointer", mr: 2 }}
+                        onClick={openCreateDistrictModal}
+                      >
+                        <AddIcon fontSize="small"/>
+                      </InputAdornment>
+                      : null
+                  }
+                  onChange={(value) => {
+                    setDistrict(districts.find((e) => e.id === value));
+                    setFormData({ ...formData, district_id: value });
+                  }}
                 />
               </Grid>
               <Grid
@@ -234,11 +335,21 @@ const PatientRegistration = () => {
                   ref={wardRef}
                   label="Ward"
                   fullWidth
-                  required
                   options={wards}
                   optionsText="name"
                   optionsValue="id"
                   value={formData.ward_id || ""}
+                  endAdornment={
+                    district ?
+                      <InputAdornment
+                        position="end"
+                        sx={{ cursor: "pointer", mr: 2 }}
+                        onClick={openCreateWardModal}
+                      >
+                        <AddIcon fontSize="small"/>
+                      </InputAdornment>
+                      : null
+                  }
                   onChange={(value) => setFormData({ ...formData, ward_id: value })}
                 />
               </Grid>
@@ -281,24 +392,6 @@ const PatientRegistration = () => {
                   onChange={(value) => setFormData({ ...formData, occupation: value })}
                 />
               </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={consultationItemRef}
-                  label="Consultation Type"
-                  fullWidth
-                  required
-                  options={consultationItems}
-                  optionsText="name"
-                  optionsValue="id"
-                  value={formData.consultation_item_id || ""}
-                  onChange={(value) => setFormData({ ...formData, consultation_item_id: value })}
-                />
-              </Grid>
             </Grid>
           </Form>
         </CardContent>
@@ -312,6 +405,7 @@ const PatientRegistration = () => {
           p={2}
         >
           <Button
+            disabled={loading}
             variant="contained"
             disableElevation
             onClick={handleSubmit}

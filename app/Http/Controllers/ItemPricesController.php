@@ -47,7 +47,7 @@ class ItemPricesController extends Controller
         $request->validate([
             'item_id' => 'required|exists:items,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
-            'price' => 'required|numeric',
+            'unit_price' => 'required|numeric|min:0',
         ]);
 
         $data = ItemPrice::create($request->all());
@@ -78,7 +78,7 @@ class ItemPricesController extends Controller
         $request->validate([
             'item_id' => 'nullable|exists:items,id',
             'payment_mode_id' => 'nullable|exists:payment_modes,id',
-            'price' => 'nullable|numeric',
+            'unit_price' => 'nullable|numeric|min:0',
         ]);
 
         $data = ItemPrice::findOrFail($id);

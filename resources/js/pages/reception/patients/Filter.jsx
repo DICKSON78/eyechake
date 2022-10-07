@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, CardActions, CardContent, Checkbox, Divider, FormControlLabel, Grid } from "@mui/material";
-import Select from "../../../../components/Select";
-import useFetch from "../../../../hooks/useFetch";
+import Select from "../../../components/Select";
+import useFetch from "../../../hooks/useFetch";
 
 const Filter = ({ modal, params: initial, onOk }) => {
 

@@ -61,84 +61,84 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
   };
 
   return (
-    <>
-    {loading ? <LinearProgress /> : null}
-    <CardContent>
-      {handleFeedback()}
-      <Form ref={formRef}>
-        <Grid
-          container
-          spacing={2}
+    <React.Fragment>
+      {loading ? <LinearProgress /> : null}
+      <CardContent>
+        {handleFeedback()}
+        <Form ref={formRef}>
+          <Grid
+            container
+            spacing={2}
+          >
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={nameRef}
+                label="Name"
+                fullWidth
+                required
+                defaultValue={formData.name}
+                onChange={(value) => setFormData({ ...formData, name: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={descriptionRef}
+                label="Description"
+                fullWidth
+                defaultValue={formData.description}
+                onChange={(value) => setFormData({ ...formData, description: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.status === "Active"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      status: event.target.checked ? "Active" : "Inactive"
+                    })}
+                  />
+                )}
+                label="Active"
+              />
+            </Grid>
+          </Grid>
+        </Form>
+      </CardContent>
+      <Divider />
+      <CardActions>
+        <Box flexGrow={1}/>
+        <Button
+          variant="text"
+          onClick={() => modal.close()}
         >
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={nameRef}
-              label="Name"
-              fullWidth
-              required
-              defaultValue={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={descriptionRef}
-              label="Description"
-              fullWidth
-              defaultValue={formData.description}
-              onChange={(value) => setFormData({ ...formData, description: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <FormControlLabel
-              control={(
-                <Checkbox
-                  defaultChecked={item.status === "Active"}
-                  onChange={(event) => setFormData({
-                    ...formData,
-                    status: event.target.checked ? "Active" : "Inactive"
-                  })}
-                />
-              )}
-              label="Active"
-            />
-          </Grid>
-        </Grid>
-      </Form>
-    </CardContent>
-    <Divider />
-    <CardActions>
-      <Box flexGrow={1}/>
-      <Button
-        variant="text"
-        onClick={() => modal.close()}
-      >
-        Cancel
-      </Button>
-      <Button
-        disabled={loading}
-        variant="text"
-        onClick={handleSubmit}
-      >
-        Save
-      </Button>
-    </CardActions>
-    </>
+          Cancel
+        </Button>
+        <Button
+          disabled={loading}
+          variant="text"
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
+      </CardActions>
+    </React.Fragment>
   );
 };
 

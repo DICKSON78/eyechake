@@ -1,11 +1,25 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import PatientRegistration from "./PatientRegistration";
+import PatientRegistration from "./patients/PatientRegistration";
+import Patients from "./patients/Patients";
+import CheckInPatient from "./CheckInPatient";
 
 const ReceptionRoutes = () => {
   return (
     <Routes>
-      <Route path="/patient-registration" element={<PatientRegistration />}/>
+      <Route
+        path="/patients"
+        exact
+        element={<Patients />}
+      />
+      <Route
+        path="/patients/:id/check-in"
+        element={<CheckInPatient />}
+      />
+      <Route
+        path="/patients/new"
+        element={<PatientRegistration />}
+      />
     </Routes>
   );
 };

@@ -1,22 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
-import Form from "../../../../components/Form";
-import TextField from "../../../../components/TextField";
+import Form from "../../../components/Form";
+import TextField from "../../../components/TextField";
 
-import { usePost } from "../../../../hooks";
-import { formatError } from "../../../../helpers";
+import { usePost } from "../../../hooks";
+import { formatError } from "../../../helpers";
 
-const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
+const CreateRegion = ({ modal, onSuccess }) => {
 
   const formRef = useRef();
   const nameRef = useRef();
-  const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
     name: "",
-    description: null,
   });
-  const { data, loading, error, handlePost } = usePost("api/units-of-measure", formData);
+  const { data, loading, error, handlePost } = usePost("api/regions", formData);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -28,7 +26,7 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
     if (data) {
       window.setTimeout(() => {
         modal.close();
-        fetchUnitsOfMeasure();
+        onSuccess(data.data);
       }, 1000);
     }
   }, [data]);
@@ -72,19 +70,6 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
                 onChange={(value) => setFormData({ ...formData, name: value })}
               />
             </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={descriptionRef}
-                label="Description"
-                fullWidth
-                onChange={(value) => setFormData({ ...formData, description: value })}
-              />
-            </Grid>
           </Grid>
         </Form>
       </CardContent>
@@ -109,4 +94,4 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
   );
 };
 
-export default CreateUnitOfMeasure;
+export default CreateRegion;

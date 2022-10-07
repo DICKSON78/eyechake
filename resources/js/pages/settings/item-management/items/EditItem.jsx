@@ -30,19 +30,19 @@ const EditItem = ({ item, modal, fetchItems }) => {
 
   const { data: itemTypes } = useFetch("api/item-types", {
     status: "Active",
-    perPage: 500
+    per_page: 500
   }, true, [], (response) => response.data.data.data);
   const { data: consultationTypes } = useFetch("api/consultation-types", {
     status: "Active",
-    perPage: 500
+    per_page: 500
   }, true, [], (response) => response.data.data.data);
   const { data: unitsOfMeasure } = useFetch("api/units-of-measure", {
     status: "Active",
-    perPage: 500
+    per_page: 500
   }, true, [], (response) => response.data.data.data);
   const { data: lensTypes } = useFetch("api/lens-types", {
     status: "Active",
-    perPage: 500
+    per_page: 500
   }, true, [], (response) => response.data.data.data);
 
   const [itemType, setItemType] = useState(item.item_type);
@@ -90,181 +90,181 @@ const EditItem = ({ item, modal, fetchItems }) => {
   };
 
   return (
-    <>
-    {loading ? <LinearProgress /> : null}
-    <CardContent>
-      {handleFeedback()}
-      <Form ref={formRef}>
-        <Grid
-          container
-          spacing={2}
-        >
+    <React.Fragment>
+      {loading ? <LinearProgress /> : null}
+      <CardContent>
+        {handleFeedback()}
+        <Form ref={formRef}>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            container
+            spacing={2}
           >
-            <TextField
-              ref={nameRef}
-              label="Item Name"
-              fullWidth
-              required
-              defaultValue={item.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <TextField
-              ref={codeRef}
-              label="Item Code"
-              fullWidth
-              defaultValue={item.code}
-              onChange={(value) => setFormData({ ...formData, code: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Select
-              ref={itemTypeRef}
-              label="Item Type"
-              fullWidth
-              required
-              options={itemTypes}
-              optionsText="name"
-              optionsValue="id"
-              value={itemTypes.length ? (formData.item_type_id || "") : ""}
-              onChange={(value) => {
-                setItemType(itemTypes.find((e) => e.id === value));
-                setFormData({ ...formData, item_type_id: value });
-              }}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Select
-              ref={consultationTypeRef}
-              label="Consultation Type"
-              fullWidth
-              required
-              options={consultationTypes}
-              optionsText="name"
-              optionsValue="id"
-              value={consultationTypes.length ? (formData.consultation_type_id || "") : ""}
-              onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Select
-              ref={unitOfMeasureRef}
-              label="Unit of Measure"
-              fullWidth
-              options={unitsOfMeasure}
-              optionsText="name"
-              optionsValue="id"
-              clearable
-              value={unitsOfMeasure.length ? (formData.unit_of_measure_id || "") : ""}
-              onChange={(value) => setFormData({ ...formData, unit_of_measure_id: value || null })}
-            />
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            {itemType && itemType.name === "Lens" ?
-              <Select
-                ref={lensTypeRef}
-                label="Lens Type"
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={nameRef}
+                label="Item Name"
                 fullWidth
                 required
-                options={lensTypes}
+                defaultValue={item.name}
+                onChange={(value) => setFormData({ ...formData, name: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={codeRef}
+                label="Item Code"
+                fullWidth
+                defaultValue={item.code}
+                onChange={(value) => setFormData({ ...formData, code: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={itemTypeRef}
+                label="Item Type"
+                fullWidth
+                required
+                options={itemTypes}
                 optionsText="name"
                 optionsValue="id"
-                value={lensTypes.length ? (formData.lens_type_id || "") : ""}
-                onChange={(value) => setFormData({ ...formData, lens_type_id: value })}
+                value={itemTypes.length ? (formData.item_type_id || "") : ""}
+                onChange={(value) => {
+                  setItemType(itemTypes.find((e) => e.id === value));
+                  setFormData({ ...formData, item_type_id: value });
+                }}
               />
-              : null
-            }
-          </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <FormControlLabel
-              control={(
-                <Checkbox
-                  checked={formData.is_consultation_item === "Yes"}
-                  onChange={(event) => setFormData({
-                    ...formData,
-                    is_consultation_item: event.target.checked ? "Yes" : "No"
-                  })}
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={consultationTypeRef}
+                label="Consultation Type"
+                fullWidth
+                required
+                options={consultationTypes}
+                optionsText="name"
+                optionsValue="id"
+                value={consultationTypes.length ? (formData.consultation_type_id || "") : ""}
+                onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={unitOfMeasureRef}
+                label="Unit of Measure"
+                fullWidth
+                options={unitsOfMeasure}
+                optionsText="name"
+                optionsValue="id"
+                clearable
+                value={unitsOfMeasure.length ? (formData.unit_of_measure_id || "") : ""}
+                onChange={(value) => setFormData({ ...formData, unit_of_measure_id: value || null })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              {itemType && itemType.name === "Lens" ?
+                <Select
+                  ref={lensTypeRef}
+                  label="Lens Type"
+                  fullWidth
+                  required
+                  options={lensTypes}
+                  optionsText="name"
+                  optionsValue="id"
+                  value={lensTypes.length ? (formData.lens_type_id || "") : ""}
+                  onChange={(value) => setFormData({ ...formData, lens_type_id: value })}
                 />
-              )}
-              label="Consultation Item"
-            />
+                : null
+              }
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={formData.is_consultation_item === "Yes"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      is_consultation_item: event.target.checked ? "Yes" : "No"
+                    })}
+                  />
+                )}
+                label="Consultation Item"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.status === "Active"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      status: event.target.checked ? "Active" : "Inactive"
+                    })}
+                  />
+                )}
+                label="Active"
+              />
+            </Grid>
           </Grid>
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <FormControlLabel
-              control={(
-                <Checkbox
-                  defaultChecked={item.status === "Active"}
-                  onChange={(event) => setFormData({
-                    ...formData,
-                    status: event.target.checked ? "Active" : "Inactive"
-                  })}
-                />
-              )}
-              label="Active"
-            />
-          </Grid>
-        </Grid>
-      </Form>
-    </CardContent>
-    <Divider />
-    <CardActions>
-      <Box flexGrow={1}/>
-      <Button
-        variant="text"
-        onClick={() => modal.close()}
-      >
-        Cancel
-      </Button>
-      <Button
-        disabled={loading}
-        variant="text"
-        onClick={handleSubmit}
-      >
-        Save
-      </Button>
-    </CardActions>
-    </>
+        </Form>
+      </CardContent>
+      <Divider />
+      <CardActions>
+        <Box flexGrow={1}/>
+        <Button
+          variant="text"
+          onClick={() => modal.close()}
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={loading}
+          variant="text"
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
+      </CardActions>
+    </React.Fragment>
   );
 };
 

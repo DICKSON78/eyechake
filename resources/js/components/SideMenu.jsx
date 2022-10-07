@@ -36,9 +36,9 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       },
       {
         id: "3",
-        title: "Patient Registration",
+        title: "Patients/Customers",
         icon: <PatientRegistrationIcon />,
-        to: "/reception/patient-registration",
+        to: "/reception/patients",
       },
       {
         id: "9",

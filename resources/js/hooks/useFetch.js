@@ -43,7 +43,7 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
     };
   }, [handleFetch]);
 
-  return { data, loading, error, handleFetch };
+  return { data, loading, error, handleFetch, setData };
 };
 
 export default useFetch;

@@ -1,38 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  CardActions,
-  CardContent,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  Grid,
-  LinearProgress
-} from "@mui/material";
-import Form from "../../../../components/Form";
-import TextField from "../../../../components/TextField";
+import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import Form from "../../../components/Form";
+import TextField from "../../../components/TextField";
 
-import { usePatch } from "../../../../hooks";
-import { formatError } from "../../../../helpers";
+import { usePost } from "../../../hooks";
+import { formatError } from "../../../helpers";
 
-const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
+const CreateDistrict = ({ modal, region, onSuccess }) => {
 
   const formRef = useRef();
   const nameRef = useRef();
-  const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: item.name,
-    description: item.description,
-    status: item.status,
+    name: "",
+    region_id: region.id
   });
-  const { data, loading, error, handlePatch } = usePatch(`api/units-of-measure/${item.id}`, formData);
+  const { data, loading, error, handlePost } = usePost("api/districts", formData);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
-      handlePatch();
+      handlePost();
     }
   };
 
@@ -40,7 +27,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
     if (data) {
       window.setTimeout(() => {
         modal.close();
-        fetchUnitsOfMeasure();
+        onSuccess(data.data);
       }, 1000);
     }
   }, [data]);
@@ -81,7 +68,6 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
                 label="Name"
                 fullWidth
                 required
-                defaultValue={formData.name}
                 onChange={(value) => setFormData({ ...formData, name: value })}
               />
             </Grid>
@@ -92,30 +78,10 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
               xs={12}
             >
               <TextField
-                ref={descriptionRef}
-                label="Description"
+                disabled
+                label="Region"
                 fullWidth
-                defaultValue={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <FormControlLabel
-                control={(
-                  <Checkbox
-                    defaultChecked={item.status === "Active"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      status: event.target.checked ? "Active" : "Inactive"
-                    })}
-                  />
-                )}
-                label="Active"
+                defaultValue={region.name}
               />
             </Grid>
           </Grid>
@@ -142,4 +108,4 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
   );
 };
 
-export default EditUnitOfMeasure;
+export default CreateDistrict;
