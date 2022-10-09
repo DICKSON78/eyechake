@@ -5,7 +5,7 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
   const ignore = useRef(false);
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState();
 
   const queryString = JSON.stringify(params || {});
 

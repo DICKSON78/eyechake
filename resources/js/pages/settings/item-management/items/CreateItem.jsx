@@ -45,7 +45,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
-  const [itemType, setItemType] = useState(null);
+  const [itemType, setItemType] = useState();
   const [formData, setFormData] = useState({
     name: "",
     code: null,

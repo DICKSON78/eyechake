@@ -2,9 +2,9 @@ import { useState } from "react";
 
 const usePost = (uri, payload = null) => {
 
-  const [data, setData] = useState(null);
+  const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState();
 
   const handlePost = (newUri, newPayload = null) => {
     if (typeof newUri === "string") {

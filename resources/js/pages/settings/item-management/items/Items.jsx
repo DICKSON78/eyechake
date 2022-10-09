@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon } from "@mui/icons-material";
+import { EditRounded as EditIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../../components/Page";
 import Table, { PageSizeSelect, SearchTextField } from "../../../../components/Table";
 import Modal from "../../../../components/Modal";
 import Filter from "./Filter";
 import CreateItem from "./CreateItem";
 import EditItem from "./EditItem";
+import ManageItemPrices from "./ManageItemPrices";
 
 import { useFetch } from "../../../../hooks";
 import { formatError, getNonNull } from "../../../../helpers";
@@ -58,6 +59,20 @@ const Items = () => {
       valueGetter: (item, index) => getNonNull(item.lens_type).name,
     },
     {
+      field: "prices",
+      headerName: "Prices",
+      renderCell: (item) => (
+        <Tooltip title="Manage">
+          <IconButton
+            size="small"
+            onClick={() => openManageItemPricesModal(item)}
+          >
+            <SettingsIcon fontSize="small"/>
+          </IconButton>
+        </Tooltip>
+      ),
+    },
+    {
       field: "status",
       headerName: "Status",
       renderCell: (item) => (
@@ -71,7 +86,6 @@ const Items = () => {
     {
       field: "actions",
       headerName: "Actions",
-      sortable: false,
       renderCell: (item) => (
         <Stack
           direction="row"
@@ -144,6 +158,18 @@ const Items = () => {
     );
 
     modalRef.current.open("Edit Item", component);
+  };
+
+  const openManageItemPricesModal = (item) => {
+    let component = (
+      <ManageItemPrices
+        item={item}
+        modal={modalRef.current}
+        fetchItems={handleFetch}
+      />
+    );
+
+    modalRef.current.open("Manage Item Prices", component, "md", item.name);
   };
 
   const getStatusColor = (status) => {

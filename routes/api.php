@@ -11,6 +11,7 @@ use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\UnitsOfMeasureController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
 Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
+    $router->apiResource('/users', UsersController::class);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/units-of-measure', UnitsOfMeasureController::class);
     $router->apiResource('/lens-types', LensTypesController::class);

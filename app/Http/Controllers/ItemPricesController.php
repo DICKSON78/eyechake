@@ -50,6 +50,15 @@ class ItemPricesController extends Controller
             'unit_price' => 'required|numeric|min:0',
         ]);
 
+        $exists = ItemPrice::where('item_id', $request->item_id)
+            ->where('payment_mode_id', $request->payment_mode_id)
+            ->first();
+
+        if ($exists) {
+            return $this->sendResponse(null, Response::HTTP_UNPROCESSABLE_ENTITY,
+                'This item already has a price for the selected payment mode.');
+        }
+
         $data = ItemPrice::create($request->all());
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }

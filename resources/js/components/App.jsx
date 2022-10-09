@@ -20,7 +20,7 @@ const App = () => {
     return themeMode === "light" ? lightTheme : darkTheme;
   }, [themeMode]);
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState();
 
   return (
     <ThemeProvider theme={theme}>
@@ -43,9 +43,6 @@ const App = () => {
             backgroundColor: theme.palette.primary.main,
             color: "#fff"
           },
-          ".MuiTableBody-root > .MuiTableRow-root:last-child > .MuiTableCell-root" : {
-            borderBottom: "none"
-          }
         }}
       />
       <Router>

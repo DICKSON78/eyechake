@@ -93,6 +93,14 @@ const Patients = () => {
               <EditIcon fontSize="small"/>
             </IconButton>
           </Tooltip>
+          <Button
+            variant="contained"
+            disableElevation
+            size="small"
+            onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
+          >
+            Check-In
+          </Button>
         </Stack>
       ),
     }

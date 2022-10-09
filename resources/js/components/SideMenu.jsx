@@ -7,11 +7,12 @@ import {
   ExpandMoreRounded as ExpandMoreIcon,
   Groups2 as UsersIcon,
   HomeRounded as HomeIcon,
+  HourglassBottomRounded as WaitingIcon,
   Inventory2Rounded as ItemsIcon,
   LinkRounded as LinkIcon,
   List as ListIcon,
   MoneyRounded as PaymentModesIcon,
-  PersonAddRounded as PatientRegistrationIcon
+  PersonRounded as PatientsIcon
 } from "@mui/icons-material";
 
 const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
@@ -19,7 +20,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
   const navigate = useNavigate();
 
   const [items, setItems] = useState([]);
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState();
 
   useEffect(() => {
     setItems([
@@ -37,8 +38,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       {
         id: "3",
         title: "Patients/Customers",
-        icon: <PatientRegistrationIcon />,
+        icon: <PatientsIcon />,
         to: "/reception/patients",
+      },
+      {
+        id: "5",
+        title: "Payment Center",
+        show: !!drawerOpen,
+      },
+      {
+        id: "4",
+        title: "Sent to Cashier",
+        icon: <WaitingIcon />,
+        to: "/payment-center/pending-payment-items",
       },
       {
         id: "9",

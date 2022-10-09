@@ -21,7 +21,7 @@ class TextField extends React.Component {
 
   _onChange(value, validate = true) {
     if (this.props.onChange) {
-      this.props.onChange(value);
+      this.props.onChange(value, this.input);
     }
 
     this.setState({ value }, () => {

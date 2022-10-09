@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Item;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ItemsController extends Controller
+class UsersController extends Controller
 {
     use ApiResponse;
 
@@ -22,11 +22,7 @@ class ItemsController extends Controller
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
-        $item_type_id = $request->item_type_id;
-        $consultation_type_id = $request->consultation_type_id;
-        $is_consultation_item = $request->is_consultation_item;
-        $payment_mode_id = $request->payment_mode_id;
-        $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type']);
+        $data = User::query();
 
         if ($status) {
             $data->where('status', $status);
@@ -34,28 +30,9 @@ class ItemsController extends Controller
 
         if ($q) {
             $data->where(function ($query) use ($q) {
-                $query->where('name', 'like', '%' . $q . '%');
-                $query->orWhere('code', 'like', '%' . $q . '%');
-            });
-        }
-
-        if ($item_type_id) {
-            $data->where('item_type_id', $item_type_id);
-        }
-
-        if ($consultation_type_id) {
-            $data->where('consultation_type_id', $consultation_type_id);
-        }
-
-        if ($is_consultation_item) {
-            $data->where('is_consultation_item', $is_consultation_item);
-        }
-
-        if ($payment_mode_id) {
-            $data->with(['prices' => function ($query) use ($payment_mode_id) {
-                $query->where('payment_mode_id', $payment_mode_id);
-            }])->whereHas('prices', function ($query) use ($payment_mode_id) {
-                $query->where('payment_mode_id', $payment_mode_id);
+                $query->where('first_name', 'like', '%' . $q . '%');
+                $query->orWhere('middle_name', 'like', '%' . $q . '%');
+                $query->orWhere('last_name', 'like', '%' . $q . '%');
             });
         }
 
@@ -81,7 +58,7 @@ class ItemsController extends Controller
             'is_consultation_item' => 'nullable|in:Yes,No',
         ]);
 
-        $data = Item::create($request->only(
+        $data = User::create($request->only(
             'name', 'code', 'item_type_id', 'consultation_type_id',
             'unit_of_measure_id', 'lens_type_id', 'is_consultation_item'
         ));
@@ -96,7 +73,7 @@ class ItemsController extends Controller
      */
     public function show($id)
     {
-        $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])->findOrFail($id);
+        $data = User::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -120,7 +97,7 @@ class ItemsController extends Controller
             'status' => 'nullable|in:Active,Inactive',
         ]);
 
-        $data = Item::findOrFail($id);
+        $data = User::findOrFail($id);
         $data->update($request->all());
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
@@ -133,7 +110,7 @@ class ItemsController extends Controller
      */
     public function destroy($id)
     {
-        $data = Item::findOrFail($id);
+        $data = User::findOrFail($id);
         $data->delete();
         return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
     }

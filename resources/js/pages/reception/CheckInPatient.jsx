@@ -1,76 +1,84 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardContent, Divider, Grid, InputAdornment, LinearProgress, Stack } from "@mui/material";
-import AddIcon from "@mui/icons-material/AddRounded";
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Radio,
+  Stack,
+  Tooltip
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/CloseRounded";
+
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
-import Form from "../../components/Form";
 import TextField from "../../components/TextField";
-import DatePicker from "../../components/DatePicker";
 import Select from "../../components/Select";
-import CreateRegion from "../settings/subdivisions/CreateRegion";
-import CreateDistrict from "../settings/subdivisions/CreateDistrict";
-import CreateWard from "../settings/subdivisions/CreateWard";
+import Table, { SearchTextField } from "../../components/Table";
 
 import { useFetch, usePost } from "../../hooks";
-import { formatError } from "../../helpers";
+import { formatError, getValidationRules, numberFormat, validateInteger } from "../../helpers";
+
+const validationRules = getValidationRules();
 
 const CheckInPatient = () => {
 
   const modalRef = useRef();
-  const formRef = useRef();
-  const firstNameRef = useRef();
-  const middleNameRef = useRef();
-  const lastNameRef = useRef();
-  const genderRef = useRef();
-  const dateOfBirthRef = useRef();
-  const regionRef = useRef();
-  const districtRef = useRef();
-  const wardRef = useRef();
-  const nationalIdRef = useRef();
-  const phoneRef = useRef();
-  const occupationRef = useRef();
+  const paymentModeRef = useRef();
+  const itemRef = useRef();
+  const quantityRef = useRef();
+  const consultantRef = useRef();
 
-  const { data: regions, setData: setRegions } = useFetch("api/regions", {
+  const { data: paymentModes } = useFetch("api/payment-modes", {
+    status: "Active",
+    per_page: 500
+  }, true, [], (response) => response.data.data.data);
+  const { data: users } = useFetch("api/users", {
     status: "Active",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
-  const [region, setRegion] = useState(null);
-  const [district, setDistrict] = useState(null);
+  const [paymentMode, setPaymentMode] = useState();
+  const [consultant, setConsultant] = useState();
+  const [itemName, setItemName] = useState();
+  const [selectedItem, setSelectedItem] = useState();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedItems, setSelectedItems] = useState([]);
 
-  const [formData, setFormData] = useState({
-    first_name: "",
-    middle_name: null,
-    last_name: "",
-    gender: null,
-    date_of_birth: null,
-    region_id: null,
-    district_id: null,
-    ward_id: null,
-    national_id: null,
-    phone: null,
-    occupation: null,
-  });
-
-  const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {
+  const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
     status: "Active",
     per_page: 500,
-    region_id: formData.region_id
-  }, false, [], (response) => response.data.data.data);
-  const { data: wards, setData: setWards, handleFetch: fetchWards } = useFetch("api/wards", {
-    status: "Active",
-    per_page: 500,
-    district_id: formData.district_id
+    payment_mode_id: paymentMode ? paymentMode.id : undefined,
+    q: itemName,
   }, false, [], (response) => response.data.data.data);
 
-  const { data, loading, error, handlePost } = usePost("api/patients", formData);
+  const { data, loading, error, handlePost } = usePost("api/patient-check-ins", {});
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
+  useEffect(() => {
+    document.title = `Check-In Patient - ${window.APP_NAME}`;
+  }, []);
+
+  useEffect(() => {
+    if (paymentMode) {
+      setSelectedItem(null);
+      setQuantity(1);
+      setItems([]);
+      fetchItems();
     }
-  };
+  }, [paymentMode]);
+
+  useEffect(() => {
+    if (paymentMode) {
+      fetchItems();
+    }
+  }, [itemName]);
 
   useEffect(() => {
     if (data) {
@@ -80,74 +88,30 @@ const CheckInPatient = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    setFormData({ ...formData, district_id: null });
-    setDistricts([]);
-    setDistrict(null);
+  const handleAddItem = () => {
+    if (consultantRef.current.validate() && quantityRef.current.validate()) {
+      setSelectedItems([...selectedItems, {
+        payment_mode_id: paymentMode.id,
+        payment_mode_name: paymentMode.name,
+        item_id: selectedItem.id,
+        item_name: selectedItem.name,
+        unit_price: selectedItem.prices[0].unit_price,
+        quantity,
+        consultant_id: consultant.id,
+        consultant_name: consultant.full_name,
+      }]);
 
-    if (region) {
-      fetchDistricts();
+      setSelectedItem(null);
+      setQuantity(1);
     }
-  }, [region]);
-
-  useEffect(() => {
-    setFormData({ ...formData, ward_id: null });
-    setWards([]);
-
-    if (district) {
-      fetchWards();
-    }
-  }, [district]);
-
-
-  useEffect(() => {
-    document.title = `Patient Registration - ${window.APP_NAME}`;
-  }, []);
-
-  const openCreateRegionModal = () => {
-    let component = (
-      <CreateRegion
-        modal={modalRef.current}
-        onSuccess={(responseData) => {
-          setRegions([...regions, responseData]);
-          setFormData({ ...formData, region_id: responseData.id });
-          setRegion(responseData);
-        }}
-      />
-    );
-
-    modalRef.current.open("Create Region", component);
   };
 
-  const openCreateDistrictModal = () => {
-    let component = (
-      <CreateDistrict
-        modal={modalRef.current}
-        region={region}
-        onSuccess={(responseData) => {
-          setDistricts([...districts, responseData]);
-          setFormData({ ...formData, district_id: responseData.id });
-          setDistrict(responseData);
-        }}
-      />
-    );
-
-    modalRef.current.open("Create District", component);
+  const handleRemoveItem = (index) => {
+    setSelectedItems(selectedItems.filter((e, i) => i !== index));
   };
 
-  const openCreateWardModal = () => {
-    let component = (
-      <CreateWard
-        modal={modalRef.current}
-        district={district}
-        onSuccess={(responseData) => {
-          setWards([...wards, responseData]);
-          setFormData({ ...formData, ward_id: responseData.id });
-        }}
-      />
-    );
-
-    modalRef.current.open("Create Ward", component);
+  const handleSubmit = () => {
+    handlePost();
   };
 
   const handleFeedback = () => {
@@ -183,214 +147,250 @@ const CheckInPatient = () => {
         <Divider />
         {loading ? <LinearProgress /> : null}
         <CardContent>
-          <Form ref={formRef}>
+          <Grid
+            container
+            spacing={2}
+            mb={2}
+          >
             <Grid
-              container
-              spacing={2}
+              item
+              md={3}
+              sm={4}
+              xs={12}
             >
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={firstNameRef}
-                  label="First Name"
-                  fullWidth
-                  required
-                  onChange={(value) => setFormData({ ...formData, first_name: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={middleNameRef}
-                  label="Middle Name"
-                  fullWidth
-                  onChange={(value) => setFormData({ ...formData, middle_name: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={lastNameRef}
-                  label="Last Name"
-                  fullWidth
-                  required
-                  onChange={(value) => setFormData({ ...formData, last_name: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={genderRef}
-                  label="Gender"
-                  fullWidth
-                  required
-                  options={["Male", "Female"]}
-                  value={formData.gender || ""}
-                  onChange={(value) => setFormData({ ...formData, gender: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <DatePicker
-                  ref={dateOfBirthRef}
-                  label="Date of Birth"
-                  fullWidth
-                  value={formData.date_of_birth}
-                  onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={regionRef}
-                  label="Region"
-                  fullWidth
-                  required
-                  options={regions}
-                  optionsText="name"
-                  optionsValue="id"
-                  value={formData.region_id || ""}
-                  endAdornment={
-                    <InputAdornment
-                      position="end"
-                      sx={{ cursor: "pointer", mr: 2 }}
-                      onClick={openCreateRegionModal}
-                    >
-                      <AddIcon fontSize="small"/>
-                    </InputAdornment>
-                  }
-                  onChange={(value) => {
-                    setRegion(regions.find((e) => e.id === value));
-                    setFormData({ ...formData, region_id: value });
-                  }}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={districtRef}
-                  label="District"
-                  fullWidth
-                  required
-                  options={districts}
-                  optionsText="name"
-                  optionsValue="id"
-                  value={formData.district_id || ""}
-                  endAdornment={
-                    region ?
-                      <InputAdornment
-                        position="end"
-                        sx={{ cursor: "pointer", mr: 2 }}
-                        onClick={openCreateDistrictModal}
-                      >
-                        <AddIcon fontSize="small"/>
-                      </InputAdornment>
-                      : null
-                  }
-                  onChange={(value) => {
-                    setDistrict(districts.find((e) => e.id === value));
-                    setFormData({ ...formData, district_id: value });
-                  }}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={wardRef}
-                  label="Ward"
-                  fullWidth
-                  required
-                  options={wards}
-                  optionsText="name"
-                  optionsValue="id"
-                  value={formData.ward_id || ""}
-                  endAdornment={
-                    district ?
-                      <InputAdornment
-                        position="end"
-                        sx={{ cursor: "pointer", mr: 2 }}
-                        onClick={openCreateWardModal}
-                      >
-                        <AddIcon fontSize="small"/>
-                      </InputAdornment>
-                      : null
-                  }
-                  onChange={(value) => setFormData({ ...formData, ward_id: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={phoneRef}
-                  label="Phone Number"
-                  fullWidth
-                  onChange={(value) => setFormData({ ...formData, phone: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={nationalIdRef}
-                  label="National ID"
-                  fullWidth
-                  onChange={(value) => setFormData({ ...formData, national_id: value })}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={occupationRef}
-                  label="Occupation"
-                  fullWidth
-                  onChange={(value) => setFormData({ ...formData, occupation: value })}
-                />
-              </Grid>
+              <Select
+                ref={paymentModeRef}
+                label="Payment Mode"
+                fullWidth
+                required
+                options={paymentModes}
+                optionsText="name"
+                optionsValue="id"
+                value={paymentMode ? paymentMode.id : ""}
+                onChange={(value) => setPaymentMode(paymentModes.find((e) => e.id === value))}
+              />
             </Grid>
-          </Form>
+            <Grid
+              item
+              md={3}
+              sm={4}
+              xs={12}
+            >
+              <Select
+                ref={consultantRef}
+                label="Consultant"
+                fullWidth
+                required
+                options={users}
+                optionsText="full_name"
+                optionsValue="id"
+                value={consultant ? consultant.id : ""}
+                onChange={(value) => setConsultant(users.find((e) => e.id === value))}
+              />
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            spacing={2}
+          >
+            <Grid
+              item
+              md={3}
+              sm={4}
+              xs={12}
+            >
+              <Card variant="outlined">
+                <CardHeader
+                  title="Select Item"
+                  titleTypographyProps={{ variant: "subtitle1" }}
+                  action={(
+                    <SearchTextField
+                      onChange={(value) => setItemName(value)}
+                    />
+                  )}
+                  className="no-action-margin-right"
+                />
+                <Divider />
+                <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
+                  {items.map((e) => (
+                    <FormControlLabel
+                      key={e.id}
+                      control={(
+                        <Radio
+                          checked={selectedItem === e}
+                          onChange={(event) => setSelectedItem(e)}
+                        />
+                      )}
+                      label={e.name}
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid
+              item
+              md={9}
+              sm={8}
+              xs={12}
+            >
+              <Card
+                variant="outlined"
+                sx={{ mb: 1 }}
+              >
+                <CardHeader
+                  title="Added Items"
+                  titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <Divider />
+                <CardContent>
+                  {selectedItem ?
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="flex-end"
+                      mb={2}
+                    >
+                      <Grid
+                        item
+                        md={4}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={itemRef}
+                          disabled={true}
+                          label="Selected Item"
+                          fullWidth
+                          required
+                          value={selectedItem.name || ""}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={3}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          disabled={true}
+                          label="Unit Price"
+                          fullWidth
+                          value={selectedItem.prices.length ? numberFormat(selectedItem.prices[0].unit_price || 0) : ""}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={2}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={quantityRef}
+                          label="Quantity"
+                          fullWidth
+                          required
+                          defaultValue={quantity}
+                          rules={[
+                            validationRules.number,
+                            (value) => value > 0 || "Quantity has to be greater than 0."
+                          ]}
+                          onChange={(value) => {
+                            value = validateInteger(value);
+                            setQuantity(value);
+                          }}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={2}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          disabled={true}
+                          label="Total Price"
+                          fullWidth
+                          value={numberFormat((selectedItem.prices[0].unit_price || 0) * (quantity || 0)) || ""}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={1}
+                        sm={2}
+                        xs={12}
+                      >
+                        <Button
+                          disabled={loading}
+                          fullWidth
+                          disableElevation
+                          variant="contained"
+                          color="primary"
+                          size="medium"
+                          onClick={handleAddItem}
+                        >
+                          Add
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    : null
+                  }
+
+                  <Table
+                    columns={[
+                      {
+                        field: "index",
+                        headerName: "S/N",
+                        sortable: false,
+                        valueGetter: (item, index) => (index + 1),
+                      },
+                      {
+                        field: "item_name",
+                        headerName: "Item",
+                      },
+                      {
+                        field: "payment_mode_name",
+                        headerName: "Payment Mode",
+                      },
+                      {
+                        field: "unit_price",
+                        headerName: "Unit Price",
+                        valueGetter: (item, index) => numberFormat(item.unit_price || 0),
+                      },
+                      {
+                        field: "quantity",
+                        headerName: "Quantity",
+                        valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                      },
+                      {
+                        field: "total_price",
+                        headerName: "Subtotal",
+                        valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                      },
+                      {
+                        field: "actions",
+                        headerName: "Actions",
+                        renderCell: (item, index) => (
+                          <Tooltip title="Remove">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveItem(index)}
+                              >
+                                <DeleteIcon fontSize="small"/>
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        ),
+                      }
+                    ]}
+                    items={selectedItems}
+                    hidePaginationFooter
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </CardContent>
         <Divider />
         <Stack
@@ -406,7 +406,7 @@ const CheckInPatient = () => {
             disableElevation
             onClick={handleSubmit}
           >
-            Save
+            Send to Cashier
           </Button>
         </Stack>
       </Card>

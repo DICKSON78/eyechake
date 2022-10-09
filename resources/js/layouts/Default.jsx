@@ -68,7 +68,7 @@ const Default = ({ setThemeMode, setUser }) => {
 
   const [appReady, setAppReady] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   useEffect(() => {

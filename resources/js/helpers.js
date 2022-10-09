@@ -27,6 +27,19 @@ export const round = (number, decimalPlaces = 0) => {
 };
 
 /**
+ * Strips all non-digit characters from `text` and returns a string of digits.
+ * @param text {String}
+ * @returns {String}
+ */
+export const validateInteger = (text) => {
+  text = text || "";
+  return Array.prototype.slice
+    .call(text)
+    .filter((c) => /\d+/.test(c))
+    .join("");
+};
+
+/**
  * Capitalizes each first letter of each word in a `text`.
  * @param text {String}
  * @returns {String}

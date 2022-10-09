@@ -30,9 +30,9 @@ const Users = () => {
 
   const modalRef = useRef();
 
-  const [item, setItem] = useState(null);
+  const [item, setItem] = useState();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState();
 
   const [params, setParams] = useState({
     page: 1,
@@ -134,7 +134,7 @@ const Users = () => {
   }, (response) => response.data.data);
   const { data: dataPatch, loading: loadingPatch, error: errorPatch, handlePatch } = usePatch();
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selected, setSelected] = useState([]);
 

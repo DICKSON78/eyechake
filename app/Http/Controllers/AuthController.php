@@ -62,7 +62,6 @@ class AuthController extends Controller
         $request->validate([
             'current_password' => 'required',
             'new_password' => 'required',
-            'api_token' => 'required',
         ]);
 
         $user = $request->user();

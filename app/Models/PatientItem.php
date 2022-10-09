@@ -11,7 +11,7 @@ class PatientItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'check_in_id', 'item_id', 'consultation_type_id', 'payment_mode_id', 'payment_type',
+        'check_in_id', 'item_id', 'consultation_type_id', 'consultant_id', 'consultation_id', 'payment_mode_id',
         'unit_price', 'quantity_required', 'quantity_served', 'discount', 'bill_id',
         'created_by', 'discounted_by', 'dosage', 'comments', 'status', 'paid_at', 'served_by', 'served_at',
     ];

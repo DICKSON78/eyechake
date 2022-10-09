@@ -88,6 +88,15 @@ const theme = createTheme({
         },
       }
     },
+    MuiCardHeader: {
+      styleOverrides: {
+        root: {
+          "&.no-action-margin-right .MuiCardHeader-action": {
+            marginRight: 0,
+          },
+        },
+      }
+    },
     MuiCardContent: {
       styleOverrides: {
         root: {
@@ -106,6 +115,9 @@ const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
+        root: {
+          whiteSpace: "nowrap",
+        },
         contained: {
           textTransform: "none",
         },
@@ -114,14 +126,14 @@ const theme = createTheme({
         }
       }
     },
-    MuiInputBase: {
+    MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          "& fieldset": {
-            borderColor: "#e0e0e0",
+          "&:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#e0e0e0 !important",
           },
-          "&:hover:not(.Mui-focused) fieldset": {
-            borderColor: "#ddd",
+          "&:hover:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#ddd !important",
           },
         },
       }

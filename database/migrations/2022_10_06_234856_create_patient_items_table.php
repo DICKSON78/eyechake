@@ -18,8 +18,9 @@ return new class extends Migration
             $table->bigInteger('check_in_id')->unsigned();
             $table->bigInteger('item_id')->unsigned();
             $table->bigInteger('consultation_type_id')->unsigned();
+            $table->bigInteger('consultant_id')->unsigned()->nullable();
+            $table->bigInteger('consultation_id')->unsigned()->nullable(); // if item was ordered from consultation
             $table->bigInteger('payment_mode_id')->unsigned();
-            $table->enum('payment_type', ['Pre', 'Post'])->default('Pre');
             $table->double('unit_price')->unsigned();
             $table->double('quantity_required')->unsigned()->default(0);
             $table->double('quantity_served')->unsigned()->default(0);
@@ -51,6 +52,11 @@ return new class extends Migration
                 ->on('consultation_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+            $table->foreign('consultant_id')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
             $table->foreign('payment_mode_id')
                 ->references('id')
                 ->on('payment_modes')

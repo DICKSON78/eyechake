@@ -38,8 +38,8 @@ const PatientRegistration = () => {
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
-  const [region, setRegion] = useState(null);
-  const [district, setDistrict] = useState(null);
+  const [region, setRegion] = useState();
+  const [district, setDistrict] = useState();
 
   const [formData, setFormData] = useState({
     first_name: "",

@@ -268,7 +268,6 @@ const Table = ({ loading, columns, items, initialState, itemCount, page, pageSiz
           alignItems="center"
           spacing={2}
           pt={2}
-          borderTop={(theme) => `1px solid ${theme.palette.divider}`}
         >
           {itemCount ?
             <Typography variant="body2">
