@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon, Settings as SettingsIcon } from "@mui/icons-material";
@@ -22,89 +22,6 @@ const Items = () => {
     per_page: 25,
     q: "",
   });
-
-  const columns = useMemo(() => [
-    {
-      field: "index",
-      headerName: "S/N",
-      sortable: false,
-      valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
-    },
-    {
-      field: "name",
-      headerName: "Item Name",
-    },
-    {
-      field: "code",
-      headerName: "Item Code",
-    },
-    {
-      field: "item_type_id",
-      headerName: "Item Type",
-      valueGetter: (item, index) => getNonNull(item.item_type).name,
-    },
-    {
-      field: "consultation_type_id",
-      headerName: "Consultation Type",
-      valueGetter: (item, index) => getNonNull(item.consultation_type).name,
-    },
-    {
-      field: "unit_of_measure_id",
-      headerName: "Unit of Measure",
-      valueGetter: (item, index) => getNonNull(item.unit_of_measure).name,
-    },
-    {
-      field: "lens_type_id",
-      headerName: "Lens Type",
-      valueGetter: (item, index) => getNonNull(item.lens_type).name,
-    },
-    {
-      field: "prices",
-      headerName: "Prices",
-      renderCell: (item) => (
-        <Tooltip title="Manage">
-          <IconButton
-            size="small"
-            onClick={() => openManageItemPricesModal(item)}
-          >
-            <SettingsIcon fontSize="small"/>
-          </IconButton>
-        </Tooltip>
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      renderCell: (item) => (
-        <Chip
-          size="small"
-          color={getStatusColor(item.status)}
-          label={item.status}
-        />
-      ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      renderCell: (item) => (
-        <Stack
-          direction="row"
-          alignItems="center"
-          divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
-          spacing={1}
-        >
-          <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              onClick={() => openEditItemModal(item)}
-            >
-              <EditIcon fontSize="small"/>
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
-    }
-  ], [params]);
 
   const { data, loading, error, handleFetch } = useFetch("api/items", params, true, {
     data: [],
@@ -227,10 +144,92 @@ const Items = () => {
             </React.Fragment>
           }
         />
+        <Divider />
         <CardContent>
           <Table
             loading={loading}
-            columns={columns}
+            columns={[
+              {
+                field: "index",
+                headerName: "S/N",
+                sortable: false,
+                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+              },
+              {
+                field: "name",
+                headerName: "Item Name",
+              },
+              {
+                field: "code",
+                headerName: "Item Code",
+              },
+              {
+                field: "item_type_id",
+                headerName: "Item Type",
+                valueGetter: (item, index) => getNonNull(item.item_type).name,
+              },
+              {
+                field: "consultation_type_id",
+                headerName: "Consultation Type",
+                valueGetter: (item, index) => getNonNull(item.consultation_type).name,
+              },
+              {
+                field: "unit_of_measure_id",
+                headerName: "Unit of Measure",
+                valueGetter: (item, index) => getNonNull(item.unit_of_measure).name,
+              },
+              {
+                field: "lens_type_id",
+                headerName: "Lens Type",
+                valueGetter: (item, index) => getNonNull(item.lens_type).name,
+              },
+              {
+                field: "prices",
+                headerName: "Prices",
+                renderCell: (item) => (
+                  <Tooltip title="Manage">
+                    <IconButton
+                      size="small"
+                      onClick={() => openManageItemPricesModal(item)}
+                    >
+                      <SettingsIcon fontSize="small"/>
+                    </IconButton>
+                  </Tooltip>
+                ),
+              },
+              {
+                field: "status",
+                headerName: "Status",
+                renderCell: (item) => (
+                  <Chip
+                    size="small"
+                    color={getStatusColor(item.status)}
+                    label={item.status}
+                  />
+                ),
+              },
+              {
+                field: "actions",
+                headerName: "Actions",
+                renderCell: (item) => (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    spacing={1}
+                  >
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => openEditItemModal(item)}
+                      >
+                        <EditIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                ),
+              }
+            ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}

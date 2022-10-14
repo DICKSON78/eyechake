@@ -58,7 +58,7 @@ class Select extends React.Component {
   }
 
   render() {
-    const { containerProps, label, placeholder, required, options, optionsText, optionsValue, clearable, endAdornment, ...rest } = this.props;
+    const { containerProps, label, placeholder, required, options, optionsLabel, optionsValue, clearable, endAdornment, ...rest } = this.props;
     return (
       <Box
         component="div"
@@ -121,7 +121,7 @@ class Select extends React.Component {
               key={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
               value={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
             >
-              {typeof e === "string" || typeof e === "number" ? e : e[optionsText]}
+              {typeof e === "string" || typeof e === "number" ? e : e[optionsLabel]}
             </MenuItem>
           ))}
         </MuiSelect>

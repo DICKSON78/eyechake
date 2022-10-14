@@ -48,7 +48,7 @@ const CreateRegion = ({ modal, onSuccess }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>

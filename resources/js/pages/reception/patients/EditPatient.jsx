@@ -180,7 +180,7 @@ const EditPatient = () => {
           containerProps={{ pb: 2 }}
         />
         <Divider />
-        {loading ? <LinearProgress /> : null}
+        {loading && <LinearProgress />}
         <CardContent>
           <Form ref={formRef}>
             <Grid
@@ -270,7 +270,7 @@ const EditPatient = () => {
                   fullWidth
                   required
                   options={regions}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.region_id || ""}
                   endAdornment={
@@ -300,7 +300,7 @@ const EditPatient = () => {
                   fullWidth
                   required
                   options={districts}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.district_id || ""}
                   endAdornment={
@@ -332,7 +332,7 @@ const EditPatient = () => {
                   fullWidth
                   required
                   options={wards}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.ward_id || ""}
                   endAdornment={

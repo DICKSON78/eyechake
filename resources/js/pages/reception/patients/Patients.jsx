@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, IconButton, Stack, Tooltip } from "@mui/material";
@@ -22,89 +22,6 @@ const Patients = () => {
     per_page: 25,
     q: "",
   });
-
-  const columns = useMemo(() => [
-    {
-      field: "index",
-      headerName: "S/N",
-      sortable: false,
-      valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
-    },
-    {
-      field: "full_name",
-      headerName: "Patient Name",
-    },
-    {
-      field: "id",
-      headerName: "Patient Number",
-    },
-    {
-      field: "date_of_birth",
-      headerName: "Date of Birth",
-    },
-    {
-      field: "gender",
-      headerName: "Gender",
-    },
-    {
-      field: "phone",
-      headerName: "Phone Number",
-    },
-    {
-      field: "region_id",
-      headerName: "Region",
-      valueGetter: (item, index) => getNonNull(item.region).name,
-    },
-    {
-      field: "district_id",
-      headerName: "District",
-      valueGetter: (item, index) => getNonNull(item.district).name,
-    },
-    // {
-    //   field: "ward_id",
-    //   headerName: "Ward",
-    //   valueGetter: (item, index) => getNonNull(item.ward).name,
-    // },
-    {
-      field: "created_by",
-      headerName: "Registered By",
-      valueGetter: (item, index) => getNonNull(item.creator).full_name,
-    },
-    {
-      field: "created_at",
-      headerName: "Date",
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      renderCell: (item) => (
-        <Stack
-          direction="row"
-          alignItems="center"
-          divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
-          spacing={1}
-        >
-          <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              onClick={() => openEditPatientModal(item)}
-            >
-              <EditIcon fontSize="small"/>
-            </IconButton>
-          </Tooltip>
-          <Button
-            variant="contained"
-            disableElevation
-            size="small"
-            onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
-          >
-            Check-In
-          </Button>
-        </Stack>
-      ),
-    }
-  ], [params]);
 
   const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
     data: [],
@@ -163,7 +80,7 @@ const Patients = () => {
       }
       <Card>
         <PageHeader
-          title="List of Registered Patients"
+          title="Registered Patients"
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -189,10 +106,87 @@ const Patients = () => {
             </React.Fragment>
           }
         />
+        <Divider />
         <CardContent>
           <Table
             loading={loading}
-            columns={columns}
+            columns={[
+              {
+                field: "index",
+                headerName: "S/N",
+                sortable: false,
+                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+              },
+              {
+                field: "full_name",
+                headerName: "Patient Name",
+              },
+              {
+                field: "id",
+                headerName: "Patient Number",
+              },
+              {
+                field: "date_of_birth",
+                headerName: "Date of Birth",
+              },
+              {
+                field: "gender",
+                headerName: "Gender",
+              },
+              {
+                field: "phone",
+                headerName: "Phone Number",
+              },
+              {
+                field: "region_id",
+                headerName: "Location",
+                valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
+              },
+              {
+                field: "payment_mode_id",
+                headerName: "Payment Mode",
+                valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+              },
+              {
+                field: "created_by",
+                headerName: "Registered By",
+                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+              },
+              {
+                field: "created_at",
+                headerName: "Date",
+              },
+              {
+                field: "actions",
+                headerName: "Actions",
+                sortable: false,
+                renderCell: (item) => (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    spacing={1}
+                  >
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => openEditPatientModal(item)}
+                      >
+                        <EditIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                    <Button
+                      variant="contained"
+                      disableElevation
+                      size="small"
+                      onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
+                    >
+                      Check-In
+                    </Button>
+                  </Stack>
+                ),
+              }
+            ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}

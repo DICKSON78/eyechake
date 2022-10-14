@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import Select from "../../../components/Select";
 
 import { usePatch } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -22,10 +23,12 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
+  const paymentTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: item.name,
     description: item.description,
+    payment_type: item.payment_type,
     status: item.status,
   });
   const { data, loading, error, handlePatch } = usePatch(`api/payment-modes/${item.id}`, formData);
@@ -99,6 +102,28 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
                 onChange={(value) => setFormData({ ...formData, description: value })}
               />
             </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={paymentTypeRef}
+                label="Payment Type"
+                fullWidth
+                required
+                options={["Cash", "Credit"]}
+                value={formData.payment_type || ""}
+                onChange={(value) => setFormData({ ...formData, payment_type: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            />
             <Grid
               item
               md={6}

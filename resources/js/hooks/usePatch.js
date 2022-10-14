@@ -15,8 +15,9 @@ const usePatch = (uri, payload = null) => {
       payload = newPayload;
     }
 
-    setError(null);
+    setData(null);
     setLoading(true);
+    setError(null);
 
     const headers = {
       "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
@@ -33,7 +34,7 @@ const usePatch = (uri, payload = null) => {
       });
   };
 
-  return { data, loading, error, handlePatch };
+  return { data, loading, error, handlePatch, setData, setError };
 };
 
 export default usePatch;

@@ -20,29 +20,29 @@ class PatientsController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 25;
-        $q = $request->q;
         $id = $request->id;
+        $name = $request->name;
         $gender = $request->gender;
+        $phone = $request->phone;
         $region_id = $request->region_id;
         $district_id = $request->district_id;
         $ward_id = $request->ward_id;
-        $data = Patient::with(['region', 'district', 'ward', 'creator']);
-
-        if ($q) {
-            $data->where(function ($query) use ($q) {
-                $query->where('first_name', 'like', '%' . $q . '%');
-                $query->orWhere('middle_name', 'like', '%' . $q . '%');
-                $query->orWhere('last_name', 'like', '%' . $q . '%');
-                $query->orWhere('phone', 'like', '%' . $q . '%');
-            });
-        }
+        $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator']);
 
         if ($id) {
             $data->where('id', $id);
         }
 
+        if ($name) {
+            $data->fullName('%' . $name . '%');
+        }
+
         if ($gender) {
             $data->where('gender', $gender);
+        }
+
+        if ($phone) {
+            $data->where('phone', $phone);
         }
 
         if ($region_id) {
@@ -78,6 +78,7 @@ class PatientsController extends Controller
             'region_id' => 'required|exists:regions,id',
             'district_id' => 'required|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
+            'payment_mode_id' => 'required|exists:payment_modes,id',
         ]);
 
         $input = $request->all();
@@ -94,7 +95,7 @@ class PatientsController extends Controller
      */
     public function show($id)
     {
-        $data = Patient::with(['region', 'district', 'ward', 'creator'])->findOrFail($id);
+        $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -111,6 +112,7 @@ class PatientsController extends Controller
             'region_id' => 'nullable|exists:regions,id',
             'district_id' => 'nullable|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
+            'payment_mode_id' => 'nullable|exists:payment_modes,id',
         ]);
 
         $data = Patient::findOrFail($id);

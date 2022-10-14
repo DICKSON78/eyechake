@@ -49,7 +49,7 @@ const CreateWard = ({ modal, district, onSuccess }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>

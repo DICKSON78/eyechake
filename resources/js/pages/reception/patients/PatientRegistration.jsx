@@ -32,8 +32,13 @@ const PatientRegistration = () => {
   const nationalIdRef = useRef();
   const phoneRef = useRef();
   const occupationRef = useRef();
+  const paymentModeRef = useRef();
 
   const { data: regions, setData: setRegions } = useFetch("api/regions", {
+    status: "Active",
+    per_page: 500
+  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch("api/payment-modes", {
     status: "Active",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
@@ -53,6 +58,7 @@ const PatientRegistration = () => {
     national_id: null,
     phone: null,
     occupation: null,
+    payment_mode_id: null,
   });
 
   const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {
@@ -70,12 +76,6 @@ const PatientRegistration = () => {
     ...formData,
     date_of_birth: (formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null)
   });
-
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
-    }
-  };
 
   useEffect(() => {
     if (data) {
@@ -104,10 +104,15 @@ const PatientRegistration = () => {
     }
   }, [district]);
 
-
   useEffect(() => {
     document.title = `Patient Registration - ${window.APP_NAME}`;
   }, []);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePost();
+    }
+  };
 
   const openCreateRegionModal = () => {
     let component = (
@@ -180,12 +185,9 @@ const PatientRegistration = () => {
     >
       {handleFeedback()}
       <Card>
-        <PageHeader
-          title="Patient Registration"
-          containerProps={{ pb: 2 }}
-        />
+        <PageHeader title="Patient Registration" />
         <Divider />
-        {loading ? <LinearProgress /> : null}
+        {loading && <LinearProgress />}
         <CardContent>
           <Form ref={formRef}>
             <Grid
@@ -275,7 +277,7 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   options={regions}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.region_id || ""}
                   endAdornment={
@@ -305,7 +307,7 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   options={districts}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.district_id || ""}
                   endAdornment={
@@ -336,7 +338,7 @@ const PatientRegistration = () => {
                   label="Ward"
                   fullWidth
                   options={wards}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.ward_id || ""}
                   endAdornment={
@@ -390,6 +392,24 @@ const PatientRegistration = () => {
                   label="Occupation"
                   fullWidth
                   onChange={(value) => setFormData({ ...formData, occupation: value })}
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={paymentModeRef}
+                  label="Payment Mode"
+                  fullWidth
+                  required
+                  options={paymentModes}
+                  optionsLabel="name"
+                  optionsValue="id"
+                  value={formData.payment_mode_id || ""}
+                  onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
                 />
               </Grid>
             </Grid>

@@ -141,7 +141,7 @@ const ManageItemPrices = ({ item, modal }) => {
                     fullWidth
                     required
                     options={paymentModes}
-                    optionsText="name"
+                    optionsLabel="name"
                     optionsValue="id"
                     value={formData.payment_mode_id || ""}
                     onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}

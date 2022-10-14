@@ -1,13 +1,16 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import PaymentModes from "./payment-modes/PaymentModes";
+
 import ItemManagementRoutes from "./item-management/ItemManagementRoutes";
+import PaymentModes from "./payment-modes/PaymentModes";
+import PaymentChannels from "./payment-channels/PaymentChannels";
 
 const SettingsRoutes = () => {
   return (
     <Routes>
-      <Route path="/payment-modes" element={<PaymentModes />}/>
       <Route path="/item-management/*" element={<ItemManagementRoutes />}/>
+      <Route path="/payment-modes" element={<PaymentModes />}/>
+      <Route path="/payment-channels" element={<PaymentChannels />}/>
     </Routes>
   );
 };

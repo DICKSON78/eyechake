@@ -13,7 +13,7 @@ const ReceptionRoutes = () => {
         element={<Patients />}
       />
       <Route
-        path="/patients/:id/check-in"
+        path="/patients/:patientId/check-in"
         element={<CheckInPatient />}
       />
       <Route

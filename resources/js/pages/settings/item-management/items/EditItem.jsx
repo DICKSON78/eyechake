@@ -59,12 +59,6 @@ const EditItem = ({ item, modal, fetchItems }) => {
 
   const { data, loading, error, handlePatch } = usePatch(`api/items/${item.id}`, formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePatch();
-    }
-  };
-
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
@@ -73,6 +67,12 @@ const EditItem = ({ item, modal, fetchItems }) => {
       }, 1000);
     }
   }, [data]);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePatch();
+    }
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -91,7 +91,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>
@@ -140,7 +140,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 fullWidth
                 required
                 options={itemTypes}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 value={itemTypes.length ? (formData.item_type_id || "") : ""}
                 onChange={(value) => {
@@ -161,7 +161,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 fullWidth
                 required
                 options={consultationTypes}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 value={consultationTypes.length ? (formData.consultation_type_id || "") : ""}
                 onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
@@ -178,7 +178,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 label="Unit of Measure"
                 fullWidth
                 options={unitsOfMeasure}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 clearable
                 value={unitsOfMeasure.length ? (formData.unit_of_measure_id || "") : ""}
@@ -198,7 +198,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
                   fullWidth
                   required
                   options={lensTypes}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={lensTypes.length ? (formData.lens_type_id || "") : ""}
                   onChange={(value) => setFormData({ ...formData, lens_type_id: value })}

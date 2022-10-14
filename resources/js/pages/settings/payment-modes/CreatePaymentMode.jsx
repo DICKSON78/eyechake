@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import Select from "../../../components/Select";
 
 import { usePost } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -11,10 +12,12 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
+  const paymentTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: "",
     description: null,
+    payment_type: "",
   });
   const { data, loading, error, handlePost } = usePost("api/payment-modes", formData);
 
@@ -83,6 +86,22 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
                 label="Description"
                 fullWidth
                 onChange={(value) => setFormData({ ...formData, description: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <Select
+                ref={paymentTypeRef}
+                label="Payment Type"
+                fullWidth
+                required
+                options={["Cash", "Credit"]}
+                value={formData.payment_type || ""}
+                onChange={(value) => setFormData({ ...formData, payment_type: value })}
               />
             </Grid>
           </Grid>

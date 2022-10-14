@@ -7,7 +7,11 @@ use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\LensTypesController;
+use App\Http\Controllers\PatientCheckInsController;
+use App\Http\Controllers\PatientPaymentCacheItemsController;
+use App\Http\Controllers\PatientPaymentCacheController;
 use App\Http\Controllers\PatientsController;
+use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\UnitsOfMeasureController;
@@ -39,6 +43,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
     $router->apiResource('/users', UsersController::class);
     $router->apiResource('/payment-modes', PaymentModesController::class);
+    $router->apiResource('/payment-channels', PaymentChannelsController::class);
     $router->apiResource('/units-of-measure', UnitsOfMeasureController::class);
     $router->apiResource('/lens-types', LensTypesController::class);
     $router->apiResource('/item-types', ItemTypesController::class);
@@ -49,4 +54,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/districts', DistrictsController::class);
     $router->apiResource('/wards', WardsController::class);
     $router->apiResource('/patients', PatientsController::class);
+    $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
+    $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
+    $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
 });

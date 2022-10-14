@@ -9,8 +9,7 @@ const Header = ({ title, subtitle, leading, trailing, containerProps }) => {
       spacing={2}
       alignItems="center"
       flexWrap="wrap"
-      px={2}
-      pt={2}
+      p={2}
       {...(containerProps || {})}
     >
       {leading}
@@ -19,6 +18,7 @@ const Header = ({ title, subtitle, leading, trailing, containerProps }) => {
           <Box flexGrow={1}>
             <Typography
               variant="h6"
+              fontSize="16px"
               fontWeight="400"
             >
               {title}

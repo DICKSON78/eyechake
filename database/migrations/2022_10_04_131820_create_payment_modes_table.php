@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('description')->nullable();
+            $table->enum('payment_type', ['Cash', 'Credit']);
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
         });

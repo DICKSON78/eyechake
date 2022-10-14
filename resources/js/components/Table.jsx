@@ -9,6 +9,7 @@ import {
   Table as MuiTable,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableRow,
   Typography
@@ -151,7 +152,7 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
   );
 };
 
-const Table = ({ loading, columns, items, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, onCheck }) => {
+const Table = ({ loading, columns, items, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, onCheck, footerItems }) => {
 
   columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
 
@@ -175,7 +176,10 @@ const Table = ({ loading, columns, items, initialState, itemCount, page, pageSiz
         <TableHead>
           <TableRow>
             {checkboxSelection ?
-              <TableCell component="th">
+              <TableCell
+                component="th"
+                sx={{ width: 64 }}
+              >
                 <Checkbox
                   checked={state.items.length > 0 && state.selected.length === state.items.length}
                   onChange={(event) => {
@@ -209,7 +213,7 @@ const Table = ({ loading, columns, items, initialState, itemCount, page, pageSiz
           {loading ?
             <TableRow>
               <TableCell
-                colSpan={columns.length}
+                colSpan={columns.length + (checkboxSelection ? 1 : 0)}
                 sx={{ p: 0, borderBottom: "none" }}
               >
                 <LinearProgress />
@@ -255,12 +259,30 @@ const Table = ({ loading, columns, items, initialState, itemCount, page, pageSiz
             </React.Fragment>
             :
             <TableRow>
-              <TableCell colSpan={columns.length}>
+              <TableCell colSpan={columns.length + (checkboxSelection ? 1 : 0)}>
                 <NoItemsOverlay />
               </TableCell>
             </TableRow>
           }
         </TableBody>
+        {footerItems ?
+          <TableFooter>
+            {footerItems.map((itemColumns, index, array) => (
+              <TableRow key={index}>
+                {itemColumns.map((col, colIndex) => (
+                  <TableCell
+                    key={colIndex}
+                    component="th"
+                    {...(col.tableCellProps || {})}
+                  >
+                    {col.value}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableFooter>
+          : null
+        }
       </MuiTable>
       {!hidePaginationFooter ?
         <Stack

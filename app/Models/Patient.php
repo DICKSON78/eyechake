@@ -14,7 +14,7 @@ class Patient extends Model
 
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
-        'national_id', 'phone', 'occupation', 'created_by',
+        'national_id', 'phone', 'occupation', 'payment_mode_id', 'created_by',
     ];
 
     public function region()
@@ -32,6 +32,11 @@ class Patient extends Model
         return $this->belongsTo(Ward::class, 'ward_id');
     }
 
+    public function payment_mode()
+    {
+        return $this->belongsTo(PaymentMode::class, 'payment_mode_id');
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -41,6 +46,11 @@ class Patient extends Model
     {
         $name = sprintf('%s %s %s', $this->first_name, $this->middle_name, $this->last_name);
         return preg_replace('/\s{2,}/', ' ', trim($name));
+    }
+
+    public function scopeFullName($query, $value)
+    {
+        return $query->whereRaw('concat(first_name, middle_name, last_name) like ?', [str_replace(' ', '', $value)]);
     }
 
     protected function serializeDate(DateTimeInterface $date)

@@ -58,12 +58,6 @@ const CreateItem = ({ modal, fetchItems }) => {
 
   const { data, loading, error, handlePost } = usePost("api/items", formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
-    }
-  };
-
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
@@ -72,6 +66,12 @@ const CreateItem = ({ modal, fetchItems }) => {
       }, 1000);
     }
   }, [data]);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePost();
+    }
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -90,7 +90,7 @@ const CreateItem = ({ modal, fetchItems }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>
@@ -137,7 +137,7 @@ const CreateItem = ({ modal, fetchItems }) => {
                 fullWidth
                 required
                 options={itemTypes}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 value={formData.item_type_id || ""}
                 onChange={(value) => {
@@ -158,7 +158,7 @@ const CreateItem = ({ modal, fetchItems }) => {
                 fullWidth
                 required
                 options={consultationTypes}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 value={formData.consultation_type_id || ""}
                 onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
@@ -175,7 +175,7 @@ const CreateItem = ({ modal, fetchItems }) => {
                 label="Unit of Measure"
                 fullWidth
                 options={unitsOfMeasure}
-                optionsText="name"
+                optionsLabel="name"
                 optionsValue="id"
                 clearable
                 value={formData.unit_of_measure_id || ""}
@@ -195,7 +195,7 @@ const CreateItem = ({ modal, fetchItems }) => {
                   fullWidth
                   required
                   options={lensTypes}
-                  optionsText="name"
+                  optionsLabel="name"
                   optionsValue="id"
                   value={formData.lens_type_id || ""}
                   onChange={(value) => setFormData({ ...formData, lens_type_id: value })}

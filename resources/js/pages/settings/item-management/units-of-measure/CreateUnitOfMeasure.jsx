@@ -18,12 +18,6 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
   });
   const { data, loading, error, handlePost } = usePost("api/units-of-measure", formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
-    }
-  };
-
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
@@ -32,6 +26,12 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
       }, 1000);
     }
   }, [data]);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePost();
+    }
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -50,7 +50,7 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>

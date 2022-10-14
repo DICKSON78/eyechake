@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('national_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('occupation')->nullable();
+            $table->bigInteger('payment_mode_id')->unsigned()->nullable();
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();
@@ -43,6 +44,11 @@ return new class extends Migration
             $table->foreign('ward_id')
                 ->references('id')
                 ->on('wards')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreign('payment_mode_id')
+                ->references('id')
+                ->on('payment_modes')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
             $table->foreign('created_by')

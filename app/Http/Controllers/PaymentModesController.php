@@ -22,6 +22,7 @@ class PaymentModesController extends Controller
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
+        $payment_type = $request->payment_type;
         $data = PaymentMode::query();
 
         if ($status) {
@@ -30,6 +31,10 @@ class PaymentModesController extends Controller
 
         if ($q) {
             $data->where('name', 'like', '%' . $q . '%');
+        }
+
+        if ($payment_type) {
+            $data->where('payment_type', $payment_type);
         }
 
         $data = $data->paginate($per_page);
@@ -46,6 +51,7 @@ class PaymentModesController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:payment_modes,name',
+            'payment_type' => 'required|in:Cash,Credit',
         ]);
 
         $data = PaymentMode::create($request->only('name', 'description'));
@@ -75,6 +81,7 @@ class PaymentModesController extends Controller
     {
         $request->validate([
             'name' => 'nullable|unique:payment_modes,name,' . $id,
+            'payment_type' => 'nullable|in:Cash,Credit',
             'status' => 'nullable|in:Active,Inactive',
         ]);
 

@@ -112,6 +112,10 @@ export const getValidationRules = () => {
       const pattern = /^-?\d+$/;
       return pattern.test(value) || "Invalid integer.";
     },
+    optionalInteger: (value) => {
+      const pattern = /^-?\d+$/;
+      return !value ? true : (pattern.test(value) || "Invalid integer.");
+    },
     number: (value) => {
       const pattern = /^-?\d*\.?\d+$/;
       return pattern.test(value) || "Invalid number.";
@@ -121,6 +125,15 @@ export const getValidationRules = () => {
       return pattern.test(value) || "Invalid phone number.";
     }
   };
+};
+
+/**
+ * Get a validation-like error object.
+ * @param message
+ * @returns {{response: {status: number, data: {message: *}}}}
+ */
+export const getValidationError = (message) => {
+  return { response: { status: 422, data: { message } } };
 };
 
 /**

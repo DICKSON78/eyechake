@@ -6,19 +6,19 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PatientItem extends Model
+class PatientPaymentCacheItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'check_in_id', 'item_id', 'consultation_type_id', 'consultant_id', 'consultation_id', 'payment_mode_id',
-        'unit_price', 'quantity_required', 'quantity_served', 'discount', 'bill_id',
-        'created_by', 'discounted_by', 'dosage', 'comments', 'status', 'paid_at', 'served_by', 'served_at',
+        'payment_cache_id', 'item_id', 'consultation_type_id', 'consultant_id', 'payment_mode_id',
+        'unit_price', 'quantity', 'item_payment_id', 'bill_id', 'created_by', 'dosage', 'comments', 'status',
+        'served_by', 'served_at',
     ];
 
-    public function check_in()
+    public function payment_cache()
     {
-        return $this->belongsTo(PatientCheckIn::class, 'check_in_id');
+        return $this->belongsTo(PatientPaymentCache::class, 'payment_cache_id');
     }
 
     public function item()
@@ -39,11 +39,6 @@ class PatientItem extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function discounter()
-    {
-        return $this->belongsTo(User::class, 'discounted_by');
     }
 
     public function server()

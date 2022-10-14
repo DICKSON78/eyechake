@@ -161,6 +161,11 @@ const theme = createTheme({
         head: {
           padding: "12px",
         },
+        footer: {
+          padding: "12px",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        },
       }
     },
     MuiSvgIcon: {

@@ -10,8 +10,8 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
   const queryString = JSON.stringify(params || {});
 
   const handleFetch = useCallback(() => {
-    setError(null);
     setLoading(true);
+    setError(null);
 
     const headers = {
       "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
@@ -43,7 +43,7 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
     };
   }, [handleFetch]);
 
-  return { data, loading, error, handleFetch, setData };
+  return { data, loading, error, handleFetch, setData, setError };
 };
 
 export default useFetch;

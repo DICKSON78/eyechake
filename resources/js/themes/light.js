@@ -157,6 +157,12 @@ const theme = createTheme({
           padding: "12px",
           backgroundColor: "#f0f3f7",
         },
+        footer: {
+          padding: "12px",
+          backgroundColor: "#f0f3f7",
+          fontSize: "0.75rem",
+          fontWeight: 500,
+        },
       }
     },
     MuiSvgIcon: {

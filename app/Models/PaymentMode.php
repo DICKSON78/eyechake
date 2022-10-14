@@ -10,7 +10,7 @@ class PaymentMode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'status'];
+    protected $fillable = ['name', 'description', 'payment_type', 'status'];
 
     protected function serializeDate(DateTimeInterface $date)
     {

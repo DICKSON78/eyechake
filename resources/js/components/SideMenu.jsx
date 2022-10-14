@@ -12,6 +12,7 @@ import {
   LinkRounded as LinkIcon,
   List as ListIcon,
   MoneyRounded as PaymentModesIcon,
+  PaymentRounded as PaymentChannelsIcon,
   PersonRounded as PatientsIcon
 } from "@mui/icons-material";
 
@@ -50,7 +51,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         id: "4",
         title: "Sent to Cashier",
         icon: <WaitingIcon />,
-        to: "/payment-center/pending-payment-items",
+        to: "/payment-center/sent-to-cashier",
       },
       {
         id: "9",
@@ -59,12 +60,6 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       },
       {
         id: "10",
-        title: "Payment Modes",
-        icon: <PaymentModesIcon />,
-        to: "/settings/payment-modes",
-      },
-      {
-        id: "11",
         title: "Item Management",
         icon: <ItemsIcon />,
         to: "/settings/item-management",
@@ -88,6 +83,18 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
             to: "/items",
           },
         ],
+      },
+      {
+        id: "11",
+        title: "Payment Modes",
+        icon: <PaymentModesIcon />,
+        to: "/settings/payment-modes",
+      },
+      {
+        id: "12",
+        title: "Payment Channels",
+        icon: <PaymentChannelsIcon />,
+        to: "/settings/payment-channels",
       },
     ]);
   }, [drawerOpen]);

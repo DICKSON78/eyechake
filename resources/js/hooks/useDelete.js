@@ -11,8 +11,9 @@ const useDelete = (uri = null) => {
       uri = newUri;
     }
 
-    setError(null);
+    setData(null);
     setLoading(true);
+    setError(null);
 
     const headers = {
       "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
@@ -29,7 +30,7 @@ const useDelete = (uri = null) => {
       });
   };
 
-  return { data, loading, error, handleDelete };
+  return { data, loading, error, handleDelete, setData, setError };
 };
 
 export default useDelete;

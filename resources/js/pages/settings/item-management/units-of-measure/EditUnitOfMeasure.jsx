@@ -30,12 +30,6 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
   });
   const { data, loading, error, handlePatch } = usePatch(`api/units-of-measure/${item.id}`, formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePatch();
-    }
-  };
-
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
@@ -44,6 +38,12 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
       }, 1000);
     }
   }, [data]);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePatch();
+    }
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -62,7 +62,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
 
   return (
     <React.Fragment>
-      {loading ? <LinearProgress /> : null}
+      {loading && <LinearProgress />}
       <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>

@@ -33,7 +33,7 @@ const Filter = ({ modal, params: initial, onOk }) => {
               label="Item Type"
               fullWidth
               options={itemTypes}
-              optionsText="name"
+              optionsLabel="name"
               optionsValue="id"
               clearable
               value={itemTypes.length ? (params.item_type_id || "") : ""}
@@ -50,7 +50,7 @@ const Filter = ({ modal, params: initial, onOk }) => {
               label="Consultation Type"
               fullWidth
               options={consultationTypes}
-              optionsText="name"
+              optionsLabel="name"
               optionsValue="id"
               clearable
               value={consultationTypes.length ? (params.consultation_type_id || "") : ""}

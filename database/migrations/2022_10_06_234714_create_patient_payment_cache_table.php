@@ -13,17 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('patient_check_ins', function (Blueprint $table) {
+        Schema::create('patient_payment_cache', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('patient_id')->unsigned();
+            $table->bigInteger('check_in_id')->unsigned();
+            $table->bigInteger('consultation_id')->unsigned()->nullable(); // if items were ordered from consultation
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
-            $table->enum('status', ['Pending', 'Sent to Cashier', 'Paid', 'Billed'])->default('Pending');
             $table->timestamp('updated_at')->nullable();
 
-            $table->foreign('patient_id')
+            $table->foreign('check_in_id')
                 ->references('id')
-                ->on('patients')
+                ->on('patient_check_ins')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('created_by')
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('patient_check_ins');
+        Schema::dropIfExists('patient_payment_cache');
     }
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
@@ -20,56 +20,6 @@ const LensTypes = () => {
     per_page: 25,
     q: "",
   });
-
-  const columns = useMemo(() => [
-    {
-      field: "index",
-      headerName: "S/N",
-      sortable: false,
-      valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
-    },
-    {
-      field: "name",
-      headerName: "Name",
-    },
-    {
-      field: "description",
-      headerName: "Description",
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      renderCell: (item) => (
-        <Chip
-          size="small"
-          color={getStatusColor(item.status)}
-          label={item.status}
-        />
-      ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      renderCell: (item) => (
-        <Stack
-          direction="row"
-          alignItems="center"
-          divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
-          spacing={1}
-        >
-          <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              onClick={() => openEditLensTypeModal(item)}
-            >
-              <EditIcon fontSize="small"/>
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
-    }
-  ], [params]);
 
   const { data, loading, error, handleFetch } = useFetch("api/lens-types", params, true, {
     data: [],
@@ -157,10 +107,59 @@ const LensTypes = () => {
             </React.Fragment>
           }
         />
+        <Divider />
         <CardContent>
           <Table
             loading={loading}
-            columns={columns}
+            columns={[
+              {
+                field: "index",
+                headerName: "S/N",
+                sortable: false,
+                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+              },
+              {
+                field: "name",
+                headerName: "Name",
+              },
+              {
+                field: "description",
+                headerName: "Description",
+              },
+              {
+                field: "status",
+                headerName: "Status",
+                renderCell: (item) => (
+                  <Chip
+                    size="small"
+                    color={getStatusColor(item.status)}
+                    label={item.status}
+                  />
+                ),
+              },
+              {
+                field: "actions",
+                headerName: "Actions",
+                sortable: false,
+                renderCell: (item) => (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    spacing={1}
+                  >
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => openEditLensTypeModal(item)}
+                      >
+                        <EditIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                ),
+              }
+            ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}

@@ -15,8 +15,9 @@ const usePost = (uri, payload = null) => {
       payload = newPayload;
     }
 
-    setError(null);
+    setData(null);
     setLoading(true);
+    setError(null);
 
     const headers = {
       "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
@@ -33,7 +34,7 @@ const usePost = (uri, payload = null) => {
       });
   };
 
-  return { data, loading, error, handlePost };
+  return { data, loading, error, handlePost, setData, setError };
 };
 
 export default usePost;

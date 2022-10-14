@@ -13,33 +13,29 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('patient_items', function (Blueprint $table) {
+        Schema::create('patient_payment_cache_items', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('check_in_id')->unsigned();
+            $table->bigInteger('payment_cache_id')->unsigned();
             $table->bigInteger('item_id')->unsigned();
             $table->bigInteger('consultation_type_id')->unsigned();
             $table->bigInteger('consultant_id')->unsigned()->nullable();
-            $table->bigInteger('consultation_id')->unsigned()->nullable(); // if item was ordered from consultation
             $table->bigInteger('payment_mode_id')->unsigned();
             $table->double('unit_price')->unsigned();
-            $table->double('quantity_required')->unsigned()->default(0);
-            $table->double('quantity_served')->unsigned()->default(0);
-            $table->double('discount')->unsigned()->default(0);
+            $table->double('quantity')->unsigned();
+            $table->bigInteger('item_payment_id')->unsigned()->nullable();
             $table->bigInteger('bill_id')->unsigned()->nullable();
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
-            $table->bigInteger('discounted_by')->unsigned()->nullable();
             $table->text('dosage')->nullable();
             $table->text('comments')->nullable();
-            $table->enum('status', ['Pending', 'Paid', 'Served'])->default('Pending');
-            $table->dateTime('paid_at')->nullable();
+            $table->enum('status', ['Pending', 'Paid', 'Billed', 'Served'])->default('Pending');
             $table->bigInteger('served_by')->unsigned()->nullable();
             $table->dateTime('served_at')->nullable();
             $table->timestamp('updated_at')->nullable();
 
-            $table->foreign('check_in_id')
+            $table->foreign('payment_cache_id')
                 ->references('id')
-                ->on('patient_check_ins')
+                ->on('patient_payment_cache')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('item_id')
@@ -67,11 +63,6 @@ return new class extends Migration
                 ->on('users')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->foreign('discounted_by')
-                ->references('id')
-                ->on('users')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
             $table->foreign('served_by')
                 ->references('id')
                 ->on('users')
@@ -87,6 +78,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('patient_items');
+        Schema::dropIfExists('patient_payment_cache_items');
     }
 };

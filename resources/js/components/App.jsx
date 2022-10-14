@@ -10,6 +10,7 @@ import DefaultLayout from "../layouts/Default";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
+import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import Users from "../pages/users/Users";
 
@@ -72,6 +73,10 @@ const App = () => {
             <Route
               path="reception/*"
               element={<ReceptionRoutes />}
+            />
+            <Route
+              path="payment-center/*"
+              element={<PaymentCenterRoutes />}
             />
             <Route
               path="settings/*"

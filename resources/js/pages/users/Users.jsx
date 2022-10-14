@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
@@ -41,91 +41,6 @@ const Users = () => {
     role: "",
     status: "",
   });
-
-  const columns = useMemo(() => [
-    {
-      field: "id",
-      headerName: "ID",
-      flex: 0.05,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      flex: 0.15,
-    },
-    {
-      field: "phone",
-      headerName: "Phone",
-      flex: 0.1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 0.15,
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      flex: 0.1,
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 0.1,
-      sortable: false,
-      renderCell: (item) => (
-        <Chip
-          size="small"
-          color={getStatusColor(item.status)}
-          label={item.status}
-        />
-      ),
-    },
-    {
-      field: "last_login",
-      headerName: "Last Login",
-      flex: 0.1,
-      sortable: false,
-    },
-    {
-      field: "sms_balance",
-      headerName: "SMS Balance",
-      flex: 0.1,
-      sortable: false,
-      valueGetter: (item) => item.role === "Admin" ? "N/A" : numberFormat(item.sms_balance),
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.15,
-      sortable: false,
-      renderCell: (item) => (
-        <Stack
-          direction="row"
-          alignItems="center"
-          divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
-          spacing={1}
-        >
-          <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              onClick={() => openEditUserModal(item)}
-            >
-              <EditIcon fontSize="small"/>
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="More">
-            <IconButton
-              size="small"
-              onClick={(event) => handleMenuOpen(event, item)}
-            >
-              <MoreIcon fontSize="small"/>
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
-    }
-  ], [params]);
 
   const { data, loading: loadingFetch, error: errorFetch, handleFetch } = useFetch("api/users", params, true, {
     data: [],
@@ -292,7 +207,90 @@ const Users = () => {
         <CardContent>
           <Table
             loading={loading}
-            columns={columns}
+            columns={[
+              {
+                field: "id",
+                headerName: "ID",
+                flex: 0.05,
+              },
+              {
+                field: "name",
+                headerName: "Name",
+                flex: 0.15,
+              },
+              {
+                field: "phone",
+                headerName: "Phone",
+                flex: 0.1,
+              },
+              {
+                field: "email",
+                headerName: "Email",
+                flex: 0.15,
+              },
+              {
+                field: "role",
+                headerName: "Role",
+                flex: 0.1,
+              },
+              {
+                field: "status",
+                headerName: "Status",
+                flex: 0.1,
+                sortable: false,
+                renderCell: (item) => (
+                  <Chip
+                    size="small"
+                    color={getStatusColor(item.status)}
+                    label={item.status}
+                  />
+                ),
+              },
+              {
+                field: "last_login",
+                headerName: "Last Login",
+                flex: 0.1,
+                sortable: false,
+              },
+              {
+                field: "sms_balance",
+                headerName: "SMS Balance",
+                flex: 0.1,
+                sortable: false,
+                valueGetter: (item) => item.role === "Admin" ? "N/A" : numberFormat(item.sms_balance),
+              },
+              {
+                field: "actions",
+                headerName: "Actions",
+                flex: 0.15,
+                sortable: false,
+                renderCell: (item) => (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    spacing={1}
+                  >
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        onClick={() => openEditUserModal(item)}
+                      >
+                        <EditIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="More">
+                      <IconButton
+                        size="small"
+                        onClick={(event) => handleMenuOpen(event, item)}
+                      >
+                        <MoreIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                ),
+              }
+            ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
