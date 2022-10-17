@@ -12,7 +12,7 @@ class Item extends Model
 
     protected $fillable = [
         'name', 'code', 'item_type_id', 'consultation_type_id', 'unit_of_measure_id',
-        'lens_type_id', 'is_consultation_item',
+        'lens_type_id', 'is_consultation_item', 'status',
     ];
 
     public function item_type()

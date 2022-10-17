@@ -18,7 +18,7 @@ const PaymentChannels = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: "",
+    q: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/payment-channels", params, true, {
@@ -114,7 +114,6 @@ const PaymentChannels = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                sortable: false,
                 valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
               },
               {
@@ -139,7 +138,6 @@ const PaymentChannels = () => {
               {
                 field: "actions",
                 headerName: "Actions",
-                sortable: false,
                 renderCell: (item) => (
                   <Stack
                     direction="row"

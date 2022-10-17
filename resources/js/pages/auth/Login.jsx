@@ -19,8 +19,8 @@ const LogIn = () => {
   const passwordRef = useRef();
 
   const [formData, setFormData] = useState({
-    username: "",
-    password: ""
+    username: undefined,
+    password: undefined
   });
   const { data, loading, error, handlePost } = usePost("api/auth/login", formData);
 

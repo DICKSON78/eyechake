@@ -47,18 +47,18 @@ const PatientRegistration = () => {
   const [district, setDistrict] = useState();
 
   const [formData, setFormData] = useState({
-    first_name: "",
-    middle_name: null,
-    last_name: "",
-    gender: null,
-    date_of_birth: null,
-    region_id: null,
-    district_id: null,
-    ward_id: null,
-    national_id: null,
-    phone: null,
-    occupation: null,
-    payment_mode_id: null,
+    first_name: undefined,
+    middle_name: undefined,
+    last_name: undefined,
+    gender: undefined,
+    date_of_birth: undefined,
+    region_id: undefined,
+    district_id: undefined,
+    ward_id: undefined,
+    national_id: undefined,
+    phone: undefined,
+    occupation: undefined,
+    payment_mode_id: undefined,
   });
 
   const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {

@@ -13,8 +13,8 @@ const CreateLensType = ({ modal, fetchLensTypes }) => {
   const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
-    description: null,
+    name: undefined,
+    description: undefined,
   });
   const { data, loading, error, handlePost } = usePost("api/lens-types", formData);
 

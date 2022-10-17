@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
 
 import {
+  DoneAllOutlined as DoneIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
   Groups2 as UsersIcon,
@@ -13,7 +14,8 @@ import {
   List as ListIcon,
   MoneyRounded as PaymentModesIcon,
   PaymentRounded as PaymentChannelsIcon,
-  PersonRounded as PatientsIcon
+  PersonRounded as PatientsIcon,
+  PestControlRounded as DiseasesIcon,
 } from "@mui/icons-material";
 
 const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
@@ -33,7 +35,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       },
       {
         id: "2",
-        title: "Reception",
+        title: "RECEPTION",
         show: !!drawerOpen,
       },
       {
@@ -43,23 +45,40 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         to: "/reception/patients",
       },
       {
-        id: "5",
-        title: "Payment Center",
+        id: "4",
+        title: "PAYMENT CENTER",
         show: !!drawerOpen,
       },
       {
-        id: "4",
-        title: "Sent to Cashier",
+        id: "5",
+        title: "Patients Sent to Cashier",
         icon: <WaitingIcon />,
-        to: "/payment-center/sent-to-cashier",
+        to: "/payment-center/pending-cash-payments",
+      },
+      {
+        id: "7",
+        title: "DOCTOR WORKS",
+        show: !!drawerOpen,
+      },
+      {
+        id: "8",
+        title: "Patients Sent to Doctor",
+        icon: <WaitingIcon />,
+        to: "/doctor-works/consultation-patients/pending",
       },
       {
         id: "9",
-        title: "Settings",
+        title: "Consulted Patients",
+        icon: <DoneIcon />,
+        to: "/doctor-works/consultation-patients/consulted",
+      },
+      {
+        id: "15",
+        title: "SETTINGS",
         show: !!drawerOpen,
       },
       {
-        id: "10",
+        id: "16",
         title: "Item Management",
         icon: <ItemsIcon />,
         to: "/settings/item-management",
@@ -96,6 +115,12 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         icon: <PaymentChannelsIcon />,
         to: "/settings/payment-channels",
       },
+      {
+        id: "13",
+        title: "Diseases",
+        icon: <DiseasesIcon />,
+        to: "/settings/diseases",
+      },
     ]);
   }, [drawerOpen]);
 
@@ -106,6 +131,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         <ListSubheader sx={{ px: 3 }}>MENU</ListSubheader>
         : null
       }
+      dense
     >
       {items.filter((e) => (typeof e.show === "undefined") || e.show).map((e) => (
         !e.to ?
@@ -118,7 +144,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           :
           <React.Fragment key={e.id}>
             <ListItemButton
-              selected={location.pathname === e.to}
+              selected={location.pathname.indexOf(e.to) !== -1}
               onClick={() => {
                 if (e.items && e.items.length) {
                   setOpen(!open ? e.to : null);
@@ -159,7 +185,10 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                 in={open === e.to}
                 unmountOnExit
               >
-                <List component="div">
+                <List
+                  component="div"
+                  dense
+                >
                   {e.items.filter((f) => (typeof f.show === "undefined") || f.show).map(f => (
                     <ListItemButton
                       key={f.id}

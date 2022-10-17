@@ -6,18 +6,20 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Consultation extends Model
+class ConsultationDiagnosis extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'payment_cache_item_id', 'chief_complaint', 'history_present_illness', 'family_history',
-        'review', 'remarks', 'created_by', 'status',
-    ];
+    protected $fillable = ['consultation_id', 'disease_id', 'diagnosis_type', 'created_by'];
 
-    public function payment_cache_item()
+    public function consultation()
     {
-        return $this->belongsTo(PatientPaymentCacheItem::class, 'payment_cache_item_id');
+        return $this->belongsTo(Consultation::class, 'consultation_id');
+    }
+
+    public function disease()
+    {
+        return $this->belongsTo(Disease::class, 'disease_id');
     }
 
     public function creator()

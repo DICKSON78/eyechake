@@ -18,7 +18,7 @@ const PaymentModes = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: "",
+    q: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/payment-modes", params, true, {
@@ -114,7 +114,6 @@ const PaymentModes = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                sortable: false,
                 valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
               },
               {
@@ -143,7 +142,6 @@ const PaymentModes = () => {
               {
                 field: "actions",
                 headerName: "Actions",
-                sortable: false,
                 renderCell: (item) => (
                   <Stack
                     direction="row"

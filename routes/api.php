@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConsultationDiagnosesController;
+use App\Http\Controllers\ConsultationsController;
 use App\Http\Controllers\ConsultationTypesController;
+use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
 use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
@@ -53,8 +56,12 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/regions', RegionsController::class);
     $router->apiResource('/districts', DistrictsController::class);
     $router->apiResource('/wards', WardsController::class);
+    $router->apiResource('/diseases', DiseasesController::class);
     $router->apiResource('/patients', PatientsController::class);
     $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
     $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
     $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
+    $router->post('/patient-payment-cache-items/make-cash-payment', [PatientPaymentCacheItemsController::class, 'makeCashPayment']);
+    $router->apiResource('/consultations', ConsultationsController::class);
+    $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
 });

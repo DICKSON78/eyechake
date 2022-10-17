@@ -24,8 +24,8 @@ const ChangePassword = ({ modal }) => {
   const newPasswordRef = useRef();
 
   const [formData, setFormData] = useState({
-    current_password: "",
-    new_password: "",
+    current_password: undefined,
+    new_password: undefined,
   });
   const { data, loading, error, handlePost } = usePost("api/auth/change-password", formData);
 

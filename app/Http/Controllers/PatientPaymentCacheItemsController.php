@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\Consultation;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
 use Illuminate\Http\Request;
@@ -23,8 +24,10 @@ class PatientPaymentCacheItemsController extends Controller
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $payment_cache_id = $request->payment_cache_id;
+        $payment_mode_id = $request->payment_mode_id;
         $payment_mode_type = $request->payment_mode_type;
-        $patient_id = $request->patient_id;
+        $consultation_type = $request->consultation_type;
+        $consultant_id = $request->consultant_id;
         $data = PatientPaymentCacheItem::with(['item', 'consultation_type', 'payment_mode', 'creator']);
 
         if ($status) {
@@ -35,14 +38,24 @@ class PatientPaymentCacheItemsController extends Controller
             $data->where('payment_cache_id', $payment_cache_id);
         }
 
-        if ($patient_id) {
-            $data->where('patient_id', $patient_id);
+        if ($payment_mode_id) {
+            $data->where('payment_mode_id', $payment_mode_id);
         }
 
         if ($payment_mode_type) {
             $data->whereHas('payment_mode', function ($query) use ($payment_mode_type) {
                 $query->where('payment_type', $payment_mode_type);
             });
+        }
+
+        if ($consultation_type) {
+            $data->whereHas('consultation_type', function ($query) use ($consultation_type) {
+                $query->where('name', $consultation_type);
+            });
+        }
+
+        if ($consultant_id) {
+            $data->where('consultant_id', $consultant_id);
         }
 
         $data->orderBy('created_at', 'asc');
@@ -65,9 +78,10 @@ class PatientPaymentCacheItemsController extends Controller
     {
         $request->validate([
             'payment_channel_id' => 'required|exists:payment_channels,id',
-            'payment_cache_id' => 'required|exists:patient_payment_caches,id',
+            'payment_cache_id' => 'required|exists:patient_payment_cache,id',
             'items' => 'required|array',
-            'discount' => 'nullable|numeric',
+            'items.*' => 'required|integer',
+            'discount' => 'nullable|numeric|min:0',
         ]);
 
         $user = $request->user();
@@ -81,7 +95,9 @@ class PatientPaymentCacheItemsController extends Controller
         ]);
 
         if ($payment) {
-            foreach ($request->items as &$request_item) {
+            $items = $request->json('items');
+
+            foreach ($items as &$request_item) {
                 $item = PatientPaymentCacheItem::find($request_item);
 
                 if ($item) {
@@ -90,6 +106,14 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->item_payment_id = $payment->id;
                     $item->status = 'Paid';
                     $item->save();
+
+                    if ($item->item->is_consultation_item == 'Yes') {
+                        Consultation::create([
+                            'payment_cache_item_id' => $item->id,
+                            'consultant_id' => $item->consultant_id,
+                            'created_by' => $user->id,
+                        ]);
+                    }
                 }
             }
 

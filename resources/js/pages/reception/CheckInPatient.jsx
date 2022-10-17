@@ -266,6 +266,7 @@ const CheckInPatient = () => {
                           />
                         )}
                         label={e.name}
+                        sx={{ display: "block" }}
                       />
                     ))}
                   </CardContent>
@@ -385,7 +386,6 @@ const CheckInPatient = () => {
                         {
                           field: "index",
                           headerName: "S/N",
-                          sortable: false,
                           valueGetter: (item, index) => (index + 1),
                         },
                         {

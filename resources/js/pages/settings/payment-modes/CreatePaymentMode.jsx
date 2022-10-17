@@ -15,9 +15,9 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
   const paymentTypeRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
-    description: null,
-    payment_type: "",
+    name: undefined,
+    description: undefined,
+    payment_type: undefined,
   });
   const { data, loading, error, handlePost } = usePost("api/payment-modes", formData);
 

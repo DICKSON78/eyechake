@@ -18,7 +18,7 @@ const LensTypes = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: "",
+    q: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/lens-types", params, true, {
@@ -115,7 +115,6 @@ const LensTypes = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                sortable: false,
                 valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
               },
               {
@@ -140,7 +139,6 @@ const LensTypes = () => {
               {
                 field: "actions",
                 headerName: "Actions",
-                sortable: false,
                 renderCell: (item) => (
                   <Stack
                     direction="row"

@@ -49,8 +49,8 @@ const ManageItemPrices = ({ item, modal }) => {
 
   const [formData, setFormData] = useState({
     item_id: item.id,
-    payment_mode_id: null,
-    unit_price: "",
+    payment_mode_id: undefined,
+    unit_price: undefined,
   });
 
   const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost("api/item-prices", formData);
@@ -97,6 +97,12 @@ const ManageItemPrices = ({ item, modal }) => {
     }
   };
 
+  const handleSubmitDelete = (item) => {
+    setData(null);
+    setError(null);
+    handleDelete(`api/item-prices/${item.id}`);
+  };
+
   const handleFeedback = () => {
     if (data || error) {
       return (
@@ -114,7 +120,10 @@ const ManageItemPrices = ({ item, modal }) => {
 
   return (
     <React.Fragment>
-      {(loadingFetchItemPrices || loadingPost || loadingDelete) ? <LinearProgress /> : null}
+      {(loadingFetchItemPrices || loadingPost || loadingDelete) ?
+        <LinearProgress />
+        : null
+      }
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
         {handleFeedback()}
         <Grid
@@ -192,7 +201,6 @@ const ManageItemPrices = ({ item, modal }) => {
                     {
                       field: "index",
                       headerName: "S/N",
-                      sortable: false,
                       valueGetter: (item, index) => (index + 1),
                     },
                     {
@@ -214,7 +222,7 @@ const ManageItemPrices = ({ item, modal }) => {
                             <IconButton
                               size="small"
                               disabled={loadingDelete}
-                              onClick={() => handleDelete(`api/item-prices/${item.id}`)}
+                              onClick={() => handleSubmitDelete(item)}
                             >
                               <DeleteIcon fontSize="small"/>
                             </IconButton>

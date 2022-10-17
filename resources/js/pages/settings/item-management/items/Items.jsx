@@ -20,7 +20,7 @@ const Items = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: "",
+    q: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/items", params, true, {
@@ -152,7 +152,6 @@ const Items = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                sortable: false,
                 valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
               },
               {

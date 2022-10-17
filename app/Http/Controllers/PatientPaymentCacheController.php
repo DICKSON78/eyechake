@@ -28,7 +28,11 @@ class PatientPaymentCacheController extends Controller
         $gender = $request->gender;
         $phone = $request->phone;
         $item_status = $request->item_status;
+        $item_payment_mode_id = $request->item_payment_mode_id;
         $item_payment_mode_type = $request->item_payment_mode_type;
+        $item_consultation_type = $request->item_consultation_type;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
 
         $data = PatientPaymentCache::with(['check_in.patient' => function ($query) {
             $query->with(['region', 'district']);
@@ -62,10 +66,30 @@ class PatientPaymentCacheController extends Controller
             });
         }
 
+        if ($item_payment_mode_id) {
+            $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_id) {
+                $query->where('id', $item_payment_mode_id);
+            });
+        }
+
         if ($item_payment_mode_type) {
             $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_type) {
                 $query->where('payment_type', $item_payment_mode_type);
             });
+        }
+
+        if ($item_consultation_type) {
+            $data->whereHas('items.consultation_type', function ($query) use ($item_consultation_type) {
+                $query->where('name', $item_consultation_type);
+            });
+        }
+
+        if ($start_date) {
+            $data->where('created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $data->where('created_at', '<=', $end_date);
         }
 
         $data->orderBy('created_by', 'desc');

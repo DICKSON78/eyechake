@@ -1,18 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon } from "@mui/icons-material";
+import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect, SearchTextField } from "../../../components/Table";
+import Table, { PageSizeSelect } from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filter from "./Filter";
-import EditPatient from "./EditPatient";
 
 import { useFetch } from "../../../hooks";
 import { formatError, getNonNull } from "../../../helpers";
 
-const Patients = () => {
+const PendingConsultationPatients = ({ status, title }) => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -20,18 +18,30 @@ const Patients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: undefined,
+    consultant_id: window.user.id,
+    status: undefined,
+    patient_id: undefined,
+    patient_name: undefined,
+    patient_gender: undefined,
+    patient_phone: undefined,
+    item_payment_mode_id: undefined,
+    start_date: undefined,
+    end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
+  const { data, loading, error, handleFetch } = useFetch("api/consultations", params, true, {
     data: [],
     total: 0,
-    page: 1
+    page: 1,
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients - ${window.APP_NAME}`;
+    document.title = `Patients Sent to Doctor - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    setParams({ ...params, status });
+  }, [status]);
 
   const openFilterModal = () => {
     let component = (
@@ -48,25 +58,12 @@ const Patients = () => {
     modalRef.current.open("Filter", component);
   };
 
-
-  const openEditPatientModal = (item) => {
-    let component = (
-      <EditPatient
-        item={item}
-        modal={modalRef.current}
-        fetchPatients={handleFetch}
-      />
-    );
-
-    modalRef.current.open("Edit Patient", component);
-  };
-
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Reception" },
-        { title: "Patients/Customers" },
+        { title: "Doctor Works" },
+        { title: title },
       ]}
     >
       {error ?
@@ -80,14 +77,13 @@ const Patients = () => {
       }
       <Card>
         <PageHeader
-          title="Registered Patients"
+          title={title}
           trailing={
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
-              <SearchTextField onChange={(value) => setParams({ ...params, q: value })}/>
               <Button
                 variant="contained"
                 color="secondary"
@@ -95,13 +91,6 @@ const Patients = () => {
                 onClick={openFilterModal}
               >
                 Filter
-              </Button>
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() => navigate("/reception/patients/new")}
-              >
-                New Patient
               </Button>
             </React.Fragment>
           }
@@ -119,36 +108,31 @@ const Patients = () => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.full_name,
               },
               {
-                field: "id",
+                field: "patient_id",
                 headerName: "Patient Number",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Date of Birth",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.date_of_birth,
               },
               {
                 field: "gender",
                 headerName: "Gender",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-              },
-              {
-                field: "region_id",
-                headerName: "Location",
-                valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
-              },
-              {
-                field: "payment_mode_id",
-                headerName: "Payment Mode",
-                valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.phone,
               },
               {
                 field: "created_by",
-                headerName: "Registered By",
+                headerName: "Sent By",
                 valueGetter: (item, index) => getNonNull(item.creator).full_name,
               },
               {
@@ -165,21 +149,13 @@ const Patients = () => {
                     divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={() => openEditPatientModal(item)}
-                      >
-                        <EditIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
                     <Button
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
+                      onClick={() => navigate(`/doctor-works/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
                     >
-                      Check-In
+                      Manage
                     </Button>
                   </Stack>
                 ),
@@ -198,4 +174,4 @@ const Patients = () => {
   );
 };
 
-export default Patients;
+export default PendingConsultationPatients;

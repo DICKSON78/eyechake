@@ -27,6 +27,9 @@ class PatientsController extends Controller
         $region_id = $request->region_id;
         $district_id = $request->district_id;
         $ward_id = $request->ward_id;
+        $payment_mode_id = $request->payment_mode_id;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
         $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator']);
 
         if ($id) {
@@ -55,6 +58,18 @@ class PatientsController extends Controller
 
         if ($ward_id) {
             $data->where('ward_id', $ward_id);
+        }
+
+        if ($payment_mode_id) {
+            $data->where('payment_mode_id', $payment_mode_id);
+        }
+
+        if ($start_date) {
+            $data->where('created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $data->where('created_at', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');
@@ -128,8 +143,6 @@ class PatientsController extends Controller
      */
     public function destroy($id)
     {
-        $data = Patient::findOrFail($id);
-        $data->delete();
-        return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
+        //
     }
 }

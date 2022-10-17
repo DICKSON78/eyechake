@@ -13,8 +13,8 @@ const CreateUnitOfMeasure = ({ modal, fetchUnitsOfMeasure }) => {
   const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
-    description: null,
+    name: undefined,
+    description: undefined,
   });
   const { data, loading, error, handlePost } = usePost("api/units-of-measure", formData);
 

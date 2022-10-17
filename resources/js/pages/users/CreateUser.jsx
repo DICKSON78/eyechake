@@ -30,11 +30,11 @@ const CreateUser = ({ modal, fetchUsers }) => {
   const passwordRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
-    password: "",
+    name: undefined,
+    email: undefined,
+    phone: undefined,
+    role: undefined,
+    password: undefined,
   });
   const { data, loading, error, handlePost } = usePost("api/users", formData);
 

@@ -10,7 +10,7 @@ import Filter from "./Filter";
 import { useFetch } from "../../../hooks";
 import { formatError, getNonNull } from "../../../helpers";
 
-const PatientsSentToCashier = () => {
+const PendingCashPayments = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -18,7 +18,7 @@ const PatientsSentToCashier = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    patient_name: "",
+    patient_name: undefined,
     item_status: "Pending",
     item_payment_mode_type: "Cash",
   });
@@ -53,7 +53,7 @@ const PatientsSentToCashier = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Payment Center" },
-        { title: "Sent to Cashier" },
+        { title: "Patients Sent to Cashier" },
       ]}
     >
       {error ?
@@ -93,7 +93,6 @@ const PatientsSentToCashier = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                sortable: false,
                 valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
               },
               {
@@ -133,7 +132,6 @@ const PatientsSentToCashier = () => {
               {
                 field: "actions",
                 headerName: "Actions",
-                sortable: false,
                 renderCell: (item) => (
                   <Stack
                     direction="row"
@@ -145,7 +143,7 @@ const PatientsSentToCashier = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/payment-center/sent-to-cashier/${getNonNull(item.check_in).patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/payment-center/pending-cash-payments/${getNonNull(item.check_in).patient_id}/${item.id}`)}
                     >
                       Manage
                     </Button>
@@ -166,4 +164,4 @@ const PatientsSentToCashier = () => {
   );
 };
 
-export default PatientsSentToCashier;
+export default PendingCashPayments;

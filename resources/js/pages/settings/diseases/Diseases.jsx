@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
-import Page, { Header as PageHeader } from "../../../../components/Page";
-import Table, { PageSizeSelect, SearchTextField } from "../../../../components/Table";
-import Modal from "../../../../components/Modal";
-import CreateUnitOfMeasure from "./CreateUnitOfMeasure";
-import EditUnitOfMeasure from "./EditUnitOfMeasure";
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Table, { PageSizeSelect, SearchTextField } from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import CreateDisease from "./CreateDisease";
+import EditDisease from "./EditDisease";
 
-import { useFetch } from "../../../../hooks";
-import { formatError } from "../../../../helpers";
+import { useFetch } from "../../../hooks";
+import { formatError } from "../../../helpers";
 
-const UnitsOfMeasure = () => {
+const Diseases = () => {
 
   const modalRef = useRef();
 
@@ -21,21 +21,21 @@ const UnitsOfMeasure = () => {
     q: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/units-of-measure", params, true, {
+  const { data, loading, error, handleFetch } = useFetch("api/diseases", params, true, {
     data: [],
     total: 0,
     page: 1
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Units of Measure - ${window.APP_NAME}`;
+    document.title = `Diseases - ${window.APP_NAME}`;
   }, []);
 
-  const openCreateUnitOfMeasureModal = () => {
+  const openCreateDiseaseModal = () => {
     let component = (
-      <CreateUnitOfMeasure
+      <CreateDisease
         modal={modalRef.current}
-        fetchUnitsOfMeasure={() => {
+        fetchDiseases={() => {
           if (params.page !== 1) {
             setParams({ ...params, page: 1 });
           } else {
@@ -45,19 +45,19 @@ const UnitsOfMeasure = () => {
       />
     );
 
-    modalRef.current.open("Create Unit of Measure", component);
+    modalRef.current.open("Create Disease", component);
   };
 
-  const openEditUnitOfMeasureModal = (item) => {
+  const openEditDiseaseModal = (item) => {
     let component = (
-      <EditUnitOfMeasure
+      <EditDisease
         item={item}
         modal={modalRef.current}
-        fetchUnitsOfMeasure={handleFetch}
+        fetchDiseases={handleFetch}
       />
     );
 
-    modalRef.current.open("Edit Unit of Measure", component);
+    modalRef.current.open("Edit Disease", component);
   };
 
   const getStatusColor = (status) => {
@@ -74,8 +74,7 @@ const UnitsOfMeasure = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Settings" },
-        { title: "Item Management" },
-        { title: "Units of Measure" },
+        { title: "Diseases" },
       ]}
     >
       {error ?
@@ -89,7 +88,7 @@ const UnitsOfMeasure = () => {
       }
       <Card>
         <PageHeader
-          title="Units of Measure"
+          title="Diseases"
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -100,9 +99,9 @@ const UnitsOfMeasure = () => {
               <Button
                 variant="contained"
                 disableElevation
-                onClick={openCreateUnitOfMeasureModal}
+                onClick={openCreateDiseaseModal}
               >
-                New Unit of Measure
+                New Disease
               </Button>
             </React.Fragment>
           }
@@ -119,11 +118,11 @@ const UnitsOfMeasure = () => {
               },
               {
                 field: "name",
-                headerName: "Name",
+                headerName: "Disease Name",
               },
               {
-                field: "description",
-                headerName: "Description",
+                field: "code",
+                headerName: "Disease Code",
               },
               {
                 field: "status",
@@ -142,14 +141,14 @@ const UnitsOfMeasure = () => {
                 renderCell: (item) => (
                   <Stack
                     direction="row"
-                    alignItems="center"
+                    alignDiseases="center"
                     divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
-                        onClick={() => openEditUnitOfMeasureModal(item)}
+                        onClick={() => openEditDiseaseModal(item)}
                       >
                         <EditIcon fontSize="small"/>
                       </IconButton>
@@ -171,4 +170,4 @@ const UnitsOfMeasure = () => {
   );
 };
 
-export default UnitsOfMeasure;
+export default Diseases;

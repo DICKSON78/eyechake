@@ -56,17 +56,26 @@ class TextField extends React.Component {
   }
 
   render() {
-    const { containerProps, label, required, ...rest } = this.props;
+    const { containerProps, label, required, horizontal, ...rest } = this.props;
     return (
       <Box
         component="div"
+        {...(horizontal && {
+          display: "flex",
+          flexDirection: "row"
+        })}
         {...containerProps}
       >
         {label ?
           <Typography
             sx={{
-              marginLeft: "4px",
-              marginBottom: "4px",
+              ...(horizontal && {
+                marginRight: "8px",
+              }),
+              ...(!horizontal && {
+                marginLeft: "4px",
+                marginBottom: "4px",
+              }),
             }}
           >
             {label}
@@ -84,30 +93,37 @@ class TextField extends React.Component {
           </Typography>
           : null
         }
-        <MuiTextField
-          inputRef={(ref) => this.input = ref}
-          variant="outlined"
-          size="small"
-          margin="none"
-          autoComplete="off"
-          {...rest}
-          required={required}
-          error={!!this.state.error}
-          onChange={(event) => this._onChange(event.target.value, true)}
-        />
-        {this.state.error ?
-          <Typography
-            variant="body2"
-            sx={{
-              color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
-              marginLeft: "4px",
-              marginTop: "2px",
-            }}
-          >
-            {this.state.error}
-          </Typography>
-          : null
-        }
+        <Box
+          component="div"
+          {...(horizontal && {
+            flexGrow: 1,
+          })}
+        >
+          <MuiTextField
+            inputRef={(ref) => this.input = ref}
+            variant="outlined"
+            size="small"
+            margin="none"
+            autoComplete="off"
+            {...rest}
+            required={required}
+            error={!!this.state.error}
+            onChange={(event) => this._onChange(event.target.value, true)}
+          />
+          {this.state.error ?
+            <Typography
+              variant="body2"
+              sx={{
+                color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
+                marginLeft: "4px",
+                marginTop: "2px",
+              }}
+            >
+              {this.state.error}
+            </Typography>
+            : null
+          }
+        </Box>
       </Box>
     );
   }

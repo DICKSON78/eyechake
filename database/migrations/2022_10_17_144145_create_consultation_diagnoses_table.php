@@ -13,22 +13,23 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('consultations', function (Blueprint $table) {
+        Schema::create('consultation_diagnoses', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('payment_cache_item_id')->unsigned();
-            $table->text('chief_complaint')->nullable();
-            $table->text('history_present_illness')->nullable();
-            $table->text('family_history')->nullable();
-            $table->text('review')->nullable();
-            $table->text('remarks')->nullable();
+            $table->bigInteger('consultation_id')->unsigned();
+            $table->bigInteger('disease_id')->unsigned();
+            $table->enum('diagnosis_type', ['Preliminary', 'Final']);
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
-            $table->enum('status', ['Pending', 'Consulted'])->default('Pending');
             $table->timestamp('updated_at')->nullable();
 
-            $table->foreign('payment_cache_item_id')
+            $table->foreign('consultation_id')
                 ->references('id')
-                ->on('patient_payment_cache_items')
+                ->on('consultations')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreign('disease_id')
+                ->references('id')
+                ->on('diseases')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('created_by')
@@ -46,6 +47,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consultations');
+        Schema::dropIfExists('consultation_diagnoses');
     }
 };

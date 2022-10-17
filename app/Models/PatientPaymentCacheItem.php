@@ -31,6 +31,11 @@ class PatientPaymentCacheItem extends Model
         return $this->belongsTo(ConsultationType::class, 'consultation_type_id');
     }
 
+    public function consultant()
+    {
+        return $this->belongsTo(User::class, 'consultant_id');
+    }
+
     public function payment_mode()
     {
         return $this->belongsTo(PaymentMode::class, 'payment_mode_id');

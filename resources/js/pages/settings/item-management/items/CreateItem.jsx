@@ -47,12 +47,12 @@ const CreateItem = ({ modal, fetchItems }) => {
 
   const [itemType, setItemType] = useState();
   const [formData, setFormData] = useState({
-    name: "",
-    code: null,
-    item_type_id: null,
-    consultation_type_id: null,
-    unit_of_measure_id: null,
-    lens_type_id: null,
+    name: undefined,
+    code: undefined,
+    item_type_id: undefined,
+    consultation_type_id: undefined,
+    unit_of_measure_id: undefined,
+    lens_type_id: undefined,
     is_consultation_item: "No",
   });
 

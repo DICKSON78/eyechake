@@ -37,9 +37,9 @@ const Users = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: "",
-    role: "",
-    status: "",
+    q: undefined,
+    role: undefined,
+    status: undefined,
   });
 
   const { data, loading: loadingFetch, error: errorFetch, handleFetch } = useFetch("api/users", params, true, {
@@ -237,7 +237,6 @@ const Users = () => {
                 field: "status",
                 headerName: "Status",
                 flex: 0.1,
-                sortable: false,
                 renderCell: (item) => (
                   <Chip
                     size="small"
@@ -250,20 +249,17 @@ const Users = () => {
                 field: "last_login",
                 headerName: "Last Login",
                 flex: 0.1,
-                sortable: false,
               },
               {
                 field: "sms_balance",
                 headerName: "SMS Balance",
                 flex: 0.1,
-                sortable: false,
                 valueGetter: (item) => item.role === "Admin" ? "N/A" : numberFormat(item.sms_balance),
               },
               {
                 field: "actions",
                 headerName: "Actions",
                 flex: 0.15,
-                sortable: false,
                 renderCell: (item) => (
                   <Stack
                     direction="row"

@@ -11,6 +11,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
 import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
+import DoctorWorksRoutes from "../pages/doctor-works/DoctorWorksRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import Users from "../pages/users/Users";
 
@@ -77,6 +78,10 @@ const App = () => {
             <Route
               path="payment-center/*"
               element={<PaymentCenterRoutes />}
+            />
+            <Route
+              path="doctor-works/*"
+              element={<DoctorWorksRoutes />}
             />
             <Route
               path="settings/*"

@@ -1,20 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Skeleton,
-  Stack,
-  Tooltip
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/CloseRounded";
+import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -22,9 +9,17 @@ import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../../hooks";
-import { formatError, getNonNull, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
+import {
+  formatError,
+  getNonNull,
+  getValidationError,
+  getValidationRules,
+  numberFormat,
+  validateInteger
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -58,7 +53,7 @@ const PendingPatientItems = () => {
     status: "Pending",
     per_page: 500,
     payment_cache_id: paymentCacheId,
-    payment_mode: "Cash"
+    payment_mode_type: "Cash"
   }, false, [], (response) => response.data.data.data);
 
   const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/make-cash-payment", {
@@ -82,10 +77,14 @@ const PendingPatientItems = () => {
   useEffect(() => {
     if (data) {
       fetchItems();
+
+      setSelectedItems([]);
+      discountRef.current.setValue(null);
+      paymentChannelRef.current.setValue(null);
     }
   }, [data]);
 
-  const handleSubmitMakePayment = () => {
+  const confirmSubmitMakePayment = (title) => {
     if (!selectedItems.length) {
       return setError(getValidationError("Please select at least one item."));
     }
@@ -94,7 +93,18 @@ const PendingPatientItems = () => {
       return false;
     }
 
-    handlePost();
+    let component = (
+      <ConfirmationDialog
+        message="Are you sure you want to perform this action?"
+        onCancel={() => modalRef.current.close()}
+        onOk={() => {
+          modalRef.current.close();
+          handlePost();
+        }}
+      />
+    );
+
+    modalRef.current.open(title, component, "sm");
   };
 
   const handleFeedback = () => {
@@ -145,7 +155,7 @@ const PendingPatientItems = () => {
 
       {patient ?
         <Card>
-          <PageHeader title="Pending Patient Items" />
+          <PageHeader title="Pending Patient Items"/>
           <Divider />
           <CardContent>
             <Table
@@ -154,7 +164,6 @@ const PendingPatientItems = () => {
                 {
                   field: "index",
                   headerName: "S/N",
-                  sortable: false,
                   valueGetter: (item, index) => (index + 1),
                 },
                 {
@@ -275,7 +284,7 @@ const PendingPatientItems = () => {
               variant="contained"
               color="secondary"
               disableElevation
-              onClick={handleSubmitMakePayment}
+              onClick={() => console.log(true)}
             >
               Print Receipt
             </Button>
@@ -283,7 +292,7 @@ const PendingPatientItems = () => {
               disabled={loading}
               variant="contained"
               disableElevation
-              onClick={handleSubmitMakePayment}
+              onClick={() => confirmSubmitMakePayment("Make Payment")}
             >
               Make Payment
             </Button>

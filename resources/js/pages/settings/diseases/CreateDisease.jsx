@@ -6,30 +6,33 @@ import TextField from "../../../components/TextField";
 import { usePost } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
-const CreateRegion = ({ modal, onSuccess }) => {
+const CreateDisease = ({ modal, fetchDiseases }) => {
 
   const formRef = useRef();
   const nameRef = useRef();
+  const codeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: undefined,
+    code: undefined,
   });
-  const { data, loading, error, handlePost } = usePost("api/regions", formData);
+
+  const { data, loading, error, handlePost } = usePost("api/diseases", formData);
+
+  useEffect(() => {
+    if (data) {
+      window.setTimeout(() => {
+        modal.close();
+        fetchDiseases();
+      }, 1000);
+    }
+  }, [data]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePost();
     }
   };
-
-  useEffect(() => {
-    if (data) {
-      window.setTimeout(() => {
-        modal.close();
-        onSuccess(data.data);
-      }, 1000);
-    }
-  }, [data]);
 
   const handleFeedback = () => {
     if (data || error) {
@@ -64,10 +67,23 @@ const CreateRegion = ({ modal, onSuccess }) => {
             >
               <TextField
                 ref={nameRef}
-                label="Name"
+                label="Disease Name"
                 fullWidth
                 required
                 onChange={(value) => setFormData({ ...formData, name: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={codeRef}
+                label="Disease Code"
+                fullWidth
+                onChange={(value) => setFormData({ ...formData, code: value })}
               />
             </Grid>
           </Grid>
@@ -94,4 +110,4 @@ const CreateRegion = ({ modal, onSuccess }) => {
   );
 };
 
-export default CreateRegion;
+export default CreateDisease;

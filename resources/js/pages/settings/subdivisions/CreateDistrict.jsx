@@ -12,7 +12,7 @@ const CreateDistrict = ({ modal, region, onSuccess }) => {
   const nameRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
+    name: undefined,
     region_id: region.id
   });
   const { data, loading, error, handlePost } = usePost("api/districts", formData);

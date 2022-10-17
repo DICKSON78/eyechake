@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
-import Select from "../../../components/Select";
 
 import { usePatch } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -23,7 +22,6 @@ const EditPaymentChannel = ({ item, modal, fetchPaymentChannels }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
-  const paymentTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: item.name,

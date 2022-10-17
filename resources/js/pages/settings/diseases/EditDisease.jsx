@@ -1,35 +1,50 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Grid,
+  LinearProgress
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
-import { usePost } from "../../../hooks";
+import { usePatch } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
-const CreateRegion = ({ modal, onSuccess }) => {
+const EditDisease = ({ item, modal, fetchDiseases }) => {
 
   const formRef = useRef();
   const nameRef = useRef();
+  const codeRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: undefined,
+    name: item.name,
+    code: item.code,
+    status: item.status,
   });
-  const { data, loading, error, handlePost } = usePost("api/regions", formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
-    }
-  };
+  const { data, loading, error, handlePatch } = usePatch(`api/diseases/${item.id}`, formData);
 
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
         modal.close();
-        onSuccess(data.data);
+        fetchDiseases();
       }, 1000);
     }
   }, [data]);
+
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePatch();
+    }
+  };
 
   const handleFeedback = () => {
     if (data || error) {
@@ -64,10 +79,44 @@ const CreateRegion = ({ modal, onSuccess }) => {
             >
               <TextField
                 ref={nameRef}
-                label="Name"
+                label="Disease Name"
                 fullWidth
                 required
+                defaultValue={item.name}
                 onChange={(value) => setFormData({ ...formData, name: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={codeRef}
+                label="Disease Code"
+                fullWidth
+                defaultValue={item.code}
+                onChange={(value) => setFormData({ ...formData, code: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.status === "Active"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      status: event.target.checked ? "Active" : "Inactive"
+                    })}
+                  />
+                )}
+                label="Active"
               />
             </Grid>
           </Grid>
@@ -94,4 +143,4 @@ const CreateRegion = ({ modal, onSuccess }) => {
   );
 };
 
-export default CreateRegion;
+export default EditDisease;

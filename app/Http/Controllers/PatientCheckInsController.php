@@ -27,6 +27,8 @@ class PatientCheckInsController extends Controller
         $patient_id = $request->patient_id;
         $gender = $request->gender;
         $phone = $request->phone;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
 
         $data = PatientCheckIn::with(['patient' => function ($query) {
             $query->with(['region', 'district']);
@@ -52,6 +54,14 @@ class PatientCheckInsController extends Controller
             $data->whereHas('patient', function ($query) use ($phone) {
                 $query->where('phone', 'like', '%' . $phone . '%');
             });
+        }
+
+        if ($start_date) {
+            $data->where('created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $data->where('created_at', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');

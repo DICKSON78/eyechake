@@ -12,7 +12,7 @@ const CreateWard = ({ modal, district, onSuccess }) => {
   const nameRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: "",
+    name: undefined,
     district_id: district.id
   });
   const { data, loading, error, handlePost } = usePost("api/wards", formData);
