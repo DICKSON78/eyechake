@@ -25,11 +25,13 @@ import {
 } from "@mui/material";
 
 import {
+  DarkModeRounded as DarkModeIcon,
   ExpandMoreRounded as ChevronDownIcon,
+  LightModeOutlined as LightModeIcon,
   MoreVert as MoreIcon,
   PersonRounded as UserIcon
 } from "@mui/icons-material";
-import { Heart as HeartIcon, Menu as MenuIcon, Moon as DarkModeIcon, Sun as LightModeIcon } from "../components/icons";
+import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
 
 import SideMenu from "../components/SideMenu";
 import Modal from "../components/Modal";

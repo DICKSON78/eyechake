@@ -26,13 +26,13 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
   const [data, setData] = useState();
   const [error, setError] = useState();
 
-  const [params, setParams] = useState({
+  const [diseaseName, setDiseaseName] = useState();
+
+  const { data: diseases, loading: loadingDiseases } = useFetch("api/diseases", {
     status: "Active",
     per_page: 500,
-    q: undefined
-  });
-
-  const { data: diseases } = useFetch("api/diseases", params, true, [], (response) => response.data.data.data);
+    q: diseaseName
+  }, true, [], (response) => response.data.data.data);
 
   const [selected, setSelected] = useState(initial);
 
@@ -122,12 +122,13 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                 titleTypographyProps={{ variant: "subtitle1" }}
                 action={(
                   <SearchTextField
-                    onChange={(value) => setParams({ ...params, q: value })}
+                    onChange={(value) => setDiseaseName(value)}
                   />
                 )}
                 className="no-action-margin-right"
               />
               <Divider />
+              {loadingDiseases && <LinearProgress />}
               <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
                 {diseases.map((e) => (
                   <FormControlLabel

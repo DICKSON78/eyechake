@@ -84,7 +84,6 @@ class PatientCheckInsController extends Controller
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.consultant_id' => 'required|exists:users,id',
             'items.*.payment_mode_id' => 'required|exists:payment_modes,id',
-            'items.*.unit_price' => 'required|numeric',
             'items.*.quantity' => 'required|numeric|min:1',
         ]);
 
@@ -103,6 +102,7 @@ class PatientCheckInsController extends Controller
                 $input_items = $request->json('items');
 
                 foreach ($input_items as &$input_item) {
+                    // if this item has price for the provided payment mode, continue
                     $item = Item::where('id', $input_item['item_id'])
                         ->whereHas('prices', function ($query) use ($input_item) {
                             $query->where('payment_mode_id', $input_item['payment_mode_id']);

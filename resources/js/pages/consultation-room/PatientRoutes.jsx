@@ -7,6 +7,7 @@ import Page from "../../components/Page";
 import Modal from "../../components/Modal";
 import PatientDetails from "../reception/patients/PatientDetails";
 import ClinicalNotes from "./clinical-notes/ClinicalNotes";
+import useFetch from "../../hooks/useFetch";
 
 const PatientRoutes = () => {
 
@@ -18,9 +19,11 @@ const PatientRoutes = () => {
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
 
+  const { data: consultation, loading: loadingConsultation } = useFetch(`api/consultations/${consultationId}`, null, true, null, (response) => response.data.data);
+
   useEffect(() => {
     if (!patientId || !consultationId) {
-      navigate(`/doctor-works/consultation-patients/${(status || "pending")}`);
+      navigate(`/consultation-room/consultation-patients/${(status || "pending")}`);
     }
   }, []);
 
@@ -37,7 +40,7 @@ const PatientRoutes = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Doctor Works" },
+        { title: "Consultation Room" },
         { title: getFromListTitle() },
         { title: patientId },
       ]}
@@ -48,7 +51,7 @@ const PatientRoutes = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ?
+      {loadingPatient ||  loadingConsultation ?
         <Skeleton
           variant="rounded"
           height={256}
@@ -56,14 +59,14 @@ const PatientRoutes = () => {
         : null
       }
 
-      {patient ?
+      {patient && consultation ?
         <Routes>
           <Route
             path="/clinical-notes"
             element={(
               <ClinicalNotes
-                patientId={patientId}
-                consultationId={consultationId}
+                patient={patient}
+                consultation={consultation}
                 status={status}
               />
             )}

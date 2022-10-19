@@ -227,7 +227,7 @@ const CheckInPatient = () => {
                   options={users}
                   optionsLabel="full_name"
                   optionsValue="id"
-                  value={consultant ? consultant.id : ""}
+                  value={users.length ? (consultant ? consultant.id : "") : ""}
                   onChange={(value) => setConsultant(users.find((e) => e.id === value))}
                 />
               </Grid>

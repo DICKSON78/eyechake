@@ -23,7 +23,7 @@ class ItemsController extends Controller
         $status = $request->status;
         $q = $request->q;
         $item_type_id = $request->item_type_id;
-        $consultation_type_id = $request->consultation_type_id;
+        $consultation_type = $request->consultation_type;
         $is_consultation_item = $request->is_consultation_item;
         $payment_mode_id = $request->payment_mode_id;
         $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type']);
@@ -43,8 +43,10 @@ class ItemsController extends Controller
             $data->where('item_type_id', $item_type_id);
         }
 
-        if ($consultation_type_id) {
-            $data->where('consultation_type_id', $consultation_type_id);
+        if ($consultation_type) {
+            $data->whereHas('consultation_type', function ($query) use ($consultation_type) {
+                $query->where('name', $consultation_type);
+            });
         }
 
         if ($is_consultation_item) {

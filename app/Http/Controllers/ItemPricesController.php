@@ -60,7 +60,7 @@ class ItemPricesController extends Controller
         }
 
         $data = ItemPrice::create($request->all());
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        return $this->sendResponse($data, Response::HTTP_OK, 'Added successfully.');
     }
 
     /**

@@ -57,20 +57,20 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       },
       {
         id: "7",
-        title: "DOCTOR WORKS",
+        title: "CONSULTATION ROOM",
         show: !!drawerOpen,
       },
       {
         id: "8",
         title: "Patients Sent to Doctor",
         icon: <WaitingIcon />,
-        to: "/doctor-works/consultation-patients/pending",
+        to: "/consultation-room/consultation-patients/pending",
       },
       {
         id: "9",
         title: "Consulted Patients",
         icon: <DoneIcon />,
-        to: "/doctor-works/consultation-patients/consulted",
+        to: "/consultation-room/consultation-patients/consulted",
       },
       {
         id: "15",

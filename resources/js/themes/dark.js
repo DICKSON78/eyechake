@@ -1,11 +1,11 @@
 import { createTheme } from "@mui/material/styles";
-import { amber, lightBlue, red } from "@mui/material/colors";
+import { amber, red } from "@mui/material/colors";
 
 const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#00225f",
+      main: "#345ea8",
       contrastText: "#fff",
     },
     secondary: {
@@ -13,7 +13,7 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     info: {
-      main: lightBlue[600],
+      main: "#345ea8",
       contrastText: "#fff",
     },
     success: {
@@ -75,6 +75,7 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         elevation1: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
+        backgroundImage: "none",
       }
     },
     MuiCard: {

@@ -56,7 +56,7 @@ class ConsultationDiagnosesController extends Controller
         $input['created_by'] = $request->user()->id;
         $data = ConsultationDiagnosis::create($input);
         $data->disease = Disease::find($request->disease_id);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        return $this->sendResponse($data, Response::HTTP_OK, 'Added successfully.');
     }
 
     /**

@@ -28,6 +28,7 @@ class PatientPaymentCacheItemsController extends Controller
         $payment_mode_type = $request->payment_mode_type;
         $consultation_type = $request->consultation_type;
         $consultant_id = $request->consultant_id;
+        $consultation_id = $request->consultation_id;
         $data = PatientPaymentCacheItem::with(['item', 'consultation_type', 'payment_mode', 'creator']);
 
         if ($status) {
@@ -56,6 +57,12 @@ class PatientPaymentCacheItemsController extends Controller
 
         if ($consultant_id) {
             $data->where('consultant_id', $consultant_id);
+        }
+
+        if ($consultation_id) {
+            $data->whereHas('payment_cache', function ($query) use ($consultation_id) {
+                $query->where('consultation_id', $consultation_id);
+            });
         }
 
         $data->orderBy('created_at', 'asc');

@@ -1,0 +1,459 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Radio,
+  Tooltip
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/DeleteRounded";
+import Table, { SearchTextField } from "../../../components/Table";
+import Select from "../../../components/Select";
+import TextField from "../../../components/TextField";
+
+import { useDelete, useFetch, usePost } from "../../../hooks";
+import { formatError, getNonNull, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
+
+const validationRules = getValidationRules();
+
+const SelectItems = ({ consultation, selected: initial, consultationType, fetchItems: fetchConsultationItems, modal }) => {
+
+  const paymentModeRef = useState();
+  const consultantRef = useState();
+  const itemRef = useRef();
+  const quantityRef = useRef();
+  const dosageRef = useRef();
+  const commentsRef = useRef();
+
+  const [data, setData] = useState();
+  const [error, setError] = useState();
+
+  const [paymentMode, setPaymentMode] = useState(consultation.payment_cache_item.payment_mode);
+  const [consultant, setConsultant] = useState(window.user);
+  const [itemName, setItemName] = useState();
+  const [selectedItem, setSelectedItem] = useState();
+  const [quantity, setQuantity] = useState(1);
+  const [dosage, setDosage] = useState();
+  const [comments, setComments] = useState();
+
+  const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch("api/payment-modes", {
+    status: "Active",
+    per_page: 500
+  }, true, [], (response) => response.data.data.data);
+  const { data: users, handleFetch: fetchUsers } = useFetch("api/users", {
+    status: "Active",
+    per_page: 500
+  }, true, [], (response) => response.data.data.data);
+
+  const { data: items, loading: loadingItems, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
+    status: "Active",
+    per_page: 500,
+    q: itemName,
+    consultation_type: consultationType,
+    is_consultation_item: "No",
+    payment_mode_id: paymentMode ? paymentMode.id : undefined,
+  }, false, [], (response) => response.data.data.data);
+
+  const [selected, setSelected] = useState(initial);
+
+  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost();
+  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+
+  useEffect(() => {
+    if (paymentMode) {
+      setSelectedItem(null);
+      setQuantity(1);
+      setDosage(null);
+      setComments(null);
+      setItems([]);
+      fetchItems();
+    }
+  }, [paymentMode]);
+
+  useEffect(() => {
+    if (paymentMode) {
+      fetchItems();
+    }
+  }, [itemName]);
+
+  useEffect(() => {
+    if (dataPost) {
+      setData(dataPost);
+      setSelected([...selected, dataPost.data]);
+      setSelectedItem(null);
+      setQuantity(1);
+      setDosage(null);
+      fetchConsultationItems();
+    }
+  }, [dataPost]);
+
+  useEffect(() => {
+    if (dataDelete) {
+      setData(dataDelete);
+      setSelected(selected.filter((e) => e.id !== dataDelete.data.id));
+      fetchConsultationItems();
+    }
+  }, [dataDelete]);
+
+  useEffect(() => {
+    if (errorPost) {
+      setError(errorPost);
+    }
+  }, [errorPost]);
+
+  useEffect(() => {
+    if (errorDelete) {
+      setError(errorDelete);
+    }
+  }, [errorDelete]);
+
+  const handlePostItem = () => {
+    setData(null);
+    setError(null);
+
+    if (paymentModeRef.current.validate() && consultantRef.current.validate() && quantityRef.current.validate()) {
+      handlePost("api/consultations/add-item", {
+        payment_mode_id: paymentMode.id,
+        item_id: selectedItem.id,
+        consultation_id: consultation.id,
+        consultation_type: consultationType,
+        quantity,
+        dosage,
+        comments,
+        consultant_id: consultant.id,
+      });
+    }
+  };
+
+  const handleDeleteItem = (item) => {
+    setData(null);
+    setError(null);
+    handleDelete(`api/patient-payment-cache-items/${item.id}`);
+  };
+
+  const handleFeedback = () => {
+    if (data || error) {
+      return (
+        <Alert
+          sx={{ mb: 2 }}
+          severity={error ? "error" : "success"}
+        >
+          {error ? formatError(error) : data ? data.message : null}
+        </Alert>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <React.Fragment>
+      {(loadingPost || loadingDelete) ?
+        <LinearProgress />
+        : null
+      }
+      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+        {handleFeedback()}
+        <Grid
+          container
+          spacing={2}
+          mb={2}
+        >
+          <Grid
+            item
+            md={4}
+            sm={8}
+            xs={12}
+          >
+            <Select
+              ref={paymentModeRef}
+              disabled
+              label="Payment Mode"
+              fullWidth
+              required
+              options={paymentModes}
+              optionsLabel="name"
+              optionsValue="id"
+              value={paymentModes.length ? (paymentMode ? paymentMode.id : "") : ""}
+              onChange={(value) => setPaymentMode(paymentModes.find((e) => e.id === value))}
+            />
+          </Grid>
+          <Grid
+            item
+            md={4}
+            sm={8}
+            xs={12}
+          >
+            <Select
+              ref={consultantRef}
+              label="Consultant"
+              fullWidth
+              required
+              options={users}
+              optionsLabel="full_name"
+              optionsValue="id"
+              value={users.length ? (consultant ? consultant.id : "") : ""}
+              onChange={(value) => setConsultant(users.find((e) => e.id === value))}
+            />
+          </Grid>
+        </Grid>
+
+        <Grid
+          container
+          spacing={2}
+        >
+          <Grid
+            item
+            md={4}
+            sm={12}
+            xs={12}
+          >
+            <Card variant="outlined">
+              <CardHeader
+                title="Select Item"
+                titleTypographyProps={{ variant: "subtitle1" }}
+                action={(
+                  <SearchTextField
+                    onChange={(value) => setItemName(value)}
+                  />
+                )}
+                className="no-action-margin-right"
+              />
+              <Divider />
+              {loadingItems && <LinearProgress />}
+              <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
+                {items.map((e) => (
+                  <FormControlLabel
+                    key={e.id}
+                    control={(
+                      <Radio
+                        checked={selectedItem === e}
+                        onChange={(event) => {
+                          if (event.target.checked) {
+                            setSelectedItem(e);
+                          }
+                        }}
+                      />
+                    )}
+                    label={e.name}
+                    sx={{ display: "block" }}
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid
+            item
+            md={8}
+            sm={12}
+            xs={12}
+          >
+            <Card variant="outlined">
+              <CardHeader
+                title="Selected Items"
+                titleTypographyProps={{ variant: "subtitle1" }}
+              />
+              <Divider />
+              <CardContent>
+                {selectedItem ?
+                  <Grid
+                    container
+                    spacing={1}
+                    alignItems="flex-end"
+                    mb={2}
+                  >
+                    <Grid
+                      item
+                      md={4}
+                      sm={4}
+                      xs={12}
+                    >
+                      <TextField
+                        ref={itemRef}
+                        disabled={true}
+                        label="Selected Item"
+                        fullWidth
+                        required
+                        value={selectedItem.name || ""}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={2}
+                      sm={4}
+                      xs={12}
+                    >
+                      <TextField
+                        disabled={true}
+                        label="Unit Price"
+                        fullWidth
+                        value={selectedItem.prices.length ? numberFormat(selectedItem.prices[0].unit_price || 0) : ""}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={2}
+                      sm={4}
+                      xs={12}
+                    >
+                      <TextField
+                        ref={quantityRef}
+                        label="Quantity"
+                        fullWidth
+                        required
+                        defaultValue={quantity}
+                        rules={[
+                          validationRules.number,
+                          (value) => value > 0 || "Quantity has to be greater than 0."
+                        ]}
+                        onChange={(value) => {
+                          value = validateInteger(value);
+                          setQuantity(value);
+                        }}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={2}
+                      sm={4}
+                      xs={12}
+                    >
+                      <TextField
+                        disabled={true}
+                        label="Total Price"
+                        fullWidth
+                        value={numberFormat((selectedItem.prices[0].unit_price || 0) * (quantity || 0)) || ""}
+                      />
+                    </Grid>
+                    {consultationType === "Pharmacy" ?
+                      <Grid
+                        item
+                        md={4}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={dosageRef}
+                          label="Dosage"
+                          fullWidth
+                          multiline
+                          rows={3}
+                          onChange={(value) => setDosage(value)}
+                        />
+                      </Grid>
+                      : null
+                    }
+                    <Grid
+                      item
+                      md={6}
+                      sm={12}
+                      xs={12}
+                    >
+                      <TextField
+                        ref={commentsRef}
+                        label="Comments"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        onChange={(value) => setComments(value)}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={1}
+                      sm={2}
+                      xs={12}
+                    >
+                      <Button
+                        disabled={loadingPost}
+                        fullWidth
+                        disableElevation
+                        variant="contained"
+                        color="primary"
+                        size="medium"
+                        onClick={handlePostItem}
+                      >
+                        Add
+                      </Button>
+                    </Grid>
+                  </Grid>
+                  : null
+                }
+
+                <Table
+                  columns={[
+                    {
+                      field: "index",
+                      headerName: "S/N",
+                      valueGetter: (item, index) => (index + 1),
+                    },
+                    {
+                      field: "item_name",
+                      headerName: "Item Name",
+                      valueGetter: (item, index) => getNonNull(item.item).name,
+                    },
+                    {
+                      field: "quantity",
+                      headerName: "Quantity",
+                      valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                    },
+                    {
+                      field: "dosage",
+                      headerName: "Dosage",
+                      show: consultationType === "Pharmacy",
+                    },
+                    {
+                      field: "comments",
+                      headerName: "Comments",
+                    },
+                    {
+                      field: "actions",
+                      headerName: "Actions",
+                      renderCell: (item) => (
+                        <Tooltip title="Delete">
+                          <span>
+                            <IconButton
+                              size="small"
+                              disabled={loadingDelete || item.status !== "Pending"}
+                              onClick={() => handleDeleteItem(item)}
+                            >
+                              <DeleteIcon fontSize="small"/>
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      ),
+                    }
+                  ]}
+                  items={selected}
+                  hidePaginationFooter
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </CardContent>
+      <Divider />
+      <CardActions>
+        <Box flexGrow={1}/>
+        <Button
+          variant="text"
+          onClick={() => modal.close()}
+        >
+          Close
+        </Button>
+      </CardActions>
+    </React.Fragment>
+  );
+};
+
+export default SelectItems;

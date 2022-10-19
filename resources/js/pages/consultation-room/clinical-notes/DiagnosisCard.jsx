@@ -5,7 +5,7 @@ import Table from "../../../components/Table";
 
 import { getNonNull } from "../../../helpers";
 
-const DiagnosisCard = ({ title, diagnosisType, loading, items, onClickAdd }) => {
+const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onClickAdd }) => {
 
   return (
     <Card variant="outlined">
@@ -49,6 +49,7 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, onClickAdd }) => 
               {
                 value: (
                   <Button
+                    disabled={consultation.status === "Consulted"}
                     variant="contained"
                     color="secondary"
                     disableElevation

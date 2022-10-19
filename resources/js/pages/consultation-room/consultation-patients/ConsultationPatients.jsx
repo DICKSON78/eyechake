@@ -62,7 +62,7 @@ const PendingConsultationPatients = ({ status, title }) => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Doctor Works" },
+        { title: "Consultation Room" },
         { title: title },
       ]}
     >
@@ -134,6 +134,13 @@ const PendingConsultationPatients = ({ status, title }) => {
                 field: "created_by",
                 headerName: "Sent By",
                 valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                show: status === "Pending"
+              },
+              {
+                field: "consultant",
+                headerName: "Consultant",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
+                show: status === "Consulted"
               },
               {
                 field: "created_at",
@@ -153,9 +160,9 @@ const PendingConsultationPatients = ({ status, title }) => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/doctor-works/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/consultation-room/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
                     >
-                      Manage
+                      {status === "Pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),

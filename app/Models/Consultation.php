@@ -20,6 +20,26 @@ class Consultation extends Model
         return $this->belongsTo(PatientPaymentCacheItem::class, 'payment_cache_item_id');
     }
 
+    public function external_examination()
+    {
+        return $this->hasOne(ConsultationExternalExamination::class, 'consultation_id');
+    }
+
+    public function visual_acuity()
+    {
+        return $this->hasOne(ConsultationVisualAcuity::class, 'consultation_id');
+    }
+
+    public function refraction()
+    {
+        return $this->hasOne(ConsultationRefraction::class, 'consultation_id');
+    }
+
+    public function fundoscopy()
+    {
+        return $this->hasOne(ConsultationFundoscopy::class, 'consultation_id');
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');

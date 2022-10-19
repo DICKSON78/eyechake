@@ -4,6 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
+use App\Models\ConsultationExternalExamination;
+use App\Models\ConsultationFundoscopy;
+use App\Models\ConsultationRefraction;
+use App\Models\ConsultationVisualAcuity;
+use App\Models\Item;
+use App\Models\PatientPaymentCache;
+use App\Models\PatientPaymentCacheItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -35,7 +42,7 @@ class ConsultationsController extends Controller
                 $query2->with(['region', 'district', 'ward']);
             }]);
 
-            $query->with(['payment_mode']);
+            $query->with(['payment_mode', 'consultant']);
         }, 'creator']);
 
         if ($status) {
@@ -106,6 +113,63 @@ class ConsultationsController extends Controller
         //
     }
 
+    public function addItem(Request $request)
+    {
+        $request->validate([
+            'consultation_id' => 'required|exists:consultations,id',
+            'item_id' => 'required|exists:items,id',
+            'payment_mode_id' => 'required|exists:payment_modes,id',
+            'consultant_id' => 'required|exists:users,id',
+            'quantity' => 'required|numeric|min:1',
+        ]);
+
+        $data = null;
+        $user = $request->user();
+
+        // if item has price for the provided payment mode, continue
+        $item = Item::where('id', $request->item_id)
+            ->whereHas('prices', function ($query) use ($request) {
+                $query->where('payment_mode_id', $request->payment_mode_id);
+            })
+            ->with(['prices' => function ($query) use ($request) {
+                $query->where('payment_mode_id', $request->payment_mode_id);
+            }])
+            ->first();
+
+        if ($item) {
+            // if this consultation has payment cache for this user use the existing one, otherwise create new
+            $payment_cache = PatientPaymentCache::where('consultation_id', $request->consultation_id)
+                ->where('created_by', $user->id)
+                ->first();
+
+            if (!$payment_cache) {
+                $consultation = Consultation::find($request->consultation_id);
+                $payment_cache = PatientPaymentCache::create([
+                    'check_in_id' => $consultation->payment_cache_item->payment_cache->check_in_id,
+                    'consultation_id' => $request->consultation_id,
+                    'created_by' => $user->id,
+                ]);
+            }
+
+            $data = PatientPaymentCacheItem::create([
+                'payment_cache_id' => $payment_cache->id,
+                'item_id' => $item->id,
+                'consultation_type_id' => $item->consultation_type_id,
+                'consultant_id' => $request->consultant_id,
+                'payment_mode_id' => $request->payment_mode_id,
+                'unit_price' => $item->prices[0]->unit_price,
+                'quantity' => $request->quantity,
+                'dosage' => $request->dosage,
+                'comments' => $request->comments,
+                'created_by' => $user->id,
+            ]);
+            $data->item = $item;
+            $data->status = 'Pending';
+        }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Added successfully.');
+    }
+
     /**
      * Display the specified resource.
      *
@@ -119,8 +183,8 @@ class ConsultationsController extends Controller
                 $query2->with(['region', 'district', 'ward']);
             }]);
 
-            $query->with(['payment_mode']);
-        }, 'consultant', 'creator'])
+            $query->with(['payment_mode', 'consultant']);
+        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy'])
             ->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -140,6 +204,69 @@ class ConsultationsController extends Controller
 
         $data = Consultation::findOrFail($id);
         $data->update($request->all());
+        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
+    }
+
+    public function autoSaveClinicalNotes(Request $request, $id)
+    {
+        $request->validate([
+            'what' => 'required|in:Consultation,Visual Acuity,External Examination,Refraction,Fundoscopy'
+        ]);
+
+        $user = $request->user();
+        $data = Consultation::findOrFail($id);
+
+        switch ($request->what) {
+            case 'Consultation': {
+                $data->update($request->except('what'));
+            }
+                break;
+            case 'External Examination': {
+                if ($data->external_examination) {
+                    $data->external_examination->update($request->except('what'));
+                } else {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    ConsultationExternalExamination::create($input);
+                }
+            }
+                break;
+            case 'Visual Acuity': {
+                if ($data->visual_acuity) {
+                    $data->visual_acuity->update($request->except('what'));
+                } else {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    ConsultationVisualAcuity::create($input);
+                }
+            }
+                break;
+            case 'Refraction': {
+                if ($data->refraction) {
+                    $data->refraction->update($request->except('what'));
+                } else {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    ConsultationRefraction::create($input);
+                }
+            }
+                break;
+            case 'Fundoscopy': {
+                if ($data->fundoscopy) {
+                    $data->fundoscopy->update($request->except('what'));
+                } else {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    ConsultationFundoscopy::create($input);
+                }
+            }
+                break;
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 

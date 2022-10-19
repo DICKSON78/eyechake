@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import ConsultationPatients from "./consultation-patients/ConsultationPatients";
 import PatientRoutes from "./PatientRoutes";
 
-const DoctorWorksRoutes = () => {
+const ConsultationRoomRoutes = () => {
   return (
     <Routes>
       <Route
@@ -34,4 +34,4 @@ const DoctorWorksRoutes = () => {
   );
 };
 
-export default DoctorWorksRoutes;
+export default ConsultationRoomRoutes;

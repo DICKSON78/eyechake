@@ -11,7 +11,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
 import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
-import DoctorWorksRoutes from "../pages/doctor-works/DoctorWorksRoutes";
+import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import Users from "../pages/users/Users";
 
@@ -80,8 +80,8 @@ const App = () => {
               element={<PaymentCenterRoutes />}
             />
             <Route
-              path="doctor-works/*"
-              element={<DoctorWorksRoutes />}
+              path="consultation-room/*"
+              element={<ConsultationRoomRoutes />}
             />
             <Route
               path="settings/*"

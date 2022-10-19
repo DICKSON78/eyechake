@@ -1,0 +1,101 @@
+import React from "react";
+
+import { Button, Card, CardContent, CardHeader, Chip, Divider } from "@mui/material";
+import Table from "../../../components/Table";
+
+import { getNonNull } from "../../../helpers";
+
+const ConsultationItemsCard = ({ title, consultationType, loading, items, consultation, onClickAdd }) => {
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "warning";
+      case "Paid":
+      case "Billed":
+        return "info";
+      case "Served":
+        return "success";
+    }
+
+    return "neutral";
+  };
+
+  return (
+    <Card variant="outlined">
+      <CardHeader
+        title={title}
+        titleTypographyProps={{
+          variant: "subtitle2",
+          fontWeight: 500,
+        }}
+      />
+      <Divider />
+      <CardContent>
+        <Table
+          loading={loading}
+          columns={[
+            {
+              field: "index",
+              headerName: "S/N",
+              valueGetter: (item, index) => (index + 1),
+            },
+            {
+              field: "item_name",
+              headerName: "Item Name",
+              valueGetter: (item, index) => getNonNull(item.item).name,
+            },
+            {
+              field: "dosage",
+              headerName: "Dosage",
+              show: consultationType === "Pharmacy",
+            },
+            {
+              field: "comments",
+              headerName: "Comments",
+              show: consultationType !== "Pharmacy",
+            },
+            {
+              field: "status",
+              headerName: "Status",
+              renderCell: (item, index) => (
+                <Chip
+                  size="small"
+                  color={getStatusColor(item.status)}
+                  label={item.status}
+                />
+              ),
+            }
+          ]}
+          items={items.filter((e) => e.consultation_type.name === consultationType)}
+          hideNoItemsOverlayIcon
+          hidePaginationFooter
+          footerItems={[
+            [
+              {
+                value: "",
+                tableCellProps: { colSpan: 3 },
+              },
+              {
+                value: (
+                  <Button
+                    disabled={consultation.status === "Consulted"}
+                    variant="contained"
+                    color="secondary"
+                    disableElevation
+                    size="small"
+                    onClick={() => onClickAdd(title, consultationType)}
+                  >
+                    Add
+                  </Button>
+                ),
+              }
+            ]
+          ]}
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
+export default ConsultationItemsCard;
