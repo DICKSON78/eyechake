@@ -59,18 +59,27 @@ class DatePicker extends React.Component {
   }
 
   render() {
-    const { containerProps, fullWidth, label, required, ...rest } = this.props;
+    const { containerProps, fullWidth, label, required, horizontal, ...rest } = this.props;
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box
           component="div"
+          {...(horizontal && {
+            display: "flex",
+            flexDirection: "row"
+          })}
           {...containerProps}
         >
           {label ?
             <Typography
               sx={{
-                marginLeft: "4px",
-                marginBottom: "4px",
+                ...(horizontal && {
+                  marginRight: "8px",
+                }),
+                ...(!horizontal && {
+                  marginLeft: "4px",
+                  marginBottom: "4px",
+                }),
               }}
             >
               {label}
@@ -88,39 +97,48 @@ class DatePicker extends React.Component {
             </Typography>
             : null
           }
-          <MuiDatePicker
-            inputRef={(ref) => this.input = ref}
-            onChange={(value) => this._onChange(value, true)}
-            renderInput={(params) => (
-              <TextField
-                variant="outlined"
-                type="text"
-                size="small"
-                margin="none"
-                autoComplete="off"
-                fullWidth={fullWidth}
-                required={required}
-                error={!!this.state.error}
-                {...params}
-              />
-            )}
-            inputFormat="yyyy-MM-dd"
-            mask="____-__-__"
-            {...rest}
-          />
-          {this.state.error ?
-            <Typography
-              variant="body2"
-              sx={{
-                color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
-                marginLeft: "4px",
-                marginTop: "2px",
+          <Box
+            component="div"
+            {...(horizontal && {
+              flexGrow: 1,
+            })}
+          >
+            <MuiDatePicker
+              inputRef={(ref) => this.input = ref}
+              onChange={(value) => this._onChange(value, true)}
+              renderInput={(params) => (
+                <TextField
+                  variant="outlined"
+                  type="text"
+                  size="small"
+                  margin="none"
+                  autoComplete="off"
+                  fullWidth={fullWidth}
+                  required={required}
+                  {...params}
+                />
+              )}
+              InputProps={{
+                error: !!this.state.error
               }}
-            >
-              {this.state.error}
-            </Typography>
-            : null
-          }
+              inputFormat="yyyy-MM-dd"
+              mask="____-__-__"
+              {...rest}
+            />
+            {this.state.error ?
+              <Typography
+                variant="body2"
+                sx={{
+                  color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
+                  marginLeft: "4px",
+                  marginTop: "2px",
+                }}
+              >
+                {this.state.error}
+              </Typography>
+              : null
+            }
+          </Box>
         </Box>
       </LocalizationProvider>
     );

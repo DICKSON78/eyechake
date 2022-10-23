@@ -27,10 +27,8 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
       return "Not Paid";
     }
 
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
-      if (status === "Served") {
-        return "Dispensed";
-      }
+    if (status === "Served") {
+      return "Dispensed";
     }
 
     return status;
@@ -94,7 +92,7 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
               {
                 value: (
                   <Button
-                    disabled={consultation.status === "Consulted"}
+                    disabled={consultation.optician_status === "Consulted"}
                     variant="contained"
                     color="secondary"
                     disableElevation

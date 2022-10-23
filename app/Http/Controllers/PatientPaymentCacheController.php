@@ -25,8 +25,8 @@ class PatientPaymentCacheController extends Controller
         $per_page = $request->per_page ?? 25;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
-        $gender = $request->gender;
-        $phone = $request->phone;
+        $patient_gender = $request->patient_gender;
+        $patient_phone = $request->patient_phone;
         $item_status = $request->item_status;
         $item_payment_mode_id = $request->item_payment_mode_id;
         $item_payment_mode_type = $request->item_payment_mode_type;
@@ -48,15 +48,15 @@ class PatientPaymentCacheController extends Controller
             $data->where('patient_id', $patient_id);
         }
 
-        if ($gender) {
-            $data->whereHas('patient', function ($query) use ($gender) {
-                $query->where('gender', $gender);
+        if ($patient_gender) {
+            $data->whereHas('patient', function ($query) use ($patient_gender) {
+                $query->where('gender', $patient_gender);
             });
         }
 
-        if ($phone) {
-            $data->whereHas('patient', function ($query) use ($phone) {
-                $query->where('phone', 'like', '%' . $phone . '%');
+        if ($patient_phone) {
+            $data->whereHas('patient', function ($query) use ($patient_phone) {
+                $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
         }
 
@@ -85,14 +85,14 @@ class PatientPaymentCacheController extends Controller
         }
 
         if ($start_date) {
-            $data->where('created_at', '>=', $start_date);
+            $data->whereDate('created_at', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->where('created_at', '<=', $end_date);
+            $data->whereDate('created_at', '<=', $end_date);
         }
 
-        $data->orderBy('created_by', 'desc');
+        $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }

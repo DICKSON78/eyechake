@@ -2,15 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
-import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
-import Modal from "../../../components/Modal";
-import Filters from "../PatientFilters";
+import Page, { Header as PageHeader } from "../../components/Page";
+import Table, { PageSizeSelect } from "../../components/Table";
+import Modal from "../../components/Modal";
+import Filters from "../consultation-room/PatientFilters";
 
-import { useFetch } from "../../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
+import { useFetch } from "../../hooks";
+import { formatDateForDb, formatError, getNonNull } from "../../helpers";
 
-const PendingCashPayments = () => {
+const PendingConsultationPatients = ({ status, title }) => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -18,37 +18,42 @@ const PendingCashPayments = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending",
-    item_payment_mode_type: "Cash",
+    consultant_id: window.user.id,
+    status: "Consulted",
+    optician_status: status,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
+    item_payment_mode_id: undefined,
     start_date: new Date(),
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patient-payment-cache",
-    {
-      ...params,
-      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-    }, true, {
-      data: [],
-      total: 0,
-      page: 1,
-    }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch("api/consultations", {
+    ...params,
+    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+  }, true, {
+    data: [],
+    total: 0,
+    page: 1,
+  }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Cashier - ${window.APP_NAME}`;
+    document.title = `Patients Sent to Doctor - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    setParams({ ...params, optician_status: status });
+  }, [status]);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Payment Center" },
-        { title: "Patients Sent to Cashier" },
+        { title: "Optician Center" },
+        { title: title },
       ]}
     >
       {error ?
@@ -62,7 +67,7 @@ const PendingCashPayments = () => {
       }
       <Card>
         <PageHeader
-          title="Patients Sent to Cashier"
+          title={title}
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -90,35 +95,42 @@ const PendingCashPayments = () => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.full_name,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient_id,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Date of Birth",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.date_of_birth,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.date_of_birth,
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.gender,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.phone,
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.phone,
               },
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => getNonNull(item.to_optician_sender).full_name,
+                show: status === "Pending"
               },
               {
-                field: "created_at",
+                field: "consultant",
+                headerName: "Consultant",
+                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
+                show: status === "Consulted"
+              },
+              {
+                field: "sent_to_optician_at",
                 headerName: "Date",
               },
               {
@@ -135,9 +147,9 @@ const PendingCashPayments = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/payment-center/pending-cash-patients/${getNonNull(item.check_in).patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/optician-center/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
                     >
-                      Manage
+                      {status === "Pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),
@@ -156,4 +168,4 @@ const PendingCashPayments = () => {
   );
 };
 
-export default PendingCashPayments;
+export default PendingConsultationPatients;

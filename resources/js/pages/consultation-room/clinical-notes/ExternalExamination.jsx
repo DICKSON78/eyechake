@@ -27,7 +27,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
 
   const autoSave = (field, value) => {
     if (value && (!external_examination || (external_examination && value !== external_examination[field]))) {
-      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "External Examination", [field]: value });
+      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, {
+        what: "External Examination",
+        [field]: value
+      });
     }
   };
 

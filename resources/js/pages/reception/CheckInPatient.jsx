@@ -145,7 +145,7 @@ const CheckInPatient = () => {
     if (data || error) {
       return (
         <Alert
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
           severity={error ? "error" : "success"}
         >
           {error ? formatError(error) : data ? data.message : null}
@@ -186,7 +186,7 @@ const CheckInPatient = () => {
 
       {patient ?
         <Card>
-          <PageHeader title="Check-In Patient" />
+          <PageHeader title="Check-In Patient"/>
           <Divider />
           <CardContent>
             <Grid
@@ -390,7 +390,7 @@ const CheckInPatient = () => {
                         },
                         {
                           field: "item_name",
-                          headerName: "Item",
+                          headerName: "Item Name",
                         },
                         {
                           field: "payment_mode_name",

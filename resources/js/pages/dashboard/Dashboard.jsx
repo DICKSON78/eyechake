@@ -1,13 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@mui/material";
 
 import Page from "../../components/Page";
 import Modal from "../../components/Modal";
-import LoadingSkeleton from "./LoadingSkeleton";
 
 import { useTheme } from "@mui/material/styles";
-import { formatError } from "../../helpers";
 
 const Dashboard = () => {
 
@@ -29,13 +26,13 @@ const Dashboard = () => {
       ]}
     >
       {/*{error ?*/}
-        {/*<Alert*/}
-          {/*sx={{ mb: 2 }}*/}
-          {/*severity="error"*/}
-        {/*>*/}
-          {/*{formatError(error)}*/}
-        {/*</Alert>*/}
-        {/*: null*/}
+      {/*<Alert*/}
+      {/*sx={{ mb: 2 }}*/}
+      {/*severity="error"*/}
+      {/*>*/}
+      {/*{formatError(error)}*/}
+      {/*</Alert>*/}
+      {/*: null*/}
       {/*}*/}
       {/*{loading && <LoadingSkeleton />}*/}
 

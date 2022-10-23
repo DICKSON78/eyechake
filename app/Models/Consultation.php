@@ -11,8 +11,13 @@ class Consultation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'payment_cache_item_id', 'chief_complaint', 'history_present_illness', 'family_history',
-        'review', 'remarks', 'created_by', 'status',
+        'payment_cache_item_id', 'consultant', 'chief_complaint', 'history_present_illness',
+        'family_history', 'patient_to_return', 'to_return_date', 'remarks', 'created_by', 'status',
+        'sent_to_optician_at', 'sent_to_optician_by', 'optician_status',
+    ];
+
+    protected $casts = [
+        'sent_to_optician_at' => 'datetime:Y-m-d H:i',
     ];
 
     public function payment_cache_item()
@@ -43,6 +48,11 @@ class Consultation extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function to_optician_sender()
+    {
+        return $this->belongsTo(User::class, 'sent_to_optician_by');
     }
 
     protected function serializeDate(DateTimeInterface $date)

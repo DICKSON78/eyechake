@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -29,7 +30,7 @@ class PatientPaymentCacheItemsController extends Controller
         $consultation_type = $request->consultation_type;
         $consultant_id = $request->consultant_id;
         $consultation_id = $request->consultation_id;
-        $data = PatientPaymentCacheItem::with(['item', 'consultation_type', 'payment_mode', 'creator']);
+        $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator']);
 
         if ($status) {
             $data->where('status', $status);
@@ -114,12 +115,28 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->status = 'Paid';
                     $item->save();
 
-                    if ($item->item->is_consultation_item == 'Yes') {
-                        Consultation::create([
-                            'payment_cache_item_id' => $item->id,
-                            'consultant_id' => $item->consultant_id,
-                            'created_by' => $user->id,
-                        ]);
+                    // if item was not created from consultation, i.e. on check-in, create consultation
+                    if (!$item->payment_cache->consultation_id) {
+                        if ($item->item->is_consultation_item == 'Yes') {
+                            Consultation::create([
+                                'payment_cache_item_id' => $item->id,
+                                'consultant_id' => $item->consultant_id,
+                                'created_by' => $user->id,
+                            ]);
+                        } else {
+                            if ($item->item->consultation_type->name == 'Glass') {
+                                Consultation::create([
+                                    'payment_cache_item_id' => $item->id,
+                                    'consultant' => 'Optician',
+                                    'consultant_id' => $item->consultant_id,
+                                    'created_by' => $user->id,
+                                    'status' => 'Consulted',
+                                    'sent_to_optician_at' => Carbon::now(),
+                                    'sent_to_optician_by' => $user->id,
+                                    'optician_status' => 'Pending',
+                                ]);
+                            }
+                        }
                     }
                 }
             }
@@ -134,6 +151,34 @@ class PatientPaymentCacheItemsController extends Controller
             'An error occurred. Payment could not be made.');
     }
 
+    public function dispense(Request $request)
+    {
+        $request->validate([
+            'payment_cache_id' => 'required|exists:patient_payment_cache,id',
+            'items' => 'required|array',
+            'items.*' => 'required|integer',
+        ]);
+
+        $data = [];
+        $user = $request->user();
+        $items = $request->json('items');
+
+        foreach ($items as &$request_item) {
+            $item = PatientPaymentCacheItem::find($request_item);
+
+            if ($item) {
+                $item->status = 'Served';
+                $item->served_by = $user->id;
+                $item->served_at = Carbon::now();
+                $item->save();
+
+                $data[] = $item;
+            }
+        }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Dispensed successfully.');
+    }
+
     /**
      * Display the specified resource.
      *
@@ -143,7 +188,7 @@ class PatientPaymentCacheItemsController extends Controller
     public function show($id)
     {
         $data = PatientPaymentCacheItem::with([
-            'payment_cache.check_in.patient', 'item', 'consultation_type', 'payment_mode', 'creator',
+            'payment_cache.check_in.patient', 'item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator',
         ])
             ->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');

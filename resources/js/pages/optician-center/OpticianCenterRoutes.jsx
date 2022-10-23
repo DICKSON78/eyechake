@@ -2,8 +2,9 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ConsultationPatients from "./ConsultationPatients";
 import ConsultationPatientRoutes from "./ConsultationPatientRoutes";
+import DispensingRoutes from "../dispensing/DispensingRoutes";
 
-const ConsultationRoomRoutes = () => {
+const OpticianCenterRoutes = () => {
   return (
     <Routes>
       <Route
@@ -12,7 +13,7 @@ const ConsultationRoomRoutes = () => {
         element={(
           <ConsultationPatients
             status="Pending"
-            title="Patients Sent to Doctor"
+            title="Patients Sent to Optician"
           />
         )}
       />
@@ -30,8 +31,12 @@ const ConsultationRoomRoutes = () => {
         path="/consultation-patients/:status/:patientId/:consultationId/*"
         element={<ConsultationPatientRoutes />}
       />
+      <Route
+        path="dispensing-requests/*"
+        element={<DispensingRoutes consultationType="Glass"/>}
+      />
     </Routes>
   );
 };
 
-export default ConsultationRoomRoutes;
+export default OpticianCenterRoutes;

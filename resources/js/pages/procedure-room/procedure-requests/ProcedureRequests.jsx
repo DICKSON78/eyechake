@@ -5,12 +5,12 @@ import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material"
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table, { PageSizeSelect } from "../../../components/Table";
 import Modal from "../../../components/Modal";
-import Filters from "../PatientFilters";
+import Filters from "../../dispensing/PatientFilters";
 
 import { useFetch } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
 
-const PendingCashPayments = () => {
+const ProcedureRequests = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -18,12 +18,12 @@ const PendingCashPayments = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending",
-    item_payment_mode_type: "Cash",
+    item_consultation_type: "Procedure",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
+    item_payment_mode_id: undefined,
     start_date: new Date(),
     end_date: undefined,
   });
@@ -40,15 +40,15 @@ const PendingCashPayments = () => {
     }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Cashier - ${window.APP_NAME}`;
+    document.title = `Procedure Requests - ${window.APP_NAME}`;
   }, []);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Payment Center" },
-        { title: "Patients Sent to Cashier" },
+        { title: "Procedure Room" },
+        { title: "Procedure Requests" },
       ]}
     >
       {error ?
@@ -62,7 +62,7 @@ const PendingCashPayments = () => {
       }
       <Card>
         <PageHeader
-          title="Patients Sent to Cashier"
+          title="Procedure Requests"
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -135,7 +135,7 @@ const PendingCashPayments = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/payment-center/pending-cash-patients/${getNonNull(item.check_in).patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/procedure-room/procedure-requests/${getNonNull(item.check_in).patient_id}/${item.id}`)}
                     >
                       Manage
                     </Button>
@@ -156,4 +156,4 @@ const PendingCashPayments = () => {
   );
 };
 
-export default PendingCashPayments;
+export default ProcedureRequests;

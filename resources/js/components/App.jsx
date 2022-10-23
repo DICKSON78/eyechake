@@ -12,6 +12,9 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
 import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
 import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomRoutes";
+import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
+import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
+import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import Users from "../pages/users/Users";
 
@@ -52,7 +55,7 @@ const App = () => {
           <Route
             path="/"
             exact
-            element={<Navigate to="/login" />}
+            element={<Navigate to="/login"/>}
           />
           <Route
             path="/"
@@ -65,7 +68,7 @@ const App = () => {
           </Route>
           <Route
             path="/"
-            element={<DefaultLayout setThemeMode={setThemeMode} setUser={setUser} />}
+            element={<DefaultLayout setThemeMode={setThemeMode} setUser={setUser}/>}
           >
             <Route
               path="dashboard"
@@ -82,6 +85,18 @@ const App = () => {
             <Route
               path="consultation-room/*"
               element={<ConsultationRoomRoutes />}
+            />
+            <Route
+              path="optician-center/*"
+              element={<OpticianCenterRoutes />}
+            />
+            <Route
+              path="medicine-center/*"
+              element={<MedicineCenterRoutes />}
+            />
+            <Route
+              path="procedure-room/*"
+              element={<ProcedureRoomRoutes />}
             />
             <Route
               path="settings/*"

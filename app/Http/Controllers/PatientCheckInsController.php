@@ -57,11 +57,11 @@ class PatientCheckInsController extends Controller
         }
 
         if ($start_date) {
-            $data->where('created_at', '>=', $start_date);
+            $data->whereDate('created_at', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->where('created_at', '<=', $end_date);
+            $data->whereDate('created_at', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');

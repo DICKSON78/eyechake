@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { Alert, Button, Card, CardContent, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect, SearchTextField } from "../../../components/Table";
+import Table, { PageSizeSelect } from "../../../components/Table";
 import Modal from "../../../components/Modal";
-import Filter from "./Filter";
+import Filters from "./Filters";
 import EditPatient from "./EditPatient";
 
 import { useFetch } from "../../../hooks";
@@ -20,7 +20,10 @@ const Patients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    q: undefined,
+    id: undefined,
+    name: undefined,
+    gender: undefined,
+    payment_mode_id: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
@@ -32,22 +35,6 @@ const Patients = () => {
   useEffect(() => {
     document.title = `Patients - ${window.APP_NAME}`;
   }, []);
-
-  const openFilterModal = () => {
-    let component = (
-      <Filter
-        params={params}
-        modal={modalRef.current}
-        onOk={(updated) => {
-          setParams(updated);
-          modalRef.current.close();
-        }}
-      />
-    );
-
-    modalRef.current.open("Filter", component);
-  };
-
 
   const openEditPatientModal = (item) => {
     let component = (
@@ -87,15 +74,6 @@ const Patients = () => {
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
-              <SearchTextField onChange={(value) => setParams({ ...params, q: value })}/>
-              <Button
-                variant="contained"
-                color="secondary"
-                disableElevation
-                onClick={openFilterModal}
-              >
-                Filter
-              </Button>
               <Button
                 variant="contained"
                 disableElevation
@@ -108,6 +86,11 @@ const Patients = () => {
         />
         <Divider />
         <CardContent>
+          <Filters
+            params={params}
+            setParams={setParams}
+            sx={{ mb: 2 }}
+          />
           <Table
             loading={loading}
             columns={[

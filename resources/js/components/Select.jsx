@@ -58,17 +58,26 @@ class Select extends React.Component {
   }
 
   render() {
-    const { containerProps, label, placeholder, required, options, optionsLabel, optionsValue, clearable, endAdornment, ...rest } = this.props;
+    const { containerProps, label, placeholder, required, horizontal, options, optionsLabel, optionsValue, clearable, endAdornment, ...rest } = this.props;
     return (
       <Box
         component="div"
+        {...(horizontal && {
+          display: "flex",
+          flexDirection: "row"
+        })}
         {...containerProps}
       >
         {label ?
           <Typography
             sx={{
-              marginLeft: "4px",
-              marginBottom: "4px",
+              ...(horizontal && {
+                marginRight: "8px",
+              }),
+              ...(!horizontal && {
+                marginLeft: "4px",
+                marginBottom: "4px",
+              }),
             }}
           >
             {label}
@@ -86,58 +95,65 @@ class Select extends React.Component {
           </Typography>
           : null
         }
-        <MuiSelect
-          ref={(ref) => this.input = ref}
-          variant="outlined"
-          size="small"
-          margin="none"
-          displayEmpty
-          {...rest}
-          required={required}
-          error={!!this.state.error}
-          onChange={(event) => this._onChange(event.target.value, true)}
-          renderValue={
-            !this.state.value ? () => (
-              <Typography sx={{ opacity: 0.42 }}>
-                {placeholder || "Select..."}
-              </Typography>
-            ) : undefined
-          }
-          IconComponent={ArrowDropDownIcon}
-          endAdornment={
-            clearable && this.state.value ? (
-              <InputAdornment
-                position="end"
-                sx={{ cursor: "pointer", mr: 2 }}
-                onClick={() => this._onChange(undefined, true)}
-              >
-                <CloseIcon fontSize="small"/>
-              </InputAdornment>
-            ) : endAdornment
-          }
+        <Box
+          component="div"
+          {...(horizontal && {
+            flexGrow: 1,
+          })}
         >
-          {options.map(e => (
-            <MenuItem
-              key={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
-              value={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
-            >
-              {typeof e === "string" || typeof e === "number" ? e : e[optionsLabel]}
-            </MenuItem>
-          ))}
-        </MuiSelect>
-        {this.state.error ?
-          <Typography
-            variant="body2"
-            sx={{
-              color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
-              marginLeft: "4px",
-              marginTop: "2px",
-            }}
+          <MuiSelect
+            ref={(ref) => this.input = ref}
+            variant="outlined"
+            size="small"
+            margin="none"
+            displayEmpty
+            {...rest}
+            required={required}
+            error={!!this.state.error}
+            onChange={(event) => this._onChange(event.target.value, true)}
+            renderValue={
+              !this.state.value ? () => (
+                <Typography sx={{ opacity: 0.42 }}>
+                  {placeholder || "Select..."}
+                </Typography>
+              ) : undefined
+            }
+            IconComponent={ArrowDropDownIcon}
+            endAdornment={
+              clearable && this.state.value ? (
+                <InputAdornment
+                  position="end"
+                  sx={{ cursor: "pointer", mr: 2 }}
+                  onClick={() => this._onChange(undefined, true)}
+                >
+                  <CloseIcon fontSize="small"/>
+                </InputAdornment>
+              ) : endAdornment
+            }
           >
-            {this.state.error}
-          </Typography>
-          : null
-        }
+            {options.map(e => (
+              <MenuItem
+                key={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
+                value={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
+              >
+                {typeof e === "string" || typeof e === "number" ? e : e[optionsLabel]}
+              </MenuItem>
+            ))}
+          </MuiSelect>
+          {this.state.error ?
+            <Typography
+              variant="body2"
+              sx={{
+                color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
+                marginLeft: "4px",
+                marginTop: "2px",
+              }}
+            >
+              {this.state.error}
+            </Typography>
+            : null
+          }
+        </Box>
       </Box>
     );
   }

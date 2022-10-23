@@ -50,7 +50,7 @@ class Patient extends Model
 
     public function scopeFullName($query, $value)
     {
-        return $query->whereRaw('concat(first_name, middle_name, last_name) like ?', [str_replace(' ', '', $value)]);
+        return $query->whereRaw('concat(first_name, coalesce(middle_name, ""), last_name) like ?', [str_replace(' ', '', $value)]);
     }
 
     protected function serializeDate(DateTimeInterface $date)

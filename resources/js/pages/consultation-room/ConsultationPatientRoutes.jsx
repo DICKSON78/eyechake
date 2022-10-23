@@ -9,7 +9,7 @@ import PatientDetails from "../reception/patients/PatientDetails";
 import ClinicalNotes from "./clinical-notes/ClinicalNotes";
 import useFetch from "../../hooks/useFetch";
 
-const PatientRoutes = () => {
+const ConsultationPatientRoutes = () => {
 
   const navigate = useNavigate();
   const { status, patientId, consultationId } = useParams();
@@ -51,7 +51,7 @@ const PatientRoutes = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ||  loadingConsultation ?
+      {loadingPatient || loadingConsultation ?
         <Skeleton
           variant="rounded"
           height={256}
@@ -79,4 +79,4 @@ const PatientRoutes = () => {
   );
 };
 
-export default PatientRoutes;
+export default ConsultationPatientRoutes;

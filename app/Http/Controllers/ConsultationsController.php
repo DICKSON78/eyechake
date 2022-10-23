@@ -11,6 +11,7 @@ use App\Models\ConsultationVisualAcuity;
 use App\Models\Item;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -28,7 +29,9 @@ class ConsultationsController extends Controller
     {
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
+        $optician_status = $request->optician_status;
         $payment_cache_item_id = $request->payment_cache_item_id;
+        $consultant = $request->consultant;
         $consultant_id = $request->consultant_id;
         $patient_id = $request->patient_id;
         $patient_name = $request->patient_name;
@@ -43,14 +46,22 @@ class ConsultationsController extends Controller
             }]);
 
             $query->with(['payment_mode', 'consultant']);
-        }, 'creator']);
+        }, 'creator', 'to_optician_sender']);
 
         if ($status) {
             $data->where('status', $status);
         }
 
+        if ($optician_status) {
+            $data->where('optician_status', $optician_status);
+        }
+
         if ($payment_cache_item_id) {
             $data->where('payment_cache_item_id', $payment_cache_item_id);
+        }
+
+        if ($consultant) {
+            $data->where('consultant', $consultant);
         }
 
         if ($consultant_id) {
@@ -90,11 +101,11 @@ class ConsultationsController extends Controller
         }
 
         if ($start_date) {
-            $data->where('created_at', '>=', $start_date);
+            $data->whereDate('created_at', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->where('created_at', '<=', $end_date);
+            $data->whereDate('created_at', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');
@@ -184,7 +195,7 @@ class ConsultationsController extends Controller
             }]);
 
             $query->with(['payment_mode', 'consultant']);
-        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy'])
+        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy', 'to_optician_sender'])
             ->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -199,6 +210,8 @@ class ConsultationsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
+            'patient_to_return' => 'nullable|in:Yes,No',
+            'to_return_date' => 'nullable|date_format:Y-m-d',
             'status' => 'nullable|in:Pending,Consulted'
         ]);
 
@@ -218,6 +231,10 @@ class ConsultationsController extends Controller
 
         switch ($request->what) {
             case 'Consultation': {
+                $request->validate([
+                    'patient_to_return' => 'nullable|in:Yes,No',
+                    'to_return_date' => 'nullable|date_format:Y-m-d',
+                ]);
                 $data->update($request->except('what'));
             }
                 break;
@@ -265,6 +282,31 @@ class ConsultationsController extends Controller
                 }
             }
                 break;
+        }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
+    }
+
+    public function completeClinicalNotes(Request $request, $id)
+    {
+        $request->validate([
+            'patient_to_return' => 'nullable|in:Yes,No',
+            'to_return_date' => 'nullable|date_format:Y-m-d',
+            'send_to_optician' => 'nullable|in:Yes,No'
+        ]);
+
+        $user = $request->user();
+        $data = Consultation::findOrFail($id);
+        $input = $request->only('patient_to_return', 'to_return_date');
+        $input['status'] = 'Consulted';
+        $data->update($input);
+
+        if ($request->send_to_optician == 'Yes') {
+            $data->update([
+                'sent_to_optician_at' => Carbon::now(),
+                'sent_to_optician_by' => $user->id,
+                'optician_status' => 'Pending',
+            ]);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

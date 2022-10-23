@@ -6,7 +6,9 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
   Divider,
+  FormControlLabel,
   Grid,
   LinearProgress,
   Paper,
@@ -18,6 +20,7 @@ import { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import DatePicker from "../../../components/DatePicker";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import DiagnosisCard from "./DiagnosisCard";
 import SelectDiagnoses from "./SelectDiagnoses";
@@ -29,12 +32,11 @@ import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
 
 import { useFetch, usePatch } from "../../../hooks";
-import { formatError, getValidationError } from "../../../helpers";
+import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
     <Paper
-      square
       sx={{
         bgcolor: "info.main",
         my: 2,
@@ -63,7 +65,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const chiefComplaintRef = useRef();
   const historyPresentIllnessRef = useRef();
   const familyHistoryRef = useRef();
-  const reviewRef = useRef();
+  const patientToReturnDateRef = useRef();
   const remarksRef = useRef();
 
   const [data, setData] = useState();
@@ -88,8 +90,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
     consultation_id: consultation.id,
   }, false, [], (response) => response.data.data.data);
 
+  const [patientToReturn, setPatientToReturn] = useState(consultation.patient_to_return);
+  const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
+  const [remarks, setRemarks] = useState(consultation.remarks);
+
   const { handlePatch: handleAutoSave } = usePatch();
-  const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch(`api/consultations/${consultation.id}`, { status: "Consulted" });
+  const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
 
   useEffect(() => {
     document.title = `Clinical Notes - ${window.APP_NAME}`;
@@ -153,7 +159,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     modalRef.current.open(title, component, "lg");
   };
 
-  const confirmComplete = () => {
+  const confirmComplete = (title, payload) => {
     setData(null);
     setError(null);
 
@@ -167,19 +173,24 @@ const ClinicalNotes = ({ patient, consultation }) => {
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
-          handleComplete();
+          handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
+            patient_to_return: patientToReturn,
+            to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : null,
+            remarks,
+            ...(payload || {})
+          });
         }}
       />
     );
 
-    modalRef.current.open("Confirm Complete", component, "sm");
+    modalRef.current.open(title, component, "sm");
   };
 
   const handleFeedback = () => {
     if (data || error) {
       return (
         <Alert
-          sx={{ mt: 1 }}
+          sx={{ mt: 2 }}
           severity={error ? "error" : "success"}
         >
           {error ? formatError(error) : data ? data.message : null}
@@ -318,7 +329,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             >
               <Grid
                 item
-                md={4}
+                md={6}
                 sm={12}
                 xs={12}
               >
@@ -333,7 +344,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Grid>
               <Grid
                 item
-                md={4}
+                md={6}
                 sm={12}
                 xs={12}
               >
@@ -348,13 +359,28 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Grid>
               <Grid
                 item
-                md={4}
+                md={6}
                 sm={12}
                 xs={12}
               >
                 <ConsultationItemsCard
                   title="Glass"
                   consultationType="Glass"
+                  loading={loadingItems}
+                  items={items}
+                  consultation={consultation}
+                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                />
+              </Grid>
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <ConsultationItemsCard
+                  title="Others"
+                  consultationType="Others"
                   loading={loadingItems}
                   items={items}
                   consultation={consultation}
@@ -374,17 +400,41 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 sm={12}
                 xs={12}
               >
-                <TextField
-                  ref={reviewRef}
-                  disabled={consultation.status === "Consulted"}
-                  fullWidth
-                  label="Review"
-                  multiline
-                  rows={3}
-                  horizontal
-                  defaultValue={consultation.review}
-                  onChange={(value) => autoSave("review", value)}
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      disabled={consultation.status === "Consulted"}
+                      checked={patientToReturn === "Yes"}
+                      onChange={(event) => setPatientToReturn(event.target.checked ? "Yes" : "No")}
+                    />
+                  )}
+                  label="Patient to Return"
                 />
+              </Grid>
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                {patientToReturn === "Yes" ?
+                  <DatePicker
+                    ref={patientToReturnDateRef}
+                    disabled={consultation.status === "Consulted"}
+                    fullWidth
+                    label="Return Date"
+                    horizontal
+                    type={consultation.status === "Consulted" ? "text" : "date"}
+                    required={patientToReturn === "Yes"}
+                    value={patientToReturnDate}
+                    onChange={(value) => {
+                      if (!isNaN(value)) {
+                        setPatientToReturnDate(value);
+                      }
+                    }}
+                  />
+                  : null
+                }
               </Grid>
               <Grid
                 item
@@ -396,12 +446,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   ref={remarksRef}
                   disabled={consultation.status === "Consulted"}
                   fullWidth
-                  label="Remarks"
+                  placeholder="Type remarks..."
                   multiline
                   rows={3}
                   horizontal
-                  defaultValue={consultation.remarks}
-                  onChange={(value) => autoSave("remarks", value)}
+                  defaultValue={remarks}
+                  onChange={(value) => setRemarks(value)}
                 />
               </Grid>
             </Grid>
@@ -424,10 +474,19 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Button
                 disabled={loadingComplete}
                 variant="contained"
+                color="secondary"
                 disableElevation
-                onClick={confirmComplete}
+                onClick={() => confirmComplete("Confirm Send to Optician", { send_to_optician: "Yes" })}
               >
-                Complete Consultation
+                Save & Send to Optician
+              </Button>
+              <Button
+                disabled={loadingComplete}
+                variant="contained"
+                disableElevation
+                onClick={() => confirmComplete("Confirm Save")}
+              >
+                Save & Complete Consultation
               </Button>
             </Stack>
           </React.Fragment>

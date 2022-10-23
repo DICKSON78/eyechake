@@ -53,7 +53,13 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         id: "5",
         title: "Patients Sent to Cashier",
         icon: <WaitingIcon />,
-        to: "/payment-center/pending-cash-payments",
+        to: "/payment-center/pending-cash-patients",
+      },
+      {
+        id: "6",
+        title: "Credit Patients Approval",
+        icon: <WaitingIcon />,
+        to: "/payment-center/pending-credit-patients",
       },
       {
         id: "7",
@@ -71,6 +77,51 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         title: "Consulted Patients",
         icon: <DoneIcon />,
         to: "/consultation-room/consultation-patients/consulted",
+      },
+      {
+        id: "70",
+        title: "OPTICIAN CENTER",
+        show: !!drawerOpen,
+      },
+      {
+        id: "80",
+        title: "Patients Sent to Optician",
+        icon: <WaitingIcon />,
+        to: "/optician-center/consultation-patients/pending",
+      },
+      {
+        id: "90",
+        title: "Consulted Patients",
+        icon: <DoneIcon />,
+        to: "/optician-center/consultation-patients/consulted",
+      },
+      {
+        id: "801",
+        title: "Dispensing Requests",
+        icon: <WaitingIcon />,
+        to: "/optician-center/dispensing-requests",
+      },
+      {
+        id: "25",
+        title: "MEDICINE CENTER",
+        show: !!drawerOpen,
+      },
+      {
+        id: "810",
+        title: "Dispensing Requests",
+        icon: <WaitingIcon />,
+        to: "/medicine-center/dispensing-requests",
+      },
+      {
+        id: "257",
+        title: "PROCEDURE ROOM",
+        show: !!drawerOpen,
+      },
+      {
+        id: "819",
+        title: "Procedure Requests",
+        icon: <WaitingIcon />,
+        to: "/procedure-room/procedure-requests",
       },
       {
         id: "15",

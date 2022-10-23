@@ -53,10 +53,10 @@ const PendingPatientItems = () => {
     status: "Pending",
     per_page: 500,
     payment_cache_id: paymentCacheId,
-    payment_mode_type: "Cash"
+    payment_mode_type: "Credit"
   }, false, [], (response) => response.data.data.data);
 
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/make-cash-payment", {
+  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/make-credit-payment", {
     payment_cache_id: paymentCacheId,
     items: selectedItems.map((e) => e.id),
     discount,
@@ -135,7 +135,7 @@ const PendingPatientItems = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Payment Center" },
-        { title: "Sent to Cashier" },
+        { title: "Credit Patients Approval" },
         { title: patientId },
       ]}
     >

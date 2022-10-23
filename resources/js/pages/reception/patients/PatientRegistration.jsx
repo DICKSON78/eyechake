@@ -74,7 +74,7 @@ const PatientRegistration = () => {
 
   const { data, loading, error, handlePost } = usePost("api/patients", {
     ...formData,
-    date_of_birth: (formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null)
+    date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
   });
 
   useEffect(() => {
@@ -185,7 +185,7 @@ const PatientRegistration = () => {
     >
       {handleFeedback()}
       <Card>
-        <PageHeader title="Patient Registration" />
+        <PageHeader title="Patient Registration"/>
         <Divider />
         {loading && <LinearProgress />}
         <CardContent>
@@ -262,7 +262,7 @@ const PatientRegistration = () => {
                   label="Date of Birth"
                   fullWidth
                   value={formData.date_of_birth}
-                  onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
+                  onChange={(value) => setFormData({ ...formData, date_of_birth: !isNaN(value) ? value : null })}
                 />
               </Grid>
               <Grid

@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
-import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
-import Modal from "../../../components/Modal";
-import Filter from "./Filter";
+import Page, { Header as PageHeader } from "../../components/Page";
+import Table, { PageSizeSelect } from "../../components/Table";
+import Modal from "../../components/Modal";
+import Filters from "./PatientFilters";
 
-import { useFetch } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { useFetch } from "../../hooks";
+import { formatDateForDb, formatError, getNonNull } from "../../helpers";
 
 const PendingConsultationPatients = ({ status, title }) => {
 
@@ -18,18 +18,23 @@ const PendingConsultationPatients = ({ status, title }) => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    consultant: "Doctor",
     consultant_id: window.user.id,
-    status: undefined,
+    status,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: undefined,
-    start_date: undefined,
+    start_date: new Date(),
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/consultations", params, true, {
+  const { data, loading, error, handleFetch } = useFetch("api/consultations", {
+    ...params,
+    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+  }, true, {
     data: [],
     total: 0,
     page: 1,
@@ -42,21 +47,6 @@ const PendingConsultationPatients = ({ status, title }) => {
   useEffect(() => {
     setParams({ ...params, status });
   }, [status]);
-
-  const openFilterModal = () => {
-    let component = (
-      <Filter
-        params={params}
-        modal={modalRef.current}
-        onOk={(updated) => {
-          setParams(updated);
-          modalRef.current.close();
-        }}
-      />
-    );
-
-    modalRef.current.open("Filter", component);
-  };
 
   return (
     <Page
@@ -84,19 +74,16 @@ const PendingConsultationPatients = ({ status, title }) => {
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
-              <Button
-                variant="contained"
-                color="secondary"
-                disableElevation
-                onClick={openFilterModal}
-              >
-                Filter
-              </Button>
             </React.Fragment>
           }
         />
         <Divider />
         <CardContent>
+          <Filters
+            params={params}
+            setParams={setParams}
+            sx={{ mb: 2 }}
+          />
           <Table
             loading={loading}
             columns={[

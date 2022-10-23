@@ -27,8 +27,8 @@ const validationRules = getValidationRules();
 
 const SelectItems = ({ consultation, selected: initial, consultationType, fetchItems: fetchConsultationItems, modal }) => {
 
-  const paymentModeRef = useState();
-  const consultantRef = useState();
+  const paymentModeRef = useRef();
+  const consultantRef = useRef();
   const itemRef = useRef();
   const quantityRef = useRef();
   const dosageRef = useRef();

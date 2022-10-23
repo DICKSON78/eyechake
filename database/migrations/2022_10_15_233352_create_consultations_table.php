@@ -16,14 +16,19 @@ return new class extends Migration
         Schema::create('consultations', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('payment_cache_item_id')->unsigned();
+            $table->enum('consultant', ['Doctor', 'Optician'])->default('Doctor');
             $table->text('chief_complaint')->nullable();
             $table->text('history_present_illness')->nullable();
             $table->text('family_history')->nullable();
-            $table->text('review')->nullable();
+            $table->enum('patient_to_return', ['Yes', 'No'])->default('No');
+            $table->date('to_return_date')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->enum('status', ['Pending', 'Consulted'])->default('Pending');
+            $table->dateTime('sent_to_optician_at')->nullable();
+            $table->bigInteger('sent_to_optician_by')->unsigned()->nullable();
+            $table->enum('optician_status', ['Pending', 'Consulted'])->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('payment_cache_item_id')
@@ -32,6 +37,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreign('sent_to_optician_by')
                 ->references('id')
                 ->on('users')
                 ->cascadeOnUpdate()

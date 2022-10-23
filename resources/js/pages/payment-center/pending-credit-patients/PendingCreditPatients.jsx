@@ -10,7 +10,7 @@ import Filters from "../PatientFilters";
 import { useFetch } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
 
-const PendingCashPayments = () => {
+const PendingCreditPayments = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -19,7 +19,7 @@ const PendingCashPayments = () => {
     page: 1,
     per_page: 25,
     item_status: "Pending",
-    item_payment_mode_type: "Cash",
+    item_payment_mode_type: "Credit",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -40,7 +40,7 @@ const PendingCashPayments = () => {
     }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Cashier - ${window.APP_NAME}`;
+    document.title = `Credit Patients Approval - ${window.APP_NAME}`;
   }, []);
 
   return (
@@ -48,7 +48,7 @@ const PendingCashPayments = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Payment Center" },
-        { title: "Patients Sent to Cashier" },
+        { title: "Credit Patients Approval" },
       ]}
     >
       {error ?
@@ -62,7 +62,7 @@ const PendingCashPayments = () => {
       }
       <Card>
         <PageHeader
-          title="Patients Sent to Cashier"
+          title="Credit Patients Approval"
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -135,7 +135,7 @@ const PendingCashPayments = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/payment-center/pending-cash-patients/${getNonNull(item.check_in).patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/payment-center/pending-credit-patients/${getNonNull(item.check_in).patient_id}/${item.id}`)}
                     >
                       Manage
                     </Button>
@@ -156,4 +156,4 @@ const PendingCashPayments = () => {
   );
 };
 
-export default PendingCashPayments;
+export default PendingCreditPayments;

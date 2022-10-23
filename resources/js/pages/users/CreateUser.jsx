@@ -10,7 +10,7 @@ import {
   InputAdornment,
   LinearProgress
 } from "@mui/material";
-import { VisibilityOff as VisibilityOffIcon, Visibility as VisibilityIcon } from "@mui/icons-material";
+import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";

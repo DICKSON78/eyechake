@@ -155,13 +155,13 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
   );
 };
 
-const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, onCheck, footerItems }) => {
+const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems }) => {
 
   columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
+  checked = checked || [];
 
   const [state, setState] = useState({
     items,
-    selected: [],
     ...(initialState || {})
   });
 
@@ -171,6 +171,22 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
 
   const getNumberOfPages = () => {
     return Math.ceil(itemCount / pageSize);
+  };
+
+  const getCheckableItems = () => {
+    if (typeof checkboxSelection === "function") {
+      return state.items.filter((item, index) => checkboxSelection(item, index));
+    }
+
+    return state.items;
+  };
+
+  const isItemCheckable = (item, index) => {
+    if (typeof checkboxSelection === "function") {
+      return checkboxSelection(item, index);
+    }
+
+    return true;
   };
 
   return (
@@ -184,13 +200,12 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                 sx={{ width: 64 }}
               >
                 <Checkbox
-                  checked={state.items.length > 0 && state.selected.length === state.items.length}
+                  checked={getCheckableItems().length > 0 && checked.length === getCheckableItems().length}
                   onChange={(event) => {
-                    const selected = event.target.checked ? state.items : [];
-                    setState({ ...state, selected });
+                    const checked1 = event.target.checked ? getCheckableItems() : [];
 
-                    if (typeof onCheck === "function") {
-                      onCheck(selected);
+                    if (typeof setChecked === "function") {
+                      setChecked(checked1);
                     }
                   }}
                 />
@@ -229,18 +244,18 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
               {state.items.map((item, index, array) => (
                 <TableRow
                   key={index}
-                  selected={state.selected.indexOf(item) !== -1}
+                  selected={checked.indexOf(item) !== -1}
                 >
                   {checkboxSelection ?
                     <TableCell component="th">
                       <Checkbox
-                        checked={state.selected.indexOf(item) !== -1}
+                        disabled={!isItemCheckable(item, index)}
+                        checked={checked.indexOf(item) !== -1}
                         onChange={(event) => {
-                          const selected = event.target.checked ? [...state.selected, item] : state.selected.filter((e, i) => i !== state.selected.indexOf(item));
-                          setState({ ...state, selected });
+                          const checked1 = event.target.checked ? [...checked, item] : checked.filter((e, i) => i !== checked.indexOf(item));
 
-                          if (typeof onCheck === "function") {
-                            onCheck(selected);
+                          if (typeof setChecked === "function") {
+                            setChecked(checked1);
                           }
                         }}
                       />

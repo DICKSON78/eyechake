@@ -62,8 +62,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
     $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
     $router->post('/patient-payment-cache-items/make-cash-payment', [PatientPaymentCacheItemsController::class, 'makeCashPayment']);
+    $router->post('/patient-payment-cache-items/dispense', [PatientPaymentCacheItemsController::class, 'dispense']);
     $router->apiResource('/consultations', ConsultationsController::class);
     $router->post('/consultations/add-item', [ConsultationsController::class, 'addItem']);
     $router->patch('/consultations/{id}/auto-save-clinical-notes', [ConsultationsController::class, 'autoSaveClinicalNotes']);
+    $router->patch('/consultations/{id}/complete-clinical-notes', [ConsultationsController::class, 'completeClinicalNotes']);
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
 });
