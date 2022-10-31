@@ -19,11 +19,7 @@ const usePatch = (uri, payload = null) => {
     setLoading(true);
     setError(null);
 
-    const headers = {
-      "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
-    };
-
-    window.axios.patch("/" + uri, payload, { headers })
+    window.axios.patch("/" + uri, payload)
       .then((response) => {
         setData(response.data);
         setLoading(false);

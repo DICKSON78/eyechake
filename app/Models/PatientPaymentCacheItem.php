@@ -13,7 +13,11 @@ class PatientPaymentCacheItem extends Model
     protected $fillable = [
         'payment_cache_id', 'item_id', 'consultation_type_id', 'consultant_id', 'payment_mode_id',
         'unit_price', 'quantity', 'item_payment_id', 'bill_id', 'created_by', 'dosage', 'comments', 'status',
-        'served_by', 'served_at',
+        'served_at', 'served_by',
+    ];
+
+    protected $casts = [
+        'served_at' => 'datetime:Y-m-d H:i',
     ];
 
     public function payment_cache()

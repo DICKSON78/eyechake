@@ -62,6 +62,18 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         to: "/payment-center/pending-credit-patients",
       },
       {
+        id: "66",
+        title: "Pending Patient Bills",
+        icon: <WaitingIcon />,
+        to: "/payment-center/patient-bills/pending",
+      },
+      {
+        id: "67",
+        title: "Cleared Patient Bills",
+        icon: <WaitingIcon />,
+        to: "/payment-center/patient-bills/cleared",
+      },
+      {
         id: "7",
         title: "CONSULTATION ROOM",
         show: !!drawerOpen,
@@ -122,6 +134,17 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         title: "Procedure Requests",
         icon: <WaitingIcon />,
         to: "/procedure-room/procedure-requests",
+      },
+      {
+        id: "2597",
+        title: "INVENTORY MANAGEMENT",
+        show: !!drawerOpen,
+      },
+      {
+        id: "8019",
+        title: "Stocktaking",
+        icon: <ItemsIcon />,
+        to: "/inventory/stocktaking",
       },
       {
         id: "15",

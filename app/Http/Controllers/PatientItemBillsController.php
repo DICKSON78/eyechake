@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Item;
-use App\Models\PatientCheckIn;
-use App\Models\PatientPaymentCache;
-use App\Models\PatientPaymentCacheItem;
+use App\Models\PatientItemBill;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class PatientPaymentCacheController extends Controller
+class PatientItemBillsController extends Controller
 {
     use ApiResponse;
 
@@ -23,64 +21,40 @@ class PatientPaymentCacheController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 25;
+        $status = $request->status;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
         $patient_gender = $request->patient_gender;
         $patient_phone = $request->patient_phone;
-        $item_status = $request->item_status;
-        $item_payment_mode_id = $request->item_payment_mode_id;
-        $item_payment_mode_type = $request->item_payment_mode_type;
-        $item_consultation_type = $request->item_consultation_type;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        $data = PatientItemBill::with(['first_item', 'creator'])->whereHas('first_item');
 
-        $data = PatientPaymentCache::with(['check_in.patient', 'check_in.payment_mode', 'creator']);
+        if ($status) {
+            $data->where('status', $status);
+        }
 
         if ($patient_name) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_name) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
                 $query->fullName('%' . $patient_name . '%');
             });
         }
 
         if ($patient_id) {
-            $data->whereHas('check_in', function ($query) use ($patient_id) {
+            $data->whereHas('items.payment_cache.check_in', function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);
             });
         }
 
         if ($patient_gender) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_gender) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
                 $query->where('gender', $patient_gender);
             });
         }
 
         if ($patient_phone) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_phone) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
                 $query->where('phone', 'like', '%' . $patient_phone . '%');
-            });
-        }
-
-        if ($item_status) {
-            $data->whereHas('items', function ($query) use ($item_status) {
-                $query->where('status', $item_status);
-            });
-        }
-
-        if ($item_payment_mode_id) {
-            $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_id) {
-                $query->where('id', $item_payment_mode_id);
-            });
-        }
-
-        if ($item_payment_mode_type) {
-            $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_type) {
-                $query->where('payment_type', $item_payment_mode_type);
-            });
-        }
-
-        if ($item_consultation_type) {
-            $data->whereHas('items.consultation_type', function ($query) use ($item_consultation_type) {
-                $query->where('name', $item_consultation_type);
             });
         }
 
@@ -116,7 +90,7 @@ class PatientPaymentCacheController extends Controller
      */
     public function show($id)
     {
-        $data = PatientPaymentCache::with(['check_in.patient', 'items', 'creator'])->findOrFail($id);
+        $data = PatientItemBill::with(['creator', 'clearer'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -129,7 +103,21 @@ class PatientPaymentCacheController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = PatientItemBill::findOrFail($id);
+        $data->update($request->only('discount'));
+        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
+    }
+
+    public function clear(Request $request, $id)
+    {
+
+        $data = PatientItemBill::findOrFail($id);
+        $data->update([
+            'status' => 'Cleared',
+            'cleared_at' => Carbon::now(),
+            'cleared_by' => $request->user()->id,
+        ]);
+        return $this->sendResponse($data, Response::HTTP_OK, 'Cleared successfully.');
     }
 
     /**

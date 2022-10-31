@@ -12,14 +12,7 @@ import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../../hooks";
-import {
-  formatError,
-  getNonNull,
-  getValidationError,
-  getValidationRules,
-  numberFormat,
-  validateInteger
-} from "../../../helpers";
+import { formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -84,7 +77,7 @@ const PendingPatientItems = () => {
     }
   }, [data]);
 
-  const confirmSubmitMakePayment = (title) => {
+  const confirmSubmit = (title, action) => {
     if (!selectedItems.length) {
       return setError(getValidationError("Please select at least one item."));
     }
@@ -99,7 +92,15 @@ const PendingPatientItems = () => {
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
-          handlePost();
+          if (action === "create_bill") {
+            handlePost("api/patient-payment-cache-items/create-bill", {
+              payment_cache_id: paymentCacheId,
+              items: selectedItems.map((e) => e.id),
+              discount,
+            });
+          } else {
+            handlePost();
+          }
         }}
       />
     );
@@ -169,12 +170,12 @@ const PendingPatientItems = () => {
                 {
                   field: "item_id",
                   headerName: "Item Name",
-                  valueGetter: (item, index) => getNonNull(item.item).name,
+                  valueGetter: (item, index) => item.item.name,
                 },
                 {
                   field: "payment_mode_id",
                   headerName: "Payment Mode",
-                  valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                  valueGetter: (item, index) => item.payment_mode.name,
                 },
                 {
                   field: "unit_price",
@@ -227,7 +228,7 @@ const PendingPatientItems = () => {
                   fullWidth
                   rules={[
                     validationRules.optionalInteger,
-                    (value) => value <= getSelectedAmount() || "Discount cannot be greater than total selected amount."
+                    (value) => !value ? true : (value <= getSelectedAmount() || "Discount cannot be greater than total selected amount.")
                   ]}
                   onChange={(value) => {
                     value = validateInteger(value);
@@ -259,7 +260,6 @@ const PendingPatientItems = () => {
                   ref={paymentChannelRef}
                   label="Payment Channel"
                   fullWidth
-                  required
                   options={paymentChannels}
                   optionsLabel="name"
                   optionsValue="id"
@@ -283,7 +283,7 @@ const PendingPatientItems = () => {
             <Button
               disabled={loading}
               variant="contained"
-              color="secondary"
+              color="purple"
               disableElevation
               onClick={() => console.log(true)}
             >
@@ -292,8 +292,17 @@ const PendingPatientItems = () => {
             <Button
               disabled={loading}
               variant="contained"
+              color="secondary"
               disableElevation
-              onClick={() => confirmSubmitMakePayment("Make Payment")}
+              onClick={() => confirmSubmit("Create Bill", "create_bill")}
+            >
+              Create Bill
+            </Button>
+            <Button
+              disabled={loading}
+              variant="contained"
+              disableElevation
+              onClick={() => confirmSubmit("Make Payment", "make_payment")}
             >
               Make Payment
             </Button>

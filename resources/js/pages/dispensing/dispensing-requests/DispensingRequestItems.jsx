@@ -7,10 +7,12 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
+import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../../hooks";
 import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
+import usePatch from "../../../hooks/usePatch";
 
 const DispensingRequestItems = ({ consultationType }) => {
 
@@ -35,6 +37,7 @@ const DispensingRequestItems = ({ consultationType }) => {
     consultation_type: consultationType
   }, false, [], (response) => response.data.data.data);
 
+  const { handlePatch: handleAutoSave } = usePatch();
   const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/dispense", {
     payment_cache_id: paymentCacheId,
     items: selectedItems.map((e) => e.id),
@@ -56,6 +59,14 @@ const DispensingRequestItems = ({ consultationType }) => {
       setSelectedItems([]);
     }
   }, [data]);
+
+  const autoSave = (item, field, value) => {
+    if (value !== item[field]) {
+      handleAutoSave(`api/patient-payment-cache-items/${item.id}`, {
+        [field]: value
+      });
+    }
+  };
 
   const confirmSubmitDispense = (title) => {
     if (!selectedItems.length) {
@@ -160,17 +171,17 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "item_id",
                   headerName: "Item Name",
-                  valueGetter: (item, index) => getNonNull(item.item).name,
+                  valueGetter: (item, index) => item.item.name,
                 },
                 {
-                  field: "item_id",
+                  field: "unit_of_measure_id",
                   headerName: "UoM",
-                  valueGetter: (item, index) => getNonNull(getNonNull(item.item.unit_of_measure)).name,
+                  valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
                 },
                 {
                   field: "payment_mode_id",
                   headerName: "Payment Mode",
-                  valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                  valueGetter: (item, index) => item.payment_mode.name,
                 },
                 {
                   field: "unit_price",
@@ -190,11 +201,37 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "dosage",
                   headerName: "Dosage",
+                  renderCell: (item, index) => (
+                    <TextField
+                      disabled={item.status === "Served"}
+                      fullWidth
+                      defaultValue={item.dosage}
+                      onChange={(value) => {
+                        let tmp = items;
+                        tmp[index] = { ...item, dosage: value };
+                        setItems(tmp);
+                        autoSave(item, "dosage", value);
+                      }}
+                    />
+                  ),
                   show: consultationType === "Pharmacy",
                 },
                 {
                   field: "comments",
                   headerName: "Comments",
+                  renderCell: (item, index) => (
+                    <TextField
+                      disabled={item.status === "Served"}
+                      fullWidth
+                      defaultValue={item.comments}
+                      onChange={(value) => {
+                        let tmp = items;
+                        tmp[index] = { ...item, comments: value };
+                        setItems(tmp);
+                        autoSave(item, "comments", value);
+                      }}
+                    />
+                  ),
                 },
                 {
                   field: "status",

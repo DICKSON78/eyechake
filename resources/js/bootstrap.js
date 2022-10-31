@@ -13,6 +13,11 @@ import axios from "axios";
 window.axios = axios;
 
 window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+window.axios.interceptors.request.use((config) => {
+    config.headers.Authorization = `Bearer ${localStorage.getItem("api_token") || null}`;
+    return config;
+  }
+);
 window.axios.interceptors.response.use(response => {
   return response;
 }, error => {

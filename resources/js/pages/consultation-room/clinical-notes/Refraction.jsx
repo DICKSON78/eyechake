@@ -30,7 +30,7 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
-    if (value && (!refraction || (refraction && value !== refraction[field]))) {
+    if (!refraction || (refraction && value !== refraction[field])) {
       handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Refraction", [field]: value });
     }
   };

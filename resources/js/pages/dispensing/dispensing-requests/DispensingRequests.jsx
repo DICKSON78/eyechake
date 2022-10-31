@@ -90,27 +90,27 @@ const DispensingRequests = ({ consultationType }) => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.full_name,
+                valueGetter: (item, index) => item.check_in.patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient_id,
+                valueGetter: (item, index) => item.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Date of Birth",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.date_of_birth,
+                valueGetter: (item, index) => item.check_in.patient.date_of_birth,
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.gender,
+                valueGetter: (item, index) => item.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => getNonNull(item.check_in).patient.phone,
+                valueGetter: (item, index) => item.check_in.patient.phone,
               },
               {
                 field: "created_by",
@@ -135,7 +135,7 @@ const DispensingRequests = ({ consultationType }) => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/${consultationType === "Glass" ? "optician" : "medicine"}-center/dispensing-requests/${getNonNull(item.check_in).patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/${consultationType === "Glass" ? "optician" : "medicine"}-center/dispensing-requests/${item.check_in.patient_id}/${item.id}`)}
                     >
                       Manage
                     </Button>

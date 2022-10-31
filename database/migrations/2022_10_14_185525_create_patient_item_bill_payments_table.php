@@ -13,15 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('patient_item_payments', function (Blueprint $table) {
+        Schema::create('patient_item_bill_payments', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('bill_id')->unsigned();
             $table->bigInteger('channel_id')->unsigned()->nullable();
             $table->double('amount')->unsigned();
-            $table->double('discount')->unsigned()->default(0);
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();
 
+            $table->foreign('bill_id')
+                ->references('id')
+                ->on('patient_item_bills')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->foreign('channel_id')
                 ->references('id')
                 ->on('payment_channels')
@@ -42,6 +47,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('patient_item_payments');
+        Schema::dropIfExists('patient_item_bill_payments');
     }
 };

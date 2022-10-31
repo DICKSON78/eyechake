@@ -4,6 +4,8 @@ import PendingCashPayments from "./pending-cash-patients/PendingCashPatients";
 import PendingCashPatientItems from "./pending-cash-patients/PendingPatientItems";
 import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatients";
 import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
+import PatientBills from "./patient-bills/PatientBills";
+import PatientBill from "./patient-bills/PatientBill";
 
 const PaymentCenterRoutes = () => {
   return (
@@ -25,6 +27,15 @@ const PaymentCenterRoutes = () => {
       <Route
         path="/pending-credit-patients/:patientId/:paymentCacheId"
         element={<PendingCreditPatientItems />}
+      />
+      <Route
+        path="/patient-bills/:status"
+        exact
+        element={<PatientBills />}
+      />
+      <Route
+        path="/patient-bills/:status/:patientId/:billId"
+        element={<PatientBill />}
       />
     </Routes>
   );

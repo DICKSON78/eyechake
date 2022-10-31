@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
@@ -8,19 +8,21 @@ import Modal from "../../components/Modal";
 import Filters from "./PatientFilters";
 
 import { useFetch } from "../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../helpers";
+import { capitalize, formatDateForDb, formatError, getNonNull } from "../../helpers";
 
-const PendingConsultationPatients = ({ status, title }) => {
+const PendingConsultationPatients = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
+
+  const { status } = useParams();
 
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
     consultant: "Doctor",
     consultant_id: window.user.id,
-    status,
+    status: capitalize(status),
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -41,19 +43,28 @@ const PendingConsultationPatients = ({ status, title }) => {
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Doctor - ${window.APP_NAME}`;
+    document.title = `${getTitle()} - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
-    setParams({ ...params, status });
+    setParams({ ...params, status: capitalize(status) });
   }, [status]);
+
+  const getTitle = () => {
+    if (status === "pending") {
+      return "Patients Sent to Doctor";
+    }
+    if (status === "consulted") {
+      return "Consulted Patients";
+    }
+  };
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
         { title: "Consultation Room" },
-        { title: title },
+        { title: getTitle() },
       ]}
     >
       {error ?
@@ -67,7 +78,7 @@ const PendingConsultationPatients = ({ status, title }) => {
       }
       <Card>
         <PageHeader
-          title={title}
+          title={getTitle()}
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -95,27 +106,27 @@ const PendingConsultationPatients = ({ status, title }) => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.full_name,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Date of Birth",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.date_of_birth,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.date_of_birth,
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.gender,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.phone,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "created_by",
@@ -147,9 +158,9 @@ const PendingConsultationPatients = ({ status, title }) => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/consultation-room/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/consultation-room/consultation-patients/${(status || "pending")}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >
-                      {status === "Pending" ? "Manage" : "View"}
+                      {status === "pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),

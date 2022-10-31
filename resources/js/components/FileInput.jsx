@@ -71,7 +71,7 @@ class FileInput extends React.Component {
             {required ?
               <Typography
                 component="span"
-                color={(theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark}
+                color={(theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main}
                 fontWeight="bold"
                 ml="2px"
               >
@@ -102,7 +102,7 @@ class FileInput extends React.Component {
             <Typography
               variant="body2"
               sx={{
-                color: (theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark,
+                color: (theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main,
                 marginLeft: "4px",
                 marginTop: "2px",
               }}

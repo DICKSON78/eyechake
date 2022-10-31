@@ -17,7 +17,7 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
-    if (value && (!visual_acuity || (visual_acuity && value !== visual_acuity[field]))) {
+    if (!visual_acuity || (visual_acuity && value !== visual_acuity[field])) {
       handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Visual Acuity", [field]: value });
     }
   };

@@ -13,11 +13,7 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
     setLoading(true);
     setError(null);
 
-    const headers = {
-      "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
-    };
-
-    window.axios.get("/" + uri, { params, headers })
+    window.axios.get("/" + uri, { params })
       .then((response) => {
         if (!ignore.current) {
           setData(callback ? callback(response) : response.data);

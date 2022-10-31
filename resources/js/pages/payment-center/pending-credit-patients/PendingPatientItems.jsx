@@ -7,21 +7,11 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
-import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../../hooks";
-import {
-  formatError,
-  getNonNull,
-  getValidationError,
-  getValidationRules,
-  numberFormat,
-  validateInteger
-} from "../../../helpers";
-
-const validationRules = getValidationRules();
+import { formatError, getValidationError, numberFormat } from "../../../helpers";
 
 const PendingPatientItems = () => {
 
@@ -34,13 +24,6 @@ const PendingPatientItems = () => {
 
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
-  const [discount, setDiscount] = useState();
-  const [paymentChannel, setPaymentChannel] = useState();
-
-  const { data: paymentChannels, handleFetch: fetchPaymentChannels } = useFetch("api/payment-channels", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
 
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -56,11 +39,9 @@ const PendingPatientItems = () => {
     payment_mode_type: "Credit"
   }, false, [], (response) => response.data.data.data);
 
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/make-credit-payment", {
+  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/approve-credit-payment", {
     payment_cache_id: paymentCacheId,
     items: selectedItems.map((e) => e.id),
-    discount,
-    payment_channel_id: paymentChannel ? paymentChannel.id : null,
   });
 
   useEffect(() => {
@@ -70,7 +51,6 @@ const PendingPatientItems = () => {
   useEffect(() => {
     if (patient) {
       fetchItems();
-      fetchPaymentChannels();
     }
   }, [patient]);
 
@@ -79,18 +59,12 @@ const PendingPatientItems = () => {
       fetchItems();
 
       setSelectedItems([]);
-      discountRef.current.setValue(null);
-      paymentChannelRef.current.setValue(null);
     }
   }, [data]);
 
-  const confirmSubmitMakePayment = (title) => {
+  const confirmSubmitApprove = () => {
     if (!selectedItems.length) {
       return setError(getValidationError("Please select at least one item."));
-    }
-
-    if (!discountRef.current.validate() || !paymentChannelRef.current.validate()) {
-      return false;
     }
 
     let component = (
@@ -104,7 +78,7 @@ const PendingPatientItems = () => {
       />
     );
 
-    modalRef.current.open(title, component, "sm");
+    modalRef.current.open("Approve Items", component, "sm");
   };
 
   const handleFeedback = () => {
@@ -169,12 +143,12 @@ const PendingPatientItems = () => {
                 {
                   field: "item_id",
                   headerName: "Item Name",
-                  valueGetter: (item, index) => getNonNull(item.item).name,
+                  valueGetter: (item, index) => item.item.name,
                 },
                 {
                   field: "payment_mode_id",
                   headerName: "Payment Mode",
-                  valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                  valueGetter: (item, index) => item.payment_mode.name,
                 },
                 {
                   field: "unit_price",
@@ -222,49 +196,10 @@ const PendingPatientItems = () => {
                 xs={12}
               >
                 <TextField
-                  ref={discountRef}
-                  label="Discount"
-                  fullWidth
-                  rules={[
-                    validationRules.optionalInteger,
-                    (value) => value <= getSelectedAmount() || "Discount cannot be greater than total selected amount."
-                  ]}
-                  onChange={(value) => {
-                    value = validateInteger(value);
-                    setDiscount(value);
-                  }}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={4}
-                xs={12}
-              >
-                <TextField
                   disabled
                   label="Selected Grand Total"
                   fullWidth
-                  value={numberFormat(getSelectedAmount() - (discount || 0))}
-                />
-              </Grid>
-
-              <Grid
-                item
-                md={4}
-                sm={4}
-                xs={12}
-              >
-                <Select
-                  ref={paymentChannelRef}
-                  label="Payment Channel"
-                  fullWidth
-                  required
-                  options={paymentChannels}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  value={paymentChannels.length ? (paymentChannel ? paymentChannel.id : "") : ""}
-                  onChange={(value) => setPaymentChannel(paymentChannels.find((e) => e.id === value))}
+                  value={numberFormat(getSelectedAmount())}
                 />
               </Grid>
             </Grid>
@@ -293,9 +228,9 @@ const PendingPatientItems = () => {
               disabled={loading}
               variant="contained"
               disableElevation
-              onClick={() => confirmSubmitMakePayment("Make Payment")}
+              onClick={() => confirmSubmitApprove()}
             >
-              Make Payment
+              Approve Items
             </Button>
           </Stack>
         </Card>

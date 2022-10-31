@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
+use App\Models\PatientItemBill;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
@@ -30,6 +31,7 @@ class PatientPaymentCacheItemsController extends Controller
         $consultation_type = $request->consultation_type;
         $consultant_id = $request->consultant_id;
         $consultation_id = $request->consultation_id;
+        $bill_id = $request->bill_id;
         $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator']);
 
         if ($status) {
@@ -64,6 +66,10 @@ class PatientPaymentCacheItemsController extends Controller
             $data->whereHas('payment_cache', function ($query) use ($consultation_id) {
                 $query->where('consultation_id', $consultation_id);
             });
+        }
+
+        if ($bill_id) {
+            $data->where('bill_id', $bill_id);
         }
 
         $data->orderBy('created_at', 'asc');
@@ -151,7 +157,124 @@ class PatientPaymentCacheItemsController extends Controller
             'An error occurred. Payment could not be made.');
     }
 
-    public function dispense(Request $request)
+    public function approveCreditPayment(Request $request)
+    {
+        $request->validate([
+            'payment_cache_id' => 'required|exists:patient_payment_cache,id',
+            'items' => 'required|array',
+            'items.*' => 'required|integer',
+        ]);
+
+        $user = $request->user();
+        $amount = 0;
+        $items = $request->json('items');
+
+        foreach ($items as &$request_item) {
+            $item = PatientPaymentCacheItem::find($request_item);
+
+            if ($item) {
+                $amount += ($item->unit_price * $item->quantity);
+
+                $item->status = 'Paid';
+                $item->save();
+
+                // if item was not created from consultation, i.e. on check-in, create consultation
+                if (!$item->payment_cache->consultation_id) {
+                    if ($item->item->is_consultation_item == 'Yes') {
+                        Consultation::create([
+                            'payment_cache_item_id' => $item->id,
+                            'consultant_id' => $item->consultant_id,
+                            'created_by' => $user->id,
+                        ]);
+                    } else {
+                        if ($item->item->consultation_type->name == 'Glass') {
+                            Consultation::create([
+                                'payment_cache_item_id' => $item->id,
+                                'consultant' => 'Optician',
+                                'consultant_id' => $item->consultant_id,
+                                'created_by' => $user->id,
+                                'status' => 'Consulted',
+                                'sent_to_optician_at' => Carbon::now(),
+                                'sent_to_optician_by' => $user->id,
+                                'optician_status' => 'Pending',
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->sendResponse($items, Response::HTTP_OK, 'Approved successfully.');
+    }
+
+    public function createBill(Request $request)
+    {
+        $request->validate([
+            'payment_cache_id' => 'required|exists:patient_payment_cache,id',
+            'items' => 'required|array',
+            'items.*' => 'required|integer',
+            'discount' => 'nullable|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+        $amount = 0;
+
+        $bill = PatientItemBill::create([
+            'amount' => 0,
+            'discount' => $request->discount ?? 0,
+            'created_by' => $user->id,
+        ]);
+
+        if ($bill) {
+            $items = $request->json('items');
+
+            foreach ($items as &$request_item) {
+                $item = PatientPaymentCacheItem::find($request_item);
+
+                if ($item) {
+                    $amount += ($item->unit_price * $item->quantity);
+
+                    $item->bill_id = $bill->id;
+                    $item->status = 'Billed';
+                    $item->save();
+
+                    // if item was not created from consultation, i.e. on check-in, create consultation
+                    if (!$item->payment_cache->consultation_id) {
+                        if ($item->item->is_consultation_item == 'Yes') {
+                            Consultation::create([
+                                'payment_cache_item_id' => $item->id,
+                                'consultant_id' => $item->consultant_id,
+                                'created_by' => $user->id,
+                            ]);
+                        } else {
+                            if ($item->item->consultation_type->name == 'Glass') {
+                                Consultation::create([
+                                    'payment_cache_item_id' => $item->id,
+                                    'consultant' => 'Optician',
+                                    'consultant_id' => $item->consultant_id,
+                                    'created_by' => $user->id,
+                                    'status' => 'Consulted',
+                                    'sent_to_optician_at' => Carbon::now(),
+                                    'sent_to_optician_by' => $user->id,
+                                    'optician_status' => 'Pending',
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $bill->amount = $amount;
+            $bill->save();
+
+            return $this->sendResponse($bill, Response::HTTP_OK, 'Bill created successfully.');
+        }
+
+        return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR,
+            'An error occurred. Bill could not be created.');
+    }
+
+    private function updateStatus(Request $request, $status, $message)
     {
         $request->validate([
             'payment_cache_id' => 'required|exists:patient_payment_cache,id',
@@ -167,7 +290,7 @@ class PatientPaymentCacheItemsController extends Controller
             $item = PatientPaymentCacheItem::find($request_item);
 
             if ($item) {
-                $item->status = 'Served';
+                $item->status = $status;
                 $item->served_by = $user->id;
                 $item->served_at = Carbon::now();
                 $item->save();
@@ -176,7 +299,17 @@ class PatientPaymentCacheItemsController extends Controller
             }
         }
 
-        return $this->sendResponse($data, Response::HTTP_OK, 'Dispensed successfully.');
+        return $this->sendResponse($data, Response::HTTP_OK, $message);
+    }
+
+    public function dispense(Request $request)
+    {
+        return $this->updateStatus($request, 'Served', 'Dispensed successfully.');
+    }
+
+    public function complete(Request $request)
+    {
+        return $this->updateStatus($request, 'Served', 'Completed successfully.');
     }
 
     /**
@@ -203,7 +336,9 @@ class PatientPaymentCacheItemsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = PatientPaymentCacheItem::findOrFail($id);
+        $data->update($request->only('comments', 'dosage'));
+        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
     /**

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
@@ -8,18 +8,19 @@ import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
+import { capitalize, formatDateForDb, formatError, getNonNull } from "../../../helpers";
 
-const PendingCashPatients = () => {
+const PatientBills = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
 
+  const { status } = useParams();
+
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending",
-    item_payment_mode_type: "Cash",
+    status: capitalize(status),
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -28,7 +29,7 @@ const PendingCashPatients = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patient-payment-cache",
+  const { data, loading, error, handleFetch } = useFetch("api/patient-item-bills",
     {
       ...params,
       start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
@@ -40,15 +41,19 @@ const PendingCashPatients = () => {
     }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Cashier - ${window.APP_NAME}`;
+    document.title = `${capitalize(status)} Patient Bills - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    setParams({ ...params, status: capitalize(status) });
+  }, [status]);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
         { title: "Payment Center" },
-        { title: "Patients Sent to Cashier" },
+        { title: `${capitalize(status)} Patient Bills` },
       ]}
     >
       {error ?
@@ -62,7 +67,7 @@ const PendingCashPatients = () => {
       }
       <Card>
         <PageHeader
-          title="Patients Sent to Cashier"
+          title={`${capitalize(status)} Patient Bills`}
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -90,27 +95,27 @@ const PendingCashPatients = () => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => item.check_in.patient.full_name,
+                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => item.check_in.patient_id,
+                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Date of Birth",
-                valueGetter: (item, index) => item.check_in.patient.date_of_birth,
+                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.date_of_birth,
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => item.check_in.patient.gender,
+                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => item.check_in.patient.phone,
+                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "created_by",
@@ -135,9 +140,9 @@ const PendingCashPatients = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/payment-center/pending-cash-patients/${item.check_in.patient_id}/${item.id}`)}
+                      onClick={() => navigate(`/payment-center/patient-bills/${status}/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`)}
                     >
-                      Manage
+                      {status === "pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),
@@ -156,4 +161,4 @@ const PendingCashPatients = () => {
   );
 };
 
-export default PendingCashPatients;
+export default PatientBills;

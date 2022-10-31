@@ -7,24 +7,9 @@ const ConsultationRoomRoutes = () => {
   return (
     <Routes>
       <Route
-        path="/consultation-patients/pending"
+        path="/consultation-patients/:status"
         exact
-        element={(
-          <ConsultationPatients
-            status="Pending"
-            title="Patients Sent to Doctor"
-          />
-        )}
-      />
-      <Route
-        path="/consultation-patients/consulted"
-        exact
-        element={(
-          <ConsultationPatients
-            status="Consulted"
-            title="Consulted Patients"
-          />
-        )}
+        element={<ConsultationPatients />}
       />
       <Route
         path="/consultation-patients/:status/:patientId/:consultationId/*"

@@ -12,7 +12,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
-    if (value && (!fundoscopy || (fundoscopy && value !== fundoscopy[field]))) {
+    if (!fundoscopy || (fundoscopy && value !== fundoscopy[field])) {
       handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Fundoscopy", [field]: value });
     }
   };

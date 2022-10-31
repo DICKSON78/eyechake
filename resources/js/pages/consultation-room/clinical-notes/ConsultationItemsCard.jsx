@@ -3,8 +3,6 @@ import React from "react";
 import { Button, Card, CardContent, CardHeader, Chip, Divider } from "@mui/material";
 import Table from "../../../components/Table";
 
-import { getNonNull } from "../../../helpers";
-
 const ConsultationItemsCard = ({ title, consultationType, loading, items, consultation, onClickAdd }) => {
 
   const getStatusColor = (status) => {
@@ -58,7 +56,7 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
             {
               field: "item_name",
               headerName: "Item Name",
-              valueGetter: (item, index) => getNonNull(item.item).name,
+              valueGetter: (item, index) => item.item.name,
             },
             {
               field: "dosage",

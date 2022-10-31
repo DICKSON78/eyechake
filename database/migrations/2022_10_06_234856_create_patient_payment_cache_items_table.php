@@ -29,8 +29,8 @@ return new class extends Migration
             $table->text('dosage')->nullable();
             $table->text('comments')->nullable();
             $table->enum('status', ['Pending', 'Paid', 'Billed', 'Served'])->default('Pending');
-            $table->bigInteger('served_by')->unsigned()->nullable();
             $table->dateTime('served_at')->nullable();
+            $table->bigInteger('served_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('payment_cache_id')

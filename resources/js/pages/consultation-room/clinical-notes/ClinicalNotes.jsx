@@ -123,7 +123,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   }, [errorComplete]);
 
   const autoSave = (field, value) => {
-    if (value && value !== consultation[field]) {
+    if (value !== consultation[field]) {
       handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
         what: "Consultation",
         [field]: value

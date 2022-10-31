@@ -7,10 +7,12 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
+import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../../hooks";
-import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
+import { formatError, getValidationError, numberFormat } from "../../../helpers";
+import usePatch from "../../../hooks/usePatch";
 
 const ProcedureRequestItems = () => {
 
@@ -35,7 +37,8 @@ const ProcedureRequestItems = () => {
     consultation_type: "Procedure"
   }, false, [], (response) => response.data.data.data);
 
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/dispense", {
+  const { handlePatch: handleAutoSave } = usePatch();
+  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/complete", {
     payment_cache_id: paymentCacheId,
     items: selectedItems.map((e) => e.id),
   });
@@ -57,9 +60,17 @@ const ProcedureRequestItems = () => {
     }
   }, [data]);
 
-  const confirmSubmitDispense = (title) => {
+  const autoSave = (item, field, value) => {
+    if (value !== item[field]) {
+      handleAutoSave(`api/patient-payment-cache-items/${item.id}`, {
+        [field]: value
+      });
+    }
+  };
+
+  const confirmSubmitComplete = (title) => {
     if (!selectedItems.length) {
-      return setError(getValidationError("Please select at least one item."));
+      return setError(getValidationError("Please select at least one procedure."));
     }
 
     let component = (
@@ -158,12 +169,12 @@ const ProcedureRequestItems = () => {
                 {
                   field: "item_id",
                   headerName: "Item Name",
-                  valueGetter: (item, index) => getNonNull(item.item).name,
+                  valueGetter: (item, index) => item.item.name,
                 },
                 {
                   field: "payment_mode_id",
                   headerName: "Payment Mode",
-                  valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                  valueGetter: (item, index) => item.payment_mode.name,
                 },
                 {
                   field: "unit_price",
@@ -183,6 +194,19 @@ const ProcedureRequestItems = () => {
                 {
                   field: "comments",
                   headerName: "Comments",
+                  renderCell: (item, index) => (
+                    <TextField
+                      disabled={item.status === "Served"}
+                      fullWidth
+                      defaultValue={item.comments}
+                      onChange={(value) => {
+                        let tmp = items;
+                        tmp[index] = { ...item, comments: value };
+                        setItems(tmp);
+                        autoSave(item, "comments", value);
+                      }}
+                    />
+                  ),
                 },
                 {
                   field: "status",
@@ -229,9 +253,9 @@ const ProcedureRequestItems = () => {
               disabled={loading}
               variant="contained"
               disableElevation
-              onClick={() => confirmSubmitDispense("Dispense Items")}
+              onClick={() => confirmSubmitComplete("Complete Procedures")}
             >
-              Dispense Items
+              Complete Procedures
             </Button>
           </Stack>
         </Card>

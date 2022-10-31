@@ -19,7 +19,7 @@ const FormLabelControl = ({ containerProps, label, required, children }) => {
           {required ?
             <Box
               component="span"
-              color={(theme) => theme.palette.mode === "light" ? theme.palette.error.light : theme.palette.error.dark}
+              color={(theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main}
               ml="2px"
             >
               *

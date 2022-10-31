@@ -15,11 +15,7 @@ const useDelete = (uri = null) => {
     setLoading(true);
     setError(null);
 
-    const headers = {
-      "Authorization": `Bearer ${window.localStorage.getItem("api_token")}`
-    };
-
-    window.axios.delete("/" + uri, { headers })
+    window.axios.delete("/" + uri)
       .then((response) => {
         setData(response.data);
         setLoading(false);
