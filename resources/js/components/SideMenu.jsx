@@ -114,6 +114,32 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         to: "/optician-center/reports-requests",
       },
       {
+        id: "801197",
+        title: "Reports",
+        icon: <ItemsIcon />,
+        to: "/optician-center/reports",
+        items: [
+          {
+            id: "916.1",
+            title: "Items Dispensed Report",
+            icon: <LinkIcon />,
+            to: "/items-dispensed",
+          },
+          {
+            id: "916.81",
+            title: "Items Not Dispensed Report",
+            icon: <LinkIcon />,
+            to: "/items-not-dispensed",
+          },
+          {
+            id: "976.199",
+            title: "Item Balance Report",
+            icon: <LinkIcon />,
+            to: "/item-balance",
+          },
+        ],
+      },
+      {
         id: "25",
         title: "MEDICINE CENTER",
         show: !!drawerOpen,
@@ -125,6 +151,32 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         to: "/medicine-center/reports-requests",
       },
       {
+        id: "80119",
+        title: "Reports",
+        icon: <ItemsIcon />,
+        to: "/medicine-center/reports",
+        items: [
+          {
+            id: "91.1",
+            title: "Medicines Dispensed Report",
+            icon: <LinkIcon />,
+            to: "/medicines-dispensed",
+          },
+          {
+            id: "91.81",
+            title: "Medicines Not Dispensed Report",
+            icon: <LinkIcon />,
+            to: "/medicines-not-dispensed",
+          },
+          {
+            id: "97.199",
+            title: "Item Balance Report",
+            icon: <LinkIcon />,
+            to: "/item-balance",
+          },
+        ],
+      },
+      {
         id: "257",
         title: "PROCEDURE ROOM",
         show: !!drawerOpen,
@@ -134,6 +186,26 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         title: "Procedure Requests",
         icon: <WaitingIcon />,
         to: "/procedure-room/procedure-requests",
+      },
+      {
+        id: "8011979",
+        title: "Reports",
+        icon: <ItemsIcon />,
+        to: "/procedure-room/reports",
+        items: [
+          {
+            id: "9169.1",
+            title: "Served Procedures Report",
+            icon: <LinkIcon />,
+            to: "/served-procedures",
+          },
+          {
+            id: "9169.81",
+            title: "Pending Procedures Report",
+            icon: <LinkIcon />,
+            to: "/pending-procedures",
+          },
+        ],
       },
       {
         id: "2597",

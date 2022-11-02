@@ -95,17 +95,15 @@ const PDFReportDocument = ({ title, subtitle, orientation, columns, items }) => 
         </View>
 
         <Footer
-          style={styles.text}
-          render={({ pageNumber, totalPages }) =>
-            `${pageNumber} / ${totalPages}`
-          }
+          textStyle={styles.text}
+          render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
         />
       </Page>
     </Document>
   );
 };
 
-const PDFReport = ({ title, items, ...rest }) => {
+const PDFReport = ({ title, columns, items, ...rest }) => {
   const [loading, setLoading] = useState(false);
 
   const generatePdfDocument = useCallback(async () => {
@@ -113,6 +111,7 @@ const PDFReport = ({ title, items, ...rest }) => {
     const blob = await pdf(
       <PDFReportDocument
         title={title}
+        columns={columns}
         items={items}
         {...rest}
       />
@@ -120,7 +119,7 @@ const PDFReport = ({ title, items, ...rest }) => {
     setLoading(false);
     const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank");
-  }, [items]);
+  }, [title, columns, items]);
 
   return (
     <Button

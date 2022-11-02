@@ -237,7 +237,6 @@ const Default = ({ setThemeMode, setUser }) => {
               display: { xs: "none", sm: "none", md: "block" },
               width: drawerWidth,
               flexShrink: 0,
-              whiteSpace: "nowrap",
               boxSizing: "border-box",
               ...(isDrawerOpen && {
                 ...drawerOpenedMixin(theme),

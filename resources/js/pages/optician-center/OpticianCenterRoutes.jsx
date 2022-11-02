@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import ConsultationPatients from "./ConsultationPatients";
 import ConsultationPatientRoutes from "./ConsultationPatientRoutes";
 import DispensingRoutes from "../dispensing/DispensingRoutes";
+import ReportsRoutes from "./ReportsRoutes";
 
 const OpticianCenterRoutes = () => {
   return (
@@ -34,6 +35,10 @@ const OpticianCenterRoutes = () => {
       <Route
         path="dispensing-requests/*"
         element={<DispensingRoutes consultationType="Glass"/>}
+      />
+      <Route
+        path="reports/*"
+        element={<ReportsRoutes />}
       />
     </Routes>
   );

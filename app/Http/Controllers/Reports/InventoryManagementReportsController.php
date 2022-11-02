@@ -7,7 +7,6 @@ use App\Http\Traits\ApiResponse;
 use App\Models\PatientPaymentCacheItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
 
 class InventoryManagementReportsController extends Controller
 {
@@ -21,15 +20,13 @@ class InventoryManagementReportsController extends Controller
         $consultation_type = $request->consultation_type;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $data = PatientPaymentCacheItem::with(['item.unit_of_measure'])
-            ->where('status', 'Served');
+        $data = PatientPaymentCacheItem::with(['item.unit_of_measure'])->where('status', 'Served');
 
         if ($q) {
             $data->whereHas('item', function ($query) use ($q) {
                 $query->where('name', 'like', '%' . $q . '%');
                 $query->orWhere('code', 'like', '%' . $q . '%');
             });
-
         }
 
         if ($payment_mode_id) {
@@ -54,9 +51,8 @@ class InventoryManagementReportsController extends Controller
         $data->orderBy('created_at', 'desc');
         $data->groupBy('item_id');
         $data->selectRaw('item_id, sum(quantity) as quantity_dispensed, sum(unit_price * quantity) as dispensed_value');
-        Log::debug($data->toSql());
+
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
-
 }

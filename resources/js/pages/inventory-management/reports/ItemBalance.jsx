@@ -6,9 +6,10 @@ import { SearchTextField } from "../../../components/Table";
 
 import { getNonNull, numberFormat } from "../../../helpers";
 
-const ItemBalance = () => {
+const ItemBalance = ({ module, consultationType }) => {
 
   const [params, setParams] = useState({
+    consultation_type: consultationType,
     status: "Active",
     is_stock_item: "Yes",
     q: undefined,
@@ -18,11 +19,15 @@ const ItemBalance = () => {
     document.title = `Item Balance Report - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    setParams({ ...params, consultation_type: consultationType });
+  }, [consultationType]);
+
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Inventory Management" },
+        { title: module || "Inventory Management" },
         { title: "Reports" },
         { title: "Item Balance" },
       ]}
@@ -58,6 +63,7 @@ const ItemBalance = () => {
             field: "consultation_type_id",
             headerName: "Consultation Type",
             valueGetter: (item, index) => getNonNull(item.consultation_type).name,
+            show: !module,
           },
           {
             field: "unit_of_measure_id",

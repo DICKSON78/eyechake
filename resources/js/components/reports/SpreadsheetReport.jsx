@@ -1,10 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { utils, writeFile } from "xlsx";
 import { Button } from "@mui/material";
 
 const SpreadsheetReport = ({ title, format, columns, items }) => {
+  const [loading, setLoading] = useState(false);
 
   const generate = useCallback(() => {
+    setLoading(true);
+
     // Flatten objects
     const rows = items.map(
       (r) => {
@@ -30,16 +33,18 @@ const SpreadsheetReport = ({ title, format, columns, items }) => {
 
     /* Create a file */
     writeFile(workbook, `${title}.${format}`);
-  }, [title, format, columns, items]);
+    setLoading(false);
+  }, [format, title, columns, items]);
 
   return (
     <Button
+      disabled={loading}
       variant="contained"
       color="info"
       disableElevation
       onClick={generate}
     >
-      {format === "csv" ? "CSV" : "Excel"}
+      {loading ? "Generating Document..." : format === "csv" ? "CSV" : "Excel"}
     </Button>
   );
 };

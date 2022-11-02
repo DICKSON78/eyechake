@@ -25,6 +25,7 @@ class PatientPaymentCacheItemsController extends Controller
     {
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
+        $q = $request->q;
         $payment_cache_id = $request->payment_cache_id;
         $payment_mode_id = $request->payment_mode_id;
         $payment_mode_type = $request->payment_mode_type;
@@ -32,10 +33,35 @@ class PatientPaymentCacheItemsController extends Controller
         $consultant_id = $request->consultant_id;
         $consultation_id = $request->consultation_id;
         $bill_id = $request->bill_id;
+        $with_patient = $request->with_patient;
+        $patient_name = $request->patient_name;
+        $patient_id = $request->patient_id;
+        $patient_gender = $request->patient_gender;
+        $patient_phone = $request->patient_phone;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $sort_direction = $request->sort_direction ?? 'asc';
+
+        $request->validate([
+            'sort_direction' => 'nullable|in:asc,desc',
+        ]);
+
         $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator']);
 
         if ($status) {
-            $data->where('status', $status);
+            $statuses = explode(',', $status);
+            if (count($statuses) > 1) {
+                $data->whereIn('status', $statuses);
+            } else {
+                $data->where('status', $statuses[0]);
+            }
+        }
+
+        if ($q) {
+            $data->whereHas('item', function ($query) use ($q) {
+                $query->where('name', 'like', '%' . $q . '%');
+                $query->orWhere('code', 'like', '%' . $q . '%');
+            });
         }
 
         if ($payment_cache_id) {
@@ -72,7 +98,43 @@ class PatientPaymentCacheItemsController extends Controller
             $data->where('bill_id', $bill_id);
         }
 
-        $data->orderBy('created_at', 'asc');
+        if ($with_patient) {
+            $data->with(['payment_cache.check_in.patient']);
+        }
+
+        if ($patient_name) {
+            $data->whereHas('payment_cache.check_in.patient', function ($query) use ($patient_name) {
+                $query->fullName('%' . $patient_name . '%');
+            });
+        }
+
+        if ($patient_id) {
+            $data->whereHas('payment_cache.check_in', function ($query) use ($patient_id) {
+                $query->where('patient_id', $patient_id);
+            });
+        }
+
+        if ($patient_gender) {
+            $data->whereHas('payment_cache.check_in.patient', function ($query) use ($patient_gender) {
+                $query->where('gender', $patient_gender);
+            });
+        }
+
+        if ($patient_phone) {
+            $data->whereHas('payment_cache.check_in.patient', function ($query) use ($patient_phone) {
+                $query->where('phone', 'like', '%' . $patient_phone . '%');
+            });
+        }
+
+        if ($start_date) {
+            $data->whereDate('created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $data->whereDate('created_at', '<=', $end_date);
+        }
+
+        $data->orderBy('created_at', $sort_direction);
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -295,7 +357,7 @@ class PatientPaymentCacheItemsController extends Controller
                 $item->served_at = Carbon::now();
                 $item->save();
 
-                if ($status == 'Served') {
+                if ($status == 'Served' && $item->item->is_stock_item == 'Yes') {
                     $item->item->balance -= $item->quantity;
                     $item->item->save();
                 }
