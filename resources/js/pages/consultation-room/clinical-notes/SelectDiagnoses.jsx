@@ -30,7 +30,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
 
   const { data: diseases, loading: loadingDiseases } = useFetch("api/diseases", {
     status: "Active",
-    per_page: 500,
+    per_page: 50000,
     q: diseaseName
   }, true, [], (response) => response.data.data.data);
 

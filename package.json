@@ -1,27 +1,29 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "dependencies": {
-        "@emotion/react": "^11.10.0",
-        "@emotion/styled": "^11.10.0",
-        "@mui/icons-material": "^5.8.4",
-        "@mui/material": "^5.9.2",
-        "@mui/x-date-pickers": "^5.0.0-beta.6",
-        "chart.js": "^3.5.1",
-        "date-fns": "^2.29.2",
-        "moment": "^2.29.4",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-router-dom": "^6.3.0"
-    },
-    "devDependencies": {
-        "axios": "^0.27",
-        "laravel-vite-plugin": "^0.6.0",
-        "lodash": "^4.17.19",
-        "postcss": "^8.1.14",
-        "vite": "^3.0.0"
-    }
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.9.2",
+    "@mui/x-date-pickers": "^5.0.0-beta.6",
+    "@react-pdf/renderer": "^3.0.0",
+    "chart.js": "^3.5.1",
+    "date-fns": "^2.29.2",
+    "moment": "^2.29.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.9/xlsx-0.18.9.tgz"
+  },
+  "devDependencies": {
+    "axios": "^0.27",
+    "laravel-vite-plugin": "^0.6.0",
+    "lodash": "^4.17.19",
+    "postcss": "^8.1.14",
+    "vite": "^3.0.0"
+  }
 }

@@ -13,12 +13,14 @@ use App\Http\Controllers\LensTypesController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
 use App\Http\Controllers\PatientItemBillsController;
-use App\Http\Controllers\PatientPaymentCacheItemsController;
 use App\Http\Controllers\PatientPaymentCacheController;
+use App\Http\Controllers\PatientPaymentCacheItemsController;
 use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\RegionsController;
+use App\Http\Controllers\Reports\InventoryManagementReportsController;
+use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
@@ -59,21 +61,37 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/districts', DistrictsController::class);
     $router->apiResource('/wards', WardsController::class);
     $router->apiResource('/diseases', DiseasesController::class);
+
     $router->apiResource('/patients', PatientsController::class);
     $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
+
     $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
     $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
-    $router->post('/patient-payment-cache-items/make-cash-payment', [PatientPaymentCacheItemsController::class, 'makeCashPayment']);
-    $router->post('/patient-payment-cache-items/approve-credit-payment', [PatientPaymentCacheItemsController::class, 'approveCreditPayment']);
-    $router->post('/patient-payment-cache-items/create-bill', [PatientPaymentCacheItemsController::class, 'createBill']);
-    $router->post('/patient-payment-cache-items/dispense', [PatientPaymentCacheItemsController::class, 'dispense']);
-    $router->post('/patient-payment-cache-items/complete', [PatientPaymentCacheItemsController::class, 'complete']);
+    $router->controller(PatientPaymentCacheItemsController::class)->prefix('patient-payment-cache-items')->group(function ($router) {
+        $router->post('/make-cash-payment', 'makeCashPayment');
+        $router->post('/approve-credit-payment', 'approveCreditPayment');
+        $router->post('/create-bill', 'createBill');
+        $router->post('/dispense', 'dispense');
+        $router->post('/complete', 'complete');
+    });
+
     $router->apiResource('/patient-item-bills', PatientItemBillsController::class);
     $router->patch('/patient-item-bills/{id}/clear', [PatientItemBillsController::class, 'clear']);
     $router->apiResource('/patient-item-bill-payments', PatientItemBillPaymentsController::class);
+
     $router->apiResource('/consultations', ConsultationsController::class);
-    $router->post('/consultations/add-item', [ConsultationsController::class, 'addItem']);
-    $router->patch('/consultations/{id}/auto-save-clinical-notes', [ConsultationsController::class, 'autoSaveClinicalNotes']);
-    $router->patch('/consultations/{id}/complete-clinical-notes', [ConsultationsController::class, 'completeClinicalNotes']);
+    $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
+        $router->post('/add-item', 'addItem');
+        $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
+        $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
+    });
+
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
+    $router->apiResource('/stocktakes', StocktakesController::class);
+
+    $router->prefix('reports')->group(function ($router) {
+        $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
+            $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');
+        });
+    });
 });

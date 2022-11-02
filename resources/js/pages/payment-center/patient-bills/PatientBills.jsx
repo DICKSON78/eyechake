@@ -119,7 +119,7 @@ const PatientBills = () => {
               },
               {
                 field: "created_by",
-                headerName: "Sent By",
+                headerName: "Created By",
                 valueGetter: (item, index) => getNonNull(item.creator).full_name,
               },
               {

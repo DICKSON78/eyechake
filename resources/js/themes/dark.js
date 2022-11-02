@@ -44,7 +44,7 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"Poppins"',
+      "Custom",
       "sans-serif",
     ].join(","),
     fontSize: 12,

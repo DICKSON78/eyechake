@@ -54,6 +54,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     unit_of_measure_id: undefined,
     lens_type_id: undefined,
     is_consultation_item: "No",
+    is_stock_item: "No",
   });
 
   const { data, loading, error, handlePost } = usePost("api/items", formData);
@@ -220,6 +221,25 @@ const CreateItem = ({ modal, fetchItems }) => {
                   />
                 )}
                 label="Consultation Item"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={formData.is_stock_item === "Yes"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      is_stock_item: event.target.checked ? "Yes" : "No"
+                    })}
+                  />
+                )}
+                label="Stock Item"
               />
             </Grid>
           </Grid>

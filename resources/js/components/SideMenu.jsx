@@ -111,7 +111,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         id: "801",
         title: "Dispensing Requests",
         icon: <WaitingIcon />,
-        to: "/optician-center/dispensing-requests",
+        to: "/optician-center/reports-requests",
       },
       {
         id: "25",
@@ -122,7 +122,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         id: "810",
         title: "Dispensing Requests",
         icon: <WaitingIcon />,
-        to: "/medicine-center/dispensing-requests",
+        to: "/medicine-center/reports-requests",
       },
       {
         id: "257",
@@ -144,7 +144,39 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         id: "8019",
         title: "Stocktaking",
         icon: <ItemsIcon />,
-        to: "/inventory/stocktaking",
+        to: "/inventory-management/stocktaking",
+      },
+      {
+        id: "8011",
+        title: "Previous Stocktakes",
+        icon: <ItemsIcon />,
+        to: "/inventory-management/stocktakes",
+      },
+      {
+        id: "80119",
+        title: "Reports",
+        icon: <ItemsIcon />,
+        to: "/inventory-management/reports",
+        items: [
+          {
+            id: "97.1",
+            title: "Item Balance Report",
+            icon: <LinkIcon />,
+            to: "/item-balance",
+          },
+          {
+            id: "97.51",
+            title: "Quantity Dispensed Report",
+            icon: <LinkIcon />,
+            to: "/item-quantity-dispensed",
+          },
+          {
+            id: "97.2",
+            title: "Stock Ledger",
+            icon: <LinkIcon />,
+            to: "/stock-ledger",
+          },
+        ],
       },
       {
         id: "15",

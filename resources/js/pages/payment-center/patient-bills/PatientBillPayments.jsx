@@ -120,6 +120,10 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
     return null;
   };
 
+  const getTotalAmount = () => {
+    return billPayments.reduce((total, e) => total += e.amount, 0);
+  };
+
   return (
     <React.Fragment>
       {(loadingFetchBillPayments || loadingPost || loadingDelete) ?
@@ -132,70 +136,78 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
           container
           spacing={2}
         >
+          {bill.status === "Pending" ?
+            <Grid
+              item
+              md={4}
+              sm={12}
+              xs={12}
+            >
+              <Card variant="outlined">
+                <CardHeader
+                  title="Add Bill Payment"
+                  titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <Divider />
+                <CardContent>
+                  <Form ref={formRef}>
+                    <Select
+                      ref={paymentChannelRef}
+                      label="Payment Channel"
+                      fullWidth
+                      required
+                      options={paymentChannels}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      value={formData.channel_id || ""}
+                      onChange={(value) => setFormData({ ...formData, channel_id: value })}
+                      containerProps={{ sx: { mb: 2 } }}
+                    />
+                    <TextField
+                      ref={amountRef}
+                      label="Amount"
+                      fullWidth
+                      required
+                      rules={[validationRules.number]}
+                      onChange={(value) => setFormData({ ...formData, amount: value })}
+                    />
+                  </Form>
+                </CardContent>
+                <Divider />
+                <Box p={2}>
+                  <Button
+                    disabled={loadingPost}
+                    fullWidth
+                    disableElevation
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    onClick={handleSubmit}
+                  >
+                    Save
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+            : null
+          }
           <Grid
             item
-            md={4}
+            md={bill.status === "Pending" ? 8 : 12}
             sm={12}
             xs={12}
           >
             <Card variant="outlined">
-              <CardHeader
-                title="Add Bill Payment"
-                titleTypographyProps={{ variant: "subtitle1" }}
-              />
-              <Divider />
-              <CardContent>
-                <Form ref={formRef}>
-                  <Select
-                    ref={paymentChannelRef}
-                    label="Payment Channel"
-                    fullWidth
-                    required
-                    options={paymentChannels}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={formData.channel_id || ""}
-                    onChange={(value) => setFormData({ ...formData, channel_id: value })}
-                    containerProps={{ sx: { mb: 2 } }}
+              {bill.status === "Pending" ?
+                <React.Fragment>
+                  <CardHeader
+                    title="Bill Payments"
+                    titleTypographyProps={{ variant: "subtitle1" }}
                   />
-                  <TextField
-                    ref={amountRef}
-                    label="Amount"
-                    fullWidth
-                    required
-                    rules={[validationRules.number]}
-                    onChange={(value) => setFormData({ ...formData, amount: value })}
-                  />
-                </Form>
-              </CardContent>
-              <Divider />
-              <Box p={2}>
-                <Button
-                  disabled={loadingPost}
-                  fullWidth
-                  disableElevation
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={handleSubmit}
-                >
-                  Save
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-          <Grid
-            item
-            md={8}
-            sm={12}
-            xs={12}
-          >
-            <Card variant="outlined">
-              <CardHeader
-                title="Bill Payments"
-                titleTypographyProps={{ variant: "subtitle1" }}
-              />
-              <Divider />
+                  <Divider />
+                </React.Fragment>
+                : null
+              }
               <CardContent>
                 <Table
                   loading={loadingFetchBillPayments}
@@ -223,7 +235,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                           <span>
                             <IconButton
                               size="small"
-                              disabled={loadingDelete}
+                              disabled={loadingDelete || bill.status === "Cleared"}
                               onClick={() => handleSubmitDelete(item)}
                             >
                               <DeleteIcon fontSize="small"/>
@@ -231,10 +243,21 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                           </span>
                         </Tooltip>
                       ),
-                    }
+                    },
                   ]}
                   items={billPayments}
                   hidePaginationFooter
+                  footerItems={[
+                    [
+                      {
+                        value: "Total",
+                        tableCellProps: { colSpan: 2 },
+                      },
+                      {
+                        value: numberFormat(getTotalAmount() || 0),
+                      }
+                    ]
+                  ]}
                 />
               </CardContent>
             </Card>

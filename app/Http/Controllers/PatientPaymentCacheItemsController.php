@@ -295,6 +295,11 @@ class PatientPaymentCacheItemsController extends Controller
                 $item->served_at = Carbon::now();
                 $item->save();
 
+                if ($status == 'Served') {
+                    $item->item->balance -= $item->quantity;
+                    $item->item->save();
+                }
+
                 $data[] = $item;
             }
         }

@@ -56,7 +56,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
 
   const { data: items, loading: loadingItems, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
     status: "Active",
-    per_page: 500,
+    per_page: 5000,
     q: itemName,
     consultation_type: consultationType,
     is_consultation_item: "No",

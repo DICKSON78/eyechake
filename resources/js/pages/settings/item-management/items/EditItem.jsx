@@ -54,6 +54,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
     unit_of_measure_id: item.unit_of_measure_id,
     lens_type_id: item.lens_type_id,
     is_consultation_item: item.is_consultation_item,
+    is_stock_item: item.is_stock_item,
     status: item.status,
   });
 
@@ -223,6 +224,25 @@ const EditItem = ({ item, modal, fetchItems }) => {
                   />
                 )}
                 label="Consultation Item"
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.is_stock_item === "Yes"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      is_stock_item: event.target.checked ? "Yes" : "No"
+                    })}
+                  />
+                )}
+                label="Stock Item"
               />
             </Grid>
             <Grid

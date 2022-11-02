@@ -25,6 +25,7 @@ class ItemsController extends Controller
         $item_type_id = $request->item_type_id;
         $consultation_type = $request->consultation_type;
         $is_consultation_item = $request->is_consultation_item;
+        $is_stock_item = $request->is_stock_item;
         $payment_mode_id = $request->payment_mode_id;
         $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type']);
 
@@ -51,6 +52,10 @@ class ItemsController extends Controller
 
         if ($is_consultation_item) {
             $data->where('is_consultation_item', $is_consultation_item);
+        }
+
+        if ($is_stock_item) {
+            $data->where('is_stock_item', $is_stock_item);
         }
 
         if ($payment_mode_id) {
@@ -81,11 +86,12 @@ class ItemsController extends Controller
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
             'lens_type_id' => 'nullable|exists:lens_types,id',
             'is_consultation_item' => 'nullable|in:Yes,No',
+            'is_stock_item' => 'nullable|in:Yes,No',
         ]);
 
         $data = Item::create($request->only(
             'name', 'code', 'item_type_id', 'consultation_type_id',
-            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item'
+            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item', 'is_stock_item'
         ));
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
@@ -119,6 +125,7 @@ class ItemsController extends Controller
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
             'lens_type_id' => 'nullable|exists:lens_types,id',
             'is_consultation_item' => 'nullable|in:Yes,No',
+            'is_stock_item' => 'nullable|in:Yes,No',
             'status' => 'nullable|in:Active,Inactive',
         ]);
 

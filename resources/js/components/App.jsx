@@ -15,6 +15,7 @@ import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomR
 import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
+import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 import Users from "../pages/users/Users";
 
@@ -97,6 +98,10 @@ const App = () => {
             <Route
               path="procedure-room/*"
               element={<ProcedureRoomRoutes />}
+            />
+            <Route
+              path="inventory-management/*"
+              element={<InventoryManagementRoutes />}
             />
             <Route
               path="settings/*"

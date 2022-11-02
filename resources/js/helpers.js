@@ -182,3 +182,15 @@ export const formatError = (errorBody) => {
 
   return message;
 };
+
+export const getDateRangeTitle = (startDate, endDate) => {
+  let title = "";
+  if (startDate) {
+    title += `From ${formatDateForDb(startDate)}`;
+  }
+  if (endDate) {
+    title += ` to ${formatDateForDb(endDate)}`;
+  }
+
+  return title;
+};

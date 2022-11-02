@@ -1,0 +1,435 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Radio,
+  Stack,
+  Tooltip
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/CloseRounded";
+
+import Page, { Header as PageHeader } from "../../components/Page";
+import Modal from "../../components/Modal";
+import TextField from "../../components/TextField";
+import DatePicker from "../../components/DatePicker";
+import Table, { SearchTextField } from "../../components/Table";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+
+import { useFetch, usePost } from "../../hooks";
+import {
+  formatDateForDb,
+  formatError,
+  getNonNull,
+  getValidationError,
+  getValidationRules,
+  numberFormat,
+  validateInteger
+} from "../../helpers";
+
+const validationRules = getValidationRules();
+
+const Stocktaking = () => {
+
+  const navigate = useNavigate();
+
+  const modalRef = useRef();
+  const reasonRef = useRef();
+  const itemRef = useRef();
+  const quantityRef = useRef();
+  const unitBuyingPriceRef = useRef();
+  const expiryDateRef = useRef();
+
+  const [reason, setReason] = useState();
+  const [itemName, setItemName] = useState();
+  const [selectedItem, setSelectedItem] = useState();
+  const [quantity, setQuantity] = useState();
+  const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
+  const [expiryDate, setExpiryDate] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
+    status: "Active",
+    per_page: 5000,
+    is_stock_item: "Yes",
+    q: itemName,
+  }, true, [], (response) => response.data.data.data);
+
+  const { data, loading, error, handlePost, setError } = usePost("api/stocktakes", {
+    reason,
+    items: selectedItems,
+  });
+
+  useEffect(() => {
+    document.title = `Stocktaking - ${window.APP_NAME}`;
+  }, []);
+
+  const handleAddItem = () => {
+    if (quantityRef.current.validate() && unitBuyingPriceRef.current.validate()) {
+      setSelectedItems([...selectedItems, {
+        item_id: selectedItem.id,
+        item_name: selectedItem.name,
+        quantity,
+        unit_buying_price: unitBuyingPrice,
+        expiry_date: expiryDate ? formatDateForDb(expiryDate) : null,
+      }]);
+
+      setSelectedItem(null);
+      setQuantity(null);
+      setUnitBuyingPrice(null);
+      setExpiryDate(null);
+    }
+  };
+
+  const handleRemoveItem = (index) => {
+    setSelectedItems(selectedItems.filter((e, i) => i !== index));
+  };
+
+  const confirmSubmit = () => {
+    setError(null);
+
+    if (!reasonRef.current.validate()) {
+      return setError(getValidationError("Please write reason for this stocktaking."));
+    }
+
+    if (!selectedItems.length) {
+      return setError(getValidationError("Please add at least one item."));
+    }
+
+    let component = (
+      <ConfirmationDialog
+        message="Are you sure you want to perform this action?"
+        onCancel={() => modalRef.current.close()}
+        onOk={() => {
+          modalRef.current.close();
+          handlePost();
+        }}
+      />
+    );
+
+    modalRef.current.open("Confirm Save", component, "sm");
+  };
+
+  const handleFeedback = () => {
+    if (data || error) {
+      return (
+        <Alert
+          sx={{ mt: 2 }}
+          severity={error ? "error" : "success"}
+        >
+          {error ? formatError(error) : data ? data.message : null}
+        </Alert>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Page
+      breadcrumbs={[
+        { title: "Home" },
+        { title: "Inventory Management" },
+        { title: "Stocktaking" },
+      ]}
+    >
+      <Card>
+        <PageHeader title="Stocktaking"/>
+        <Divider />
+        <CardContent>
+          <Grid
+            container
+            spacing={2}
+            mb={2}
+          >
+            <Grid
+              item
+              md={3}
+              sm={4}
+              xs={12}
+            >
+              <TextField
+                ref={reasonRef}
+                label="Reason"
+                fullWidth
+                required
+                onChange={(value) => setReason(value)}
+              />
+            </Grid>
+            <Grid
+              item
+              md={3}
+              sm={4}
+              xs={12}
+            >
+              <TextField
+                disabled
+                label="Prepared By"
+                fullWidth
+                required
+                value={window.user.full_name}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid
+            container
+            spacing={2}
+          >
+            <Grid
+              item
+              md={3}
+              sm={4}
+              xs={12}
+            >
+              <Card variant="outlined">
+                <CardHeader
+                  title="Select Item"
+                  titleTypographyProps={{ variant: "subtitle1" }}
+                  action={(
+                    <SearchTextField
+                      onChange={(value) => setItemName(value)}
+                    />
+                  )}
+                  className="no-action-margin-right"
+                />
+                <Divider />
+                <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
+                  {items.map((e) => (
+                    <FormControlLabel
+                      key={e.id}
+                      control={(
+                        <Radio
+                          checked={selectedItem === e}
+                          onChange={(event) => setSelectedItem(e)}
+                        />
+                      )}
+                      label={e.name}
+                      sx={{ display: "block" }}
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid
+              item
+              md={9}
+              sm={8}
+              xs={12}
+            >
+              <Card
+                variant="outlined"
+                sx={{ mb: 1 }}
+              >
+                <CardHeader
+                  title="Added Items"
+                  titleTypographyProps={{ variant: "subtitle1" }}
+                />
+                <Divider />
+                <CardContent>
+                  {selectedItem ?
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="flex-end"
+                      mb={2}
+                    >
+                      <Grid
+                        item
+                        md={3}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={itemRef}
+                          disabled={true}
+                          label="Selected Item"
+                          fullWidth
+                          required
+                          value={selectedItem.name || ""}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={2}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          disabled={true}
+                          label="UoM"
+                          fullWidth
+                          required
+                          value={getNonNull(selectedItem.unit_of_measure).name || ""}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={1}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={quantityRef}
+                          label="Qty"
+                          fullWidth
+                          required
+                          defaultValue={quantity}
+                          rules={[
+                            validationRules.number,
+                            (value) => value > 0 || "Quantity has to be greater than 0."
+                          ]}
+                          onChange={(value) => {
+                            value = validateInteger(value);
+                            setQuantity(value);
+                          }}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={2}
+                        sm={4}
+                        xs={12}
+                      >
+                        <TextField
+                          ref={unitBuyingPriceRef}
+                          label="Unit Buying Price"
+                          fullWidth
+                          defaultValue={unitBuyingPrice}
+                          rules={[
+                            (value) => {
+                              value = value.trim();
+                              return !value ? true : validationRules.number(value);
+                            },
+                            (value) => {
+                              value = value.trim();
+                              return !value ? true : (value > 0 || "Price has to be greater than 0.");
+                            },
+                          ]}
+                          onChange={(value) => {
+                            value = validateInteger(value);
+                            setUnitBuyingPrice(value);
+                          }}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={3}
+                        sm={4}
+                        xs={12}
+                      >
+                        <DatePicker
+                          ref={expiryDateRef}
+                          label="Expiry Date"
+                          fullWidth
+                          value={expiryDate}
+                          onChange={(value) => setExpiryDate(!isNaN(value) ? value : null)}
+                        />
+                      </Grid>
+                      <Grid
+                        item
+                        md={1}
+                        sm={2}
+                        xs={12}
+                      >
+                        <Button
+                          disabled={loading}
+                          fullWidth
+                          disableElevation
+                          variant="contained"
+                          color="primary"
+                          size="medium"
+                          onClick={handleAddItem}
+                        >
+                          Add
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    : null
+                  }
+
+                  <Table
+                    columns={[
+                      {
+                        field: "index",
+                        headerName: "S/N",
+                        valueGetter: (item, index) => (index + 1),
+                      },
+                      {
+                        field: "item_name",
+                        headerName: "Item Name",
+                      },
+                      {
+                        field: "quantity",
+                        headerName: "Quantity",
+                        valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                      },
+                      {
+                        field: "unit_buying_price",
+                        headerName: "Unit Buying Price",
+                        valueGetter: (item, index) => numberFormat(item.unit_buying_price || 0),
+                      },
+                      { field: "expiry_date", headerName: "Expiry Date", },
+                      {
+                        field: "actions",
+                        headerName: "Actions",
+                        renderCell: (item, index) => (
+                          <Tooltip title="Remove">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleRemoveItem(index)}
+                              >
+                                <DeleteIcon fontSize="small"/>
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        ),
+                        show: !data,
+                      }
+                    ]}
+                    items={selectedItems}
+                    hidePaginationFooter
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          {handleFeedback()}
+        </CardContent>
+        <Divider />
+        {loading && <LinearProgress />}
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="flex-end"
+          flexWrap="wrap"
+          p={2}
+        >
+          <Button
+            disabled={loading || !!data}
+            variant="contained"
+            disableElevation
+            onClick={confirmSubmit}
+          >
+            Save
+          </Button>
+        </Stack>
+      </Card>
+      <Modal ref={modalRef}/>
+    </Page>
+  );
+};
+
+export default Stocktaking;

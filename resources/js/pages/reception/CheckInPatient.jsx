@@ -25,6 +25,7 @@ import PatientDetails from "./patients/PatientDetails";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import Table, { SearchTextField } from "../../components/Table";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost } from "../../hooks";
 import { formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../helpers";
@@ -63,7 +64,7 @@ const CheckInPatient = () => {
 
   const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
     status: "Active",
-    per_page: 500,
+    per_page: 5000,
     payment_mode_id: paymentMode ? paymentMode.id : undefined,
     q: itemName,
   }, false, [], (response) => response.data.data.data);
@@ -133,12 +134,25 @@ const CheckInPatient = () => {
     setSelectedItems(selectedItems.filter((e, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const confirmSubmit = (title) => {
+    setError(null);
+
     if (!selectedItems.length) {
       return setError(getValidationError("Please add at least one item."));
     }
 
-    handlePost();
+    let component = (
+      <ConfirmationDialog
+        message="Are you sure you want to perform this action?"
+        onCancel={() => modalRef.current.close()}
+        onOk={() => {
+          modalRef.current.close();
+          handlePost();
+        }}
+      />
+    );
+
+    modalRef.current.open(title, component, "sm");
   };
 
   const handleFeedback = () => {
@@ -462,12 +476,9 @@ const CheckInPatient = () => {
               disabled={loading}
               variant="contained"
               disableElevation
-              onClick={handleSubmit}
+              onClick={() => confirmSubmit(paymentMode && paymentMode.payment_type === "Credit" ? "Confirm Send for Approval" : "Confirm Send to Cashier")}
             >
-              {paymentMode && paymentMode.payment_type === "Credit" ?
-                <React.Fragment>Send for Approval</React.Fragment> :
-                <React.Fragment>Send to Cashier</React.Fragment>
-              }
+              {paymentMode && paymentMode.payment_type === "Credit" ? "Send for Approval" : "Send to Cashier"}
             </Button>
           </Stack>
         </Card>

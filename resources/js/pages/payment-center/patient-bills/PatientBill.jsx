@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, CardHeader, Divider, Skeleton, Stack } from "@mui/material";
+import { Alert, Button, Card, CardContent, CardHeader, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import Table from "../../../components/Table";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Descriptions from "../../../components/Descriptions";
-import useFetch from "../../../hooks/useFetch";
-import { capitalize, formatError, getNonNull, numberFormat } from "../../../helpers";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import PatientBillPayments from "./PatientBillPayments";
+
+import { capitalize, formatError, getNonNull, numberFormat } from "../../../helpers";
+import { useFetch, usePatch } from "../../../hooks";
+
 
 const PatientBill = () => {
 
@@ -21,10 +24,10 @@ const PatientBill = () => {
 
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
-  const [data, setData] = useState();
   const [error, setError] = useState();
 
-  const { data: bill, loading: loadingBill, handleFetch: fetchBill } = useFetch(`api/patient-item-bills/${billId}`, null, true, null, (response) => response.data.data);
+  const { data: bill, loading: loadingBill, error: errorFetchBill, handleFetch: fetchBill } = useFetch(`api/patient-item-bills/${billId}`, null, true, null, (response) => response.data.data);
+  const { data, loading, error: errorClearBill, handlePatch } = usePatch(`api/patient-item-bills/${billId}/clear`);
 
   const {
     data: items,
@@ -50,6 +53,24 @@ const PatientBill = () => {
     }
   }, [patient, bill]);
 
+  useEffect(() => {
+    if (data) {
+      fetchBill();
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (errorFetchBill) {
+      setError(errorFetchBill);
+    }
+  }, [errorFetchBill]);
+
+  useEffect(() => {
+    if (errorClearBill) {
+      setError(errorClearBill);
+    }
+  }, [errorClearBill]);
+
   const showBillPaymentsModal = () => {
     let component = (
       <PatientBillPayments
@@ -60,6 +81,23 @@ const PatientBill = () => {
     );
 
     modalRef.current.open("Bill Payments", component, "lg");
+  };
+
+  const confirmClearBill = () => {
+    setError(null);
+
+    let component = (
+      <ConfirmationDialog
+        message="Are you sure you want to perform this action?"
+        onCancel={() => modalRef.current.close()}
+        onOk={() => {
+          modalRef.current.close();
+          handlePatch();
+        }}
+      />
+    );
+
+    modalRef.current.open("Clear Bill", component, "sm");
   };
 
   const handleFeedback = () => {
@@ -110,7 +148,6 @@ const PatientBill = () => {
             title="Patient Bill"
             trailing={
               <Button
-                // disabled={loading}
                 variant="contained"
                 color="secondary"
                 disableElevation
@@ -127,12 +164,13 @@ const PatientBill = () => {
               items={[
                 { label: "Bill Number", value: bill.id },
                 { label: "Bill Amount", value: numberFormat(bill.amount) },
+                { label: "Discount", value: numberFormat(bill.discount) },
                 { label: "Amount Paid", value: numberFormat(bill.amount_paid || 0) },
                 { label: "Created By", value: getNonNull(bill.creator).full_name },
-                { label: "Date", value: bill.created_at },
+                { label: "Date Created", value: bill.created_at },
                 { label: "Bill Status", value: bill.status },
                 { label: "Cleared By", value: getNonNull(bill.clearer).full_name },
-                { label: "Cleared At", value: bill.creared_at },
+                { label: "Date Cleared", value: bill.cleared_at },
               ]}
               containerProps={{
                 variant: "outlined",
@@ -205,7 +243,7 @@ const PatientBill = () => {
             {handleFeedback()}
           </CardContent>
           <Divider />
-          {/*{loading && <LinearProgress />}*/}
+          {loading && <LinearProgress />}
           <Stack
             direction="row"
             spacing={2}
@@ -224,11 +262,11 @@ const PatientBill = () => {
             </Button>
             {bill.status === "Pending" ?
               <Button
-                // disabled={loading}
+                disabled={loading}
                 variant="contained"
                 color="primary"
                 disableElevation
-                onClick={() => console.log(true)}
+                onClick={confirmClearBill}
               >
                 Clear Bill
               </Button>

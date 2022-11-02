@@ -22,6 +22,11 @@ return new class extends Migration
             $table->bigInteger('unit_of_measure_id')->unsigned()->nullable();
             $table->bigInteger('lens_type_id')->unsigned()->nullable();
             $table->enum('is_consultation_item', ['Yes', 'No'])->default('No');
+            $table->enum('is_stock_item', ['Yes', 'No'])->default('No')->after('is_consultation_item');
+            $table->double('balance')->nullable();
+            $table->double('unit_buying_price')->unsigned()->nullable();
+            $table->date('manufacture_date')->nullable();
+            $table->date('expiry_date')->nullable();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
 
