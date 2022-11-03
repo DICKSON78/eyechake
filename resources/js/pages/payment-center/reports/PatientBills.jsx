@@ -1,90 +1,48 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Chip, Grid } from "@mui/material";
-import Page from "../../components/Page";
-import Report from "../../components/reports/Report";
-import DatePicker from "../../components/DatePicker";
-import Select from "../../components/Select";
-import TextField from "../../components/TextField";
+import { Card, CardContent, Grid } from "@mui/material";
+import Page from "../../../components/Page";
+import Report from "../../../components/reports/Report";
+import DatePicker from "../../../components/DatePicker";
+import Select from "../../../components/Select";
+import TextField from "../../../components/TextField";
+import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-import useFetch from "../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../helpers";
-
-const PatientItems = ({ module, title, consultationType, paymentModeType, status }) => {
-
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+const PatientBills = ({ status }) => {
 
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    with_patient: true,
-    consultation_type: consultationType,
-    payment_mode_type: paymentModeType,
     status,
+    with_items: true,
+    id: undefined,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    payment_mode_id: undefined,
-    q: undefined,
     start_date: new Date(),
     end_date: undefined,
-    sort_direction: "desc",
   });
 
   useEffect(() => {
-    document.title = `${title} - ${window.APP_NAME}`;
-  }, [title]);
+    document.title = `${status} Patient Bills Report - ${window.APP_NAME}`;
 
-  useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType, payment_mode_type: paymentModeType, status });
-  }, [consultationType, paymentModeType, status]);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "warning";
-      case "Paid":
-        return "info";
-      case "Billed":
-        return "purple";
-      case "Served":
-        return "success";
-    }
-
-    return "neutral";
-  };
-
-  const getStatusLabel = (status) => {
-    if (status === "Pending") {
-      return "Not Paid";
-    }
-
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
-      if (status === "Served") {
-        return "Dispensed";
-      }
-    }
-
-    return status;
-  };
+    setParams({ ...params, status });
+  }, [status]);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: module },
+        { title: "Payment Center" },
         { title: "Reports" },
-        { title },
+        { title: `${status} Patient Bills Report` },
       ]}
     >
       <Report
-        title={title}
+        title={`${status} Patient Bills Report`}
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
-        uri="api/patient-payment-cache-items"
+        uri="api/patient-item-bills"
         params={{
           ...params,
           start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
@@ -175,28 +133,10 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                     sm={6}
                     xs={12}
                   >
-                    <Select
-                      label="Payment Mode"
-                      fullWidth
-                      options={paymentModes}
-                      optionsLabel="name"
-                      optionsValue="id"
-                      clearable
-                      value={paymentModes.length ? (params.payment_mode_id || "") : ""}
-                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={3}
-                    sm={6}
-                    xs={12}
-                  >
                     <TextField
                       fullWidth
-                      label="Item Name/Code"
-                      defaultValue={params.q}
-                      onChange={(value) => setParams({ ...params, q: value })}
+                      label="Bill Number"
+                      onChange={(value) => setParams({ ...params, id: value })}
                     />
                   </Grid>
                 </Grid>
@@ -206,15 +146,51 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
         )}
         columns={[
           {
+            field: "id",
+            headerName: "Bill Number",
+          },
+          {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient.full_name,
+            valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.full_name,
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient_id,
+            valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient_id,
           },
+          {
+            field: "amount",
+            headerName: "Bill Amount",
+            valueGetter: (item, index) => numberFormat(item.amount),
+          },
+          {
+            field: "discount",
+            headerName: "Discount",
+            valueGetter: (item, index) => numberFormat(item.discount),
+          },
+          {
+            field: "subtotal",
+            headerName: "Subtotal",
+            valueGetter: (item, index) => numberFormat(item.amount - item.discount),
+          },
+          {
+            field: "amount_paid",
+            headerName: "Amount Paid",
+            valueGetter: (item, index) => numberFormat(item.amount_paid || 0),
+          },
+          {
+            field: "created_by",
+            headerName: "Created By",
+            valueGetter: (item) => getNonNull(item.creator).full_name
+          },
+          {
+            field: "created_at",
+            headerName: "Date",
+          },
+        ]}
+        nestedObject="items"
+        nestedColumns={[
           {
             field: "name",
             headerName: "Item Name",
@@ -229,7 +205,6 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
             valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
-            show: consultationType === "Pharmacy" || consultationType === "Glass",
           },
           {
             field: "quantity",
@@ -237,14 +212,9 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             valueGetter: (item, index) => numberFormat(item.quantity),
           },
           {
-            field: "dosage",
-            headerName: "Dosage",
-            show: consultationType === "Pharmacy",
-          },
-          {
-            field: "comments",
-            headerName: "Comments",
-            show: consultationType !== "Pharmacy",
+            field: "subtotal",
+            headerName: "Subtotal",
+            valueGetter: (item, index) => numberFormat(item.unit_price * item.quantity),
           },
           {
             field: "created_by",
@@ -255,22 +225,10 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             field: "created_at",
             headerName: "Date",
           },
-          {
-            field: "status",
-            headerName: "Status",
-            renderCell: (item, index) => (
-              <Chip
-                size="small"
-                color={getStatusColor(item.status)}
-                label={getStatusLabel(item.status)}
-              />
-            ),
-            webOnly: true
-          }
         ]}
       />
     </Page>
   );
 };
 
-export default PatientItems;
+export default PatientBills;

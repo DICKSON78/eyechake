@@ -155,7 +155,7 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
   );
 };
 
-const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems }) => {
+const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems, renderExpanded, repeatHead }) => {
 
   columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
   checked = checked || [];
@@ -189,43 +189,49 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
     return true;
   };
 
+  const renderTableHeadRow = () => {
+    return (
+      <TableRow>
+        {checkboxSelection ?
+          <TableCell
+            component="th"
+            sx={{ width: 64 }}
+          >
+            <Checkbox
+              checked={getCheckableItems().length > 0 && checked.length === getCheckableItems().length}
+              onChange={(event) => {
+                const checked1 = event.target.checked ? getCheckableItems() : [];
+
+                if (typeof setChecked === "function") {
+                  setChecked(checked1);
+                }
+              }}
+            />
+          </TableCell>
+          : null
+        }
+        {columns.map((col, index) => (
+          <TableCell
+            key={index}
+            component="th"
+            {...(col.tableCellProps || {})}
+          >
+            <ColumnHeaderContainer>
+              <ColumnHeaderTitleContainer>
+                {col.headerName}
+              </ColumnHeaderTitleContainer>
+            </ColumnHeaderContainer>
+          </TableCell>
+        ))}
+      </TableRow>
+    );
+  };
+
   return (
     <Box sx={{ minWidth: 300, overflowX: "auto" }}>
       <MuiTable>
         <TableHead>
-          <TableRow>
-            {checkboxSelection ?
-              <TableCell
-                component="th"
-                sx={{ width: 64 }}
-              >
-                <Checkbox
-                  checked={getCheckableItems().length > 0 && checked.length === getCheckableItems().length}
-                  onChange={(event) => {
-                    const checked1 = event.target.checked ? getCheckableItems() : [];
-
-                    if (typeof setChecked === "function") {
-                      setChecked(checked1);
-                    }
-                  }}
-                />
-              </TableCell>
-              : null
-            }
-            {columns.map((col, index) => (
-              <TableCell
-                key={index}
-                component="th"
-                {...(col.tableCellProps || {})}
-              >
-                <ColumnHeaderContainer>
-                  <ColumnHeaderTitleContainer>
-                    {col.headerName}
-                  </ColumnHeaderTitleContainer>
-                </ColumnHeaderContainer>
-              </TableCell>
-            ))}
-          </TableRow>
+          {renderTableHeadRow()}
         </TableHead>
         <TableBody>
           {loading ?
@@ -242,37 +248,54 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
           {state.items.length > 0 ?
             <React.Fragment>
               {state.items.map((item, index, array) => (
-                <TableRow
-                  key={index}
-                  selected={checked.indexOf(item) !== -1}
-                >
-                  {checkboxSelection ?
-                    <TableCell component="th">
-                      <Checkbox
-                        disabled={!isItemCheckable(item, index)}
-                        checked={checked.indexOf(item) !== -1}
-                        onChange={(event) => {
-                          const checked1 = event.target.checked ? [...checked, item] : checked.filter((e, i) => i !== checked.indexOf(item));
+                <React.Fragment key={index}>
+                  <TableRow selected={checked.indexOf(item) !== -1}>
+                    {checkboxSelection ?
+                      <TableCell component="th">
+                        <Checkbox
+                          disabled={!isItemCheckable(item, index)}
+                          checked={checked.indexOf(item) !== -1}
+                          onChange={(event) => {
+                            const checked1 = event.target.checked ? [...checked, item] : checked.filter((e, i) => i !== checked.indexOf(item));
 
-                          if (typeof setChecked === "function") {
-                            setChecked(checked1);
-                          }
-                        }}
-                      />
-                    </TableCell>
+                            if (typeof setChecked === "function") {
+                              setChecked(checked1);
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      : null
+                    }
+                    {columns.map((col, colIndex) => (
+                      <TableCell
+                        key={colIndex}
+                        {...(col.tableCellProps || {})}
+                      >
+                        {typeof col.renderCell === "function"
+                          ? col.renderCell(item, index, array) : typeof col.valueGetter === "function"
+                            ? col.valueGetter(item, index, array) : item[col.field]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {renderExpanded ?
+                    <TableRow
+                      selected={checked.indexOf(item) !== -1}
+                      className="expanded"
+                    >
+                      {checkboxSelection ? <TableCell /> : null}
+                      <TableCell colSpan={columns.length}>
+                        {renderExpanded(item, index, array)}
+                      </TableCell>
+                    </TableRow>
                     : null
                   }
-                  {columns.map((col, colIndex) => (
-                    <TableCell
-                      key={colIndex}
-                      {...(col.tableCellProps || {})}
-                    >
-                      {typeof col.renderCell === "function"
-                        ? col.renderCell(item, index, array) : typeof col.valueGetter === "function"
-                          ? col.valueGetter(item, index, array) : item[col.field]}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                  {repeatHead && index < array.length - 1 ?
+                    <React.Fragment>
+                      {renderTableHeadRow()}
+                    </React.Fragment>
+                    : null
+                  }
+                </React.Fragment>
               ))}
             </React.Fragment>
             :

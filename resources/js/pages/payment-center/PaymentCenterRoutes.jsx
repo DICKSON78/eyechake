@@ -6,6 +6,7 @@ import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatien
 import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
 import PatientBills from "./patient-bills/PatientBills";
 import PatientBill from "./patient-bills/PatientBill";
+import ReportsRoutes from "./reports/ReportsRoutes";
 
 const PaymentCenterRoutes = () => {
   return (
@@ -36,6 +37,10 @@ const PaymentCenterRoutes = () => {
       <Route
         path="/patient-bills/:status/:patientId/:billId"
         element={<PatientBill />}
+      />
+      <Route
+        path="/reports/*"
+        element={<ReportsRoutes />}
       />
     </Routes>
   );

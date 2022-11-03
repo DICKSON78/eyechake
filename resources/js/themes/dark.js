@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { alpha, createTheme } from "@mui/material/styles";
 import { amber, purple, red } from "@mui/material/colors";
 
 const theme = createTheme({
@@ -154,6 +154,11 @@ const theme = createTheme({
           "& .MuiTableRow-root:hover": {
             backgroundColor: "rgba(255, 255, 255, 0.075)",
           },
+          "& .MuiTableRow-root th": {
+            padding: "12px",
+            backgroundColor: "#2c2f3e",
+            fontWeight: 500,
+          },
         },
       }
     },
@@ -170,6 +175,15 @@ const theme = createTheme({
           padding: "12px",
           fontSize: "0.75rem",
           fontWeight: 500,
+        },
+      }
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          "&.expanded": {
+            backgroundColor: alpha("#345ea8", 0.12),
+          }
         },
       }
     },

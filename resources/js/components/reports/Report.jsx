@@ -9,7 +9,7 @@ import SpreadsheetReport from "./SpreadsheetReport";
 import { formatError } from "../../helpers";
 import { useFetch } from "../../hooks";
 
-const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailingContent, prependInner }) => {
+const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailingContent, prependInner, nestedObject, nestedColumns }) => {
   columns = columns.filter((e) => typeof e.show === "undefined" || e.show);
 
   const [perPage, setPerPage] = useState(25);
@@ -46,12 +46,12 @@ const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailing
               <PDFReport
                 title={title}
                 subtitle={subtitle}
-                columns={columns}
+                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || col.webOnly)}
                 items={data.data}
               />
               <SpreadsheetReport
                 title={title}
-                columns={columns}
+                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || col.webOnly)}
                 items={data.data}
                 format="xlsx"
               />
@@ -73,13 +73,29 @@ const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailing
                 headerName: "S/N",
                 valueGetter: (item, index) => ((perPage * (page - 1)) + index + 1),
               },
-              ...(columns || {})
+              ...(columns || [])
             ]}
             items={data.data}
             itemCount={data.total}
             page={page}
             pageSize={perPage}
             onPageChange={(page) => setPage(page)}
+            renderExpanded={nestedObject ? (item, index) => (
+              <Table
+                columns={[
+                  {
+                    field: "index",
+                    headerName: "S/N",
+                    valueGetter: (item, index) => (index + 1),
+                  },
+                  ...(nestedColumns || [])
+                ]}
+                items={data.data[index] ? data.data[index][nestedObject] : []}
+                hidePaginationFooter
+              />
+            ) : null
+            }
+            repeatHead={!!nestedObject}
           />
         </CardContent>
       </Card>

@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Chip, Grid } from "@mui/material";
-import Page from "../../components/Page";
-import Report from "../../components/reports/Report";
-import DatePicker from "../../components/DatePicker";
-import Select from "../../components/Select";
-import TextField from "../../components/TextField";
+import { Card, CardContent, Grid } from "@mui/material";
+import Page from "../../../components/Page";
+import Report from "../../../components/reports/Report";
+import DatePicker from "../../../components/DatePicker";
+import Select from "../../../components/Select";
+import TextField from "../../../components/TextField";
 
-import useFetch from "../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../helpers";
+import useFetch from "../../../hooks/useFetch";
+import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const PatientItems = ({ module, title, consultationType, paymentModeType, status }) => {
+const CreditCollection = () => {
 
   const { data: paymentModes } = useFetch("api/payment-modes", {
     status: "Active",
+    payment_type: "Credit",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
@@ -21,9 +22,8 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
     page: 1,
     per_page: 25,
     with_patient: true,
-    consultation_type: consultationType,
-    payment_mode_type: paymentModeType,
-    status,
+    payment_mode_type: "Credit",
+    status: "Paid,Served",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -36,53 +36,20 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   });
 
   useEffect(() => {
-    document.title = `${title} - ${window.APP_NAME}`;
-  }, [title]);
-
-  useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType, payment_mode_type: paymentModeType, status });
-  }, [consultationType, paymentModeType, status]);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "warning";
-      case "Paid":
-        return "info";
-      case "Billed":
-        return "purple";
-      case "Served":
-        return "success";
-    }
-
-    return "neutral";
-  };
-
-  const getStatusLabel = (status) => {
-    if (status === "Pending") {
-      return "Not Paid";
-    }
-
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
-      if (status === "Served") {
-        return "Dispensed";
-      }
-    }
-
-    return status;
-  };
+    document.title = `Credit Collection Report - ${window.APP_NAME}`;
+  }, []);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: module },
+        { title: "Payment Center" },
         { title: "Reports" },
-        { title },
+        { title: "Credit Collection Report" },
       ]}
     >
       <Report
-        title={title}
+        title="Credit Collection Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
         uri="api/patient-payment-cache-items"
         params={{
@@ -229,7 +196,6 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
             valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
-            show: consultationType === "Pharmacy" || consultationType === "Glass",
           },
           {
             field: "quantity",
@@ -237,14 +203,9 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             valueGetter: (item, index) => numberFormat(item.quantity),
           },
           {
-            field: "dosage",
-            headerName: "Dosage",
-            show: consultationType === "Pharmacy",
-          },
-          {
-            field: "comments",
-            headerName: "Comments",
-            show: consultationType !== "Pharmacy",
+            field: "subtotal",
+            headerName: "Subtotal",
+            valueGetter: (item, index) => numberFormat(item.unit_price * item.quantity),
           },
           {
             field: "created_by",
@@ -255,22 +216,10 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             field: "created_at",
             headerName: "Date",
           },
-          {
-            field: "status",
-            headerName: "Status",
-            renderCell: (item, index) => (
-              <Chip
-                size="small"
-                color={getStatusColor(item.status)}
-                label={getStatusLabel(item.status)}
-              />
-            ),
-            webOnly: true
-          }
         ]}
       />
     </Page>
   );
 };
 
-export default PatientItems;
+export default CreditCollection;

@@ -22,16 +22,22 @@ class PatientItemBillsController extends Controller
     {
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
+        $id = $request->id;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
         $patient_gender = $request->patient_gender;
         $patient_phone = $request->patient_phone;
+        $with_items = $request->with_items;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = PatientItemBill::with(['first_item', 'creator'])->whereHas('first_item');
 
         if ($status) {
             $data->where('status', $status);
+        }
+
+        if ($id) {
+            $data->where('id', $id);
         }
 
         if ($patient_name) {
@@ -56,6 +62,12 @@ class PatientItemBillsController extends Controller
             $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
                 $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
+        }
+
+        if ($with_items) {
+            $data->with(['items' => function ($query) {
+                $query->with(['item.unit_of_measure', 'payment_mode', 'creator']);
+            }]);
         }
 
         if ($start_date) {

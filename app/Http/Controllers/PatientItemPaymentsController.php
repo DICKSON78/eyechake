@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\PatientItemBillPayment;
+use App\Models\PatientItemPayment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class PatientItemBillPaymentsController extends Controller
+class PatientItemPaymentsController extends Controller
 {
     use ApiResponse;
 
@@ -20,9 +20,9 @@ class PatientItemBillPaymentsController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 25;
-        $bill_id = $request->bill_id;
         $payment_channel_id = $request->payment_channel_id;
         $with_patient = $request->with_patient;
+        $with_items = $request->with_items;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
         $patient_gender = $request->patient_gender;
@@ -30,40 +30,42 @@ class PatientItemBillPaymentsController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $sort_direction = $request->sort_direction ?? 'asc';
-        $data = PatientItemBillPayment::with(['channel', 'creator']);
-
-        if ($bill_id) {
-            $data->where('bill_id', $bill_id);
-        }
+        $data = PatientItemPayment::with(['channel', 'creator']);
 
         if ($payment_channel_id) {
             $data->where('channel_id', $payment_channel_id);
         }
 
         if ($with_patient) {
-            $data->with(['bill.first_item'])->whereHas('bill.first_item');
+            $data->with(['first_item'])->whereHas('first_item');
+        }
+
+        if ($with_items) {
+            $data->with(['items' => function ($query) {
+                $query->with(['item.unit_of_measure', 'payment_mode', 'creator']);
+            }]);
         }
 
         if ($patient_name) {
-            $data->whereHas('bill.items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_name) {
                 $query->fullName('%' . $patient_name . '%');
             });
         }
 
         if ($patient_id) {
-            $data->whereHas('bill.items.payment_cache.check_in', function ($query) use ($patient_id) {
+            $data->whereHas('items.payment_cache.check_in', function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);
             });
         }
 
         if ($patient_gender) {
-            $data->whereHas('bill.items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_gender) {
                 $query->where('gender', $patient_gender);
             });
         }
 
         if ($patient_phone) {
-            $data->whereHas('bill.items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
+            $data->whereHas('items.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
                 $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
         }
@@ -89,16 +91,7 @@ class PatientItemBillPaymentsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'bill_id' => 'required|exists:patient_item_bills,id',
-            'channel_id' => 'nullable|exists:payment_channels,id',
-            'amount' => 'required|numeric|min:0',
-        ]);
-
-        $input = $request->all();
-        $input['created_by'] = $request->user()->id;
-        $data = PatientItemBillPayment::create($input);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        //
     }
 
     /**
@@ -109,8 +102,7 @@ class PatientItemBillPaymentsController extends Controller
      */
     public function show($id)
     {
-        $data = PatientItemBillPayment::with(['bill', 'channel', 'creator'])->findOrFail($id);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        //
     }
 
     /**
@@ -122,15 +114,7 @@ class PatientItemBillPaymentsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'bill_id' => 'nullable|exists:patient_item_bills,id',
-            'channel_id' => 'nullable|exists:payment_channels,id',
-            'amount' => 'nullable|numeric|min:0',
-        ]);
-
-        $data = PatientItemBillPayment::findOrFail($id);
-        $data->update($request->all());
-        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
+        //
     }
 
     /**
@@ -141,8 +125,6 @@ class PatientItemBillPaymentsController extends Controller
      */
     public function destroy($id)
     {
-        $data = PatientItemBillPayment::findOrFail($id);
-        $data->delete();
-        return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
+        //
     }
 }

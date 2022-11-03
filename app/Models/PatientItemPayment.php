@@ -17,6 +17,17 @@ class PatientItemPayment extends Model
         return $this->belongsTo(PaymentChannel::class, 'channel_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(PatientPaymentCacheItem::class, 'item_payment_id');
+    }
+
+    public function first_item()
+    {
+        return $this->hasOne(PatientPaymentCacheItem::class, 'item_payment_id')
+            ->with(['payment_cache.check_in.patient']);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');

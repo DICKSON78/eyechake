@@ -74,6 +74,44 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         to: "/payment-center/patient-bills/cleared",
       },
       {
+        id: "80119791",
+        title: "Reports",
+        icon: <ItemsIcon />,
+        to: "/payment-center/reports",
+        items: [
+          {
+            id: "91691.1",
+            title: "Cash Collection Report",
+            icon: <LinkIcon />,
+            to: "/cash-collection",
+          },
+          {
+            id: "91691.81",
+            title: "Credit Collection Report",
+            icon: <LinkIcon />,
+            to: "/credit-collection",
+          },
+          {
+            id: "91691.8814",
+            title: "Pending Patient Bills Report",
+            icon: <LinkIcon />,
+            to: "/pending-patient-bills",
+          },
+          {
+            id: "91691.88140",
+            title: "Cleared Patient Bills Report",
+            icon: <LinkIcon />,
+            to: "/cleared-patient-bills",
+          },
+          {
+            id: "91691.881",
+            title: "Bill Collection Report",
+            icon: <LinkIcon />,
+            to: "/patient-bill-collection",
+          },
+        ],
+      },
+      {
         id: "7",
         title: "CONSULTATION ROOM",
         show: !!drawerOpen,

@@ -13,6 +13,7 @@ use App\Http\Controllers\LensTypesController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
 use App\Http\Controllers\PatientItemBillsController;
+use App\Http\Controllers\PatientItemPaymentsController;
 use App\Http\Controllers\PatientPaymentCacheController;
 use App\Http\Controllers\PatientPaymentCacheItemsController;
 use App\Http\Controllers\PatientsController;
@@ -74,6 +75,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/dispense', 'dispense');
         $router->post('/complete', 'complete');
     });
+    $router->apiResource('/patient-item-payments', PatientItemPaymentsController::class);
 
     $router->apiResource('/patient-item-bills', PatientItemBillsController::class);
     $router->patch('/patient-item-bills/{id}/clear', [PatientItemBillsController::class, 'clear']);
