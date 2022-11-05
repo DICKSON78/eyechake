@@ -1,44 +1,50 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
-import Form from "../../components/Form";
-import TextField from "../../components/TextField";
-import Select from "../../components/Select";
+import {
+  Alert,
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Grid,
+  LinearProgress
+} from "@mui/material";
+import Form from "../../../components/Form";
+import TextField from "../../../components/TextField";
 
-import { usePatch } from "../../hooks";
-import { formatError, getValidationRules } from "../../helpers";
+import { usePatch } from "../../../hooks";
+import { formatError } from "../../../helpers";
 
-const validationRules = getValidationRules();
-
-const EditUser = ({ item, modal, fetchUsers }) => {
+const EditExpenseCategory = ({ item, modal, fetchExpenseCategories }) => {
 
   const formRef = useRef();
   const nameRef = useRef();
-  const emailRef = useRef();
-  const phoneRef = useRef();
-  const roleRef = useRef();
+  const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
     name: item.name,
-    email: item.email,
-    phone: item.phone,
-    role: item.role,
+    description: item.description,
+    status: item.status,
   });
-  const { data, loading, error, handlePatch } = usePatch(`api/users/${item.id}`, formData);
+
+  const { data, loading, error, handlePatch } = usePatch(`api/expense-categories/${item.id}`, formData);
+
+  useEffect(() => {
+    if (data) {
+      window.setTimeout(() => {
+        modal.close();
+        fetchExpenseCategories();
+      }, 1000);
+    }
+  }, [data]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePatch();
     }
   };
-
-  useEffect(() => {
-    if (data) {
-      window.setTimeout(() => {
-        modal.close();
-        fetchUsers();
-      }, 1000);
-    }
-  }, [data]);
 
   const handleFeedback = () => {
     if (data || error) {
@@ -58,7 +64,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent>
+      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
         {handleFeedback()}
         <Form ref={formRef}>
           <Grid
@@ -73,10 +79,10 @@ const EditUser = ({ item, modal, fetchUsers }) => {
             >
               <TextField
                 ref={nameRef}
-                label="Name"
+                label="Category Name"
                 fullWidth
-                defaultValue={formData.name}
                 required
+                defaultValue={item.name}
                 onChange={(value) => setFormData({ ...formData, name: value })}
               />
             </Grid>
@@ -87,12 +93,11 @@ const EditUser = ({ item, modal, fetchUsers }) => {
               xs={12}
             >
               <TextField
-                ref={emailRef}
-                label="Email"
+                ref={descriptionRef}
+                label="Description"
                 fullWidth
-                defaultValue={formData.email}
-                required
-                onChange={(value) => setFormData({ ...formData, email: value })}
+                defaultValue={item.description}
+                onChange={(value) => setFormData({ ...formData, description: value })}
               />
             </Grid>
             <Grid
@@ -101,30 +106,17 @@ const EditUser = ({ item, modal, fetchUsers }) => {
               sm={12}
               xs={12}
             >
-              <TextField
-                ref={phoneRef}
-                label="Phone"
-                fullWidth
-                defaultValue={formData.phone}
-                required
-                rules={[validationRules.phone]}
-                onChange={(value) => setFormData({ ...formData, phone: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <Select
-                ref={roleRef}
-                label="Role"
-                fullWidth
-                required
-                options={["Admin", "Customer"]}
-                value={formData.role}
-                onChange={(value) => setFormData({ ...formData, role: value })}
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.status === "Active"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      status: event.target.checked ? "Active" : "Inactive"
+                    })}
+                  />
+                )}
+                label="Active"
               />
             </Grid>
           </Grid>
@@ -151,4 +143,4 @@ const EditUser = ({ item, modal, fetchUsers }) => {
   );
 };
 
-export default EditUser;
+export default EditExpenseCategory;

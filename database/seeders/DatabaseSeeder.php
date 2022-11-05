@@ -9,6 +9,7 @@ use App\Models\JobTitle;
 use App\Models\PaymentMode;
 use App\Models\UnitOfMeasure;
 use App\Models\User;
+use App\Models\UserPrivilege;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -32,13 +33,27 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Cashier', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
-        User::insert([
+        $user = User::insert([
             'first_name' => 'System',
             'last_name' => 'Administrator',
             'username' => 'admin',
             'password' => Hash::make('1234'),
             'created_at' => $now,
             'updated_at' => $now,
+        ]);
+
+        UserPrivilege::insert([
+            'user_id' => $user->id,
+            'reception' => 1,
+            'payment_center' => 1,
+            'consultation_room' => 1,
+            'optician_center' => 1,
+            'medicine_center' => 1,
+            'procedure_room' => 1,
+            'inventory_management' => 1,
+            'financial_management' => 1,
+            'employee_management' => 1,
+            'settings' => 1,
         ]);
 
         ConsultationType::insert([

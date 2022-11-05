@@ -103,7 +103,7 @@ const DispensingRequestItems = ({ consultationType }) => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   const getStatusColor = (status) => {
@@ -252,13 +252,8 @@ const DispensingRequestItems = ({ consultationType }) => {
               setChecked={setSelectedItems}
               footerItems={[
                 [
-                  {
-                    value: "Total",
-                    tableCellProps: { colSpan: 7 },
-                  },
-                  {
-                    value: numberFormat(getTotalAmount() || 0),
-                  }
+                  { value: "TOTAL", tableCellProps: { colSpan: 7 }, },
+                  { value: numberFormat(getTotalAmount() || 0), }
                 ]
               ]}
             />

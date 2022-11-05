@@ -217,6 +217,10 @@ const CreditCollection = () => {
             headerName: "Date",
           },
         ]}
+        summationFooterColumns={[
+          { value: "TOTAL", span: 7, index: 1 },
+          { reducer: (acc, item, index) => acc + (item.unit_price * item.quantity), index: 7 },
+        ]}
       />
     </Page>
   );

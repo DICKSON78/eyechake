@@ -1,0 +1,105 @@
+import React from "react";
+import { Document, Font, Page } from "@react-pdf/renderer";
+
+import fontRegular from "../../../../fonts/Custom-Regular.ttf";
+import fontItalic from "../../../../fonts/Custom-Italic.ttf";
+import fontBold from "../../../../fonts/Custom-Bold.ttf";
+
+import Header from "../../../components/pdf/Header";
+import Descriptions from "../../../components/pdf/Descriptions";
+import Table from "../../../components/pdf/Table";
+import { getNonNull, numberFormat } from "../../../helpers";
+
+Font.register({
+  family: "Custom",
+  fonts: [
+    { src: fontRegular },
+    { src: fontItalic, fontStyle: "italic" },
+    { src: fontBold, fontWeight: 700 },
+  ],
+});
+
+const PDFReportDocument = ({ receipt, items, patient }) => {
+
+  const getTotalAmount = () => {
+    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+  };
+
+  return (
+    <Document
+      title="Payment Receipt"
+      creator={window.APP_NAME}
+      producer={window.APP_NAME}
+    >
+      <Page
+        size={[300]}
+        style={{
+          width: "100%",
+          backgroundColor: "white",
+          paddingHorizontal: 12,
+          paddingTop: 12,
+          paddingBottom: 18,
+        }}
+        orientation="portrait"
+      >
+        <Header
+          title="Payment Receipt"
+          dense
+        />
+
+        <Descriptions
+          columns={2}
+          horizontal
+          items={[
+            { label: "Customer Name", value: patient.full_name },
+            { label: "Receipt Number", value: receipt.id },
+            { label: "Receipt Amount", value: numberFormat(receipt.amount) },
+            { label: "Discount", value: numberFormat(receipt.discount) },
+            { label: "Created By", value: getNonNull(receipt.creator).full_name },
+            { label: "Date Created", value: receipt.created_at },
+          ]}
+          containerStyle={{
+            marginBottom: 8
+          }}
+        />
+
+        <Table
+          containerStyle={{ marginBottom: 12 }}
+          columns={[
+            {
+              field: "index",
+              headerName: "S/N",
+              valueGetter: (item, index) => (index + 1),
+              style: { flex: 0.35 }
+            },
+            {
+              field: "item_id",
+              headerName: "Item Name",
+              valueGetter: (item, index) => item.item.name,
+              style: { flex: 2 }
+            },
+            {
+              field: "quantity",
+              headerName: "Quantity",
+              valueGetter: (item, index) => numberFormat(item.quantity || 0),
+            },
+            {
+              field: "total_price",
+              headerName: "Subtotal",
+              valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+            }
+          ]}
+          items={items}
+          footerItems={[
+            [
+              { value: "TOTAL", style: { flex: 0.786 }, },
+              { value: numberFormat(getTotalAmount() || 0), style: { flex: 0.214 }, }
+            ]
+          ]}
+        />
+      </Page>
+    </Document>
+  );
+};
+
+export default PDFReportDocument;

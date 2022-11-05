@@ -45,7 +45,7 @@ const Patients = () => {
       />
     );
 
-    modalRef.current.open("Edit Patient", component);
+    modalRef.current.open("Edit Patient", component, "md");
   };
 
   return (

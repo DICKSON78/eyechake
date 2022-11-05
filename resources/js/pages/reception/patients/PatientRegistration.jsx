@@ -51,7 +51,7 @@ const PatientRegistration = () => {
     middle_name: undefined,
     last_name: undefined,
     gender: undefined,
-    date_of_birth: undefined,
+    date_of_birth: null,
     region_id: undefined,
     district_id: undefined,
     ward_id: undefined,
@@ -76,6 +76,10 @@ const PatientRegistration = () => {
     ...formData,
     date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
   });
+
+  useEffect(() => {
+    document.title = `Patient Registration - ${window.APP_NAME}`;
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -103,10 +107,6 @@ const PatientRegistration = () => {
       fetchWards();
     }
   }, [district]);
-
-  useEffect(() => {
-    document.title = `Patient Registration - ${window.APP_NAME}`;
-  }, []);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -164,7 +164,7 @@ const PatientRegistration = () => {
     if (data || error) {
       return (
         <Alert
-          sx={{ mb: 2 }}
+          sx={{ mt: 2 }}
           severity={error ? "error" : "success"}
         >
           {error ? formatError(error) : data ? data.message : null}
@@ -183,11 +183,9 @@ const PatientRegistration = () => {
         { title: "Patient Registration" },
       ]}
     >
-      {handleFeedback()}
       <Card>
         <PageHeader title="Patient Registration"/>
         <Divider />
-        {loading && <LinearProgress />}
         <CardContent>
           <Form ref={formRef}>
             <Grid
@@ -414,8 +412,10 @@ const PatientRegistration = () => {
               </Grid>
             </Grid>
           </Form>
+          {handleFeedback()}
         </CardContent>
         <Divider />
+        {loading && <LinearProgress />}
         <Stack
           direction="row"
           spacing={2}

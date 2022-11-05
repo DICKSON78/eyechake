@@ -16,11 +16,9 @@ const Footer = ({ textStyle, ...rest }) => {
         {...(rest || {})}
         style={{
           fontSize: 7,
+          fontFamily: "Custom",
           textAlign: "center",
           color: "grey",
-          position: "absolute",
-          width: "100%",
-          bottom: 10,
           ...(textStyle || {})
         }}
       />

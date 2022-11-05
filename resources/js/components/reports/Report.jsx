@@ -6,10 +6,10 @@ import Table, { PageSizeSelect } from "../Table";
 import PDFReport from "./PDFReport";
 import SpreadsheetReport from "./SpreadsheetReport";
 
-import { formatError } from "../../helpers";
+import { formatError, numberFormat } from "../../helpers";
 import { useFetch } from "../../hooks";
 
-const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailingContent, prependInner, nestedObject, nestedColumns }) => {
+const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch, headerTrailingContent, prependInner, nestedObject, nestedColumns, summationFooterColumns }) => {
   columns = columns.filter((e) => typeof e.show === "undefined" || e.show);
 
   const [perPage, setPerPage] = useState(25);
@@ -25,6 +25,25 @@ const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailing
       onFetch(data);
     }
   }, [data]);
+
+  const getFooterItems = () => {
+    let footerColumns = [];
+    if (summationFooterColumns) {
+      footerColumns = summationFooterColumns.map((col) => {
+        if (typeof col.reducer === "function") {
+          col.value = numberFormat(data.data.reduce(col.reducer, 0));
+        }
+
+        if (typeof col.span === "number") {
+          col.tableCellProps = { colSpan: col.span };
+        }
+
+        return col;
+      });
+    }
+
+    return footerColumns;
+  };
 
   return (
     <React.Fragment>
@@ -48,6 +67,10 @@ const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailing
                 subtitle={subtitle}
                 columns={columns.filter((col) => (typeof col.webOnly === "undefined") || col.webOnly)}
                 items={data.data}
+                orientation={pdfOrientation}
+                nestedObject={nestedObject}
+                nestedColumns={nestedColumns}
+                summationFooterColumns={summationFooterColumns}
               />
               <SpreadsheetReport
                 title={title}
@@ -73,29 +96,36 @@ const Report = ({ title, subtitle, uri, params, columns, onFetch, headerTrailing
                 headerName: "S/N",
                 valueGetter: (item, index) => ((perPage * (page - 1)) + index + 1),
               },
-              ...(columns || [])
+              ...(columns || []),
             ]}
             items={data.data}
             itemCount={data.total}
             page={page}
             pageSize={perPage}
             onPageChange={(page) => setPage(page)}
-            renderExpanded={nestedObject ? (item, index) => (
-              <Table
-                columns={[
-                  {
-                    field: "index",
-                    headerName: "S/N",
-                    valueGetter: (item, index) => (index + 1),
-                  },
-                  ...(nestedColumns || [])
-                ]}
-                items={data.data[index] ? data.data[index][nestedObject] : []}
-                hidePaginationFooter
-              />
-            ) : null
+            renderExpanded={nestedObject ?
+              (item, index) => (
+                <Table
+                  columns={[
+                    {
+                      field: "index",
+                      headerName: "S/N",
+                      valueGetter: (item, index) => (index + 1),
+                    },
+                    ...(nestedColumns || []),
+                  ]}
+                  items={data.data[index] ? data.data[index][nestedObject] : []}
+                  hidePaginationFooter
+                />
+              ) : null
             }
             repeatHead={!!nestedObject}
+            footerItems={summationFooterColumns ?
+              [
+                getFooterItems(),
+              ]
+              : null
+            }
           />
         </CardContent>
       </Card>

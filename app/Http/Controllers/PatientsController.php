@@ -6,7 +6,6 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
 
 class PatientsController extends Controller
 {
@@ -39,7 +38,6 @@ class PatientsController extends Controller
 
         if ($name) {
             $data->fullName('%' . $name . '%');
-            Log::debug($data->toSql());
         }
 
         if ($gender) {

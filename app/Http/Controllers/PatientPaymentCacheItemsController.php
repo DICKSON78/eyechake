@@ -166,7 +166,7 @@ class PatientPaymentCacheItemsController extends Controller
         $payment = PatientItemPayment::create([
             'channel_id' => $request->payment_channel_id,
             'amount' => 0,
-            'discount' => $request->discount,
+            'discount' => $request->discount ?? 0,
             'created_by' => $user->id,
         ]);
 
@@ -211,6 +211,10 @@ class PatientPaymentCacheItemsController extends Controller
 
             $payment->amount = $amount;
             $payment->save();
+
+            $payment->items = PatientPaymentCacheItem::with(['item.unit_of_measure'])
+                ->where('item_payment_id', $payment->id)
+                ->get();
 
             return $this->sendResponse($payment, Response::HTTP_OK, 'Payment made successfully.');
         }

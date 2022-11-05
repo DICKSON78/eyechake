@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Button } from "@mui/material";
-import { Document, Font, Page, pdf, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Font, Page, pdf } from "@react-pdf/renderer";
 
 import fontRegular from "../../../fonts/Custom-Regular.ttf";
 import fontItalic from "../../../fonts/Custom-Italic.ttf";
@@ -8,6 +8,8 @@ import fontBold from "../../../fonts/Custom-Bold.ttf";
 
 import Header from "../pdf/Header";
 import Footer from "../pdf/Footer";
+import Table from "../pdf/Table";
+import { numberFormat } from "../../helpers";
 
 Font.register({
   family: "Custom",
@@ -18,7 +20,29 @@ Font.register({
   ],
 });
 
-const PDFReportDocument = ({ title, subtitle, orientation, columns, items }) => {
+const PDFReportDocument = ({ title, subtitle, orientation, columns, items, nestedObject, nestedColumns, summationFooterColumns }) => {
+
+  const getFooterItems = () => {
+    // generate corresponding empty columns
+    let footerColumns = [
+      { value: null, style: { flex: 0.5 } }, // index cell
+      ...columns.map((col) => {
+        return { value: null };
+      })
+    ];
+
+    // replace values with the given value at provided index
+    summationFooterColumns.forEach((col, index) => {
+      if (typeof col.reducer === "function") {
+        footerColumns[col.index || index].value = numberFormat(items.reduce(col.reducer, 0));
+      } else {
+        footerColumns[col.index || index].value = col.value;
+      }
+    });
+
+    return footerColumns;
+  };
+
   return (
     <Document
       title={title}
@@ -39,65 +63,45 @@ const PDFReportDocument = ({ title, subtitle, orientation, columns, items }) => 
         <Header
           title={title}
           subtitle={subtitle}
-          textStyle={styles.text}
         />
 
-        <View style={[styles.table, { marginBottom: 16 }]}>
-          <View style={[styles.tableRow, styles.lightGrey]}>
-            <Text
-              style={[
-                styles.text,
-                styles.tableCell,
-                { fontWeight: "bold", flex: 0.5 },
-              ]}
-            >
-              S/N
-            </Text>
-            {columns.map((e) => (
-              <Text
-                key={e.field}
-                style={[
-                  styles.text,
-                  styles.tableCell,
+        <Table
+          containerStyle={{ marginBottom: 16 }}
+          columns={[
+            {
+              field: "index",
+              headerName: "S/N",
+              flex: 0.5,
+              valueGetter: (item, index) => (index + 1),
+            },
+            ...(columns || []),
+          ]}
+          items={items}
+          renderExpanded={nestedObject ?
+            (item, index) => (
+              <Table
+                columns={[
                   {
-                    fontWeight: "bold",
-                    flex: e.flex || 1,
-                    textAlign: e.pdfTextAlignment || "left",
+                    field: "index",
+                    headerName: "S/N",
+                    valueGetter: (item, index) => (index + 1),
                   },
+                  ...(nestedColumns || []),
                 ]}
-              >
-                {e.headerName}
-              </Text>
-            ))}
-          </View>
-          {items.map((e, i) => (
-            <View key={i} style={styles.tableRow}>
-              <Text style={[styles.text, styles.tableCell, { flex: 0.5 }]}>
-                {i + 1}
-              </Text>
-              {columns.map((f) => (
-                <Text
-                  key={f.field}
-                  style={[
-                    styles.text,
-                    styles.tableCell,
-                    {
-                      flex: f.flex || 1,
-                      textAlign: f.pdfTextAlignment || "left",
-                    },
-                  ]}
-                >
-                  {f.valueGetter ? f.valueGetter(e) : e[f.field]}
-                </Text>
-              ))}
-            </View>
-          ))}
-        </View>
-
-        <Footer
-          textStyle={styles.text}
-          render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
+                items={items[index] ? items[index][nestedObject] : []}
+              />
+            ) : null
+          }
+          repeatHead={!!nestedObject}
+          footerItems={summationFooterColumns ?
+            [
+              getFooterItems(),
+            ]
+            : null
+          }
         />
+
+        <Footer render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}/>
       </Page>
     </Document>
   );
@@ -133,31 +137,5 @@ const PDFReport = ({ title, columns, items, ...rest }) => {
     </Button>
   );
 };
-
-const styles = StyleSheet.create({
-  text: {
-    fontSize: 8,
-    fontFamily: "Custom",
-  },
-  lightGrey: {
-    backgroundColor: "#F5F5F5",
-  },
-  table: {
-    border: "1pt solid #666666",
-    borderTopWidth: 0,
-    borderLeftWidth: 0,
-  },
-  tableRow: {
-    flexDirection: "row",
-  },
-  tableCell: {
-    border: "1pt solid #666666",
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-    padding: 4,
-    flex: 1,
-    fontSize: 8,
-  },
-});
 
 export default PDFReport;

@@ -1,56 +1,56 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import {
   Alert,
   Box,
   Button,
+  Card,
   CardActions,
   CardContent,
+  CardHeader,
+  Checkbox,
   Divider,
+  FormControlLabel,
   Grid,
   InputAdornment,
   LinearProgress
 } from "@mui/material";
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
-import Form from "../../components/Form";
-import TextField from "../../components/TextField";
-import Select from "../../components/Select";
+import Form from "../../../components/Form";
+import TextField from "../../../components/TextField";
 
-import { usePost } from "../../hooks";
-import { formatError, getValidationRules } from "../../helpers";
+import { usePatch } from "../../../hooks";
+import { formatError } from "../../../helpers";
+import { PRIVILEGES } from "../../../constants";
 
-const validationRules = getValidationRules();
-
-const CreateUser = ({ modal, fetchUsers }) => {
+const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
 
   const formRef = useRef();
-  const nameRef = useRef();
-  const emailRef = useRef();
-  const phoneRef = useRef();
-  const roleRef = useRef();
+  const usernameRef = useRef();
   const passwordRef = useRef();
-
-  const [formData, setFormData] = useState({
-    name: undefined,
-    email: undefined,
-    phone: undefined,
-    role: undefined,
-    password: undefined,
-  });
-  const { data, loading, error, handlePost } = usePost("api/users", formData);
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const [formData, setFormData] = useState({
+    username: item.username,
+    password: undefined,
+    privileges: item.privileges,
+    status: item.status,
+  });
+
+  const { data, loading, error, handlePatch } = usePatch(`api/users/${item.id}`, formData);
+
   const handleSubmit = () => {
     if (formRef.current.validate()) {
-      handlePost();
+      handlePatch();
     }
   };
 
   useEffect(() => {
     if (data) {
       window.setTimeout(() => {
+        fetchEmployees();
         modal.close();
-        fetchUsers();
       }, 1000);
     }
   }, [data]);
@@ -73,7 +73,7 @@ const CreateUser = ({ modal, fetchUsers }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent>
+      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
         {handleFeedback()}
         <Form ref={formRef}>
           <Grid
@@ -83,74 +83,30 @@ const CreateUser = ({ modal, fetchUsers }) => {
             <Grid
               item
               md={6}
-              sm={12}
+              sm={6}
               xs={12}
             >
               <TextField
-                ref={nameRef}
-                label="Name"
+                ref={usernameRef}
+                label="Username"
                 fullWidth
                 required
-                onChange={(value) => setFormData({ ...formData, name: value })}
+                defaultValue={formData.username}
+                onChange={(value) => setFormData({ ...formData, username: value })}
               />
             </Grid>
             <Grid
               item
               md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={emailRef}
-                label="Email"
-                fullWidth
-                required
-                onChange={(value) => setFormData({ ...formData, email: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={phoneRef}
-                label="Phone"
-                fullWidth
-                required
-                rules={[validationRules.phone]}
-                onChange={(value) => setFormData({ ...formData, phone: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <Select
-                ref={roleRef}
-                label="Role"
-                fullWidth
-                required
-                options={["Admin", "Customer"]}
-                value={formData.role}
-                onChange={(value) => setFormData({ ...formData, role: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
+              sm={6}
               xs={12}
             >
               <TextField
                 ref={passwordRef}
-                type={showPassword ? "text" : "password"}
                 label="Password"
+                helperText="Leave blank to keep the current one."
                 fullWidth
-                required
+                type={showPassword ? "text" : "password"}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment
@@ -166,6 +122,49 @@ const CreateUser = ({ modal, fetchUsers }) => {
               />
             </Grid>
           </Grid>
+
+          <Card
+            variant="outlined"
+            sx={{ mt: 2 }}
+          >
+            <CardHeader
+              title="Access Privileges"
+              titleTypographyProps={{ variant: "subtitle1" }}
+            />
+            <Divider />
+            <CardContent>
+              {PRIVILEGES.map((e) => (
+                <FormControlLabel
+                  key={e.value}
+                  control={(
+                    <Checkbox
+                      checked={!!formData.privileges[e.value]}
+                      onChange={(event) => setFormData({
+                        ...formData,
+                        privileges: { ...formData.privileges, [e.value]: event.target.checked }
+                      })}
+                    />
+                  )}
+                  label={e.label}
+                />
+              ))}
+            </CardContent>
+          </Card>
+
+          <Box p={2}>
+            <FormControlLabel
+              control={(
+                <Checkbox
+                  defaultChecked={item.status === "Active"}
+                  onChange={(event) => setFormData({
+                    ...formData,
+                    status: event.target.checked ? "Active" : "Inactive"
+                  })}
+                />
+              )}
+              label="Active"
+            />
+          </Box>
         </Form>
       </CardContent>
       <Divider />
@@ -189,4 +188,4 @@ const CreateUser = ({ modal, fetchUsers }) => {
   );
 };
 
-export default CreateUser;
+export default EditEmployeeAccessDetails;

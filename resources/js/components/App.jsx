@@ -16,11 +16,13 @@ import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes"
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
+import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
+import EmployeeManagementRoutes from "../pages/employee-management/EmployeeManagementRoutes";
+import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
-import Users from "../pages/users/Users";
 
 const App = () => {
-  const [themeMode, setThemeMode] = useState("light");
+  const [themeMode, setThemeMode] = useState(window.localStorage.getItem("theme_mode") || "light");
 
   const theme = useMemo(() => {
     return themeMode === "light" ? lightTheme : darkTheme;
@@ -33,16 +35,16 @@ const App = () => {
       <CssBaseline />
       <GlobalStyles
         styles={{
-          "*": {
+          ".MuiDrawer-paper": {
             scrollbarWidth: "thin"
           },
 
-          "*::-webkit-scrollbar": {
+          ".MuiDrawer-paper::-webkit-scrollbar": {
             width: 8,
             height: 8
           },
 
-          "*::-webkit-scrollbar-thumb": {
+          ".MuiDrawer-paper::-webkit-scrollbar-thumb": {
             borderRadius: 8,
           },
           "*::selection": {
@@ -71,46 +73,56 @@ const App = () => {
             path="/"
             element={<DefaultLayout setThemeMode={setThemeMode} setUser={setUser}/>}
           >
-            <Route
-              path="dashboard"
-              element={<Dashboard />}
-            />
-            <Route
-              path="reception/*"
-              element={<ReceptionRoutes />}
-            />
-            <Route
-              path="payment-center/*"
-              element={<PaymentCenterRoutes />}
-            />
-            <Route
-              path="consultation-room/*"
-              element={<ConsultationRoomRoutes />}
-            />
-            <Route
-              path="optician-center/*"
-              element={<OpticianCenterRoutes />}
-            />
-            <Route
-              path="medicine-center/*"
-              element={<MedicineCenterRoutes />}
-            />
-            <Route
-              path="procedure-room/*"
-              element={<ProcedureRoomRoutes />}
-            />
-            <Route
-              path="inventory-management/*"
-              element={<InventoryManagementRoutes />}
-            />
-            <Route
-              path="settings/*"
-              element={<SettingsRoutes />}
-            />
-            <Route
-              path="users"
-              element={(user && user.role === "Admin") ? <Users /> : null}
-            />
+            <React.Fragment>
+              <Route
+                path="dashboard"
+                element={<Dashboard />}
+              />
+              <Route
+                path="patient-records/*"
+                element={<PatientRecordsRoutes />}
+              />
+              <Route
+                path="reception/*"
+                element={user && user.privileges.reception ? <ReceptionRoutes /> : null}
+              />
+              <Route
+                path="payment-center/*"
+                element={user && user.privileges.payment_center ? <PaymentCenterRoutes /> : null}
+              />
+              <Route
+                path="consultation-room/*"
+                element={user && user.privileges.consultation_room ? <ConsultationRoomRoutes /> : null}
+              />
+              <Route
+                path="optician-center/*"
+                element={user && user.privileges.optician_center ? <OpticianCenterRoutes /> : null}
+              />
+              <Route
+                path="medicine-center/*"
+                element={user && user.privileges.medicine_center ? <MedicineCenterRoutes /> : null}
+              />
+              <Route
+                path="procedure-room/*"
+                element={user && user.privileges.procedure_room ? <ProcedureRoomRoutes /> : null}
+              />
+              <Route
+                path="inventory-management/*"
+                element={user && user.privileges.inventory_management ? <InventoryManagementRoutes /> : null}
+              />
+              <Route
+                path="financial-management/*"
+                element={user && user.privileges.financial_management ? <FinancialManagementRoutes /> : null}
+              />
+              <Route
+                path="employee-management/*"
+                element={user && user.privileges.employee_management ? <EmployeeManagementRoutes /> : null}
+              />
+              <Route
+                path="settings/*"
+                element={user && user.privileges.settings ? <SettingsRoutes /> : null}
+              />
+            </React.Fragment>
           </Route>
         </Routes>
       </Router>

@@ -147,10 +147,7 @@ export const formatError = (errorBody) => {
   if (errorBody.response) {
     const statusCode = parseInt(errorBody.response.status);
     switch (statusCode) {
-      case 401: {
-        message = "You were logged out.";
-      }
-        break;
+      case 401:
       case 403: {
         let data = errorBody.response.data;
         if (data.message) {

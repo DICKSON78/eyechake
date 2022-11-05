@@ -63,7 +63,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent>
+      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
         {handleFeedback()}
         <Form ref={formRef}>
           <Grid

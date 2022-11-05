@@ -9,6 +9,7 @@ use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 
 class PatientCheckInsController extends Controller
 {
@@ -82,7 +83,7 @@ class PatientCheckInsController extends Controller
             'payment_mode_id' => 'required|exists:payment_modes,id',
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:items,id',
-            'items.*.consultant_id' => 'required|exists:users,id',
+            'items.*.consultant_id' => 'nullable|exists:users,id',
             'items.*.payment_mode_id' => 'required|exists:payment_modes,id',
             'items.*.quantity' => 'required|numeric|min:1',
         ]);
@@ -117,7 +118,7 @@ class PatientCheckInsController extends Controller
                             'payment_cache_id' => $payment_cache->id,
                             'item_id' => $item->id,
                             'consultation_type_id' => $item->consultation_type_id,
-                            'consultant_id' => $input_item['consultant_id'],
+                            'consultant_id' => Arr::get($input_item, 'consultant_id'),
                             'payment_mode_id' => $input_item['payment_mode_id'],
                             'unit_price' => $item->prices[0]->unit_price,
                             'quantity' => $input_item['quantity'],

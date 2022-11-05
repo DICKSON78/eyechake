@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, Divider, FormControlLabel, Grid } from "@mui/material";
+import React from "react";
+import { Card, CardContent, Checkbox, FormControlLabel, Grid } from "@mui/material";
+import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 import useFetch from "../../../../hooks/useFetch";
 
-const Filter = ({ modal, params: initial, onOk }) => {
+const Filters = ({ params, setParams, ...rest }) => {
 
   const { data: itemTypes } = useFetch("api/item-types", {
     status: "Active",
@@ -14,10 +15,11 @@ const Filter = ({ modal, params: initial, onOk }) => {
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
-  const [params, setParams] = useState(initial);
-
   return (
-    <React.Fragment>
+    <Card
+      variant="outlined"
+      {...rest}
+    >
       <CardContent>
         <Grid
           container
@@ -25,7 +27,19 @@ const Filter = ({ modal, params: initial, onOk }) => {
         >
           <Grid
             item
-            md={6}
+            md={3}
+            sm={12}
+            xs={12}
+          >
+            <TextField
+              label="Item Name/Code"
+              fullWidth
+              onChange={(value) => setParams({ ...params, q: value })}
+            />
+          </Grid>
+          <Grid
+            item
+            md={3}
             sm={12}
             xs={12}
           >
@@ -42,7 +56,7 @@ const Filter = ({ modal, params: initial, onOk }) => {
           </Grid>
           <Grid
             item
-            md={6}
+            md={3}
             sm={12}
             xs={12}
           >
@@ -59,7 +73,7 @@ const Filter = ({ modal, params: initial, onOk }) => {
           </Grid>
           <Grid
             item
-            md={6}
+            md={3}
             sm={12}
             xs={12}
           >
@@ -74,13 +88,7 @@ const Filter = ({ modal, params: initial, onOk }) => {
           </Grid>
           <Grid
             item
-            md={6}
-            sm={12}
-            xs={12}
-          />
-          <Grid
-            item
-            md={6}
+            md={3}
             sm={12}
             xs={12}
           >
@@ -99,24 +107,8 @@ const Filter = ({ modal, params: initial, onOk }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
-      <CardActions>
-        <Box flexGrow={1}/>
-        <Button
-          variant="text"
-          onClick={() => modal.close()}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="text"
-          onClick={() => onOk(params)}
-        >
-          Ok
-        </Button>
-      </CardActions>
-    </React.Fragment>
+    </Card>
   );
 };
 
-export default Filter;
+export default Filters;

@@ -15,19 +15,43 @@ class User extends Authenticatable
     protected $appends = ['full_name'];
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'first_name', 'middle_name', 'last_name', 'username', 'department_id', 'job_title_id',
+        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'password', 'api_token',
+        'created_by', 'status',
     ];
 
     protected $hidden = [
         'password',
     ];
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function job_title()
+    {
+        return $this->belongsTo(JobTitle::class, 'job_title_id');
+    }
+
+    public function privileges() {
+        return $this->hasOne(UserPrivilege::class, 'user_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
     public function getFullNameAttribute()
     {
         $name = sprintf('%s %s %s', $this->first_name, $this->middle_name, $this->last_name);
         return preg_replace('/\s{2,}/', ' ', trim($name));
+    }
+
+    public function scopeFullName($query, $value)
+    {
+        return $query->whereRaw('concat(first_name, coalesce(middle_name, ""), last_name) like ?', [str_replace(' ', '', $value)]);
     }
 
     protected function serializeDate(DateTimeInterface $date)

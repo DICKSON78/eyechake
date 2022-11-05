@@ -233,6 +233,12 @@ const CashCollection = () => {
             headerName: "Date",
           },
         ]}
+        summationFooterColumns={[
+          { value: "TOTAL", span: 3, index: 1 },
+          { reducer: (acc, item, index) => acc + item.amount, index: 3 },
+          { reducer: (acc, item, index) => acc + item.discount, index: 4 },
+          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 5 },
+        ]}
       />
     </Page>
   );

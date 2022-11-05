@@ -141,7 +141,7 @@ const Diseases = () => {
                 renderCell: (item) => (
                   <Stack
                     direction="row"
-                    alignDiseases="center"
+                    alignItems="center"
                     divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >

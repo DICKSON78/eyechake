@@ -97,11 +97,11 @@ const PendingPatientItems = () => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   const getSelectedAmount = () => {
-    return selectedItems.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   return (
@@ -173,13 +173,8 @@ const PendingPatientItems = () => {
               setChecked={setSelectedItems}
               footerItems={[
                 [
-                  {
-                    value: "Total",
-                    tableCellProps: { colSpan: 6 },
-                  },
-                  {
-                    value: numberFormat(getTotalAmount() || 0),
-                  }
+                  { value: "TOTAL", tableCellProps: { colSpan: 6 }, },
+                  { value: numberFormat(getTotalAmount() || 0), }
                 ]
               ]}
             />

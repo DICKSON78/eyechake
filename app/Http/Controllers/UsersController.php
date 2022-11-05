@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
+use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -20,22 +22,44 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 25;
-        $status = $request->status;
-        $q = $request->q;
-        $data = User::query();
+        $id = $request->id;
+        $name = $request->name;
+        $gender = $request->gender;
+        $phone = $request->phone;
+        $department_id = $request->department_id;
+        $job_title_id = $request->job_title_id;
+        $employee_number = $request->employee_number;
+        $data = User::with(['department', 'job_title', 'privileges', 'creator']);
 
-        if ($status) {
-            $data->where('status', $status);
+        if ($id) {
+            $data->where('id', $id);
         }
 
-        if ($q) {
-            $data->where(function ($query) use ($q) {
-                $query->where('first_name', 'like', '%' . $q . '%');
-                $query->orWhere('middle_name', 'like', '%' . $q . '%');
-                $query->orWhere('last_name', 'like', '%' . $q . '%');
-            });
+        if ($name) {
+            $data->fullName('%' . $name . '%');
         }
 
+        if ($gender) {
+            $data->where('gender', $gender);
+        }
+
+        if ($phone) {
+            $data->where('phone', $phone);
+        }
+
+        if ($department_id) {
+            $data->where('department_id', $department_id);
+        }
+
+        if ($job_title_id) {
+            $data->where('job_title_id', $job_title_id);
+        }
+
+        if ($employee_number) {
+            $data->where('employee_number', $employee_number);
+        }
+
+        $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -49,19 +73,38 @@ class UsersController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:items,name',
-            'code' => 'nullable|unique:items,code',
-            'item_type_id' => 'required|exists:item_types,id',
-            'consultation_type_id' => 'required|exists:consultation_types,id',
-            'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
-            'lens_type_id' => 'nullable|exists:lens_types,id',
-            'is_consultation_item' => 'nullable|in:Yes,No',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'username' => 'required|unique:users,username',
+            'gender' => 'required|in:Male,Female',
+            'date_of_birth' => 'nullable|date_format:Y-m-d',
+            'department_id' => 'required|exists:departments,id',
+            'job_title_id' => 'required|exists:job_titles,id',
+            'employee_number' => 'nullable|unique:users,employee_number',
+            'password' => 'required',
+            'privileges' => 'required',
+            'privileges.reception' => 'nullable|boolean',
+            'privileges.payment_center' => 'nullable|boolean',
+            'privileges.consultation_room' => 'nullable|boolean',
+            'privileges.optician_center' => 'nullable|boolean',
+            'privileges.medicine_center' => 'nullable|boolean',
+            'privileges.procedure_room' => 'nullable|boolean',
+            'privileges.inventory_management' => 'nullable|boolean',
+            'privileges.financial_management' => 'nullable|boolean',
+            'privileges.employee_management' => 'nullable|boolean',
+            'privileges.settings' => 'nullable|boolean',
         ]);
 
-        $data = User::create($request->only(
-            'name', 'code', 'item_type_id', 'consultation_type_id',
-            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item'
-        ));
+        $input = $request->all();
+        $input['created_by'] = $request->user()->id;
+        $data = User::create($input);
+
+        if ($data) {
+            UserPrivilege::create(array_merge([
+                'user_id' => $data->id,
+            ], $request->json('privileges')));
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
@@ -73,7 +116,7 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        $data = User::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type', 'prices'])->findOrFail($id);
+        $data = User::with(['department', 'job_title', 'privileges', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -87,18 +130,42 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'nullable|unique:items,name,' . $id,
-            'code' => 'nullable|unique:items,code,' . $id,
-            'item_type_id' => 'nullable|exists:item_types,id',
-            'consultation_type_id' => 'nullable|exists:consultation_types,id',
-            'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
-            'lens_type_id' => 'nullable|exists:lens_types,id',
-            'is_consultation_item' => 'nullable|in:Yes,No',
+            'username' => 'nullable|unique:users,username,' . $id,
+            'department_id' => 'nullable|exists:departments,id',
+            'job_title_id' => 'nullable|exists:job_titles,id',
+            'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'nullable|in:Active,Inactive',
+            'privileges.reception' => 'nullable|boolean',
+            'privileges.payment_center' => 'nullable|boolean',
+            'privileges.consultation_room' => 'nullable|boolean',
+            'privileges.optician_center' => 'nullable|boolean',
+            'privileges.medicine_center' => 'nullable|boolean',
+            'privileges.procedure_room' => 'nullable|boolean',
+            'privileges.inventory_management' => 'nullable|boolean',
+            'privileges.financial_management' => 'nullable|boolean',
+            'privileges.employee_management' => 'nullable|boolean',
+            'privileges.settings' => 'nullable|boolean',
         ]);
 
         $data = User::findOrFail($id);
-        $data->update($request->all());
+        $input = $request->all();
+
+        if ($request->password) {
+            $input['password'] = Hash::make($request->password);
+        }
+
+        if ($request->privileges) {
+            $user_privileges = UserPrivilege::find($id);
+            if ($user_privileges) {
+                $user_privileges->update($request->json('privileges'));
+            } else {
+                UserPrivilege::create(array_merge([
+                    'user_id' => $id,
+                ], $request->json('privileges')));
+            }
+        }
+
+        $data->update($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
@@ -110,8 +177,6 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $data = User::findOrFail($id);
-        $data->delete();
-        return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
+        //
     }
 }

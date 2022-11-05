@@ -121,7 +121,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
   };
 
   const getTotalAmount = () => {
-    return billPayments.reduce((total, e) => total += e.amount, 0);
+    return billPayments.reduce((acc, e) => acc + e.amount, 0);
   };
 
   return (
@@ -249,13 +249,8 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                   hidePaginationFooter
                   footerItems={[
                     [
-                      {
-                        value: "Total",
-                        tableCellProps: { colSpan: 2 },
-                      },
-                      {
-                        value: numberFormat(getTotalAmount() || 0),
-                      }
+                      { value: "TOTAL", tableCellProps: { colSpan: 2 }, },
+                      { value: numberFormat(getTotalAmount() || 0), }
                     ]
                   ]}
                 />

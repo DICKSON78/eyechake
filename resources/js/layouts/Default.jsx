@@ -39,6 +39,7 @@ import ChangePassword from "../pages/auth/ChangePassword";
 import loader from "../../images/loader.svg";
 
 import { useFetch } from "../hooks";
+import { getNonNull } from "../helpers";
 
 const drawerWidth = 240;
 
@@ -57,6 +58,7 @@ const drawerClosedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
+  whiteSpace: "nowrap",
   width: 72,
 });
 
@@ -86,7 +88,10 @@ const Default = ({ setThemeMode, setUser }) => {
   };
 
   const toggleTheme = () => {
-    setThemeMode(theme.palette.mode === "light" ? "dark" : "light");
+    const themeMode = theme.palette.mode === "light" ? "dark" : "light";
+    window.localStorage.removeItem("theme_mode");
+    window.localStorage.setItem("theme_mode", themeMode);
+    setThemeMode(themeMode);
   };
 
   const handleAccountMenuOpen = (event) => {
@@ -170,7 +175,10 @@ const Default = ({ setThemeMode, setUser }) => {
               </Tooltip>
 
               <Chip
-                sx={{ bgcolor: "rgba(255, 255, 255, 0.12)", display: { xs: "none", sm: "none", md: "inline-flex" } }}
+                sx={{
+                  bgcolor: "rgba(255, 255, 255, 0.12)",
+                  display: { xs: "none", sm: "none", md: "inline-flex" },
+                }}
                 color="primary"
                 avatar={
                   <Avatar>
@@ -293,7 +301,7 @@ const Default = ({ setThemeMode, setUser }) => {
             <Card sx={{ width: 250 }}>
               <CardHeader
                 title={user.full_name}
-                subheader={window.user.role}
+                subheader={getNonNull(user.job_title).name}
                 titleTypographyProps={{
                   variant: "subtitle1",
                   fontWeight: "500",

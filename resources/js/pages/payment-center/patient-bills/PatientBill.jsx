@@ -10,6 +10,7 @@ import PatientDetails from "../../reception/patients/PatientDetails";
 import Descriptions from "../../../components/Descriptions";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import PatientBillPayments from "./PatientBillPayments";
+import BillPDF from "./BillPDF";
 
 import { capitalize, formatError, getNonNull, numberFormat } from "../../../helpers";
 import { useFetch, usePatch } from "../../../hooks";
@@ -116,7 +117,14 @@ const PatientBill = () => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+  };
+
+  const getAmountRemaining = () => {
+    if (!bill) {
+      return 0;
+    }
+    return bill.amount - bill.discount - (bill.amount_paid || 0);
   };
 
   return (
@@ -146,16 +154,13 @@ const PatientBill = () => {
         <Card>
           <PageHeader
             title="Patient Bill"
-            trailing={
-              <Button
-                variant="contained"
-                color="secondary"
-                disableElevation
-                onClick={() => console.log(true)}
-              >
-                PDF
-              </Button>
-            }
+            trailing={(
+              <BillPDF
+                bill={bill}
+                items={items}
+                patient={patient}
+              />
+            )}
           />
           <Divider />
           <CardContent>
@@ -166,6 +171,7 @@ const PatientBill = () => {
                 { label: "Bill Amount", value: numberFormat(bill.amount) },
                 { label: "Discount", value: numberFormat(bill.discount) },
                 { label: "Amount Paid", value: numberFormat(bill.amount_paid || 0) },
+                { label: "Amount Remaining", value: numberFormat(getAmountRemaining()) },
                 { label: "Created By", value: getNonNull(bill.creator).full_name },
                 { label: "Date Created", value: bill.created_at },
                 { label: "Bill Status", value: bill.status },
@@ -228,13 +234,8 @@ const PatientBill = () => {
                   hidePaginationFooter
                   footerItems={[
                     [
-                      {
-                        value: "Total",
-                        tableCellProps: { colSpan: 5 },
-                      },
-                      {
-                        value: numberFormat(getTotalAmount() || 0),
-                      }
+                      { value: "TOTAL", tableCellProps: { colSpan: 5 }, },
+                      { value: numberFormat(getTotalAmount() || 0), }
                     ]
                   ]}
                 />
@@ -262,7 +263,7 @@ const PatientBill = () => {
             </Button>
             {bill.status === "Pending" ?
               <Button
-                disabled={loading}
+                disabled={loading || getAmountRemaining() > 0}
                 variant="contained"
                 color="primary"
                 disableElevation

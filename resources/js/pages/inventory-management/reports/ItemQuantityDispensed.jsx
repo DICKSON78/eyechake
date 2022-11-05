@@ -151,6 +151,10 @@ const ItemQuantityDispensed = () => {
             valueGetter: (item, index) => numberFormat(item.dispensed_value || 0),
           },
         ]}
+        summationFooterColumns={[
+          { value: "TOTAL", span: 6, index: 1 },
+          { reducer: (acc, item, index) => acc + (item.dispensed_value || 0), index: 6 },
+        ]}
       />
     </Page>
   );

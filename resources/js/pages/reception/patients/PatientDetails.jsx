@@ -7,10 +7,7 @@ import { formatError, getNonNull } from "../../../helpers";
 
 const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
 
-  const { data, loading, error } = useFetch(`api/patients/${patientId}`, {
-    status: "Active",
-    per_page: 500
-  }, true, null, (response) => response.data.data);
+  const { data, loading, error } = useFetch(`api/patients/${patientId}`, null, true, null, (response) => response.data.data);
 
   useEffect(() => {
     if (typeof setLoading === "function") {

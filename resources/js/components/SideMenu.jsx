@@ -6,16 +6,14 @@ import {
   DoneAllOutlined as DoneIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
-  Groups2 as UsersIcon,
   HomeRounded as HomeIcon,
   HourglassBottomRounded as WaitingIcon,
   Inventory2Rounded as ItemsIcon,
   LinkRounded as LinkIcon,
-  List as ListIcon,
   MoneyRounded as PaymentModesIcon,
   PaymentRounded as PaymentChannelsIcon,
   PersonRounded as PatientsIcon,
-  PestControlRounded as DiseasesIcon,
+  PestControlRounded as DiseasesIcon
 } from "@mui/icons-material";
 
 const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
@@ -26,319 +24,427 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
   const [open, setOpen] = useState();
 
   useEffect(() => {
-    setItems([
-      {
-        id: "1",
-        title: "Dashboard",
-        icon: <HomeIcon />,
-        to: "/dashboard",
-      },
-      {
-        id: "2",
-        title: "RECEPTION",
-        show: !!drawerOpen,
-      },
-      {
-        id: "3",
-        title: "Patients/Customers",
-        icon: <PatientsIcon />,
-        to: "/reception/patients",
-      },
-      {
-        id: "4",
-        title: "PAYMENT CENTER",
-        show: !!drawerOpen,
-      },
-      {
-        id: "5",
-        title: "Patients Sent to Cashier",
-        icon: <WaitingIcon />,
-        to: "/payment-center/pending-cash-patients",
-      },
-      {
-        id: "6",
-        title: "Credit Patients Approval",
-        icon: <WaitingIcon />,
-        to: "/payment-center/pending-credit-patients",
-      },
-      {
-        id: "66",
-        title: "Pending Patient Bills",
-        icon: <WaitingIcon />,
-        to: "/payment-center/patient-bills/pending",
-      },
-      {
-        id: "67",
-        title: "Cleared Patient Bills",
-        icon: <WaitingIcon />,
-        to: "/payment-center/patient-bills/cleared",
-      },
-      {
-        id: "80119791",
-        title: "Reports",
-        icon: <ItemsIcon />,
-        to: "/payment-center/reports",
-        items: [
-          {
-            id: "91691.1",
-            title: "Cash Collection Report",
-            icon: <LinkIcon />,
-            to: "/cash-collection",
-          },
-          {
-            id: "91691.81",
-            title: "Credit Collection Report",
-            icon: <LinkIcon />,
-            to: "/credit-collection",
-          },
-          {
-            id: "91691.8814",
-            title: "Pending Patient Bills Report",
-            icon: <LinkIcon />,
-            to: "/pending-patient-bills",
-          },
-          {
-            id: "91691.88140",
-            title: "Cleared Patient Bills Report",
-            icon: <LinkIcon />,
-            to: "/cleared-patient-bills",
-          },
-          {
-            id: "91691.881",
-            title: "Bill Collection Report",
-            icon: <LinkIcon />,
-            to: "/patient-bill-collection",
-          },
-        ],
-      },
-      {
-        id: "7",
-        title: "CONSULTATION ROOM",
-        show: !!drawerOpen,
-      },
-      {
-        id: "8",
-        title: "Patients Sent to Doctor",
-        icon: <WaitingIcon />,
-        to: "/consultation-room/consultation-patients/pending",
-      },
-      {
-        id: "9",
-        title: "Consulted Patients",
-        icon: <DoneIcon />,
-        to: "/consultation-room/consultation-patients/consulted",
-      },
-      {
-        id: "70",
-        title: "OPTICIAN CENTER",
-        show: !!drawerOpen,
-      },
-      {
-        id: "80",
-        title: "Patients Sent to Optician",
-        icon: <WaitingIcon />,
-        to: "/optician-center/consultation-patients/pending",
-      },
-      {
-        id: "90",
-        title: "Consulted Patients",
-        icon: <DoneIcon />,
-        to: "/optician-center/consultation-patients/consulted",
-      },
-      {
-        id: "801",
-        title: "Dispensing Requests",
-        icon: <WaitingIcon />,
-        to: "/optician-center/reports-requests",
-      },
-      {
-        id: "801197",
-        title: "Reports",
-        icon: <ItemsIcon />,
-        to: "/optician-center/reports",
-        items: [
-          {
-            id: "916.1",
-            title: "Items Dispensed Report",
-            icon: <LinkIcon />,
-            to: "/items-dispensed",
-          },
-          {
-            id: "916.81",
-            title: "Items Not Dispensed Report",
-            icon: <LinkIcon />,
-            to: "/items-not-dispensed",
-          },
-          {
-            id: "976.199",
-            title: "Item Balance Report",
-            icon: <LinkIcon />,
-            to: "/item-balance",
-          },
-        ],
-      },
-      {
-        id: "25",
-        title: "MEDICINE CENTER",
-        show: !!drawerOpen,
-      },
-      {
-        id: "810",
-        title: "Dispensing Requests",
-        icon: <WaitingIcon />,
-        to: "/medicine-center/reports-requests",
-      },
-      {
-        id: "80119",
-        title: "Reports",
-        icon: <ItemsIcon />,
-        to: "/medicine-center/reports",
-        items: [
-          {
-            id: "91.1",
-            title: "Medicines Dispensed Report",
-            icon: <LinkIcon />,
-            to: "/medicines-dispensed",
-          },
-          {
-            id: "91.81",
-            title: "Medicines Not Dispensed Report",
-            icon: <LinkIcon />,
-            to: "/medicines-not-dispensed",
-          },
-          {
-            id: "97.199",
-            title: "Item Balance Report",
-            icon: <LinkIcon />,
-            to: "/item-balance",
-          },
-        ],
-      },
-      {
-        id: "257",
-        title: "PROCEDURE ROOM",
-        show: !!drawerOpen,
-      },
-      {
-        id: "819",
-        title: "Procedure Requests",
-        icon: <WaitingIcon />,
-        to: "/procedure-room/procedure-requests",
-      },
-      {
-        id: "8011979",
-        title: "Reports",
-        icon: <ItemsIcon />,
-        to: "/procedure-room/reports",
-        items: [
-          {
-            id: "9169.1",
-            title: "Served Procedures Report",
-            icon: <LinkIcon />,
-            to: "/served-procedures",
-          },
-          {
-            id: "9169.81",
-            title: "Pending Procedures Report",
-            icon: <LinkIcon />,
-            to: "/pending-procedures",
-          },
-        ],
-      },
-      {
-        id: "2597",
-        title: "INVENTORY MANAGEMENT",
-        show: !!drawerOpen,
-      },
-      {
-        id: "8019",
-        title: "Stocktaking",
-        icon: <ItemsIcon />,
-        to: "/inventory-management/stocktaking",
-      },
-      {
-        id: "8011",
-        title: "Previous Stocktakes",
-        icon: <ItemsIcon />,
-        to: "/inventory-management/stocktakes",
-      },
-      {
-        id: "80119",
-        title: "Reports",
-        icon: <ItemsIcon />,
-        to: "/inventory-management/reports",
-        items: [
-          {
-            id: "97.1",
-            title: "Item Balance Report",
-            icon: <LinkIcon />,
-            to: "/item-balance",
-          },
-          {
-            id: "97.51",
-            title: "Quantity Dispensed Report",
-            icon: <LinkIcon />,
-            to: "/item-quantity-dispensed",
-          },
-          {
-            id: "97.2",
-            title: "Stock Ledger",
-            icon: <LinkIcon />,
-            to: "/stock-ledger",
-          },
-        ],
-      },
-      {
-        id: "15",
-        title: "SETTINGS",
-        show: !!drawerOpen,
-      },
-      {
-        id: "16",
-        title: "Item Management",
-        icon: <ItemsIcon />,
-        to: "/settings/item-management",
-        items: [
-          {
-            id: "7.1",
-            title: "Units of Measure",
-            icon: <LinkIcon />,
-            to: "/units-of-measure",
-          },
-          {
-            id: "7.2",
-            title: "Lens Types",
-            icon: <LinkIcon />,
-            to: "/lens-types",
-          },
-          {
-            id: "7.3",
-            title: "Items",
-            icon: <LinkIcon />,
-            to: "/items",
-          },
-        ],
-      },
-      {
-        id: "11",
-        title: "Payment Modes",
-        icon: <PaymentModesIcon />,
-        to: "/settings/payment-modes",
-      },
-      {
-        id: "12",
-        title: "Payment Channels",
-        icon: <PaymentChannelsIcon />,
-        to: "/settings/payment-channels",
-      },
-      {
-        id: "13",
-        title: "Diseases",
-        icon: <DiseasesIcon />,
-        to: "/settings/diseases",
-      },
-    ]);
-  }, [drawerOpen]);
+    if (user) {
+      setItems([
+        {
+          id: "1",
+          title: "Dashboard",
+          icon: <HomeIcon />,
+          to: "/dashboard",
+        },
+        {
+          id: "2",
+          title: "Patient Records",
+          icon: <HomeIcon />,
+          to: "/patient-records/patients",
+        },
+        {
+          id: "3",
+          title: "RECEPTION",
+          show: !!drawerOpen && user.privileges.reception,
+        },
+        {
+          id: "4",
+          title: "Patients/Customers",
+          icon: <PatientsIcon />,
+          to: "/reception/patients",
+          show: user.privileges.reception,
+        },
+        {
+          id: "5",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/reception/reports",
+          show: user.privileges.reception,
+          items: [
+            {
+              id: "5.1",
+              title: "Patient Registration Report",
+              icon: <LinkIcon />,
+              to: "/patient-registration",
+            },
+          ]
+        },
+        {
+          id: "6",
+          title: "PAYMENT CENTER",
+          show: !!drawerOpen && user.privileges.payment_center,
+        },
+        {
+          id: "7",
+          title: "Patients Sent to Cashier",
+          icon: <WaitingIcon />,
+          to: "/payment-center/pending-cash-patients",
+          show: user.privileges.payment_center,
+        },
+        {
+          id: "8",
+          title: "Credit Patients Approval",
+          icon: <WaitingIcon />,
+          to: "/payment-center/pending-credit-patients",
+          show: user.privileges.payment_center,
+        },
+        {
+          id: "9",
+          title: "Pending Patient Bills",
+          icon: <WaitingIcon />,
+          to: "/payment-center/patient-bills/pending",
+          show: user.privileges.payment_center,
+        },
+        {
+          id: "10",
+          title: "Cleared Patient Bills",
+          icon: <WaitingIcon />,
+          to: "/payment-center/patient-bills/cleared",
+          show: user.privileges.payment_center,
+        },
+        {
+          id: "11",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/payment-center/reports",
+          show: user.privileges.payment_center,
+          items: [
+            {
+              id: "11.1",
+              title: "Cash Collection Report",
+              icon: <LinkIcon />,
+              to: "/cash-collection",
+            },
+            {
+              id: "11.2",
+              title: "Credit Collection Report",
+              icon: <LinkIcon />,
+              to: "/credit-collection",
+            },
+            {
+              id: "11.3",
+              title: "Pending Patient Bills Report",
+              icon: <LinkIcon />,
+              to: "/pending-patient-bills",
+            },
+            {
+              id: "11.4",
+              title: "Cleared Patient Bills Report",
+              icon: <LinkIcon />,
+              to: "/cleared-patient-bills",
+            },
+            {
+              id: "11.5",
+              title: "Bill Collection Report",
+              icon: <LinkIcon />,
+              to: "/patient-bill-collection",
+            },
+          ],
+        },
+        {
+          id: "12",
+          title: "CONSULTATION ROOM",
+          show: !!drawerOpen && user.privileges.consultation_room,
+        },
+        {
+          id: "13",
+          title: "Patients Sent to Doctor",
+          icon: <WaitingIcon />,
+          to: "/consultation-room/consultation-patients/pending",
+          show: user.privileges.consultation_room,
+        },
+        {
+          id: "14",
+          title: "Consulted Patients",
+          icon: <DoneIcon />,
+          to: "/consultation-room/consultation-patients/consulted",
+          show: user.privileges.consultation_room,
+        },
+        {
+          id: "15",
+          title: "OPTICIAN CENTER",
+          show: !!drawerOpen && user.privileges.optician_center,
+        },
+        {
+          id: "16",
+          title: "Patients Sent to Optician",
+          icon: <WaitingIcon />,
+          to: "/optician-center/consultation-patients/pending",
+          show: user.privileges.optician_center,
+        },
+        {
+          id: "17",
+          title: "Consulted Patients",
+          icon: <DoneIcon />,
+          to: "/optician-center/consultation-patients/consulted",
+          show: user.privileges.optician_center,
+        },
+        {
+          id: "18",
+          title: "Dispensing Requests",
+          icon: <WaitingIcon />,
+          to: "/optician-center/dispensing-requests",
+          show: user.privileges.optician_center,
+        },
+        {
+          id: "19",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/optician-center/reports",
+          show: user.privileges.optician_center,
+          items: [
+            {
+              id: "19.1",
+              title: "Items Dispensed Report",
+              icon: <LinkIcon />,
+              to: "/items-dispensed",
+            },
+            {
+              id: "19.2",
+              title: "Items Not Dispensed Report",
+              icon: <LinkIcon />,
+              to: "/items-not-dispensed",
+            },
+            {
+              id: "19.3",
+              title: "Item Balance Report",
+              icon: <LinkIcon />,
+              to: "/item-balance",
+            },
+          ],
+        },
+        {
+          id: "20",
+          title: "MEDICINE CENTER",
+          show: !!drawerOpen && user.privileges.medicine_center,
+        },
+        {
+          id: "21",
+          title: "Dispensing Requests",
+          icon: <WaitingIcon />,
+          to: "/medicine-center/reports-requests",
+          show: user.privileges.medicine_center,
+        },
+        {
+          id: "22",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/medicine-center/reports",
+          show: user.privileges.medicine_center,
+          items: [
+            {
+              id: "22.1",
+              title: "Medicines Dispensed Report",
+              icon: <LinkIcon />,
+              to: "/medicines-dispensed",
+            },
+            {
+              id: "22.2",
+              title: "Medicines Not Dispensed Report",
+              icon: <LinkIcon />,
+              to: "/medicines-not-dispensed",
+            },
+            {
+              id: "22.3",
+              title: "Item Balance Report",
+              icon: <LinkIcon />,
+              to: "/item-balance",
+            },
+          ],
+        },
+        {
+          id: "23",
+          title: "PROCEDURE ROOM",
+          show: !!drawerOpen && user.privileges.procedure_room,
+        },
+        {
+          id: "24",
+          title: "Procedure Requests",
+          icon: <WaitingIcon />,
+          to: "/procedure-room/procedure-requests",
+          show: user.privileges.procedure_room,
+        },
+        {
+          id: "25",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/procedure-room/reports",
+          show: user.privileges.procedure_room,
+          items: [
+            {
+              id: "25.1",
+              title: "Served Procedures Report",
+              icon: <LinkIcon />,
+              to: "/served-procedures",
+            },
+            {
+              id: "25.2",
+              title: "Pending Procedures Report",
+              icon: <LinkIcon />,
+              to: "/pending-procedures",
+            },
+          ],
+        },
+        {
+          id: "26",
+          title: "INVENTORY MANAGEMENT",
+          show: !!drawerOpen && user.privileges.inventory_management,
+        },
+        {
+          id: "27",
+          title: "Stocktaking",
+          icon: <ItemsIcon />,
+          to: "/inventory-management/stocktaking",
+          show: user.privileges.inventory_management,
+        },
+        {
+          id: "28",
+          title: "Previous Stocktakes",
+          icon: <ItemsIcon />,
+          to: "/inventory-management/stocktakes",
+          show: false,
+        },
+        {
+          id: "29",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/inventory-management/reports",
+          show: user.privileges.inventory_management,
+          items: [
+            {
+              id: "29.1",
+              title: "Item Balance Report",
+              icon: <LinkIcon />,
+              to: "/item-balance",
+            },
+            {
+              id: "29.2",
+              title: "Quantity Dispensed Report",
+              icon: <LinkIcon />,
+              to: "/item-quantity-dispensed",
+            },
+            {
+              id: "29.3",
+              title: "Stock Ledger",
+              icon: <LinkIcon />,
+              to: "/stock-ledger",
+            },
+          ],
+        },
+        {
+          id: "30",
+          title: "FINANCIAL MANAGEMENT",
+          show: !!drawerOpen && user.privileges.financial_management,
+        },
+        {
+          id: "31",
+          title: "Expenses",
+          icon: <ItemsIcon />,
+          to: "/financial-management/expenses",
+          show: user.privileges.financial_management,
+        },
+        {
+          id: "32",
+          title: "Reports",
+          icon: <ItemsIcon />,
+          to: "/financial-management/reports",
+          show: user.privileges.financial_management,
+          items: [
+            {
+              id: "32.1",
+              title: "Expenses Report",
+              icon: <LinkIcon />,
+              to: "/expenses",
+            },
+          ],
+        },
+        {
+          id: "33",
+          title: "EMPLOYEE MANAGEMENT",
+          show: !!drawerOpen && user.privileges.employee_management,
+        },
+        {
+          id: "34",
+          title: "Employees",
+          icon: <WaitingIcon />,
+          to: "/employee-management/employees",
+          show: user.privileges.employee_management,
+        },
+        {
+          id: "35",
+          title: "SETTINGS",
+          show: !!drawerOpen && user.privileges.settings,
+        },
+        {
+          id: "36",
+          title: "Item Management",
+          icon: <ItemsIcon />,
+          to: "/settings/item-management",
+          show: user.privileges.settings,
+          items: [
+            {
+              id: "36.1",
+              title: "Units of Measure",
+              icon: <LinkIcon />,
+              to: "/units-of-measure",
+            },
+            {
+              id: "36.2",
+              title: "Lens Types",
+              icon: <LinkIcon />,
+              to: "/lens-types",
+            },
+            {
+              id: "36.3",
+              title: "Items",
+              icon: <LinkIcon />,
+              to: "/items",
+            },
+          ],
+        },
+        {
+          id: "37",
+          title: "Payment Modes",
+          icon: <PaymentModesIcon />,
+          to: "/settings/payment-modes",
+          show: user.privileges.settings,
+        },
+        {
+          id: "38",
+          title: "Payment Channels",
+          icon: <PaymentChannelsIcon />,
+          to: "/settings/payment-channels",
+          show: user.privileges.settings,
+        },
+        {
+          id: "39",
+          title: "Diseases",
+          icon: <DiseasesIcon />,
+          to: "/settings/diseases",
+          show: user.privileges.settings,
+        },
+        {
+          id: "40",
+          title: "Expense Categories",
+          icon: <DiseasesIcon />,
+          to: "/settings/expense-categories",
+          show: user.privileges.settings,
+        },
+        {
+          id: "41",
+          title: "Departments",
+          icon: <DiseasesIcon />,
+          to: "/settings/departments",
+          show: user.privileges.settings,
+        },
+        {
+          id: "42",
+          title: "Job Titles",
+          icon: <DiseasesIcon />,
+          to: "/settings/job-titles",
+          show: user.privileges.settings,
+        },
+      ]);
+    } else {
+      setItems([]);
+    }
+  }, [drawerOpen, user]);
 
   return (
     <List
@@ -374,7 +480,6 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               }}
               sx={{
                 "&.Mui-selected": {
-                  backgroundColor: "transparent",
                   color: (theme) => theme.palette.primary.main,
                   borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
 
@@ -412,7 +517,6 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                       onClick={() => navigate(e.to + f.to)}
                       sx={{
                         "&.Mui-selected": {
-                          backgroundColor: "transparent",
                           color: (theme) => theme.palette.primary.main,
                           borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
 

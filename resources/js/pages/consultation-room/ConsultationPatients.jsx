@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Alert, Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Table, { PageSizeSelect } from "../../components/Table";
 import Modal from "../../components/Modal";
@@ -21,7 +21,7 @@ const PendingConsultationPatients = () => {
     page: 1,
     per_page: 25,
     consultant: "Doctor",
-    consultant_id: window.user.id,
+    //consultant_id: window.user.id,
     status: capitalize(status),
     patient_id: undefined,
     patient_name: undefined,
@@ -81,6 +81,18 @@ const PendingConsultationPatients = () => {
           title={getTitle()}
           trailing={
             <React.Fragment>
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={!!params.consultant_id}
+                    onChange={(event) => setParams({
+                      ...params,
+                      consultant_id: event.target.checked ? window.user.id : undefined
+                    })}
+                  />
+                )}
+                label="My Patients Only"
+              />
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
@@ -132,13 +144,12 @@ const PendingConsultationPatients = () => {
                 field: "created_by",
                 headerName: "Sent By",
                 valueGetter: (item, index) => getNonNull(item.creator).full_name,
-                show: status === "Pending"
+                show: status === "pending"
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
                 valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
-                show: status === "Consulted"
               },
               {
                 field: "created_at",

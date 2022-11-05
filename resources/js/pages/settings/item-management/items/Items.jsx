@@ -3,9 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../../components/Page";
-import Table, { PageSizeSelect, SearchTextField } from "../../../../components/Table";
+import Table, { PageSizeSelect } from "../../../../components/Table";
 import Modal from "../../../../components/Modal";
-import Filter from "./Filter";
+import Filters from "./Filters";
 import CreateItem from "./CreateItem";
 import EditItem from "./EditItem";
 import ManageItemPrices from "./ManageItemPrices";
@@ -20,7 +20,11 @@ const Items = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    status: undefined,
     q: undefined,
+    item_type_id: undefined,
+    consultation_type_id: undefined,
+    is_consultation_item: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/items", params, true, {
@@ -32,21 +36,6 @@ const Items = () => {
   useEffect(() => {
     document.title = `Items - ${window.APP_NAME}`;
   }, []);
-
-  const openFilterModal = () => {
-    let component = (
-      <Filter
-        params={params}
-        modal={modalRef.current}
-        onOk={(updated) => {
-          setParams(updated);
-          modalRef.current.close();
-        }}
-      />
-    );
-
-    modalRef.current.open("Filter", component);
-  };
 
   const openCreateItemModal = () => {
     let component = (
@@ -125,15 +114,6 @@ const Items = () => {
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
-              <SearchTextField onChange={(value) => setParams({ ...params, q: value })}/>
-              <Button
-                variant="contained"
-                color="secondary"
-                disableElevation
-                onClick={openFilterModal}
-              >
-                Filter
-              </Button>
               <Button
                 variant="contained"
                 disableElevation
@@ -146,6 +126,13 @@ const Items = () => {
         />
         <Divider />
         <CardContent>
+          <Filters
+            params={params}
+            setParams={setParams}
+            sx={{
+              mb: 2,
+            }}
+          />
           <Table
             loading={loading}
             columns={[

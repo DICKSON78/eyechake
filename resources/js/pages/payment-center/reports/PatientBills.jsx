@@ -226,6 +226,13 @@ const PatientBills = ({ status }) => {
             headerName: "Date",
           },
         ]}
+        summationFooterColumns={[
+          { value: "TOTAL", span: 4, index: 1 },
+          { reducer: (acc, item, index) => acc + item.amount, index: 4 },
+          { reducer: (acc, item, index) => acc + item.discount, index: 5 },
+          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 6 },
+          { reducer: (acc, item, index) => acc + (item.amount_paid || 0), index: 7 },
+        ]}
       />
     </Page>
   );

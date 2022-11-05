@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Skeleton, Stack } from "@mui/material";
@@ -10,6 +10,9 @@ import Table from "../../../components/Table";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+
+import PaymentReceiptPDF from "./PaymentReceiptPDF";
+import { pdf } from "@react-pdf/renderer";
 
 import { useFetch, usePost } from "../../../hooks";
 import { formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
@@ -29,6 +32,7 @@ const PendingPatientItems = () => {
   const [patient, setPatient] = useState();
   const [discount, setDiscount] = useState();
   const [paymentChannel, setPaymentChannel] = useState();
+  const [loadingReceipt, setLoadingReceipt] = useState(false);
 
   const { data: paymentChannels, handleFetch: fetchPaymentChannels } = useFetch("api/payment-channels", {
     status: "Active",
@@ -74,6 +78,7 @@ const PendingPatientItems = () => {
       setSelectedItems([]);
       discountRef.current.setValue(null);
       paymentChannelRef.current.setValue(null);
+      generatePaymentReceipt();
     }
   }, [data]);
 
@@ -124,12 +129,26 @@ const PendingPatientItems = () => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   const getSelectedAmount = () => {
-    return selectedItems.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
+
+  const generatePaymentReceipt = useCallback(async () => {
+    setLoadingReceipt(true);
+    const blob = await pdf(
+      <PaymentReceiptPDF
+        receipt={data.data}
+        items={data.data.items}
+        patient={patient}
+      />
+    ).toBlob();
+    setLoadingReceipt(false);
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }, [data]);
 
   return (
     <Page
@@ -200,13 +219,8 @@ const PendingPatientItems = () => {
               setChecked={setSelectedItems}
               footerItems={[
                 [
-                  {
-                    value: "Total",
-                    tableCellProps: { colSpan: 6 },
-                  },
-                  {
-                    value: numberFormat(getTotalAmount() || 0),
-                  }
+                  { value: "TOTAL", tableCellProps: { colSpan: 6 }, },
+                  { value: numberFormat(getTotalAmount() || 0), }
                 ]
               ]}
             />
@@ -271,7 +285,10 @@ const PendingPatientItems = () => {
             {handleFeedback()}
           </CardContent>
           <Divider />
-          {loading && <LinearProgress />}
+          {loading || loadingReceipt ?
+            <LinearProgress />
+            : null
+          }
           <Stack
             direction="row"
             spacing={2}
@@ -280,15 +297,18 @@ const PendingPatientItems = () => {
             flexWrap="wrap"
             p={2}
           >
-            <Button
-              disabled={loading}
-              variant="contained"
-              color="purple"
-              disableElevation
-              onClick={() => console.log(true)}
-            >
-              Print Receipt
-            </Button>
+            {data ?
+              <Button
+                disabled={loading}
+                variant="contained"
+                color="purple"
+                disableElevation
+                onClick={() => generatePaymentReceipt()}
+              >
+                Print Receipt
+              </Button>
+              : null
+            }
             <Button
               disabled={loading}
               variant="contained"

@@ -5,6 +5,9 @@ import ItemManagementRoutes from "./item-management/ItemManagementRoutes";
 import PaymentModes from "./payment-modes/PaymentModes";
 import PaymentChannels from "./payment-channels/PaymentChannels";
 import Diseases from "./diseases/Diseases";
+import ExpenseCategories from "./expense-categories/ExpenseCategories";
+import Departments from "./departments/Departments";
+import JobTitles from "./job-titles/JobTitles";
 
 const SettingsRoutes = () => {
   return (
@@ -13,6 +16,9 @@ const SettingsRoutes = () => {
       <Route path="/payment-modes" element={<PaymentModes />}/>
       <Route path="/payment-channels" element={<PaymentChannels />}/>
       <Route path="/diseases" element={<Diseases />}/>
+      <Route path="/expense-categories" element={<ExpenseCategories />}/>
+      <Route path="/departments" element={<Departments />}/>
+      <Route path="/job-titles" element={<JobTitles />}/>
     </Routes>
   );
 };

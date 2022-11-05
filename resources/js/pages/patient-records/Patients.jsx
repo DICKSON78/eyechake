@@ -1,0 +1,154 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import Page, { Header as PageHeader } from "../../components/Page";
+import Table, { PageSizeSelect } from "../../components/Table";
+import Modal from "../../components/Modal";
+import Filters from "../reception/patients/Filters";
+
+import { useFetch } from "../../hooks";
+import { formatError, getNonNull } from "../../helpers";
+
+const Patients = () => {
+
+  const navigate = useNavigate();
+  const modalRef = useRef();
+
+  const [params, setParams] = useState({
+    page: 1,
+    per_page: 25,
+    id: undefined,
+    name: undefined,
+    gender: undefined,
+    payment_mode_id: undefined,
+  });
+
+  const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
+    data: [],
+    total: 0,
+    page: 1
+  }, (response) => response.data.data);
+
+  useEffect(() => {
+    document.title = `Patient Records - ${window.APP_NAME}`;
+  }, []);
+
+  return (
+    <Page
+      breadcrumbs={[
+        { title: "Home" },
+        { title: "Patient Records" },
+      ]}
+    >
+      {error ?
+        <Alert
+          sx={{ mb: 2 }}
+          severity="error"
+        >
+          {formatError(error)}
+        </Alert>
+        : null
+      }
+      <Card>
+        <PageHeader
+          title="Registered Patients"
+          trailing={
+            <React.Fragment>
+              <PageSizeSelect
+                pageSize={params.per_page}
+                onChange={(value) => setParams({ ...params, per_page: value })}
+              />
+            </React.Fragment>
+          }
+        />
+        <Divider />
+        <CardContent>
+          <Filters
+            params={params}
+            setParams={setParams}
+            sx={{ mb: 2 }}
+          />
+          <Table
+            loading={loading}
+            columns={[
+              {
+                field: "index",
+                headerName: "S/N",
+                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+              },
+              {
+                field: "full_name",
+                headerName: "Patient Name",
+              },
+              {
+                field: "id",
+                headerName: "Patient Number",
+              },
+              {
+                field: "date_of_birth",
+                headerName: "Date of Birth",
+              },
+              {
+                field: "gender",
+                headerName: "Gender",
+              },
+              {
+                field: "phone",
+                headerName: "Phone Number",
+              },
+              {
+                field: "region_id",
+                headerName: "Location",
+                valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
+              },
+              {
+                field: "payment_mode_id",
+                headerName: "Payment Mode",
+                valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+              },
+              {
+                field: "created_by",
+                headerName: "Registered By",
+                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+              },
+              {
+                field: "created_at",
+                headerName: "Date",
+              },
+              {
+                field: "actions",
+                headerName: "Actions",
+                renderCell: (item) => (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    spacing={1}
+                  >
+                    <Button
+                      variant="contained"
+                      disableElevation
+                      size="small"
+                      onClick={() => navigate(`/patient-records/patients/${item.id}`)}
+                    >
+                      View Records
+                    </Button>
+                  </Stack>
+                ),
+              }
+            ]}
+            items={data.data}
+            itemCount={data.total}
+            page={params.page}
+            pageSize={params.per_page}
+            onPageChange={(page) => setParams({ ...params, page })}
+          />
+        </CardContent>
+      </Card>
+      <Modal ref={modalRef}/>
+    </Page>
+  );
+};
+
+export default Patients;

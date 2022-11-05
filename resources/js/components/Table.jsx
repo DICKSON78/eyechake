@@ -251,7 +251,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                 <React.Fragment key={index}>
                   <TableRow selected={checked.indexOf(item) !== -1}>
                     {checkboxSelection ?
-                      <TableCell component="th">
+                      <TableCell>
                         <Checkbox
                           disabled={!isItemCheckable(item, index)}
                           checked={checked.indexOf(item) !== -1}

@@ -121,8 +121,8 @@ const CheckInPatient = () => {
         consultation_type_id: selectedItem.consultation_type_id,
         unit_price: selectedItem.prices[0].unit_price,
         quantity,
-        consultant_id: consultant.id,
-        consultant_name: consultant.full_name,
+        consultant_id: consultant ? consultant.id : null,
+        consultant_name: consultant ? consultant.full_name : null,
       }]);
 
       setSelectedItem(null);
@@ -171,7 +171,7 @@ const CheckInPatient = () => {
   };
 
   const getTotalAmount = () => {
-    return selectedItems.reduce((total, e) => total += ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   return (
@@ -237,7 +237,6 @@ const CheckInPatient = () => {
                   ref={consultantRef}
                   label="Consultant"
                   fullWidth
-                  required
                   options={users}
                   optionsLabel="full_name"
                   optionsValue="id"
@@ -446,13 +445,8 @@ const CheckInPatient = () => {
                       hidePaginationFooter
                       footerItems={[
                         [
-                          {
-                            value: "Total",
-                            tableCellProps: { colSpan: 5 },
-                          },
-                          {
-                            value: numberFormat(getTotalAmount() || 0),
-                          }
+                          { value: "TOTAL", tableCellProps: { colSpan: 5 }, },
+                          { value: numberFormat(getTotalAmount() || 0), }
                         ]
                       ]}
                     />

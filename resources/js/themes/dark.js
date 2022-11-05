@@ -148,6 +148,14 @@ const theme = createTheme({
         },
       }
     },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          marginLeft: "4px",
+          marginRight: "4px",
+        },
+      }
+    },
     MuiTableBody: {
       styleOverrides: {
         root: {
@@ -174,7 +182,7 @@ const theme = createTheme({
         footer: {
           padding: "12px",
           fontSize: "0.75rem",
-          fontWeight: 500,
+          fontWeight: 700,
         },
       }
     },

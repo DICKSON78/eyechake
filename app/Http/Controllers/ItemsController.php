@@ -23,6 +23,7 @@ class ItemsController extends Controller
         $status = $request->status;
         $q = $request->q;
         $item_type_id = $request->item_type_id;
+        $consultation_type_id = $request->consultation_type_id;
         $consultation_type = $request->consultation_type;
         $is_consultation_item = $request->is_consultation_item;
         $is_stock_item = $request->is_stock_item;
@@ -42,6 +43,10 @@ class ItemsController extends Controller
 
         if ($item_type_id) {
             $data->where('item_type_id', $item_type_id);
+        }
+
+        if ($consultation_type_id) {
+            $data->where('consultation_type_id', $consultation_type_id);
         }
 
         if ($consultation_type) {

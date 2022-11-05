@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('middle_name')->nullable();
             $table->string('last_name');
             $table->string('username')->unique();
+            $table->bigInteger('department_id')->unsigned()->nullable();
             $table->bigInteger('job_title_id')->unsigned()->nullable();
             $table->string('employee_number')->nullable();
             $table->date('date_of_birth')->nullable();
@@ -32,6 +33,11 @@ return new class extends Migration
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamp('updated_at')->nullable();
 
+            $table->foreign('department_id')
+                ->references('id')
+                ->on('departments')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
             $table->foreign('job_title_id')
                 ->references('id')
                 ->on('job_titles')

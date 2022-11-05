@@ -43,7 +43,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               fullWidth
               label="Patient Number"
-              defaultValue={params.patient_id}
+              defaultValue={params.id}
               onChange={(value) => setParams({ ...params, id: value })}
             />
           </Grid>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, Paper, Typography } from "@mui/material";
 
 const Auth = () => {
 
@@ -18,15 +18,17 @@ const Auth = () => {
         minHeight="100vh"
       >
         <Outlet />
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          align="center"
-          mt={2}
-        >
-          {"© "}
-          {new Date().getFullYear()}
-        </Typography>
+        <Paper variant="outlined" sx={{ mt: 1 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            align="center"
+            p={2}
+          >
+            {"© "}
+            {new Date().getFullYear()}
+          </Typography>
+        </Paper>
       </Box>
     </Container>
   );

@@ -4,11 +4,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConsultationDiagnosesController;
 use App\Http\Controllers\ConsultationsController;
 use App\Http\Controllers\ConsultationTypesController;
+use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
+use App\Http\Controllers\ExpenseCategoriesController;
+use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
+use App\Http\Controllers\JobTitlesController;
 use App\Http\Controllers\LensTypesController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
@@ -25,6 +29,9 @@ use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
+use App\Models\Department;
+use App\Models\JobTitle;
+use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +47,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $user->department = Department::find($user->department_id);
+    $user->job_title = JobTitle::find($user->job_title_id);
+    $user->privileges = UserPrivilege::find($user->id);
+
+    if (!$user->privileges) {
+        $user->privileges = new stdClass();
+    }
+    return $user;
 });
 
 Route::group(['prefix' => 'auth'], function ($router) {
@@ -49,6 +64,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
 Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
+    $router->apiResource('/departments', DepartmentsController::class);
+    $router->apiResource('/job-titles', JobTitlesController::class);
     $router->apiResource('/users', UsersController::class);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/payment-channels', PaymentChannelsController::class);
@@ -90,6 +107,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
     $router->apiResource('/stocktakes', StocktakesController::class);
+
+    $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
+    $router->apiResource('/expenses', ExpensesController::class);
+    $router->apiResource('/users', UsersController::class);
 
     $router->prefix('reports')->group(function ($router) {
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
