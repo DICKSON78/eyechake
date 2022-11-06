@@ -99,6 +99,10 @@ const theme = createTheme({
             marginRight: 0,
           },
         },
+        title: {
+          fontSize: "16px",
+          fontWeight: 400,
+        },
       }
     },
     MuiCardContent: {

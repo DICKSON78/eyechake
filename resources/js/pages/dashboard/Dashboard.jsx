@@ -284,12 +284,7 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader
-                title="Cash Collection"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                }}
-              />
+              <CardHeader title="Cash Collection" />
               <Divider />
               <CardContent>
                 <canvas ref={consultationTypesChartCanvasRef}/>
@@ -303,12 +298,7 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader
-                title="Expenses"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                }}
-              />
+              <CardHeader title="Expenses" />
               <Divider />
               <CardContent>
                 <canvas ref={expensesChartCanvasRef}/>
