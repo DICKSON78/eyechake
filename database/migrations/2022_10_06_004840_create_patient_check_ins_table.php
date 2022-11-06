@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->foreign('patient_id')
                 ->references('id')
-                ->on('employees')
+                ->on('patients')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('payment_mode_id')
