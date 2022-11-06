@@ -1,4 +1,5 @@
 export const PRIVILEGES = [
+  { label: "Dashboard", value: "dashboard" },
   { label: "Reception", value: "reception" },
   { label: "Payment Center", value: "payment_center" },
   { label: "Consultation Room", value: "consultation_room" },

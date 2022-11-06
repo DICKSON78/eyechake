@@ -76,7 +76,7 @@ const App = () => {
             <React.Fragment>
               <Route
                 path="dashboard"
-                element={<Dashboard />}
+                element={user && user.privileges.dashboard ? <Dashboard /> : null}
               />
               <Route
                 path="patient-records/*"

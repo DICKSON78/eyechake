@@ -14,7 +14,8 @@ class UserPrivilege extends Model
     protected $primaryKey = 'user_id';
 
     protected $fillable = [
-        'user_id', 'reception', 'payment_center', 'consultation_room', 'optician_center', 'medicine_center',
-        'procedure_room', 'inventory_management', 'financial_management', 'employee_management', 'settings',
+        'user_id', 'dashboard', 'reception', 'payment_center', 'consultation_room', 'optician_center',
+        'medicine_center', 'procedure_room', 'inventory_management', 'financial_management',
+        'employee_management', 'settings',
     ];
 }

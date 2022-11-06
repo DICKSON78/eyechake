@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
 
         UserPrivilege::insert([
             'user_id' => 1,
+            'dashboard' => 1,
             'reception' => 1,
             'payment_center' => 1,
             'consultation_room' => 1,
