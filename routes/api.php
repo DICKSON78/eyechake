@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClinicDetailsController;
 use App\Http\Controllers\ConsultationDiagnosesController;
 use App\Http\Controllers\ConsultationsController;
 use App\Http\Controllers\ConsultationTypesController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
@@ -64,6 +66,8 @@ Route::group(['prefix' => 'auth'], function ($router) {
 
 Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
+    $router->get('/dashboard', DashboardController::class);
+    $router->apiResource('/clinic-details', ClinicDetailsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
     $router->apiResource('/users', UsersController::class);

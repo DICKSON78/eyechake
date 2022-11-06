@@ -6,6 +6,7 @@ import { Skeleton } from "@mui/material";
 import Page from "../../components/Page";
 import Modal from "../../components/Modal";
 import PatientDetails from "../reception/patients/PatientDetails";
+import PatientFile from "./patient-file/PatientFile";
 
 const PatientRoutes = () => {
 
@@ -48,10 +49,8 @@ const PatientRoutes = () => {
       {patient ?
         <Routes>
           <Route
-            path="/clinical-notes"
-            element={(
-              <div/>
-            )}
+            path="/patient-file"
+            element={<PatientFile patient={patient}/>}
           />
         </Routes>
         : null

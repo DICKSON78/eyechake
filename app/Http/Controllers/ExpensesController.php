@@ -30,11 +30,11 @@ class ExpensesController extends Controller
         }
 
         if ($start_date) {
-            $data->whereDate('created_at', '>=', $start_date);
+            $data->whereDate('expense_date', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->whereDate('created_at', '<=', $end_date);
+            $data->whereDate('expense', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');
@@ -53,6 +53,7 @@ class ExpensesController extends Controller
         $request->validate([
             'category_id' => 'required|exists:expense_categories,id',
             'amount' => 'required|numeric|min:0',
+            'expense_date' => 'required|date_format:Y-m-d',
         ]);
 
         $input = $request->all();
@@ -85,6 +86,7 @@ class ExpensesController extends Controller
         $request->validate([
             'category_id' => 'nullable|exists:expense_categories,id',
             'amount' => 'nullable|numeric|min:0',
+            'expense_date' => 'nullable|date_format:Y-m-d',
         ]);
 
         $data = Expense::findOrFail($id);

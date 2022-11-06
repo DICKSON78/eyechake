@@ -21,11 +21,11 @@ const LoadingSkeleton = () => {
         <Skeleton variant="rounded" height={128}/>
       </Grid>
 
-      <Grid item md={4} sm={12} xs={12}>
+      <Grid item md={8} sm={12} xs={12}>
         <Skeleton variant="rounded" height={272}/>
       </Grid>
 
-      <Grid item md={8} sm={12} xs={12}>
+      <Grid item md={4} sm={12} xs={12}>
         <Skeleton variant="rounded" height={272}/>
       </Grid>
     </Grid>

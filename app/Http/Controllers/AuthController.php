@@ -66,7 +66,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if (Auth::attempt(['email' => $user->email, 'password' => $request->current_password])) {
+        if (Hash::check($request->current_password, $user->password)) {
             $user->password = Hash::make($request->new_password);
             $user->save();
 

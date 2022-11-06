@@ -3,7 +3,7 @@ import { Avatar, Box, Card, Grid, Stack, Typography } from "@mui/material";
 import { North as IncreaseIcon, South as DecreaseIcon } from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
 
-const InfoCard = ({ title, count, percentageChange, icon, color }) => {
+const InfoCard = ({ title, count, icon, color }) => {
   return (
     <Grid
       item
@@ -11,7 +11,12 @@ const InfoCard = ({ title, count, percentageChange, icon, color }) => {
       sm={12}
       xs={12}
     >
-      <Card sx={{ p: 3 }}>
+      <Card
+        sx={{
+          p: 3,
+          borderLeft: `4px solid ${alpha(color, 0.24)}`,
+        }}
+      >
         <Stack
           direction="row"
           alignItems="center"
@@ -68,32 +73,6 @@ const InfoCard = ({ title, count, percentageChange, icon, color }) => {
             {icon}
           </Avatar>
         </Stack>
-        <Box
-          display="inline-flex"
-          flexDirection="row"
-          alignItems="center"
-          gap="4px"
-          mt="4px"
-        >
-          <Typography
-            component="span"
-            variant="body2"
-            fontWeight="500"
-            color={percentageChange < 0 ? "error" : "primary"}
-            display="inline-flex"
-            flexDirection="row"
-            alignItems="center"
-          >
-            {percentageChange < 0 ? <DecreaseIcon fontSize="10px"/> : <IncreaseIcon fontSize="10px"/>}
-            {Math.abs(percentageChange)}{"%"}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            since last month
-          </Typography>
-        </Box>
       </Card>
     </Grid>
   );

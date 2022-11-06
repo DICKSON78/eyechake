@@ -56,7 +56,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
           ref={leRef}
           disabled={status === "Consulted"}
           fullWidth
-          label="RE"
+          label="LE"
           multiline
           rows={2}
           horizontal

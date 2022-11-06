@@ -8,6 +8,7 @@ import Diseases from "./diseases/Diseases";
 import ExpenseCategories from "./expense-categories/ExpenseCategories";
 import Departments from "./departments/Departments";
 import JobTitles from "./job-titles/JobTitles";
+import ClinicDetails from "./ClinicDetails";
 
 const SettingsRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const SettingsRoutes = () => {
       <Route path="/expense-categories" element={<ExpenseCategories />}/>
       <Route path="/departments" element={<Departments />}/>
       <Route path="/job-titles" element={<JobTitles />}/>
+      <Route path="/clinic-details" element={<ClinicDetails />}/>
     </Routes>
   );
 };

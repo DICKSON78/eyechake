@@ -4,6 +4,23 @@ import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
 import logo from "../../../images/logo.png";
 
 const Header = ({ fixed, title, subtitle, dense }) => {
+
+  const getAddressLine = () => {
+    let contacts = [window.clinic.name];
+
+    if (window.clinic.address) {
+      contacts.push(window.clinic.address);
+    }
+    if (window.clinic.phone) {
+      contacts.push("Phone: " + window.clinic.phone);
+    }
+    if (window.clinic.email) {
+      contacts.push("Email: " + window.clinic.email);
+    }
+
+    return contacts.join("\n");
+  };
+
   return (
     <View
       fixed={fixed}
@@ -11,24 +28,23 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingVertical: 8,
+        alignItems: "center",
+        paddingVertical: 4,
         borderTop: "1pt solid #00225f",
         borderBottom: "1pt solid #d71a20",
         marginBottom: 16,
         ...(dense && {
           flexDirection: "column",
-          alignItems: "center",
-          paddingVertical: 4,
           marginBottom: 8,
         }),
       }}
     >
       <View
-        style={{ width: 112 }}>
+        style={{ width: 96 }}>
         <Image
           src={logo}
           style={{
-            width: 32,
+            width: 40,
             height: "auto",
             ...(dense && {
               margin: "0 auto",
@@ -75,7 +91,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         }
       </View>
       {!dense ?
-        <View style={{ width: 112 }}>
+        <View style={{ width: 96 }}>
           <Text
             style={[
               styles.text,
@@ -84,7 +100,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
               },
             ]}
           >
-            {`EyeCare\nP. O. Box 6857, Dar es Salaam\nPhone: 0768347657\nEmail: 0768347657`}
+            {`${getAddressLine()}`}
           </Text>
         </View>
         : null

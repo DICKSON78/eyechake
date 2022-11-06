@@ -68,7 +68,10 @@ const Default = ({ setThemeMode, setUser }) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const { data: user, loading } = useFetch("api/user");
+  const [loading, setLoading] = useState(false);
+
+  const { data: user, loading: loadingUser } = useFetch("api/user");
+  const { data: clinic, loading: loadingClinic } = useFetch("api/clinic-details", null, true, null, (response) => response.data.data);
 
   const [appReady, setAppReady] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -76,12 +79,21 @@ const Default = ({ setThemeMode, setUser }) => {
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    setLoading(loadingUser);
+  }, [loadingUser]);
+
+  useEffect(() => {
+    setLoading(loadingClinic);
+  }, [loadingClinic]);
+
+  useEffect(() => {
+    if (user && !loadingClinic) {
       window.user = user;
-      setAppReady(true);
+      window.clinic = clinic || {};
       setUser(user);
+      setAppReady(true);
     }
-  }, [user]);
+  }, [user, clinic]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -119,7 +131,7 @@ const Default = ({ setThemeMode, setUser }) => {
 
   return (
     <React.Fragment>
-      {appReady && user ?
+      {appReady ?
         <Box sx={{ display: "flex" }}>
           <AppBar
             position="fixed"

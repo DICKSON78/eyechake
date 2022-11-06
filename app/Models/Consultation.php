@@ -25,6 +25,11 @@ class Consultation extends Model
         return $this->belongsTo(PatientPaymentCacheItem::class, 'payment_cache_item_id');
     }
 
+    public function diagnoses()
+    {
+        return $this->hasMany(ConsultationDiagnosis::class, 'consultation_id');
+    }
+
     public function external_examination()
     {
         return $this->hasOne(ConsultationExternalExamination::class, 'consultation_id');

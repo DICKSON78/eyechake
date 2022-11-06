@@ -49,7 +49,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
 
         <Descriptions
           columns={2}
-          horizontal
+          vertical
           items={[
             { label: "Customer Name", value: patient.full_name },
             { label: "Receipt Number", value: receipt.id },

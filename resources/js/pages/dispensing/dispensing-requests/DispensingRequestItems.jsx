@@ -179,6 +179,11 @@ const DispensingRequestItems = ({ consultationType }) => {
                   valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
                 },
                 {
+                  field: "balance",
+                  headerName: "Item Balance",
+                  valueGetter: (item, index) => numberFormat(item.item.balance || 0),
+                },
+                {
                   field: "payment_mode_id",
                   headerName: "Payment Mode",
                   valueGetter: (item, index) => item.payment_mode.name,

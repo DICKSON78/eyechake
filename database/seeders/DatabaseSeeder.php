@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\ClinicDetail;
 use App\Models\ConsultationType;
 use App\Models\ItemType;
 use App\Models\JobTitle;
@@ -26,6 +27,17 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
 
         $now = Carbon::now()->toDateTimeString();
+
+        ClinicDetail::insert([
+            [
+                'name' => 'SmartSoft Clinic',
+                'phone' => '076855364',
+                'email' => 'smartsoft@gmail.com',
+                'address' => 'P. O. Box 879 DSM',
+                'created_at' => $now,
+                'updated_at' => $now
+            ],
+        ]);
 
         JobTitle::insert([
             ['name' => 'Receptionist', 'created_at' => $now, 'updated_at' => $now],

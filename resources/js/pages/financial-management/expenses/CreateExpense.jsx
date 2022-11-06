@@ -3,9 +3,10 @@ import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProg
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
+import DatePicker from "../../../components/DatePicker";
 
 import { useFetch, usePost } from "../../../hooks";
-import { formatError, getValidationRules } from "../../../helpers";
+import { formatDateForDb, formatError, getValidationRules } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -15,6 +16,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
   const categoryRef = useRef();
   const amountRef = useRef();
   const descriptionRef = useRef();
+  const dateRef = useRef();
 
   const { data: categories } = useFetch("api/expense-categories", {
     status: "Active",
@@ -25,9 +27,13 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
     category_id: undefined,
     amount: undefined,
     description: undefined,
+    expense_date: new Date(),
   });
 
-  const { data, loading, error, handlePost } = usePost("api/expenses", formData);
+  const { data, loading, error, handlePost } = usePost("api/expenses", {
+    ...formData,
+    expense_date: formatDateForDb(formData.expense_date),
+  });
 
   useEffect(() => {
     if (data) {
@@ -107,7 +113,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
             </Grid>
             <Grid
               item
-              md={12}
+              md={6}
               sm={12}
               xs={12}
             >
@@ -115,10 +121,25 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                 ref={descriptionRef}
                 label="Description"
                 fullWidth
-                required
                 multiline
                 rows={3}
+                required
                 onChange={(value) => setFormData({ ...formData, description: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={6}
+              xs={12}
+            >
+              <DatePicker
+                ref={dateRef}
+                label="Expense Date"
+                fullWidth
+                required
+                value={formData.expense_date}
+                onChange={(value) => setFormData({ ...formData, expense_date: !isNaN(value) ? value : null })}
               />
             </Grid>
           </Grid>

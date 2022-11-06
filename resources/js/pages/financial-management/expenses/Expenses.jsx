@@ -138,6 +138,10 @@ const Expenses = () => {
                 headerName: "Description",
               },
               {
+                field: "expense_date",
+                headerName: "Expense Date",
+              },
+              {
                 field: "created_by",
                 headerName: "Created By",
                 valueGetter: (item, index) => getNonNull(item.creator).full_name,

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->bigInteger('category_id')->unsigned();
             $table->double('amount')->unsigned();
             $table->string('description')->nullable();
+            $table->date('expense_date');
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();

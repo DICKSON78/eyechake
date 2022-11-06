@@ -130,7 +130,7 @@ class ConsultationsController extends Controller
             'consultation_id' => 'required|exists:consultations,id',
             'item_id' => 'required|exists:items,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
-            'consultant_id' => 'required|exists:users,id',
+            'consultant_id' => 'nullable|exists:users,id',
             'quantity' => 'required|numeric|min:1',
         ]);
 
@@ -184,19 +184,35 @@ class ConsultationsController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param Request $request
      * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $with_diagnoses = $request->with_diagnoses;
+        $with_items = $request->with_items;
         $data = Consultation::with(['payment_cache_item' => function ($query) {
             $query->with(['payment_cache.check_in.patient' => function ($query2) {
                 $query2->with(['region', 'district', 'ward']);
             }]);
 
             $query->with(['payment_mode', 'consultant']);
-        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy', 'to_optician_sender'])
-            ->findOrFail($id);
+        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy', 'to_optician_sender']);
+
+        if ($with_diagnoses) {
+            $data->with(['diagnoses.disease']);
+        }
+
+        $data = $data->findOrFail($id);
+
+        if ($with_items) {
+            $data->items = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server'])
+                ->whereHas('payment_cache', function ($query) use ($id) {
+                    $query->where('consultation_id', $id);
+                })
+                ->get();
+        }
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -308,6 +324,10 @@ class ConsultationsController extends Controller
                 'optician_status' => 'Pending',
             ]);
         }
+
+        // update consultant
+        $data->payment_cache_item->consultant_id = $user->id;
+        $data->payment_cache_item->save();
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }

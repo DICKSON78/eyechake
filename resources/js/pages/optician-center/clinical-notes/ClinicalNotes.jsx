@@ -22,6 +22,7 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import Refraction from "./Refraction";
 import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "../../consultation-room/clinical-notes/SelectItems";
+import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
 import { useFetch, usePatch } from "../../../hooks";
 import { formatError, getValidationError } from "../../../helpers";
@@ -154,7 +155,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
   return (
     <React.Fragment>
       <Card>
-        <PageHeader title="Clinical Notes"/>
+        <PageHeader
+          title="Clinical Notes"
+          trailing={(
+            <PatientFilePDF
+              consultationId={consultation.id}
+              patient={patient}
+            />
+          )}
+        />
         <Divider />
         <Form ref={formRef}>
           <CardContent>

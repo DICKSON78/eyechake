@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
-const Table = ({ containerStyle, columns, items, footerItems, renderExpanded, repeatHead }) => {
+const Table = ({ caption, containerStyle, columns, items, footerItems, renderExpanded, repeatHead }) => {
 
   columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
 
@@ -30,6 +30,14 @@ const Table = ({ containerStyle, columns, items, footerItems, renderExpanded, re
 
   return (
     <View style={[styles.table, { ...(containerStyle || {}) }]}>
+      {caption ?
+        <View style={styles.tableRow}>
+          <Text style={[styles.text, styles.tableCell, { fontWeight: "bold" }]}>
+            {caption}
+          </Text>
+        </View>
+        : null
+      }
       {renderTableHeadRow()}
       {items.map((item, index, array) => (
         <React.Fragment key={index}>
@@ -66,6 +74,23 @@ const Table = ({ containerStyle, columns, items, footerItems, renderExpanded, re
           }
         </React.Fragment>
       ))}
+      {!items.length ?
+        <View style={styles.tableRow}>
+          <Text
+            style={[
+              styles.text,
+              styles.tableCell,
+              {
+                textAlign: "center",
+                color: "grey",
+              },
+            ]}
+          >
+            No data available
+          </Text>
+        </View>
+        : null
+      }
       {footerItems ?
         <View>
           {footerItems.map((itemColumns, index, array) => (
@@ -121,6 +146,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 7,
   },
+  tableCellNoFlex: {
+    border: "1pt solid #666666",
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    padding: 4,
+    fontSize: 7,
+  },
 });
 
+export { styles };
 export default Table;

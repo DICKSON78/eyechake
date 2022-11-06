@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
-const Descriptions = ({ columns, items, containerStyle, horizontal }) => {
+const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, valueStyle }) => {
 
   items = (items || []).filter((e) => !!e.value)
     .reduce((a, e, i) => (i % columns ? a[a.length - 1].push(e) : a.push([e]), a), []);
@@ -23,7 +23,7 @@ const Descriptions = ({ columns, items, containerStyle, horizontal }) => {
               style={{
                 width: `${100 / columns}%`,
                 flexDirection: "row",
-                ...(horizontal && {
+                ...(vertical && {
                   flexDirection: "column",
                 }),
               }}
@@ -33,6 +33,7 @@ const Descriptions = ({ columns, items, containerStyle, horizontal }) => {
                 {
                   flex: 1,
                   fontWeight: "bold",
+                  ...(labelStyle || {}),
                 }]}
               >
                 {f.label}
@@ -41,12 +42,13 @@ const Descriptions = ({ columns, items, containerStyle, horizontal }) => {
                 styles.text,
                 {
                   width: "60%",
-                  ...(horizontal && {
-                    flex: 1,
+                  ...(vertical && {
+                    width: "100%",
                   }),
+                  ...(valueStyle || {}),
                 }]}
               >
-                {!horizontal ? ": " : ""}{f.value}
+                {!vertical ? ": " : ""}{f.value}
               </Text>
             </View>
           ))}

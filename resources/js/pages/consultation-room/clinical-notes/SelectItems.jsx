@@ -129,7 +129,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         quantity,
         dosage,
         comments,
-        consultant_id: consultant.id,
+        consultant_id: consultant ? consultant.id : null,
       });
     }
   };
@@ -197,7 +197,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               ref={consultantRef}
               label="Consultant"
               fullWidth
-              required
               options={users}
               optionsLabel="full_name"
               optionsValue="id"

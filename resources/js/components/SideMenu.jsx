@@ -3,17 +3,23 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
 
 import {
-  DoneAllOutlined as DoneIcon,
+  BadgeRounded as JobTitlesIcon,
+  ContactsRounded as ClinicDetailsIcon,
+  DoneAllRounded as DoneIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
+  GroupRounded as PeopleIcon,
   HomeRounded as HomeIcon,
   HourglassBottomRounded as WaitingIcon,
   Inventory2Rounded as ItemsIcon,
-  LinkRounded as LinkIcon,
+  LibraryBooksRounded as ReportsIcon,
+  ManageAccountsRounded as EmployeeManagementIcon,
   MoneyRounded as PaymentModesIcon,
   PaymentRounded as PaymentChannelsIcon,
-  PersonRounded as PatientsIcon,
-  PestControlRounded as DiseasesIcon
+  PestControlRounded as DiseasesIcon,
+  SettingsRounded as SettingsIcon,
+  TrendingDownRounded as ExpensesIcon,
+  WindowRounded as DepartmentsIcon
 } from "@mui/icons-material";
 
 const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
@@ -35,7 +41,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "2",
           title: "Patient Records",
-          icon: <HomeIcon />,
+          icon: <ReportsIcon />,
           to: "/patient-records/patients",
         },
         {
@@ -46,21 +52,21 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "4",
           title: "Patients/Customers",
-          icon: <PatientsIcon />,
+          icon: <PeopleIcon />,
           to: "/reception/patients",
           show: user.privileges.reception,
         },
         {
           id: "5",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/reception/reports",
           show: user.privileges.reception,
           items: [
             {
               id: "5.1",
               title: "Patient Registration Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/patient-registration",
             },
           ]
@@ -94,45 +100,45 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "10",
           title: "Cleared Patient Bills",
-          icon: <WaitingIcon />,
+          icon: <DoneIcon />,
           to: "/payment-center/patient-bills/cleared",
           show: user.privileges.payment_center,
         },
         {
           id: "11",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/payment-center/reports",
           show: user.privileges.payment_center,
           items: [
             {
               id: "11.1",
               title: "Cash Collection Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/cash-collection",
             },
             {
               id: "11.2",
               title: "Credit Collection Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/credit-collection",
             },
             {
               id: "11.3",
               title: "Pending Patient Bills Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/pending-patient-bills",
             },
             {
               id: "11.4",
               title: "Cleared Patient Bills Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/cleared-patient-bills",
             },
             {
               id: "11.5",
               title: "Bill Collection Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/patient-bill-collection",
             },
           ],
@@ -185,26 +191,26 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "19",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/optician-center/reports",
           show: user.privileges.optician_center,
           items: [
             {
               id: "19.1",
               title: "Items Dispensed Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/items-dispensed",
             },
             {
               id: "19.2",
               title: "Items Not Dispensed Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/items-not-dispensed",
             },
             {
               id: "19.3",
               title: "Item Balance Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/item-balance",
             },
           ],
@@ -224,26 +230,26 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "22",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/medicine-center/reports",
           show: user.privileges.medicine_center,
           items: [
             {
               id: "22.1",
               title: "Medicines Dispensed Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/medicines-dispensed",
             },
             {
               id: "22.2",
               title: "Medicines Not Dispensed Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/medicines-not-dispensed",
             },
             {
               id: "22.3",
               title: "Item Balance Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/item-balance",
             },
           ],
@@ -263,20 +269,20 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "25",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/procedure-room/reports",
           show: user.privileges.procedure_room,
           items: [
             {
               id: "25.1",
               title: "Served Procedures Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/served-procedures",
             },
             {
               id: "25.2",
               title: "Pending Procedures Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/pending-procedures",
             },
           ],
@@ -303,26 +309,26 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "29",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/inventory-management/reports",
           show: user.privileges.inventory_management,
           items: [
             {
               id: "29.1",
               title: "Item Balance Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/item-balance",
             },
             {
               id: "29.2",
               title: "Quantity Dispensed Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/item-quantity-dispensed",
             },
             {
               id: "29.3",
               title: "Stock Ledger",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/stock-ledger",
             },
           ],
@@ -335,21 +341,21 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "31",
           title: "Expenses",
-          icon: <ItemsIcon />,
+          icon: <ExpensesIcon />,
           to: "/financial-management/expenses",
           show: user.privileges.financial_management,
         },
         {
           id: "32",
           title: "Reports",
-          icon: <ItemsIcon />,
+          icon: <ReportsIcon />,
           to: "/financial-management/reports",
           show: user.privileges.financial_management,
           items: [
             {
               id: "32.1",
               title: "Expenses Report",
-              icon: <LinkIcon />,
+              icon: <ReportsIcon />,
               to: "/expenses",
             },
           ],
@@ -362,7 +368,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "34",
           title: "Employees",
-          icon: <WaitingIcon />,
+          icon: <EmployeeManagementIcon />,
           to: "/employee-management/employees",
           show: user.privileges.employee_management,
         },
@@ -381,19 +387,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
             {
               id: "36.1",
               title: "Units of Measure",
-              icon: <LinkIcon />,
+              icon: <SettingsIcon />,
               to: "/units-of-measure",
             },
             {
               id: "36.2",
               title: "Lens Types",
-              icon: <LinkIcon />,
+              icon: <SettingsIcon />,
               to: "/lens-types",
             },
             {
               id: "36.3",
               title: "Items",
-              icon: <LinkIcon />,
+              icon: <SettingsIcon />,
               to: "/items",
             },
           ],
@@ -422,22 +428,29 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           id: "40",
           title: "Expense Categories",
-          icon: <DiseasesIcon />,
+          icon: <ExpensesIcon />,
           to: "/settings/expense-categories",
           show: user.privileges.settings,
         },
         {
           id: "41",
           title: "Departments",
-          icon: <DiseasesIcon />,
+          icon: <DepartmentsIcon />,
           to: "/settings/departments",
           show: user.privileges.settings,
         },
         {
           id: "42",
           title: "Job Titles",
-          icon: <DiseasesIcon />,
+          icon: <JobTitlesIcon />,
           to: "/settings/job-titles",
+          show: user.privileges.settings,
+        },
+        {
+          id: "43",
+          title: "Clinic Details",
+          icon: <ClinicDetailsIcon />,
+          to: "/settings/clinic-details",
           show: user.privileges.settings,
         },
       ]);

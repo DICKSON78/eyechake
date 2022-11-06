@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Breadcrumbs, Divider, Link, Paper, Stack, Typography } from "@mui/material";
 import { ChevronRightRounded as ChevronRightIcon } from "@mui/icons-material";
 
-const Header = ({ title, subtitle, leading, trailing, containerProps }) => {
+const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps }) => {
   return (
     <Stack
       direction="row"
@@ -20,6 +20,7 @@ const Header = ({ title, subtitle, leading, trailing, containerProps }) => {
               variant="h6"
               fontSize="16px"
               fontWeight="400"
+              {...(titleProps || {})}
             >
               {title}
             </Typography>

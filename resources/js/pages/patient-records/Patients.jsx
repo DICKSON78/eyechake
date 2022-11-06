@@ -130,7 +130,7 @@ const Patients = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/patient-records/patients/${item.id}`)}
+                      onClick={() => navigate(`/patient-records/patients/${item.id}/patient-file`)}
                     >
                       View Records
                     </Button>

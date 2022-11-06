@@ -30,6 +30,7 @@ import Refraction from "./Refraction";
 import Fundoscopy from "./Fundoscopy";
 import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
+import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
 import { useFetch, usePatch } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
@@ -204,7 +205,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
   return (
     <React.Fragment>
       <Card>
-        <PageHeader title="Clinical Notes"/>
+        <PageHeader
+          title="Clinical Notes"
+          trailing={(
+            <PatientFilePDF
+              consultationId={consultation.id}
+              patient={patient}
+            />
+          )}
+        />
         <Divider />
         <Form ref={formRef}>
           <CardContent>
