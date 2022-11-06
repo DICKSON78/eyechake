@@ -143,7 +143,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
       >
         <Header
           title="Patient File"
-          subtitle={`${patient.full_name} - ${patient.id}`}
+          subtitle={patient.full_name}
         />
 
         <Descriptions
