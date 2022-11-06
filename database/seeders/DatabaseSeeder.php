@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Cashier', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
-        $user = User::insert([
+        User::insert([
             'first_name' => 'System',
             'last_name' => 'Administrator',
             'username' => 'admin',
@@ -55,7 +55,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         UserPrivilege::insert([
-            'user_id' => $user->id,
+            'user_id' => 1,
             'reception' => 1,
             'payment_center' => 1,
             'consultation_room' => 1,
