@@ -63,7 +63,12 @@ class PatientPaymentCacheController extends Controller
 
         if ($item_status) {
             $data->whereHas('items', function ($query) use ($item_status) {
-                $query->where('status', $item_status);
+                $statuses = explode(',', $item_status);
+                if (count($statuses) > 1) {
+                    $query->whereIn('status', $statuses);
+                } else {
+                    $query->where('status', $statuses[0]);
+                }
             });
         }
 

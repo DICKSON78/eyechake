@@ -215,6 +215,7 @@ const DispensingRequestItems = ({ consultationType }) => {
                         let tmp = items;
                         tmp[index] = { ...item, dosage: value };
                         setItems(tmp);
+                        setSelectedItems(selectedItems.filter((e,) => e.id !== item.id));
                         autoSave(item, "dosage", value);
                       }}
                     />
@@ -233,6 +234,7 @@ const DispensingRequestItems = ({ consultationType }) => {
                         let tmp = items;
                         tmp[index] = { ...item, comments: value };
                         setItems(tmp);
+                        setSelectedItems(selectedItems.filter((e,) => e.id !== item.id));
                         autoSave(item, "comments", value);
                       }}
                     />

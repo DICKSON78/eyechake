@@ -18,6 +18,7 @@ const DispensingRequests = ({ consultationType }) => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    item_status: "Pending,Paid,Billed",
     item_consultation_type: consultationType,
     patient_id: undefined,
     patient_name: undefined,

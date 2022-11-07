@@ -203,6 +203,7 @@ const ProcedureRequestItems = () => {
                         let tmp = items;
                         tmp[index] = { ...item, comments: value };
                         setItems(tmp);
+                        setSelectedItems(selectedItems.filter((e,) => e.id !== item.id));
                         autoSave(item, "comments", value);
                       }}
                     />

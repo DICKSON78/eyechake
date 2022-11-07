@@ -26,7 +26,7 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()}
+            {new Date().getFullYear()} SmartSoft
           </Typography>
         </Paper>
       </Box>

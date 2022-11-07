@@ -18,6 +18,7 @@ const ProcedureRequests = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    item_status: "Pending,Paid,Billed",
     item_consultation_type: "Procedure",
     patient_id: undefined,
     patient_name: undefined,

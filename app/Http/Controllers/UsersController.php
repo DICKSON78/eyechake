@@ -98,6 +98,7 @@ class UsersController extends Controller
 
         $input = $request->all();
         $input['created_by'] = $request->user()->id;
+        $input['password'] = Hash::make($input['password']);
         $data = User::create($input);
 
         if ($data) {

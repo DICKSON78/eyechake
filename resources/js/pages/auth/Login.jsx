@@ -83,7 +83,10 @@ const LogIn = () => {
 
           {handleFeedback()}
 
-          <Form ref={formRef}>
+          <Form
+            ref={formRef}
+            onSubmit={handleSubmit}
+          >
             <TextField
               ref={usernameRef}
               placeholder="Username"
@@ -115,18 +118,19 @@ const LogIn = () => {
               containerProps={{ sx: { mb: 2 } }}
               onChange={(value) => setFormData({ ...formData, password: value })}
             />
+            <Button
+              disabled={loading}
+              fullWidth
+              disableElevation
+              variant="contained"
+              color="primary"
+              size="large"
+              type="submit"
+              onClick={handleSubmit}
+            >
+              Login
+            </Button>
           </Form>
-          <Button
-            disabled={loading}
-            fullWidth
-            disableElevation
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleSubmit}
-          >
-            Login
-          </Button>
         </Box>
       </Paper>
     </React.Fragment>

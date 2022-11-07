@@ -224,7 +224,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           id: "21",
           title: "Dispensing Requests",
           icon: <WaitingIcon />,
-          to: "/medicine-center/reports-requests",
+          to: "/medicine-center/dispensing-requests",
           show: user.privileges.medicine_center,
         },
         {
