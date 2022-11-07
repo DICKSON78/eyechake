@@ -25,6 +25,7 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import DiagnosisCard from "./DiagnosisCard";
 import SelectDiagnoses from "./SelectDiagnoses";
 import ExternalExamination from "./ExternalExamination";
+import FunctionalTests from "./FunctionalTests";
 import VisualAcuity from "./VisualAcuity";
 import Refraction from "./Refraction";
 import Fundoscopy from "./Fundoscopy";
@@ -94,6 +95,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [patientToReturn, setPatientToReturn] = useState(consultation.patient_to_return);
   const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
   const [remarks, setRemarks] = useState(consultation.remarks);
+  const [sendToOptician, setSendToOptician] = useState("No");
 
   const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
@@ -160,7 +162,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     modalRef.current.open(title, component, "lg");
   };
 
-  const confirmComplete = (title, payload) => {
+  const confirmComplete = () => {
     setData(null);
     setError(null);
 
@@ -178,13 +180,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
             patient_to_return: patientToReturn,
             to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : null,
             remarks,
-            ...(payload || {})
+            send_to_optician: sendToOptician,
           });
         }}
       />
     );
 
-    modalRef.current.open(title, component, "sm");
+    modalRef.current.open("Confirm Save", component, "sm");
   };
 
   const handleFeedback = () => {
@@ -282,45 +284,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Grid>
             </Grid>
 
-            <Subheader title="Diagnosis"/>
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <DiagnosisCard
-                  title="Preliminary Diagnosis"
-                  diagnosisType="Preliminary"
-                  loading={loadingDiagnoses}
-                  items={diagnoses}
-                  consultation={consultation}
-                  onClickAdd={(title, diagnosisType) => openSelectDiagnosesModal(title, diagnosisType)}
-                />
-              </Grid>
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <DiagnosisCard
-                  title="Final Diagnosis"
-                  diagnosisType="Final"
-                  loading={loadingDiagnoses}
-                  items={diagnoses}
-                  consultation={consultation}
-                  onClickAdd={(title, diagnosisType) => openSelectDiagnosesModal(title, diagnosisType)}
-                />
-              </Grid>
-            </Grid>
-
             <Subheader title="External Examination"/>
             <ExternalExamination consultation={consultation}/>
+
+            <Subheader title="Functional Tests"/>
+            <FunctionalTests consultation={consultation}/>
 
             <Subheader title="Visual Acuity (VA)"/>
             <VisualAcuity consultation={consultation}/>
@@ -331,11 +299,26 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Subheader title="Fundoscopy"/>
             <Fundoscopy consultation={consultation}/>
 
-            <Subheader title="Management"/>
+            <Subheader title="Diagnosis & Management"/>
             <Grid
               container
               spacing={2}
             >
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <DiagnosisCard
+                  title="Diagnosis"
+                  diagnosisType="Final"
+                  loading={loadingDiagnoses}
+                  items={diagnoses}
+                  consultation={consultation}
+                  onClickAdd={(title, diagnosisType) => openSelectDiagnosesModal(title, diagnosisType)}
+                />
+              </Grid>
               <Grid
                 item
                 md={6}
@@ -463,6 +446,33 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   onChange={(value) => setRemarks(value)}
                 />
               </Grid>
+              {consultation.status === "Pending" ?
+                <React.Fragment>
+                  <Grid
+                    item
+                    md={6}
+                    sm={12}
+                    xs={12}
+                  />
+                  <Grid
+                    item
+                    md={6}
+                    sm={12}
+                    xs={12}
+                  >
+                    <FormControlLabel
+                      control={(
+                        <Checkbox
+                          checked={sendToOptician === "Yes"}
+                          onChange={(event) => setSendToOptician(event.target.checked ? "Yes" : "No")}
+                        />
+                      )}
+                      label="Send to Optician"
+                    />
+                  </Grid>
+                </React.Fragment>
+                : null
+              }
             </Grid>
 
             {handleFeedback()}
@@ -483,19 +493,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Button
                 disabled={loadingComplete}
                 variant="contained"
-                color="secondary"
                 disableElevation
-                onClick={() => confirmComplete("Confirm Send to Optician", { send_to_optician: "Yes" })}
+                onClick={confirmComplete}
               >
-                Save & Send to Optician
-              </Button>
-              <Button
-                disabled={loadingComplete}
-                variant="contained"
-                disableElevation
-                onClick={() => confirmComplete("Confirm Save")}
-              >
-                Save & Complete Consultation
+                Save Notes
               </Button>
             </Stack>
           </React.Fragment>

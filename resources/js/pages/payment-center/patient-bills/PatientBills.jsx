@@ -42,9 +42,6 @@ const PatientBills = () => {
 
   useEffect(() => {
     document.title = `${capitalize(status)} Patient Bills - ${window.APP_NAME}`;
-  }, []);
-
-  useEffect(() => {
     setParams({ ...params, status: capitalize(status) });
   }, [status]);
 

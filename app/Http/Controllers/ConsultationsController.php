@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\ConsultationExternalExamination;
+use App\Models\ConsultationFunctionalTest;
 use App\Models\ConsultationFundoscopy;
 use App\Models\ConsultationRefraction;
 use App\Models\ConsultationVisualAcuity;
@@ -37,6 +38,8 @@ class ConsultationsController extends Controller
         $patient_name = $request->patient_name;
         $patient_gender = $request->patient_gender;
         $patient_phone = $request->patient_phone;
+        $patient_to_return = $request->patient_to_return;
+        $to_return_date = $request->to_return_date;
         $item_payment_mode_id = $request->item_payment_mode_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
@@ -92,6 +95,18 @@ class ConsultationsController extends Controller
             $data->whereHas('payment_cache_item.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
                 $query->where('phone', $patient_phone);
             });
+        }
+
+        if ($patient_to_return) {
+            $now = Carbon::now()->format('Y-m-d');
+            $data->where('patient_to_return', $patient_to_return)
+                ->where(function ($query) use ($to_return_date, $now) {
+                    $query->where('to_return_date', '>=', $now);
+
+                    if ($to_return_date) {
+                        $query->orWhere('to_return_date', $to_return_date);
+                    }
+                });
         }
 
         if ($item_payment_mode_id) {
@@ -198,7 +213,9 @@ class ConsultationsController extends Controller
             }]);
 
             $query->with(['payment_mode', 'consultant']);
-        }, 'creator', 'external_examination', 'visual_acuity', 'refraction', 'fundoscopy', 'to_optician_sender']);
+        }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
+            'to_optician_sender',
+        ]);
 
         if ($with_diagnoses) {
             $data->with(['diagnoses.disease']);
@@ -239,7 +256,7 @@ class ConsultationsController extends Controller
     public function autoSaveClinicalNotes(Request $request, $id)
     {
         $request->validate([
-            'what' => 'required|in:Consultation,Visual Acuity,External Examination,Refraction,Fundoscopy'
+            'what' => 'required|in:Consultation,Visual Acuity,External Examination,Functional Test,Refraction,Fundoscopy'
         ]);
 
         $user = $request->user();
@@ -262,6 +279,17 @@ class ConsultationsController extends Controller
                     $input['consultation_id'] = $id;
                     $input['created_by'] = $user->id;
                     ConsultationExternalExamination::create($input);
+                }
+            }
+                break;
+            case 'Functional Test': {
+                if ($data->functional_tests) {
+                    $data->functional_tests->update($request->except('what'));
+                } else {
+                    $input = $request->except('what');
+                    $input['consultation_id'] = $id;
+                    $input['created_by'] = $user->id;
+                    ConsultationFunctionalTest::create($input);
                 }
             }
                 break;
@@ -308,13 +336,15 @@ class ConsultationsController extends Controller
         $request->validate([
             'patient_to_return' => 'nullable|in:Yes,No',
             'to_return_date' => 'nullable|date_format:Y-m-d',
-            'send_to_optician' => 'nullable|in:Yes,No'
+            'send_to_optician' => 'nullable|in:Yes,No',
+            'optician' => 'nullable|in:Yes,No',
         ]);
 
         $user = $request->user();
         $data = Consultation::findOrFail($id);
-        $input = $request->only('patient_to_return', 'to_return_date');
+        $input = $request->only('patient_to_return', 'to_return_date', 'remarks');
         $input['status'] = 'Consulted';
+
         $data->update($input);
 
         if ($request->send_to_optician == 'Yes') {
@@ -323,6 +353,11 @@ class ConsultationsController extends Controller
                 'sent_to_optician_by' => $user->id,
                 'optician_status' => 'Pending',
             ]);
+        } else {
+            if ($request->optician == 'Yes') {
+                $data->optician_status = 'Consulted';
+                $data->save();
+            }
         }
 
         // update consultant

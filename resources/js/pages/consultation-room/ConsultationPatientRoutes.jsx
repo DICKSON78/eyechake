@@ -23,7 +23,7 @@ const ConsultationPatientRoutes = () => {
 
   useEffect(() => {
     if (!patientId || !consultationId) {
-      navigate(`/consultation-room/consultation-patients/${(status || "pending")}`);
+      navigate(`/consultation-room/consultation-patients/${status}`);
     }
   }, []);
 

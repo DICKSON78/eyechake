@@ -42,7 +42,7 @@ const PatientBill = () => {
 
   useEffect(() => {
     if (!patientId || !billId) {
-      return navigate(`/payment-center/patient-bills/${(status || "pending")}`);
+      return navigate(`/payment-center/patient-bills/${status}`);
     }
 
     document.title = `Patient Bill - ${window.APP_NAME}`;

@@ -1,40 +1,33 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
-import Page, { Header as PageHeader } from "../../components/Page";
-import Table, { PageSizeSelect } from "../../components/Table";
-import Modal from "../../components/Modal";
-import Filters from "./PatientFilters";
+import { Alert, Card, CardContent, Divider } from "@mui/material";
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Table, { PageSizeSelect } from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import Filters from "./Filters";
 
-import { useFetch } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getNonNull } from "../../helpers";
+import { useFetch } from "../../../hooks";
+import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
 
-const ConsultationPatients = () => {
+const PatientsToReturn = () => {
 
-  const navigate = useNavigate();
   const modalRef = useRef();
-
-  const { status } = useParams();
 
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    consultant: "Doctor",
-    status: capitalize(status),
+    status: "Consulted",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    item_payment_mode_id: undefined,
-    start_date: new Date(),
-    end_date: undefined,
+    patient_to_return: "Yes",
+    to_return_date: null,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/consultations", {
     ...params,
-    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    to_return_date: params.to_return_date ? formatDateForDb(params.to_return_date) : undefined,
   }, true, {
     data: [],
     total: 0,
@@ -42,25 +35,15 @@ const ConsultationPatients = () => {
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `${getTitle()} - ${window.APP_NAME}`;
-    setParams({ ...params, status: capitalize(status) });
-  }, [status]);
-
-  const getTitle = () => {
-    if (status === "pending") {
-      return "Patients Sent to Doctor";
-    }
-    if (status === "consulted") {
-      return "Consulted Patients";
-    }
-  };
+    document.title = `Patients to Return - ${window.APP_NAME}`;
+  }, []);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Consultation Room" },
-        { title: getTitle() },
+        { title: "Reception" },
+        { title: "Patients to Return" },
       ]}
     >
       {error ?
@@ -74,21 +57,9 @@ const ConsultationPatients = () => {
       }
       <Card>
         <PageHeader
-          title={getTitle()}
+          title="Patients to Return"
           trailing={
             <React.Fragment>
-              <FormControlLabel
-                control={(
-                  <Checkbox
-                    checked={!!params.consultant_id}
-                    onChange={(event) => setParams({
-                      ...params,
-                      consultant_id: event.target.checked ? window.user.id : undefined
-                    })}
-                  />
-                )}
-                label="My Patients Only"
-              />
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
@@ -137,41 +108,14 @@ const ConsultationPatients = () => {
                 valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
-                field: "created_by",
-                headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
-                show: status === "pending"
-              },
-              {
                 field: "consultant",
                 headerName: "Consultant",
                 valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
               },
               {
-                field: "created_at",
-                headerName: "Date",
+                field: "to_return_date",
+                headerName: "Return Date",
               },
-              {
-                field: "actions",
-                headerName: "Actions",
-                renderCell: (item) => (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
-                    spacing={1}
-                  >
-                    <Button
-                      variant="contained"
-                      disableElevation
-                      size="small"
-                      onClick={() => navigate(`/consultation-room/consultation-patients/${status}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
-                    >
-                      {status === "pending" ? "Manage" : "View"}
-                    </Button>
-                  </Stack>
-                ),
-              }
             ]}
             items={data.data}
             itemCount={data.total}
@@ -186,4 +130,4 @@ const ConsultationPatients = () => {
   );
 };
 
-export default ConsultationPatients;
+export default PatientsToReturn;

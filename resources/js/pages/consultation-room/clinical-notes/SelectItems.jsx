@@ -40,11 +40,16 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const [paymentMode, setPaymentMode] = useState(consultation.payment_cache_item.payment_mode);
   const [consultant, setConsultant] = useState(window.user);
   const [itemName, setItemName] = useState();
+  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
   const [dosage, setDosage] = useState();
   const [comments, setComments] = useState();
 
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
+    status: "Active",
+    per_page: 500
+  }, false, [], (response) => response.data.data.data);
   const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch("api/payment-modes", {
     status: "Active",
     per_page: 500
@@ -61,12 +66,19 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     consultation_type: consultationType,
     is_consultation_item: "No",
     payment_mode_id: paymentMode ? paymentMode.id : undefined,
+    lens_type_id: lensTypeId
   }, false, [], (response) => response.data.data.data);
 
   const [selected, setSelected] = useState(initial);
 
   const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost();
   const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+
+  useEffect(() => {
+    if (consultationType === "Glass") {
+      fetchLensTypes();
+    }
+  }, []);
 
   useEffect(() => {
     if (paymentMode) {
@@ -83,7 +95,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     if (paymentMode) {
       fetchItems();
     }
-  }, [itemName]);
+  }, [itemName, lensTypeId]);
 
   useEffect(() => {
     if (dataPost) {
@@ -230,6 +242,24 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               <Divider />
               {loadingItems && <LinearProgress />}
               <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
+                {consultationType === "Glass" ?
+                  <Select
+                    placeholder="Filter by Lens Type"
+                    fullWidth
+                    clearable
+                    options={lensTypes}
+                    optionsLabel="name"
+                    optionsValue="id"
+                    value={lensTypeId || ""}
+                    onChange={(value) => setLensTypeId(value)}
+                    containerProps={{
+                      sx: {
+                        mb: 2,
+                      }
+                    }}
+                  />
+                  : null
+                }
                 {items.map((e) => (
                   <FormControlLabel
                     key={e.id}

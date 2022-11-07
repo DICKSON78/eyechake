@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
@@ -8,19 +8,21 @@ import Modal from "../../components/Modal";
 import Filters from "../consultation-room/PatientFilters";
 
 import { useFetch } from "../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../helpers";
+import { capitalize, formatDateForDb, formatError, getNonNull } from "../../helpers";
 
-const PendingConsultationPatients = ({ status, title }) => {
+const PendingConsultationPatients = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
+
+  const { status } = useParams();
 
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
     consultant_id: window.user.id,
     status: "Consulted",
-    optician_status: status,
+    optician_status: capitalize(status),
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -41,19 +43,25 @@ const PendingConsultationPatients = ({ status, title }) => {
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `Patients Sent to Doctor - ${window.APP_NAME}`;
-  }, []);
-
-  useEffect(() => {
-    setParams({ ...params, optician_status: status });
+    document.title = `${getTitle()} - ${window.APP_NAME}`;
+    setParams({ ...params, optician_status: capitalize(status) });
   }, [status]);
+
+  const getTitle = () => {
+    if (status === "pending") {
+      return "Patients Sent to Optician";
+    }
+    if (status === "consulted") {
+      return "Consulted Patients";
+    }
+  };
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
         { title: "Optician Center" },
-        { title: title },
+        { title: getTitle() },
       ]}
     >
       {error ?
@@ -67,7 +75,7 @@ const PendingConsultationPatients = ({ status, title }) => {
       }
       <Card>
         <PageHeader
-          title={title}
+          title={getTitle()}
           trailing={
             <React.Fragment>
               <PageSizeSelect
@@ -147,9 +155,9 @@ const PendingConsultationPatients = ({ status, title }) => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/optician-center/consultation-patients/${(status || "Pending").toLowerCase()}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/optician-center/consultation-patients/${status}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
                     >
-                      {status === "Pending" ? "Manage" : "View"}
+                      {status === "pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),

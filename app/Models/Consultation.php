@@ -35,6 +35,11 @@ class Consultation extends Model
         return $this->hasOne(ConsultationExternalExamination::class, 'consultation_id');
     }
 
+    public function functional_tests()
+    {
+        return $this->hasOne(ConsultationFunctionalTest::class, 'consultation_id');
+    }
+
     public function visual_acuity()
     {
         return $this->hasOne(ConsultationVisualAcuity::class, 'consultation_id');

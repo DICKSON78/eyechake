@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import PatientRegistration from "./patients/PatientRegistration";
 import Patients from "./patients/Patients";
 import CheckInPatient from "./CheckInPatient";
+import PatientsToReturn from "./patients-to-return/PatientsToReturn";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
 const ReceptionRoutes = () => {
@@ -20,6 +21,10 @@ const ReceptionRoutes = () => {
       <Route
         path="/patients/new"
         element={<PatientRegistration />}
+      />
+      <Route
+        path="/to-return/patients"
+        element={<PatientsToReturn />}
       />
       <Route
         path="/reports/*"

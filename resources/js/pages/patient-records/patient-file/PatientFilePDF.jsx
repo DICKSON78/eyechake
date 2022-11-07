@@ -200,33 +200,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
           : null
         }
 
-        {consultation.consultant === "Doctor" ?
-          <React.Fragment>
-            <Subheader
-              title="Diagnosis"
-              style={{ marginBottom: 4 }}
-            />
-
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
-              <View style={{ flex: 1, paddingRight: 4 }}>
-                <DiagnosisCard
-                  title="Preliminary Diagnosis"
-                  diagnosisType="Preliminary"
-                  items={consultation.diagnoses}
-                />
-              </View>
-              <View style={{ flex: 1, paddingLeft: 4 }}>
-                <DiagnosisCard
-                  title="Final Diagnosis"
-                  diagnosisType="Final"
-                  items={consultation.diagnoses}
-                />
-              </View>
-            </View>
-          </React.Fragment>
-          : null
-        }
-
         {consultation.external_examination ?
           <React.Fragment>
             <Subheader
@@ -281,6 +254,48 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 <Text style={[styles.text, tableStyles.tableCell, { flex: 0.25 }]}>IOP</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.external_examination.re_iop}</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.external_examination.le_iop}</Text>
+              </View>
+            </View>
+          </React.Fragment>
+          : null
+        }
+
+        {consultation.functional_tests ?
+          <React.Fragment>
+            <Subheader
+              title="Functional Tests"
+              style={{ marginBottom: 4 }}
+            />
+
+            <View style={[tableStyles.table, { marginBottom: 4 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <View style={[tableStyles.tableCell, { flex: 0.3 }]}/>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}>NPC</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.re_npc}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.le_npc}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}>NPA</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.re_npa}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.le_npa}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}>CONFRONTATION</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.re_confrontation}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.le_confrontation}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell, { flex: 0.3 }]}>COVER TEST</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.re_cover_test}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.le_cover_test}</Text>
               </View>
             </View>
           </React.Fragment>
@@ -431,35 +446,71 @@ const PDFReportDocument = ({ consultation, patient }) => {
         }
 
         <Subheader
-          title="Management"
+          title={consultation.consultant === "Doctor" ? "Diagnosis & Management" : "Management" }
           style={{ marginBottom: 4 }}
         />
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
-          <View style={{ flex: 1, paddingRight: 4 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          {consultation.consultant === "Doctor" ?
+            <View style={{ width: "50%", paddingRight: 4, marginBottom: 4 }}>
+              <DiagnosisCard
+                title="Diagnosis"
+                diagnosisType="Final"
+                items={consultation.diagnoses}
+              />
+            </View>
+            : null
+          }
+          <View
+            style={{
+              width: "50%",
+              paddingLeft: consultation.consultant === "Doctor" ? 4 : 0,
+              paddingRight: consultation.consultant === "Doctor" ? 0 : 4,
+              marginBottom: 4
+            }}
+          >
             <ConsultationItemsCard
               title="Medicine"
               consultationType="Pharmacy"
               items={consultation.items}
             />
           </View>
-          <View style={{ flex: 1, paddingLeft: 4 }}>
+          <View
+            style={{
+              width: "50%",
+              paddingLeft: consultation.consultant === "Doctor" ? 0 : 4,
+              paddingRight: consultation.consultant === "Doctor" ? 4 : 0,
+              marginBottom: 4
+            }}
+          >
             <ConsultationItemsCard
               title="Procedure"
               consultationType="Procedure"
               items={consultation.items}
             />
           </View>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
-          <View style={{ flex: 1, paddingRight: 4 }}>
+          <View
+            style={{
+              width: "50%",
+              paddingLeft: consultation.consultant === "Doctor" ? 4 : 0,
+              paddingRight: consultation.consultant === "Doctor" ? 0 : 4,
+              marginBottom: 4
+            }}
+          >
             <ConsultationItemsCard
               title="Glass"
               consultationType="Glass"
               items={consultation.items}
             />
           </View>
-          <View style={{ flex: 1, paddingLeft: 4 }}>
+          <View
+            style={{
+              width: "50%",
+              paddingLeft: consultation.consultant === "Doctor" ? 0 : 4,
+              paddingRight: consultation.consultant === "Doctor" ? 4 : 0,
+              marginBottom: 4
+            }}
+          >
             <ConsultationItemsCard
               title="Others"
               consultationType="Others"

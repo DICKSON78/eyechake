@@ -112,7 +112,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     modalRef.current.open(title, component, "lg");
   };
 
-  const confirmComplete = (title) => {
+  const confirmComplete = () => {
     setData(null);
     setError(null);
 
@@ -128,13 +128,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
           modalRef.current.close();
           handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
             remarks,
-            optician_status: "Consulted",
+            optician: "Yes",
           });
         }}
       />
     );
 
-    modalRef.current.open(title, component, "sm");
+    modalRef.current.open("Confirm Save", component, "sm");
   };
 
   const handleFeedback = () => {
@@ -241,7 +241,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 disableElevation
                 onClick={confirmComplete}
               >
-                Complete Notes
+                Save Notes
               </Button>
             </Stack>
           </React.Fragment>

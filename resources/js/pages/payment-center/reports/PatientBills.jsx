@@ -26,7 +26,6 @@ const PatientBills = ({ status }) => {
 
   useEffect(() => {
     document.title = `${status} Patient Bills Report - ${window.APP_NAME}`;
-
     setParams({ ...params, status });
   }, [status]);
 
