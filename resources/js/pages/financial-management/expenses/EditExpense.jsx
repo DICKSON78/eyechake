@@ -14,7 +14,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
 
   const formRef = useRef();
   const categoryRef = useRef();
-  const amountRef = useRef();
+  const totalAmountRef = useRef();
   const descriptionRef = useRef();
   const dateRef = useRef();
 
@@ -25,7 +25,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
 
   const [formData, setFormData] = useState({
     category_id: item.category_id,
-    amount: item.amount,
+    total_amount: item.total_amount,
     description: item.description,
     expense_date: new Date(item.expense_date),
   });
@@ -100,16 +100,16 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
               xs={12}
             >
               <TextField
-                ref={amountRef}
-                label="Amount"
+                ref={totalAmountRef}
+                label="Total Amount"
                 fullWidth
                 required
-                defaultValue={formData.amount}
+                defaultValue={formData.total_amount}
                 rules={[
                   validationRules.number,
                   (value) => value >= 0 || "Amount cannot be negative."
                 ]}
-                onChange={(value) => setFormData({ ...formData, amount: value })}
+                onChange={(value) => setFormData({ ...formData, total_amount: value })}
               />
             </Grid>
             <Grid

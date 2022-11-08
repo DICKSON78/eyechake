@@ -12,8 +12,11 @@ import CreateRegion from "../../settings/subdivisions/CreateRegion";
 import CreateDistrict from "../../settings/subdivisions/CreateDistrict";
 import CreateWard from "../../settings/subdivisions/CreateWard";
 
+import moment from "moment";
 import { useFetch, usePost } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { formatDateForDb, formatError, getValidationRules, validateInteger } from "../../../helpers";
+
+const validationRules = getValidationRules();
 
 const PatientRegistration = () => {
 
@@ -255,13 +258,35 @@ const PatientRegistration = () => {
                 sm={6}
                 xs={12}
               >
-                <DatePicker
-                  ref={dateOfBirthRef}
-                  label="Date of Birth"
-                  fullWidth
-                  value={formData.date_of_birth}
-                  onChange={(value) => setFormData({ ...formData, date_of_birth: !isNaN(value) ? value : null })}
-                />
+                <Stack
+                  direction="row"
+                  alignItems="flex-end"
+                  spacing={1}
+                >
+                  <DatePicker
+                    ref={dateOfBirthRef}
+                    label="Date of Birth"
+                    fullWidth
+                    value={formData.date_of_birth}
+                    onChange={(value) => setFormData({ ...formData, date_of_birth: !isNaN(value) ? value : null })}
+                  />
+                  <TextField
+                    label="Age"
+                    fullWidth
+                    rules={[validationRules.optionalInteger]}
+                    onChange={(value) => {
+                      const age = validateInteger(value);
+                      if (age) {
+                        setFormData({ ...formData, date_of_birth: moment().subtract(age, "years").format("YYYY-MM-DD") })
+                      }
+                    }}
+                    containerProps={{
+                      sx: {
+                        width: 80,
+                      }
+                    }}
+                  />
+                </Stack>
               </Grid>
               <Grid
                 item

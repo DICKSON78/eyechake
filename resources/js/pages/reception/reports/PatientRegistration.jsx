@@ -8,7 +8,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getDateRangeTitle, getNonNull } from "../../../helpers";
+import { formatDateForDb, getAge, getDateRangeTitle, getNonNull } from "../../../helpers";
 
 const PatientRegistration = () => {
 
@@ -221,7 +221,8 @@ const PatientRegistration = () => {
           },
           {
             field: "date_of_birth",
-            headerName: "Date of Birth",
+            headerName: "Age",
+            valueGetter: (item, index) => getAge(item.date_of_birth)
           },
           {
             field: "gender",

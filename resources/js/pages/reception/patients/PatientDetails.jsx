@@ -3,7 +3,7 @@ import { Alert, Skeleton } from "@mui/material";
 import Descriptions from "../../../components/Descriptions";
 
 import { useFetch } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { formatError, getAge, getNonNull } from "../../../helpers";
 
 const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
 
@@ -53,7 +53,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
           items={[
             { label: "Patient Name", value: data.full_name },
             { label: "Patient Number", value: data.id },
-            { label: "Date of Birth", value: data.date_of_birth },
+            { label: "Age", value: getAge(data.date_of_birth) },
             { label: "Gender", value: data.gender },
             { label: "Phone Number", value: data.phone },
             { label: "Region", value: getNonNull(data.region).name },

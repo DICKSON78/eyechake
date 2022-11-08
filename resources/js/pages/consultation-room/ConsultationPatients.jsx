@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "./PatientFilters";
 
 import { useFetch } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getNonNull } from "../../helpers";
+import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
 
 const ConsultationPatients = () => {
 
@@ -123,8 +123,8 @@ const ConsultationPatients = () => {
               },
               {
                 field: "date_of_birth",
-                headerName: "Date of Birth",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.date_of_birth,
+                headerName: "Age",
+                valueGetter: (item, index) => getAge(item.payment_cache_item.payment_cache.check_in.patient.date_of_birth),
               },
               {
                 field: "gender",

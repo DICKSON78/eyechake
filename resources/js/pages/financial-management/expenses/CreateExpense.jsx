@@ -14,7 +14,8 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
 
   const formRef = useRef();
   const categoryRef = useRef();
-  const amountRef = useRef();
+  const totalAmountRef = useRef();
+  const paidAmountRef = useRef();
   const descriptionRef = useRef();
   const dateRef = useRef();
 
@@ -25,7 +26,8 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
 
   const [formData, setFormData] = useState({
     category_id: undefined,
-    amount: undefined,
+    total_amount: undefined,
+    paid_amount: undefined,
     description: undefined,
     expense_date: new Date(),
   });
@@ -100,15 +102,33 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
               xs={12}
             >
               <TextField
-                ref={amountRef}
-                label="Amount"
+                ref={totalAmountRef}
+                label="Total Amount"
                 fullWidth
                 required
                 rules={[
                   validationRules.number,
                   (value) => value >= 0 || "Amount cannot be negative."
                 ]}
-                onChange={(value) => setFormData({ ...formData, amount: value })}
+                onChange={(value) => setFormData({ ...formData, total_amount: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={paidAmountRef}
+                label="Paid Amount"
+                fullWidth
+                required
+                rules={[
+                  validationRules.number,
+                  (value) => value >= 0 || "Amount cannot be negative."
+                ]}
+                onChange={(value) => setFormData({ ...formData, paid_amount: value })}
               />
             </Grid>
             <Grid

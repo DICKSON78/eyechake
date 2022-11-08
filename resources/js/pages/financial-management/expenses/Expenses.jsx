@@ -8,6 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import CreateExpense from "./CreateExpense";
 import EditExpense from "./EditExpense";
+import PayExpense from "./PayExpense";
 
 import { useFetch } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull, numberFormat } from "../../../helpers";
@@ -72,6 +73,18 @@ const Expenses = () => {
     modalRef.current.open("Edit Expense", component);
   };
 
+  const openPayExpenseModal = (item) => {
+    let component = (
+      <PayExpense
+        item={item}
+        modal={modalRef.current}
+        fetchExpenses={handleFetch}
+      />
+    );
+
+    modalRef.current.open("Pay Expense", component);
+  };
+
   return (
     <Page
       breadcrumbs={[
@@ -129,9 +142,19 @@ const Expenses = () => {
                 valueGetter: (item, index) => item.category.name,
               },
               {
-                field: "amount",
-                headerName: "Amount",
-                valueGetter: (item, index) => numberFormat(item.amount)
+                field: "total_amount",
+                headerName: "Total Amount",
+                valueGetter: (item, index) => numberFormat(item.total_amount)
+              },
+              {
+                field: "paid_amount",
+                headerName: "Paid Amount",
+                valueGetter: (item, index) => numberFormat(item.paid_amount)
+              },
+              {
+                field: "remaining_amount",
+                headerName: "Remaining Amount",
+                valueGetter: (item, index) => numberFormat(item.total_amount - item.paid_amount)
               },
               {
                 field: "description",
@@ -156,18 +179,32 @@ const Expenses = () => {
                 renderCell: (item) => (
                   <Stack
                     direction="row"
-                    alignExpenses="center"
+                    alignItems="center"
                     divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
-                    <Tooltip title="Edit">
-                      <IconButton
+                    {item.paid_amount < item.total_amount ?
+                      <Tooltip title="Edit">
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditExpenseModal(item)}
+                        >
+                          <EditIcon fontSize="small"/>
+                        </IconButton>
+                      </Tooltip>
+                      : null
+                    }
+                    {item.paid_amount < item.total_amount ?
+                      <Button
+                        variant="contained"
+                        disableElevation
                         size="small"
-                        onClick={() => openEditExpenseModal(item)}
+                        onClick={() => openPayExpenseModal(item)}
                       >
-                        <EditIcon fontSize="small"/>
-                      </IconButton>
-                    </Tooltip>
+                        Pay
+                      </Button>
+                      : null
+                    }
                   </Stack>
                 ),
               }
@@ -180,7 +217,9 @@ const Expenses = () => {
             footerItems={[
               [
                 { value: "TOTAL", tableCellProps: { colSpan: 2 } },
-                { value: numberFormat(data.data.reduce((acc, item) => acc + item.amount, 0)) },
+                { value: numberFormat(data.data.reduce((acc, item) => acc + item.total_amount, 0)) },
+                { value: numberFormat(data.data.reduce((acc, item) => acc + item.paid_amount, 0)) },
+                { value: numberFormat(data.data.reduce((acc, item) => acc + (item.total_amount - item.paid_amount), 0)) },
               ]
             ]}
           />

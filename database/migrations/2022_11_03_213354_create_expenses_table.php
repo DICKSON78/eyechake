@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('category_id')->unsigned();
-            $table->double('amount')->unsigned();
+            $table->double('total_amount')->unsigned();
+            $table->double('paid_amount')->unsigned()->default(0);
             $table->string('description')->nullable();
             $table->date('expense_date');
             $table->timestamp('created_at')->nullable();

@@ -41,7 +41,7 @@ class DashboardController extends Controller
 
         $a = PatientItemPayment::query()
             ->whereDate('created_at', '>=', $start_date)
-            ->sum('amount');
+            ->sum(DB::raw('amount - discount'));
         $b = PatientItemBillPayment::query()
             ->whereDate('created_at', '>=', $start_date)
             ->sum('amount');
@@ -49,7 +49,7 @@ class DashboardController extends Controller
 
         $data['counts']['expenses'] = Expense::query()
             ->whereDate('expense_date', '>=', $start_date)
-            ->sum('amount');
+            ->sum('paid_amount');
         $data['counts']['new_patients'] = Patient::query()
             ->whereDate('created_at', '>=', $start_date)
             ->count();
@@ -65,7 +65,7 @@ class DashboardController extends Controller
             ->whereDate('created_at', '>=', $start_date)
             ->count();
 
-        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where date(exp.expense_date) >= ? group by exp.category_id', [$start_date]);
+        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.paid_amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where date(exp.expense_date) >= ? group by exp.category_id', [$start_date]);
         $data['statistics']['cash_collection_by_consultation_type'] = DB::select('select pct.consultation_type_id, cnt.name, sum(pct.unit_price * pct.quantity) as amount from patient_payment_cache_items as pct inner join consultation_types as cnt on pct.consultation_type_id = cnt.id inner join payment_modes as pmd on pct.payment_mode_id = pmd.id where pmd.name = "Cash" and pct.status in ("Paid","Served") and date(pct.created_at) >= ? group by pct.consultation_type_id', [$start_date]);
 
         $channels = PaymentChannel::query()->where('status', 'Active')->get();
@@ -74,7 +74,7 @@ class DashboardController extends Controller
             $a = PatientItemPayment::query()
                 ->where('channel_id', $channel->id)
                 ->whereDate('created_at', '>=', $start_date)
-                ->sum('amount');
+                ->sum(DB::raw('amount - discount'));
             $b = PatientItemBillPayment::query()
                 ->where('channel_id', $channel->id)
                 ->whereDate('created_at', '>=', $start_date)

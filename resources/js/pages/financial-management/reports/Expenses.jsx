@@ -60,9 +60,19 @@ const Expenses = () => {
             valueGetter: (item, index) => item.category.name,
           },
           {
-            field: "amount",
-            headerName: "Amount",
-            valueGetter: (item, index) => numberFormat(item.amount)
+            field: "total_amount",
+            headerName: "Total Amount",
+            valueGetter: (item, index) => numberFormat(item.total_amount)
+          },
+          {
+            field: "paid_amount",
+            headerName: "Paid Amount",
+            valueGetter: (item, index) => numberFormat(item.paid_amount)
+          },
+          {
+            field: "remaining_amount",
+            headerName: "Remaining Amount",
+            valueGetter: (item, index) => numberFormat(item.total_amount - item.paid_amount)
           },
           {
             field: "description",
@@ -84,7 +94,9 @@ const Expenses = () => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 2, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 2 },
+          { reducer: (acc, item, index) => acc + item.total_amount, index: 2 },
+          { reducer: (acc, item, index) => acc + item.paid_amount, index: 3 },
+          { reducer: (acc, item, index) => acc + (item.total_amount - item.paid_amount), index: 4 },
         ]}
       />
     </Page>

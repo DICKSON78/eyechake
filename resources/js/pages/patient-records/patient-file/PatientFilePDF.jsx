@@ -11,7 +11,7 @@ import Footer from "../../../components/pdf/Footer";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table, { styles as tableStyles } from "../../../components/pdf/Table";
 
-import { getNonNull } from "../../../helpers";
+import { getAge, getNonNull } from "../../../helpers";
 import useFetch from "../../../hooks/useFetch";
 
 Font.register({
@@ -151,12 +151,12 @@ const PDFReportDocument = ({ consultation, patient }) => {
           items={[
             { label: "Patient Name", value: patient.full_name },
             { label: "Patient Number", value: patient.id },
-            { label: "Date of Birth", value: patient.date_of_birth },
+            { label: "Age", value: getAge(patient.date_of_birth) },
             { label: "Gender", value: patient.gender },
             { label: "Phone Number", value: patient.phone },
             { label: "Region", value: getNonNull(patient.region).name },
             { label: "District", value: getNonNull(patient.district).name },
-            { label: "Payment Mode", value: getNonNull(consultation.payment_cache_item.payment_mode).name },
+            { label: "Payment Mode", value: consultation.payment_cache_item.payment_mode.name },
             { label: "Consultant", value: getNonNull(consultation.payment_cache_item.consultant).full_name },
             { label: "Consultation Date", value: consultation.created_at },
           ]}
@@ -196,6 +196,52 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 },
               ]}
             />
+          </React.Fragment>
+          : null
+        }
+
+        {consultation.visual_acuity ?
+          <React.Fragment>
+            <Subheader
+              title="Visual Acuity (VA)"
+              style={{ marginBottom: 4 }}
+            />
+
+            <View style={[tableStyles.table, { marginBottom: 4 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Unaided</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Aided</Text>
+              </View>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>VA</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_re_va}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_le_va}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_re_va}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_le_va}</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>PH</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_re_ph}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_le_ph}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>IPD</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_ipd}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+              </View>
+            </View>
           </React.Fragment>
           : null
         }
@@ -296,52 +342,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
                   style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.re_cover_test}</Text>
                 <Text
                   style={[styles.text, tableStyles.tableCell]}>{consultation.functional_tests.le_cover_test}</Text>
-              </View>
-            </View>
-          </React.Fragment>
-          : null
-        }
-
-        {consultation.visual_acuity ?
-          <React.Fragment>
-            <Subheader
-              title="Visual Acuity (VA)"
-              style={{ marginBottom: 4 }}
-            />
-
-            <View style={[tableStyles.table, { marginBottom: 4 }]}>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Unaided</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Aided</Text>
-              </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>VA</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_re_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_le_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_re_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_le_va}</Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>PH</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_re_ph}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_le_ph}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>IPD</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_ipd}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
               </View>
             </View>
           </React.Fragment>

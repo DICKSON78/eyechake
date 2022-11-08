@@ -21,12 +21,17 @@ class ExpensesController extends Controller
     {
         $per_page = $request->per_page ?? 25;
         $category_id = $request->category_id;
+        $created_by = $request->created_by;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Expense::with(['category', 'creator']);
 
         if ($category_id) {
             $data->where('category_id', $category_id);
+        }
+
+        if ($created_by) {
+            $data->where('created_by', $created_by);
         }
 
         if ($start_date) {
@@ -52,11 +57,13 @@ class ExpensesController extends Controller
     {
         $request->validate([
             'category_id' => 'required|exists:expense_categories,id',
-            'amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'expense_date' => 'required|date_format:Y-m-d',
         ]);
 
         $input = $request->all();
+        $input['paid_amount'] = $request->paid_amount ?? 0;
         $input['created_by'] = $request->user()->id;
         $data = Expense::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -85,7 +92,8 @@ class ExpensesController extends Controller
     {
         $request->validate([
             'category_id' => 'nullable|exists:expense_categories,id',
-            'amount' => 'nullable|numeric|min:0',
+            'total_amount' => 'nullable|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
             'expense_date' => 'nullable|date_format:Y-m-d',
         ]);
 

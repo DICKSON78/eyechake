@@ -8,7 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "../../dispensing/PatientFilters";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
+import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
 
 const ProcedureRequests = () => {
 
@@ -100,8 +100,8 @@ const ProcedureRequests = () => {
               },
               {
                 field: "date_of_birth",
-                headerName: "Date of Birth",
-                valueGetter: (item, index) => item.check_in.patient.date_of_birth,
+                headerName: "Age",
+                valueGetter: (item, index) => getAge(item.check_in.patient.date_of_birth),
               },
               {
                 field: "gender",

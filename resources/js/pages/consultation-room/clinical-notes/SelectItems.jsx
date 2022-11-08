@@ -40,6 +40,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const [paymentMode, setPaymentMode] = useState(consultation.payment_cache_item.payment_mode);
   const [consultant, setConsultant] = useState(window.user);
   const [itemName, setItemName] = useState();
+  const [itemType, setItemType] = useState();
   const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
@@ -66,6 +67,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     consultation_type: consultationType,
     is_consultation_item: "No",
     payment_mode_id: paymentMode ? paymentMode.id : undefined,
+    item_type: itemType,
     lens_type_id: lensTypeId
   }, false, [], (response) => response.data.data.data);
 
@@ -75,10 +77,10 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
 
   useEffect(() => {
-    if (consultationType === "Glass") {
+    if (consultationType === "Glass" && itemType === "Lens") {
       fetchLensTypes();
     }
-  }, []);
+  }, [consultationType, itemType]);
 
   useEffect(() => {
     if (paymentMode) {
@@ -95,7 +97,13 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     if (paymentMode) {
       fetchItems();
     }
-  }, [itemName, lensTypeId]);
+  }, [itemName, itemType, lensTypeId]);
+
+  useEffect(() => {
+    if (itemType !== "Lens") {
+      setLensTypeId(null);
+    }
+  }, [itemType]);
 
   useEffect(() => {
     if (dataPost) {
@@ -241,25 +249,55 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               />
               <Divider />
               {loadingItems && <LinearProgress />}
-              <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
-                {consultationType === "Glass" ?
-                  <Select
-                    placeholder="Filter by Lens Type"
-                    fullWidth
-                    clearable
-                    options={lensTypes}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={lensTypeId || ""}
-                    onChange={(value) => setLensTypeId(value)}
-                    containerProps={{
-                      sx: {
-                        mb: 2,
+              {consultationType === "Glass" ?
+                <React.Fragment>
+                  <CardContent>
+                    <Grid
+                      container
+                      spacing={2}
+                    >
+                      <Grid
+                        item
+                        md
+                        sm={12}
+                        xs={12}
+                      >
+                        <Select
+                          placeholder="Item Type"
+                          fullWidth
+                          clearable
+                          options={["Lens", "Frame"]}
+                          value={itemType || ""}
+                          onChange={(value) => setItemType(value)}
+                        />
+                      </Grid>
+                      {itemType === "Lens" ?
+                        <Grid
+                          item
+                          md
+                          sm={12}
+                          xs={12}
+                        >
+                          <Select
+                            placeholder="Lens Type"
+                            fullWidth
+                            clearable
+                            options={lensTypes}
+                            optionsLabel="name"
+                            optionsValue="id"
+                            value={lensTypeId || ""}
+                            onChange={(value) => setLensTypeId(value)}
+                          />
+                        </Grid>
+                        : null
                       }
-                    }}
-                  />
-                  : null
-                }
+                    </Grid>
+                  </CardContent>
+                  <Divider />
+                </React.Fragment>
+                : null
+              }
+              <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
                 {items.map((e) => (
                   <FormControlLabel
                     key={e.id}

@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Alert, Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Table, { PageSizeSelect } from "../../components/Table";
 import Modal from "../../components/Modal";
 import Filters from "../consultation-room/PatientFilters";
 
 import { useFetch } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getNonNull } from "../../helpers";
+import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
 
 const PendingConsultationPatients = () => {
 
@@ -20,7 +20,6 @@ const PendingConsultationPatients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    consultant_id: window.user.id,
     status: "Consulted",
     optician_status: capitalize(status),
     patient_id: undefined,
@@ -78,6 +77,18 @@ const PendingConsultationPatients = () => {
           title={getTitle()}
           trailing={
             <React.Fragment>
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={!!params.consultant_id}
+                    onChange={(event) => setParams({
+                      ...params,
+                      consultant_id: event.target.checked ? window.user.id : undefined
+                    })}
+                  />
+                )}
+                label="My Patients Only"
+              />
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
@@ -103,27 +114,27 @@ const PendingConsultationPatients = () => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.full_name,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
-                headerName: "Date of Birth",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.date_of_birth,
+                headerName: "Age",
+                valueGetter: (item, index) => getAge(item.payment_cache_item.payment_cache.check_in.patient.date_of_birth),
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.gender,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.payment_cache.check_in).patient.phone,
+                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "created_by",
@@ -155,7 +166,7 @@ const PendingConsultationPatients = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/optician-center/consultation-patients/${status}/${getNonNull(item.payment_cache_item.payment_cache.check_in).patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/optician-center/consultation-patients/${status}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >
                       {status === "pending" ? "Manage" : "View"}
                     </Button>

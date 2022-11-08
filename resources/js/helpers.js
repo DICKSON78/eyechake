@@ -180,6 +180,37 @@ export const formatError = (errorBody) => {
   return message;
 };
 
+/**
+ * Get age from `date`.
+ * @param date
+ * @returns {*}
+ */
+export const getAge = (date) => {
+  if (!date || date === "0000-00-00") {
+    return null;
+  }
+
+  const years = moment().diff(date, "years");
+  const months = moment().diff(date, "months");
+  const days = moment().diff(date, "days");
+
+  if (years >= 1) {
+    return Math.floor(years) + " years";
+  }
+
+  if (months >= 1 && months <= 12) {
+    return Math.floor(months) + " months";
+  }
+
+  return days + " days";
+};
+
+/**
+ * Get date range title for reports.
+ * @param startDate
+ * @param endDate
+ * @returns {string}
+ */
 export const getDateRangeTitle = (startDate, endDate) => {
   let title = "";
   if (startDate) {

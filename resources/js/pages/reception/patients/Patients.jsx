@@ -10,7 +10,7 @@ import Filters from "./Filters";
 import EditPatient from "./EditPatient";
 
 import { useFetch } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { formatError, getAge, getNonNull } from "../../../helpers";
 
 const Patients = () => {
 
@@ -109,7 +109,8 @@ const Patients = () => {
               },
               {
                 field: "date_of_birth",
-                headerName: "Date of Birth",
+                headerName: "Age",
+                valueGetter: (item, index) => getAge(item.date_of_birth)
               },
               {
                 field: "gender",

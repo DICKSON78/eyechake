@@ -284,14 +284,14 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Grid>
             </Grid>
 
+            <Subheader title="Visual Acuity (VA)"/>
+            <VisualAcuity consultation={consultation}/>
+
             <Subheader title="External Examination"/>
             <ExternalExamination consultation={consultation}/>
 
             <Subheader title="Functional Tests"/>
             <FunctionalTests consultation={consultation}/>
-
-            <Subheader title="Visual Acuity (VA)"/>
-            <VisualAcuity consultation={consultation}/>
 
             <Subheader title="Refraction Details"/>
             <Refraction consultation={consultation}/>

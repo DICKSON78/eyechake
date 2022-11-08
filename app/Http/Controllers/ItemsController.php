@@ -23,6 +23,7 @@ class ItemsController extends Controller
         $status = $request->status;
         $q = $request->q;
         $item_type_id = $request->item_type_id;
+        $item_type = $request->item_type;
         $lens_type_id = $request->lens_type_id;
         $consultation_type_id = $request->consultation_type_id;
         $consultation_type = $request->consultation_type;
@@ -44,6 +45,12 @@ class ItemsController extends Controller
 
         if ($item_type_id) {
             $data->where('item_type_id', $item_type_id);
+        }
+
+        if ($item_type) {
+            $data->whereHas('item_type', function ($query) use ($item_type) {
+                $query->where('name', $item_type);
+            });
         }
 
         if ($lens_type_id) {
