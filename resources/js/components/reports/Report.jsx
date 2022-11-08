@@ -65,7 +65,7 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
               <PDFReport
                 title={title}
                 subtitle={subtitle}
-                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || col.webOnly)}
+                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
                 items={data.data}
                 orientation={pdfOrientation}
                 nestedObject={nestedObject}
@@ -74,7 +74,7 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
               />
               <SpreadsheetReport
                 title={title}
-                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || col.webOnly)}
+                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
                 items={data.data}
                 format="xlsx"
               />
