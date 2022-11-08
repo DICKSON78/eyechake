@@ -20,11 +20,20 @@ class ExpensesController extends Controller
     public function index(Request $request)
     {
         $per_page = $request->per_page ?? 25;
+        $status = $request->status;
         $category_id = $request->category_id;
         $created_by = $request->created_by;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Expense::with(['category', 'creator']);
+
+        if ($status == 'Pending') {
+            $data->whereRaw('paid_amount < total_amount');
+        }
+
+        if ($status == 'Paid') {
+            $data->whereRaw('paid_amount >= total_amount');
+        }
 
         if ($category_id) {
             $data->where('category_id', $category_id);
@@ -39,7 +48,7 @@ class ExpensesController extends Controller
         }
 
         if ($end_date) {
-            $data->whereDate('expense', '<=', $end_date);
+            $data->whereDate('expense_date', '<=', $end_date);
         }
 
         $data->orderBy('created_at', 'desc');

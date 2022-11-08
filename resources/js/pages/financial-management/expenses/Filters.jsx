@@ -64,6 +64,21 @@ const Filters = ({ params, setParams, ...rest }) => {
               onChange={(value) => setParams({ ...params, category_id: value })}
             />
           </Grid>
+          <Grid
+            item
+            md
+            sm={6}
+            xs={12}
+          >
+            <Select
+              label="Status"
+              fullWidth
+              options={["Pending", "Paid"]}
+              clearable
+              value={params.status || ""}
+              onChange={(value) => setParams({ ...params, status: value })}
+            />
+          </Grid>
         </Grid>
       </CardContent>
     </Card>

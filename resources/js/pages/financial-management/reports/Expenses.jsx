@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Chip } from "@mui/material";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../expenses/Filters";
@@ -16,6 +17,7 @@ const Expenses = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    status: undefined,
     category_id: undefined,
     start_date: new Date(),
     end_date: undefined,
@@ -25,6 +27,26 @@ const Expenses = () => {
     document.title = `Expenses Report - ${window.APP_NAME}`;
   }, []);
 
+  const getStatus = (item) => {
+    if (item.paid_amount < item.total_amount) {
+      return "Pending"
+    }
+
+    if (item.paid_amount >= item.total_amount) {
+      return "Paid"
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "warning";
+      case "Paid":
+        return "success";
+    }
+
+    return "neutral";
+  };
 
   return (
     <Page
@@ -90,6 +112,18 @@ const Expenses = () => {
           {
             field: "created_at",
             headerName: "Date",
+          },
+          {
+            field: "status",
+            headerName: "Status",
+            renderCell: (item) => (
+              <Chip
+                size="small"
+                color={getStatusColor(getStatus(item))}
+                label={getStatus(item)}
+              />
+            ),
+            webOnly: true,
           },
         ]}
         summationFooterColumns={[

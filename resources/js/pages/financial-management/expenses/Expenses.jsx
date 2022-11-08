@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardContent, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table, { PageSizeSelect } from "../../../components/Table";
@@ -25,6 +25,7 @@ const Expenses = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    status: "Pending",
     category_id: undefined,
     start_date: new Date(),
     end_date: undefined,
@@ -83,6 +84,27 @@ const Expenses = () => {
     );
 
     modalRef.current.open("Pay Expense", component);
+  };
+
+  const getStatus = (item) => {
+    if (item.paid_amount < item.total_amount) {
+      return "Pending"
+    }
+
+    if (item.paid_amount >= item.total_amount) {
+      return "Paid"
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "warning";
+      case "Paid":
+        return "success";
+    }
+
+    return "neutral";
   };
 
   return (
@@ -172,6 +194,17 @@ const Expenses = () => {
               {
                 field: "created_at",
                 headerName: "Date",
+              },
+              {
+                field: "status",
+                headerName: "Status",
+                renderCell: (item) => (
+                  <Chip
+                    size="small"
+                    color={getStatusColor(getStatus(item))}
+                    label={getStatus(item)}
+                  />
+                ),
               },
               {
                 field: "actions",
