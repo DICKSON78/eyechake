@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef } from "react";
 
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { Stack, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
@@ -12,7 +12,9 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
   const unaidedLeVaRef = useRef();
   const unaidedLePhRef = useRef();
   const aidedReVaRef = useRef();
+  const aidedReVaDescriptionRef = useRef();
   const aidedLeVaRef = useRef();
+  const aidedLeVaDescriptionRef = useRef();
 
   const { handlePatch: handleAutoSave } = usePatch();
 
@@ -66,21 +68,54 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
             />
           </TableCell>
           <TableCell>
-            <TextField
-              ref={aidedReVaRef}
-              disabled={status === "Consulted"}
-              fullWidth
-              defaultValue={visual_acuity ? visual_acuity.aided_re_va : null}
-              onChange={(value) => autoSave("aided_re_va", value)}/>
+            <Stack
+              direction="row"
+              spacing={1}
+            >
+              <TextField
+                ref={aidedReVaRef}
+                disabled={status === "Consulted"}
+                fullWidth
+                defaultValue={visual_acuity ? visual_acuity.aided_re_va : null}
+                onChange={(value) => autoSave("aided_re_va", value)}
+                containerProps={{
+                  width: 72,
+                }}
+              />
+              <TextField
+                ref={aidedReVaDescriptionRef}
+                disabled={status === "Consulted"}
+                placeholder="Enter description"
+                fullWidth
+                defaultValue={visual_acuity ? visual_acuity.aided_re_va_description : null}
+                onChange={(value) => autoSave("aided_re_va_description", value)}
+              />
+            </Stack>
           </TableCell>
           <TableCell>
-            <TextField
-              ref={aidedLeVaRef}
-              disabled={status === "Consulted"}
-              fullWidth
-              defaultValue={visual_acuity ? visual_acuity.aided_le_va : null}
-              onChange={(value) => autoSave("aided_le_va", value)}
-            />
+            <Stack
+              direction="row"
+              spacing={1}
+            >
+              <TextField
+                ref={aidedLeVaRef}
+                disabled={status === "Consulted"}
+                fullWidth
+                defaultValue={visual_acuity ? visual_acuity.aided_le_va : null}
+                onChange={(value) => autoSave("aided_le_va", value)}
+                containerProps={{
+                  width: 72,
+                }}
+              />
+              <TextField
+                ref={aidedLeVaDescriptionRef}
+                disabled={status === "Consulted"}
+                placeholder="Enter description"
+                fullWidth
+                defaultValue={visual_acuity ? visual_acuity.aided_le_va_description : null}
+                onChange={(value) => autoSave("aided_le_va_description", value)}
+              />
+            </Stack>
           </TableCell>
         </TableRow>
         <TableRow>

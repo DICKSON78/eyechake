@@ -6,14 +6,6 @@ import usePatch from "../../../hooks/usePatch";
 
 const RefractionDetails = ({ consultation: { id, optician_status, refraction } }, ref) => {
 
-  const obReSphRef = useRef();
-  const obReCylRef = useRef();
-  const obReAxisRef = useRef();
-  const obReVaRef = useRef();
-  const obLeSphRef = useRef();
-  const obLeCylRef = useRef();
-  const obLeAxisRef = useRef();
-  const obLeVaRef = useRef();
   const subReSphRef = useRef();
   const subReCylRef = useRef();
   const subReAxisRef = useRef();
@@ -46,13 +38,10 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
       <TableHead>
         <TableRow>
           <TableCell />
-          <TableCell colSpan={2}>Objective Refraction</TableCell>
           <TableCell colSpan={2}>Subjective Refraction</TableCell>
         </TableRow>
         <TableRow>
           <TableCell/>
-          <TableCell>RE</TableCell>
-          <TableCell>LE</TableCell>
           <TableCell>RE</TableCell>
           <TableCell>LE</TableCell>
         </TableRow>
@@ -60,24 +49,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
       <TableBody>
         <TableRow>
           <TableCell component="th">SPH</TableCell>
-          <TableCell>
-            <TextField
-              ref={obReSphRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_re_sph : null}
-              onChange={(value) => autoSave("ob_re_sph", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={obLeSphRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_le_sph : null}
-              onChange={(value) => autoSave("ob_le_sph", value)}
-            />
-          </TableCell>
           <TableCell>
             <TextField
               ref={subReSphRef}
@@ -101,24 +72,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
           <TableCell component="th">CYL</TableCell>
           <TableCell>
             <TextField
-              ref={obReCylRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_re_cyl : null}
-              onChange={(value) => autoSave("ob_re_cyl", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={obLeCylRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_le_cyl : null}
-              onChange={(value) => autoSave("ob_le_cyl", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
               ref={subReCylRef}
               disabled={optician_status === "Consulted"}
               fullWidth
@@ -138,24 +91,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
         </TableRow>
         <TableRow>
           <TableCell component="th">AXIS</TableCell>
-          <TableCell>
-            <TextField
-              ref={obReAxisRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_re_axis : null}
-              onChange={(value) => autoSave("ob_re_axis", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={obLeAxisRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_le_axis : null}
-              onChange={(value) => autoSave("ob_le_axis", value)}
-            />
-          </TableCell>
           <TableCell>
             <TextField
               ref={subReAxisRef}
@@ -179,24 +114,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
           <TableCell component="th">VA</TableCell>
           <TableCell>
             <TextField
-              ref={obReVaRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_re_va : null}
-              onChange={(value) => autoSave("ob_re_va", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={obLeVaRef}
-              disabled={optician_status === "Consulted"}
-              fullWidth
-              defaultValue={refraction ? refraction.ob_le_va : null}
-              onChange={(value) => autoSave("ob_le_va", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
               ref={subReVaRef}
               disabled={optician_status === "Consulted"}
               fullWidth
@@ -216,8 +133,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
         </TableRow>
         <TableRow>
           <TableCell component="th">ADD</TableCell>
-          <TableCell />
-          <TableCell />
           <TableCell>
             <TextField
               ref={subReAddRef}
@@ -239,8 +154,6 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
         </TableRow>
         <TableRow>
           <TableCell component="th">VA</TableCell>
-          <TableCell />
-          <TableCell />
           <TableCell>
             <TextField
               ref={subReAddVaRef}

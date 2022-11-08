@@ -123,7 +123,7 @@ const Expenses = () => {
                 label={getStatus(item)}
               />
             ),
-            webOnly: true,
+            valueGetter: (item, index) => getStatus(item),
           },
         ]}
         summationFooterColumns={[

@@ -54,19 +54,32 @@ const CheckInPatient = () => {
     status: "Active",
     per_page: 500
   }, false, [], (response) => response.data.data.data);
+  const { data: itemTypes, handleFetch: fetchItemTypes } = useFetch("api/item-types", {
+    status: "Active",
+    per_page: 500
+  }, false, [], (response) => response.data.data.data.map((e) => e.name));
 
   const [paymentMode, setPaymentMode] = useState();
   const [consultant, setConsultant] = useState();
   const [itemName, setItemName] = useState();
+  const [itemType, setItemType] = useState();
+  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
+    status: "Active",
+    per_page: 500
+  }, false, [], (response) => response.data.data.data);
 
   const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
     status: "Active",
     per_page: 5000,
     payment_mode_id: paymentMode ? paymentMode.id : undefined,
     q: itemName,
+    item_type: itemType,
+    lens_type_id: lensTypeId
   }, false, [], (response) => response.data.data.data);
 
   const { data, loading, error, handlePost, setError } = usePost("api/patient-check-ins", {
@@ -83,7 +96,7 @@ const CheckInPatient = () => {
     if (patient) {
       fetchPaymentModes();
       fetchUsers();
-
+      fetchItemTypes();
       setPaymentMode(patient.payment_mode);
     }
   }, [patient]);
@@ -101,7 +114,17 @@ const CheckInPatient = () => {
     if (paymentMode) {
       fetchItems();
     }
-  }, [itemName]);
+  }, [itemName, itemType, lensTypeId]);
+
+  useEffect(() => {
+    if (itemType !== "Lens") {
+      setLensTypeId(null);
+    }
+
+    if (itemType === "Lens") {
+      fetchLensTypes();
+    }
+  }, [itemType]);
 
   useEffect(() => {
     if (data) {
@@ -210,8 +233,8 @@ const CheckInPatient = () => {
             >
               <Grid
                 item
-                md={3}
-                sm={4}
+                md={4}
+                sm={12}
                 xs={12}
               >
                 <Select
@@ -229,8 +252,8 @@ const CheckInPatient = () => {
               </Grid>
               <Grid
                 item
-                md={3}
-                sm={4}
+                md={4}
+                sm={12}
                 xs={12}
               >
                 <Select
@@ -252,8 +275,8 @@ const CheckInPatient = () => {
             >
               <Grid
                 item
-                md={3}
-                sm={4}
+                md={4}
+                sm={12}
                 xs={12}
               >
                 <Card variant="outlined">
@@ -267,6 +290,49 @@ const CheckInPatient = () => {
                     )}
                     className="no-action-margin-right"
                   />
+                  <Divider />
+                  <CardContent>
+                    <Grid
+                      container
+                      spacing={2}
+                    >
+                      <Grid
+                        item
+                        md
+                        sm={12}
+                        xs={12}
+                      >
+                        <Select
+                          placeholder="Item Type"
+                          fullWidth
+                          clearable
+                          options={itemTypes}
+                          value={itemType || ""}
+                          onChange={(value) => setItemType(value)}
+                        />
+                      </Grid>
+                      {itemType === "Lens" ?
+                        <Grid
+                          item
+                          md
+                          sm={12}
+                          xs={12}
+                        >
+                          <Select
+                            placeholder="Lens Type"
+                            fullWidth
+                            clearable
+                            options={lensTypes}
+                            optionsLabel="name"
+                            optionsValue="id"
+                            value={lensTypeId || ""}
+                            onChange={(value) => setLensTypeId(value)}
+                          />
+                        </Grid>
+                        : null
+                      }
+                    </Grid>
+                  </CardContent>
                   <Divider />
                   <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
                     {items.map((e) => (
@@ -288,8 +354,8 @@ const CheckInPatient = () => {
 
               <Grid
                 item
-                md={9}
-                sm={8}
+                md={8}
+                sm={12}
                 xs={12}
               >
                 <Card

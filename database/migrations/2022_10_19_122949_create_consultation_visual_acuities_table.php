@@ -22,8 +22,9 @@ return new class extends Migration
             $table->string('unaided_le_va')->nullable();
             $table->string('unaided_le_ph')->nullable();
             $table->string('aided_re_va')->nullable();
-            $table->string('re_lens')->nullable();
+            $table->string('aided_re_va_description')->nullable();
             $table->string('aided_le_va')->nullable();
+            $table->string('aided_le_va_description')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();

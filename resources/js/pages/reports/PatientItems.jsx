@@ -265,7 +265,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                 label={getStatusLabel(item.status)}
               />
             ),
-            webOnly: true
+            valueGetter: (item) => getStatusLabel(item.status)
           }
         ]}
       />

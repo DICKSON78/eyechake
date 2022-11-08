@@ -11,8 +11,8 @@ class ConsultationVisualAcuity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'consultation_id', 'unaided_re_va', 'unaided_re_ph', 'unaided_ipd', 'unaided_le_va',
-        'unaided_le_ph', 'aided_re_va', 'aided_le_va', 'created_by',
+        'consultation_id', 'unaided_re_va', 'unaided_re_ph', 'unaided_ipd', 'unaided_le_va', 'unaided_le_ph',
+        'aided_re_va', 'aided_re_va_description', 'aided_le_va', 'aided_le_va_description', 'created_by',
     ];
 
     public function creator()

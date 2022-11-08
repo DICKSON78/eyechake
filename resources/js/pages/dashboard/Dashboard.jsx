@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, Card, CardContent, CardHeader, Divider, Grid } from "@mui/material";
-import { AccountBalance as CashCollectionIcon, DoneAll as DoneIcon, PersonAddRounded as NewPatientsIcon, TrendingDownRounded as ExpensesIcon } from "@mui/icons-material";
+import { Alert, Card, CardContent, CardHeader, Divider, Grid, Typography } from "@mui/material";
+import {
+  AccountBalance as CashCollectionIcon,
+  DoneAll as DoneIcon,
+  PersonAddRounded as NewPatientsIcon,
+  TrendingDownRounded as ExpensesIcon
+} from "@mui/icons-material";
 
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
-import Select from "../../components/Select";
+import DatePicker from "../../components/DatePicker";
 import LoadingSkeleton from "./LoadingSkeleton";
 import InfoCard from "./InfoCard";
 
 import { useTheme } from "@mui/material/styles";
 import { blue, cyan, deepOrange, green, lightBlue, lime, orange, pink, purple, red, teal } from "@mui/material/colors";
 
+import moment from "moment";
 import { useFetch } from "../../hooks";
-import { formatError, numberFormat } from "../../helpers";
+import { formatDateForDb, formatError, numberFormat } from "../../helpers";
 
 import {
   ArcElement,
@@ -48,47 +53,49 @@ Chart.defaults.font.size = 11;
 const Dashboard = () => {
 
   const theme = useTheme();
-  const navigate = useNavigate();
 
   const modalRef = useRef();
-  const consultationTypesChartCanvasRef = useRef();
+  const cashCollectionByConsultationTypeChartCanvasRef = useRef();
   const expensesChartCanvasRef = useRef();
-  const collectionByChannelChartCanvasRef = useRef();
 
-  const [consultationTypesChart, setConsultationTypesChart] = useState();
+  const [cashCollectionByConsultationTypeChart, setCashCollectionByConsultationTypeChart] = useState();
   const [expensesChart, setExpensesChart] = useState();
-  const [collectionByChannelChart, setCollectionByChannelChart] = useState();
   const [params, setParams] = useState({
-    past_days: 7,
+    start_date: moment().subtract(7, "days").toDate(),
+    end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/dashboard", params, true, null, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch("api/dashboard", {
+    ...params,
+    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+  }, true, null, (response) => response.data.data);
 
   useEffect(() => {
     document.title = `Dashboard - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
-    if (data && consultationTypesChartCanvasRef && expensesChartCanvasRef) {
+    if (data && cashCollectionByConsultationTypeChartCanvasRef && expensesChartCanvasRef) {
       renderCharts();
     }
-  }, [data, consultationTypesChartCanvasRef, expensesChartCanvasRef, theme]);
+  }, [data, cashCollectionByConsultationTypeChartCanvasRef, expensesChartCanvasRef, theme]);
 
   const renderCharts = () => {
-    if (consultationTypesChart) {
-      consultationTypesChart.destroy();
+    if (cashCollectionByConsultationTypeChart) {
+      cashCollectionByConsultationTypeChart.destroy();
     }
     if (expensesChart) {
       expensesChart.destroy();
     }
 
-    let chart = new Chart(consultationTypesChartCanvasRef.current.getContext("2d"), {
+    let chart = new Chart(cashCollectionByConsultationTypeChartCanvasRef.current.getContext("2d"), {
       type: "bar",
       data: {
         labels: data.statistics.cash_collection_by_consultation_type.map((e) => e.name),
         datasets: [
           {
-            label: "Cash Collection by Consultation Type",
+            label: "Cash Collection",
             data: data.statistics.cash_collection_by_consultation_type.map((e) => e.amount),
             backgroundColor: [
               blue[300],
@@ -108,6 +115,7 @@ const Dashboard = () => {
             display: false,
           },
           legend: {
+            display: false,
             labels: {
               color: theme.palette.text.secondary,
             }
@@ -135,7 +143,7 @@ const Dashboard = () => {
       },
     });
 
-    setConsultationTypesChart(chart);
+    setCashCollectionByConsultationTypeChart(chart);
 
     chart = new Chart(expensesChartCanvasRef.current.getContext("2d"), {
       type: "pie",
@@ -143,7 +151,6 @@ const Dashboard = () => {
         labels: data.statistics.expenses_by_category.map((e) => e.name),
         datasets: [
           {
-            label: "Expenses by Category",
             data: data.statistics.expenses_by_category.map((e) => e.amount),
             backgroundColor: [
               blue[300],
@@ -171,7 +178,8 @@ const Dashboard = () => {
           legend: {
             labels: {
               color: theme.palette.text.secondary,
-            }
+            },
+            position: "bottom"
           },
         },
         scales: {
@@ -214,20 +222,28 @@ const Dashboard = () => {
       <PageHeader
         title="Dashboard"
         trailing={
-          <Select
-            placeholder="Past Days"
-            options={[
-              { label: "Last 7 days", value: 7 },
-              { label: "Last 14 days", value: 14 },
-              { label: "Last 30 days", value: 30 },
-            ]}
-            optionsLabel="label"
-            optionsValue="value"
-            value={params.past_days}
-            onChange={(value) => setParams({ ...params, past_days: value })}
-          />
+          <React.Fragment>
+            <DatePicker
+              fullWidth
+              value={params.start_date || null}
+              onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+              containerProps={{
+                width: 156,
+              }}
+            />
+            <Typography>~</Typography>
+            <DatePicker
+              fullWidth
+              value={params.end_date || null}
+              onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+              containerProps={{
+                width: 156,
+              }}
+            />
+          </React.Fragment>
         }
         containerProps={{
+          spacing: 1,
           p: 0,
           mb: 2,
         }}
@@ -284,10 +300,10 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader title="Cash Collection" />
+              <CardHeader title="Cash Collection"/>
               <Divider />
               <CardContent>
-                <canvas ref={consultationTypesChartCanvasRef}/>
+                <canvas ref={cashCollectionByConsultationTypeChartCanvasRef}/>
               </CardContent>
             </Card>
           </Grid>
@@ -298,7 +314,7 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader title="Expenses" />
+              <CardHeader title="Expenses"/>
               <Divider />
               <CardContent>
                 <canvas ref={expensesChartCanvasRef}/>

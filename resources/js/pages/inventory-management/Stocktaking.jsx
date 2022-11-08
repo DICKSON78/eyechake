@@ -21,6 +21,7 @@ import DeleteIcon from "@mui/icons-material/CloseRounded";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
 import TextField from "../../components/TextField";
+import Select from "../../components/Select";
 import DatePicker from "../../components/DatePicker";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
@@ -51,17 +52,26 @@ const Stocktaking = () => {
 
   const [reason, setReason] = useState();
   const [itemName, setItemName] = useState();
+  const [itemType, setItemType] = useState();
+  const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState();
   const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
   const [expiryDate, setExpiryDate] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
+    status: "Active",
+    per_page: 500
+  }, false, [], (response) => response.data.data.data);
+
   const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
     status: "Active",
     per_page: 5000,
     is_stock_item: "Yes",
     q: itemName,
+    item_type: itemType,
+    lens_type_id: lensTypeId
   }, true, [], (response) => response.data.data.data);
 
   const { data, loading, error, handlePost, setError } = usePost("api/stocktakes", {
@@ -72,6 +82,16 @@ const Stocktaking = () => {
   useEffect(() => {
     document.title = `Stocktaking - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    if (itemType !== "Lens") {
+      setLensTypeId(null);
+    }
+
+    if (itemType === "Lens") {
+      fetchLensTypes();
+    }
+  }, [itemType]);
 
   const handleAddItem = () => {
     if (quantityRef.current.validate() && unitBuyingPriceRef.current.validate()) {
@@ -153,8 +173,8 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={3}
-              sm={4}
+              md={4}
+              sm={12}
               xs={12}
             >
               <TextField
@@ -167,8 +187,8 @@ const Stocktaking = () => {
             </Grid>
             <Grid
               item
-              md={3}
-              sm={4}
+              md={4}
+              sm={12}
               xs={12}
             >
               <TextField
@@ -187,8 +207,8 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={3}
-              sm={4}
+              md={4}
+              sm={12}
               xs={12}
             >
               <Card variant="outlined">
@@ -202,6 +222,49 @@ const Stocktaking = () => {
                   )}
                   className="no-action-margin-right"
                 />
+                <Divider />
+                <CardContent>
+                  <Grid
+                    container
+                    spacing={2}
+                  >
+                    <Grid
+                      item
+                      md
+                      sm={12}
+                      xs={12}
+                    >
+                      <Select
+                        placeholder="Item Type"
+                        fullWidth
+                        clearable
+                        options={["Pharmaceutical", "Lens", "Frame"]}
+                        value={itemType || ""}
+                        onChange={(value) => setItemType(value)}
+                      />
+                    </Grid>
+                    {itemType === "Lens" ?
+                      <Grid
+                        item
+                        md
+                        sm={12}
+                        xs={12}
+                      >
+                        <Select
+                          placeholder="Lens Type"
+                          fullWidth
+                          clearable
+                          options={lensTypes}
+                          optionsLabel="name"
+                          optionsValue="id"
+                          value={lensTypeId || ""}
+                          onChange={(value) => setLensTypeId(value)}
+                        />
+                      </Grid>
+                      : null
+                    }
+                  </Grid>
+                </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
                   {items.map((e) => (
@@ -223,8 +286,8 @@ const Stocktaking = () => {
 
             <Grid
               item
-              md={9}
-              sm={8}
+              md={8}
+              sm={12}
               xs={12}
             >
               <Card

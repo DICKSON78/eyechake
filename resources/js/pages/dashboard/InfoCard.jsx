@@ -1,6 +1,5 @@
 import React from "react";
 import { Avatar, Box, Card, Grid, Stack, Typography } from "@mui/material";
-import { North as IncreaseIcon, South as DecreaseIcon } from "@mui/icons-material";
 import { alpha } from "@mui/material/styles";
 
 const InfoCard = ({ title, count, icon, color }) => {
@@ -14,7 +13,7 @@ const InfoCard = ({ title, count, icon, color }) => {
       <Card
         sx={{
           p: 3,
-          borderLeft: `4px solid ${alpha(color, 0.24)}`,
+          borderBottom: `4px solid ${alpha(color, 0.24)}`,
         }}
       >
         <Stack
