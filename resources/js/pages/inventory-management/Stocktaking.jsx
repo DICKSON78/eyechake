@@ -173,7 +173,7 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={4}
+              md={3}
               sm={12}
               xs={12}
             >
@@ -187,7 +187,7 @@ const Stocktaking = () => {
             </Grid>
             <Grid
               item
-              md={4}
+              md={3}
               sm={12}
               xs={12}
             >
@@ -207,7 +207,7 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={4}
+              md={3}
               sm={12}
               xs={12}
             >
@@ -224,46 +224,30 @@ const Stocktaking = () => {
                 />
                 <Divider />
                 <CardContent>
-                  <Grid
-                    container
-                    spacing={2}
-                  >
-                    <Grid
-                      item
-                      md
-                      sm={12}
-                      xs={12}
-                    >
-                      <Select
-                        placeholder="Item Type"
-                        fullWidth
-                        clearable
-                        options={["Pharmaceutical", "Lens", "Frame"]}
-                        value={itemType || ""}
-                        onChange={(value) => setItemType(value)}
-                      />
-                    </Grid>
-                    {itemType === "Lens" ?
-                      <Grid
-                        item
-                        md
-                        sm={12}
-                        xs={12}
-                      >
-                        <Select
-                          placeholder="Lens Type"
-                          fullWidth
-                          clearable
-                          options={lensTypes}
-                          optionsLabel="name"
-                          optionsValue="id"
-                          value={lensTypeId || ""}
-                          onChange={(value) => setLensTypeId(value)}
-                        />
-                      </Grid>
-                      : null
-                    }
-                  </Grid>
+                  <Select
+                    placeholder="Item Type"
+                    fullWidth
+                    clearable
+                    options={["Pharmaceutical", "Lens", "Frame"]}
+                    value={itemType || ""}
+                    onChange={(value) => setItemType(value)}
+                  />
+                  {itemType === "Lens" ?
+                    <Select
+                      placeholder="Lens Type"
+                      fullWidth
+                      clearable
+                      options={lensTypes}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      value={lensTypeId || ""}
+                      onChange={(value) => setLensTypeId(value)}
+                      containerProps={{
+                        mt: 2
+                      }}
+                    />
+                    : null
+                  }
                 </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
@@ -286,7 +270,7 @@ const Stocktaking = () => {
 
             <Grid
               item
-              md={8}
+              md={9}
               sm={12}
               xs={12}
             >

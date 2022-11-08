@@ -190,8 +190,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         >
           <Grid
             item
-            md={4}
-            sm={8}
+            md={3}
+            sm={12}
             xs={12}
           >
             <Select
@@ -209,8 +209,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
           </Grid>
           <Grid
             item
-            md={4}
-            sm={8}
+            md={3}
+            sm={12}
             xs={12}
           >
             <Select
@@ -232,7 +232,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         >
           <Grid
             item
-            md={4}
+            md={3}
             sm={12}
             xs={12}
           >
@@ -243,6 +243,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                 action={(
                   <SearchTextField
                     onChange={(value) => setItemName(value)}
+                    sx={{ width: 116 }}
                   />
                 )}
                 className="no-action-margin-right"
@@ -252,46 +253,30 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               {consultationType === "Glass" ?
                 <React.Fragment>
                   <CardContent>
-                    <Grid
-                      container
-                      spacing={2}
-                    >
-                      <Grid
-                        item
-                        md
-                        sm={12}
-                        xs={12}
-                      >
-                        <Select
-                          placeholder="Item Type"
-                          fullWidth
-                          clearable
-                          options={["Lens", "Frame"]}
-                          value={itemType || ""}
-                          onChange={(value) => setItemType(value)}
-                        />
-                      </Grid>
-                      {itemType === "Lens" ?
-                        <Grid
-                          item
-                          md
-                          sm={12}
-                          xs={12}
-                        >
-                          <Select
-                            placeholder="Lens Type"
-                            fullWidth
-                            clearable
-                            options={lensTypes}
-                            optionsLabel="name"
-                            optionsValue="id"
-                            value={lensTypeId || ""}
-                            onChange={(value) => setLensTypeId(value)}
-                          />
-                        </Grid>
-                        : null
-                      }
-                    </Grid>
+                    <Select
+                      placeholder="Item Type"
+                      fullWidth
+                      clearable
+                      options={["Lens", "Frame"]}
+                      value={itemType || ""}
+                      onChange={(value) => setItemType(value)}
+                    />
+                    {itemType === "Lens" ?
+                      <Select
+                        placeholder="Lens Type"
+                        fullWidth
+                        clearable
+                        options={lensTypes}
+                        optionsLabel="name"
+                        optionsValue="id"
+                        value={lensTypeId || ""}
+                        onChange={(value) => setLensTypeId(value)}
+                        containerProps={{
+                          mt: 2
+                        }}
+                      />
+                      : null
+                    }
                   </CardContent>
                   <Divider />
                 </React.Fragment>
@@ -321,7 +306,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
 
           <Grid
             item
-            md={8}
+            md={9}
             sm={12}
             xs={12}
           >
