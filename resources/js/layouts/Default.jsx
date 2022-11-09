@@ -229,7 +229,7 @@ const Default = ({ setThemeMode, setUser }) => {
             variant="temporary"
             open={isDrawerOpen}
             ModalProps={{
-              keepMounted: true,
+              //keepMounted: true,
               disableScrollLock: true,
             }}
             sx={{
