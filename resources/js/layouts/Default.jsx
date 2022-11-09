@@ -225,11 +225,11 @@ const Default = ({ setThemeMode, setUser }) => {
 
           {/* Drawer for small screens */}
           <Drawer
-            container={() => window.document.body}
+            // container={() => window.document.body}
             variant="temporary"
             open={isDrawerOpen}
             ModalProps={{
-              //keepMounted: true,
+              keepMounted: true,
               disableScrollLock: true,
             }}
             sx={{
