@@ -155,7 +155,7 @@ const PendingPatientItems = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Payment Center" },
-        { title: "Sent to Cashier" },
+        { title: "Patients Sent to Cashier" },
         { title: patientId },
       ]}
     >

@@ -19,8 +19,6 @@ const PendingPatientItems = () => {
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
-  const discountRef = useRef();
-  const paymentChannelRef = useRef();
 
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();

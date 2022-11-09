@@ -475,6 +475,9 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         : null
       }
       dense
+      sx={{
+        width: "100%",
+      }}
     >
       {items.filter((e) => (typeof e.show === "undefined") || e.show).map((e) => (
         !e.to ?

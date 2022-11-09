@@ -140,13 +140,13 @@ const PendingConsultationPatients = () => {
                 field: "created_by",
                 headerName: "Sent By",
                 valueGetter: (item, index) => getNonNull(item.to_optician_sender).full_name,
-                show: status === "Pending"
+                show: status === "pending"
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
                 valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
-                show: status === "Consulted"
+                show: status === "consulted"
               },
               {
                 field: "sent_to_optician_at",

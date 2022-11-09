@@ -253,6 +253,9 @@ const Default = ({ setThemeMode, setUser }) => {
           {/* Drawer for large screens */}
           <Drawer
             variant="permanent"
+            ModalProps={{
+              disableScrollLock: true,
+            }}
             sx={{
               display: { xs: "none", sm: "none", md: "block" },
               width: drawerWidth,

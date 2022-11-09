@@ -96,7 +96,7 @@ class ItemsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:items,name',
+            'name' => 'required',
             'code' => 'nullable|unique:items,code',
             'item_type_id' => 'required|exists:item_types,id',
             'consultation_type_id' => 'required|exists:consultation_types,id',
@@ -135,7 +135,6 @@ class ItemsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'nullable|unique:items,name,' . $id,
             'code' => 'nullable|unique:items,code,' . $id,
             'item_type_id' => 'nullable|exists:item_types,id',
             'consultation_type_id' => 'nullable|exists:consultation_types,id',
