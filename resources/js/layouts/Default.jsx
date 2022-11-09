@@ -21,7 +21,8 @@ import {
   Stack,
   Toolbar,
   Tooltip,
-  Typography
+  Typography,
+  useMediaQuery
 } from "@mui/material";
 
 import {
@@ -67,6 +68,8 @@ const Default = ({ setThemeMode, setUser }) => {
   const modalRef = useRef();
   const navigate = useNavigate();
   const theme = useTheme();
+  const breakpointDownMedium = useMediaQuery(theme.breakpoints.down("md"));
+  const breakpointUpMedium = useMediaQuery(theme.breakpoints.up("md"));
 
   const [loading, setLoading] = useState(false);
 
@@ -224,59 +227,63 @@ const Default = ({ setThemeMode, setUser }) => {
           </AppBar>
 
           {/* Drawer for small screens */}
-          <Drawer
-            // container={() => window.document.body}
-            variant="temporary"
-            open={isDrawerOpen}
-            ModalProps={{
-              keepMounted: true,
-              disableScrollLock: true,
-            }}
-            sx={{
-              display: { xs: "block", sm: "block", md: "none" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: drawerWidth,
-              },
-            }}
-            onClose={toggleDrawer}
-          >
-            <Toolbar />
-            <SideMenu
-              drawerOpen={isDrawerOpen}
-              setDrawerOpen={setIsDrawerOpen}
-              user={user}
-            />
-          </Drawer>
+          {breakpointDownMedium ?
+            <Drawer
+              container={() => window.document.body}
+              variant="temporary"
+              open={isDrawerOpen}
+              ModalProps={{
+                keepMounted: true,
+                disableScrollLock: true,
+              }}
+              sx={{
+                "& .MuiDrawer-paper": {
+                  boxSizing: "border-box",
+                  width: drawerWidth,
+                },
+              }}
+              onClose={toggleDrawer}
+            >
+              <Toolbar />
+              <SideMenu
+                drawerOpen={isDrawerOpen}
+                setDrawerOpen={setIsDrawerOpen}
+                user={user}
+              />
+            </Drawer>
+            : null
+          }
           {/*****/}
 
           {/* Drawer for large screens */}
-          <Drawer
-            variant="permanent"
-            ModalProps={{
-              disableScrollLock: true,
-            }}
-            sx={{
-              display: { xs: "none", sm: "none", md: "block" },
-              width: drawerWidth,
-              flexShrink: 0,
-              boxSizing: "border-box",
-              ...(isDrawerOpen && {
-                ...drawerOpenedMixin(theme),
-                "& .MuiDrawer-paper": drawerOpenedMixin(theme),
-              }),
-              ...(!isDrawerOpen && {
-                ...drawerClosedMixin(theme),
-                "& .MuiDrawer-paper": drawerClosedMixin(theme),
-              }),
-            }}
-          >
-            <Toolbar />
-            <SideMenu
-              drawerOpen={isDrawerOpen}
-              user={user}
-            />
-          </Drawer>
+          {breakpointUpMedium ?
+            <Drawer
+              variant="permanent"
+              ModalProps={{
+                disableScrollLock: true,
+              }}
+              sx={{
+                width: drawerWidth,
+                flexShrink: 0,
+                boxSizing: "border-box",
+                ...(isDrawerOpen && {
+                  ...drawerOpenedMixin(theme),
+                  "& .MuiDrawer-paper": drawerOpenedMixin(theme),
+                }),
+                ...(!isDrawerOpen && {
+                  ...drawerClosedMixin(theme),
+                  "& .MuiDrawer-paper": drawerClosedMixin(theme),
+                }),
+              }}
+            >
+              <Toolbar />
+              <SideMenu
+                drawerOpen={isDrawerOpen}
+                user={user}
+              />
+            </Drawer>
+            : null
+          }
           {/*****/}
 
           <Box
