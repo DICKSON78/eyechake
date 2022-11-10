@@ -13,7 +13,9 @@ const InfoCard = ({ title, count, icon, color }) => {
       <Card
         sx={{
           p: 3,
-          borderBottom: `4px solid ${alpha(color, 0.24)}`,
+          backgroundColor: (theme) => theme.palette.mode === "light"
+            ? alpha(color, 0.24)
+            : theme.palette.background.paper,
         }}
       >
         <Stack

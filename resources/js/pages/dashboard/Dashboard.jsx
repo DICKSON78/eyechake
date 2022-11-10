@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Card, CardContent, CardHeader, Divider, Grid, Typography } from "@mui/material";
 import {
-  AccountBalance as CashCollectionIcon,
-  DoneAll as DoneIcon,
+  AccountBalanceRounded as SalesIcon,
+  CenterFocusStrongRounded as GlassIcon,
+  DiscountRounded as DiscountIcon,
+  DoneAllRounded as DoneIcon,
+  MedicalInformationRounded as PharmacyIcon,
+  MeetingRoomRounded as ConsultationsIcon,
   PersonAddRounded as NewPatientsIcon,
   TrendingDownRounded as ExpensesIcon
 } from "@mui/icons-material";
@@ -14,7 +18,7 @@ import LoadingSkeleton from "./LoadingSkeleton";
 import InfoCard from "./InfoCard";
 
 import { useTheme } from "@mui/material/styles";
-import { blue, cyan, deepOrange, green, lightBlue, lime, orange, pink, purple, red, teal } from "@mui/material/colors";
+import { blue, cyan, deepOrange, green, lightBlue, lime, orange, pink, purple, red, teal, yellow } from "@mui/material/colors";
 
 import moment from "moment";
 import { useFetch } from "../../hooks";
@@ -55,11 +59,13 @@ const Dashboard = () => {
   const theme = useTheme();
 
   const modalRef = useRef();
-  const cashCollectionByConsultationTypeChartCanvasRef = useRef();
+  const salesChartCanvasRef = useRef();
   const expensesChartCanvasRef = useRef();
+  const paymentsChartCanvasRef = useRef();
 
-  const [cashCollectionByConsultationTypeChart, setCashCollectionByConsultationTypeChart] = useState();
+  const [salesChart, setSalesChart] = useState();
   const [expensesChart, setExpensesChart] = useState();
+  const [paymentsChart, setPaymentsChart] = useState();
   const [params, setParams] = useState({
     start_date: moment().subtract(7, "days").toDate(),
     end_date: undefined,
@@ -76,33 +82,39 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (data && cashCollectionByConsultationTypeChartCanvasRef && expensesChartCanvasRef) {
+    if (data && salesChartCanvasRef && expensesChartCanvasRef && paymentsChartCanvasRef) {
       renderCharts();
     }
-  }, [data, cashCollectionByConsultationTypeChartCanvasRef, expensesChartCanvasRef, theme]);
+  }, [data, salesChartCanvasRef, expensesChartCanvasRef, paymentsChartCanvasRef, theme]);
 
   const renderCharts = () => {
-    if (cashCollectionByConsultationTypeChart) {
-      cashCollectionByConsultationTypeChart.destroy();
+    if (salesChart) {
+      salesChart.destroy();
     }
     if (expensesChart) {
       expensesChart.destroy();
     }
+    if (paymentsChart) {
+      paymentsChart.destroy();
+    }
 
-    let chart = new Chart(cashCollectionByConsultationTypeChartCanvasRef.current.getContext("2d"), {
+    let chart = new Chart(salesChartCanvasRef.current.getContext("2d"), {
       type: "bar",
       data: {
-        labels: data.statistics.cash_collection_by_consultation_type.map((e) => e.name),
+        labels: ["Glass", "Pharmacy", "Consultation"],
         datasets: [
           {
-            label: "Cash Collection",
-            data: data.statistics.cash_collection_by_consultation_type.map((e) => e.amount),
+            label: "Sales",
+            data: [
+              data.counts.glass,
+              data.counts.pharmacy,
+              data.counts.consultation,
+            ],
             backgroundColor: [
               blue[300],
-              green[300],
+              green[400],
               orange[300],
               purple[300],
-              pink[300],
             ],
             borderWidth: 0,
           },
@@ -143,7 +155,7 @@ const Dashboard = () => {
       },
     });
 
-    setCashCollectionByConsultationTypeChart(chart);
+    setSalesChart(chart);
 
     chart = new Chart(expensesChartCanvasRef.current.getContext("2d"), {
       type: "pie",
@@ -154,16 +166,17 @@ const Dashboard = () => {
             data: data.statistics.expenses_by_category.map((e) => e.amount),
             backgroundColor: [
               blue[300],
-              green[300],
-              orange[300],
-              purple[300],
+              green[400],
               pink[300],
-              teal[200],
+              yellow[500],
+              teal[400],
+              theme.palette.warning.main,
+              lime[600],
+              purple[300],
+              cyan[400],
               red[200],
-              lightBlue[200],
-              cyan[300],
+              lightBlue[400],
               deepOrange[300],
-              lime[300],
             ],
             borderWidth: 0,
           },
@@ -209,6 +222,70 @@ const Dashboard = () => {
     });
 
     setExpensesChart(chart);
+
+    chart = new Chart(paymentsChartCanvasRef.current.getContext("2d"), {
+      type: "pie",
+      data: {
+        labels: data.statistics.payments_by_channel.map((e) => e.name),
+        datasets: [
+          {
+            data: data.statistics.payments_by_channel.map((e) => e.amount),
+            backgroundColor: [
+              yellow[500],
+              blue[300],
+              red[300],
+              cyan[400],
+              lightBlue[400],
+              lime[600],
+              teal[400],
+              pink[300],
+              deepOrange[300],
+              green[400],
+            ],
+            borderWidth: 0,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: false,
+          },
+          legend: {
+            labels: {
+              color: theme.palette.text.secondary,
+            },
+            position: "bottom"
+          },
+        },
+        scales: {
+          x: {
+            display: false,
+            grid: {
+              color: theme.palette.divider,
+              display: false,
+            },
+            ticks: {
+              color: theme.palette.text.secondary,
+            },
+          },
+          y: {
+            display: false,
+            grid: {
+              color: theme.palette.divider,
+              display: false,
+            },
+            ticks: {
+              beginAtZero: true,
+              color: theme.palette.text.secondary,
+            },
+          },
+        }
+      },
+    });
+
+    setPaymentsChart(chart);
   };
 
   return (
@@ -250,7 +327,7 @@ const Dashboard = () => {
         titleProps={{
           variant: "h5",
           fontWeight: 500,
-          fontSize: "20px",
+          fontSize: "22px",
         }}
       />
       {error ?
@@ -269,10 +346,34 @@ const Dashboard = () => {
           spacing={{ xs: 2, sm: 2, md: 3 }}
         >
           <InfoCard
-            title="Cash Collection"
-            count={numberFormat(data.counts.cash_collection)}
-            icon={<CashCollectionIcon />}
-            color={purple[400]}
+            title="Total Sales"
+            count={numberFormat(data.counts.total_sales)}
+            icon={<SalesIcon />}
+            color={purple[300]}
+          />
+          <InfoCard
+            title="Discount"
+            count={numberFormat(data.counts.discount)}
+            icon={<DiscountIcon />}
+            color={cyan[500]}
+          />
+          <InfoCard
+            title="Glass"
+            count={numberFormat(data.counts.glass)}
+            icon={<GlassIcon />}
+            color={lime[600]}
+          />
+          <InfoCard
+            title="Pharmacy"
+            count={numberFormat(data.counts.pharmacy)}
+            icon={<PharmacyIcon />}
+            color={pink[300]}
+          />
+          <InfoCard
+            title="Consultation"
+            count={numberFormat(data.counts.consultation)}
+            icon={<ConsultationsIcon />}
+            color={teal[400]}
           />
           <InfoCard
             title="Expenses"
@@ -284,40 +385,54 @@ const Dashboard = () => {
             title="New Patients"
             count={numberFormat(data.counts.new_patients)}
             icon={<NewPatientsIcon />}
-            color={theme.palette.info.main}
+            color={blue[300]}
           />
           <InfoCard
             title="Consulted Patients"
             count={numberFormat(data.counts.consulted_patients)}
             icon={<DoneIcon />}
-            color={theme.palette.success.main}
+            color={green[400]}
           />
 
           <Grid
             item
-            md={8}
+            md={6}
             sm={12}
             xs={12}
           >
             <Card>
-              <CardHeader title="Cash Collection"/>
+              <CardHeader title="Sales Statistics"/>
               <Divider />
               <CardContent>
-                <canvas ref={cashCollectionByConsultationTypeChartCanvasRef}/>
+                <canvas ref={salesChartCanvasRef}/>
               </CardContent>
             </Card>
           </Grid>
           <Grid
             item
-            md={4}
+            md={3}
             sm={12}
             xs={12}
           >
             <Card>
-              <CardHeader title="Expenses"/>
+              <CardHeader title="Expense Statistics"/>
               <Divider />
               <CardContent>
                 <canvas ref={expensesChartCanvasRef}/>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid
+            item
+            md={3}
+            sm={12}
+            xs={12}
+          >
+            <Card>
+              <CardHeader title="Payment Statistics"/>
+              <Divider />
+              <CardContent>
+                <canvas ref={paymentsChartCanvasRef}/>
               </CardContent>
             </Card>
           </Grid>

@@ -6,9 +6,8 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\Expense;
 use App\Models\Patient;
-use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
-use App\Models\PaymentChannel;
+use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,31 +25,60 @@ class DashboardController extends Controller
 
         $data = [
             'counts' => [
-                'cash_collection' => 0,
+                'total_sales' => 0,
+                'discount' => 0,
                 'expenses' => 0,
                 'new_patients' => 0,
                 'consulted_patients' => 0,
+                'glass' => 0,
+                'pharmacy' => 0,
+                'consultation' => 0,
             ],
             'statistics' => [
                 'expenses_by_category' => [],
-                'cash_collection_by_consultation_type' => [],
+                'payments_by_channel' => [],
             ],
         ];
 
-        $a = PatientItemPayment::query()
+        $data['counts']['total_sales'] = PatientPaymentCacheItem::query()
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('amount - discount'));
-        $b = PatientItemBillPayment::query()
+            ->sum(DB::raw('unit_price * quantity'));
+
+        $data['counts']['discount'] = PatientItemPayment::query()
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount');
-        $data['counts']['cash_collection'] = $a + $b;
+            ->sum('discount');
+
+        $data['counts']['glass'] = PatientPaymentCacheItem::query()
+            ->whereHas('consultation_type', function ($query) {
+                $query->where('name', 'Glass');
+            })
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum(DB::raw('unit_price * quantity'));
+
+        $data['counts']['pharmacy'] = PatientPaymentCacheItem::query()
+            ->whereHas('consultation_type', function ($query) {
+                $query->where('name', 'Pharmacy');
+            })
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum(DB::raw('unit_price * quantity'));
+
+        $data['counts']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
+            ->whereDate('it.created_at', '>=', $start_date)
+            ->whereDate('it.created_at', '<=', $end_date)
+            ->sum(DB::raw('it.unit_price * it.quantity'));
 
         $data['counts']['expenses'] = Expense::query()
             ->whereDate('expense_date', '>=', $start_date)
             ->whereDate('expense_date', '<=', $end_date)
             ->sum('paid_amount');
+
         $data['counts']['new_patients'] = Patient::query()
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -68,9 +96,8 @@ class DashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.paid_amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where date(exp.expense_date) >= ? and date(exp.expense_date) <= ? group by exp.category_id', [$start_date, $end_date]);
-        $data['statistics']['cash_collection_by_consultation_type'] = DB::select('select pct.consultation_type_id, cnt.name, sum(pct.unit_price * pct.quantity) as amount from patient_payment_cache_items as pct inner join consultation_types as cnt on pct.consultation_type_id = cnt.id inner join payment_modes as pmd on pct.payment_mode_id = pmd.id where pmd.name = "Cash" and pct.status in ("Paid","Served") and date(pct.created_at) >= ? group by pct.consultation_type_id', [$start_date]);
-
+        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.paid_amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where (date(exp.expense_date) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
+        $data['statistics']['payments_by_channel'] = DB::select('select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id', [$start_date, $end_date]);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 }
