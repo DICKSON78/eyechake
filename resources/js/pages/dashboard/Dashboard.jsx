@@ -7,6 +7,7 @@ import {
   DoneAllRounded as DoneIcon,
   MedicalInformationRounded as PharmacyIcon,
   MeetingRoomRounded as ConsultationsIcon,
+  MoneyRounded as NetProfitIcon,
   PersonAddRounded as NewPatientsIcon,
   TrendingDownRounded as ExpensesIcon
 } from "@mui/icons-material";
@@ -382,9 +383,9 @@ const Dashboard = () => {
             color={theme.palette.warning.main}
           />
           <InfoCard
-            title="New Patients"
-            count={numberFormat(data.counts.new_patients)}
-            icon={<NewPatientsIcon />}
+            title="Net Profit"
+            count={numberFormat(data.counts.total_sales - data.counts.discount - data.counts.expenses)}
+            icon={<NetProfitIcon />}
             color={blue[300]}
           />
           <InfoCard

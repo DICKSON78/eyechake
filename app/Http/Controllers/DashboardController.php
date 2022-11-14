@@ -70,6 +70,7 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['counts']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
+            ->where('consultations.consultant', 'Doctor')
             ->whereDate('it.created_at', '>=', $start_date)
             ->whereDate('it.created_at', '<=', $end_date)
             ->sum(DB::raw('it.unit_price * it.quantity'));

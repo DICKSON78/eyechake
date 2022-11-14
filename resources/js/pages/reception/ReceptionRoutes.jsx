@@ -4,6 +4,7 @@ import PatientRegistration from "./patients/PatientRegistration";
 import Patients from "./patients/Patients";
 import CheckInPatient from "./CheckInPatient";
 import PatientsToReturn from "./patients-to-return/PatientsToReturn";
+import SentMessages from "./sent-messages/Messages";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
 const ReceptionRoutes = () => {
@@ -25,6 +26,10 @@ const ReceptionRoutes = () => {
       <Route
         path="/to-return/patients"
         element={<PatientsToReturn />}
+      />
+      <Route
+        path="/sent-messages"
+        element={<SentMessages />}
       />
       <Route
         path="/reports/*"

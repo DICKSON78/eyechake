@@ -388,6 +388,7 @@ const PatientRegistration = () => {
                   ref={phoneRef}
                   label="Phone Number"
                   fullWidth
+                  rules={[validationRules.optionalPhone]}
                   onChange={(value) => setFormData({ ...formData, phone: value })}
                 />
               </Grid>

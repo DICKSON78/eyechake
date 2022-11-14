@@ -7,7 +7,9 @@ import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 
 import { useFetch, usePatch } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { formatDateForDb, formatError, getValidationRules } from "../../../helpers";
+
+const validationRules = getValidationRules();
 
 const EditPatient = ({ item, modal, fetchPatients }) => {
 
@@ -261,6 +263,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 ref={phoneRef}
                 label="Phone Number"
                 fullWidth
+                rules={[validationRules.optionalPhone]}
                 defaultValue={formData.phone}
                 onChange={(value) => setFormData({ ...formData, phone: value })}
               />

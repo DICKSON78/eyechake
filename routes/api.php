@@ -16,6 +16,7 @@ use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\JobTitlesController;
 use App\Http\Controllers\LensTypesController;
+use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
 use App\Http\Controllers\PatientItemBillsController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\PatientPaymentCacheItemsController;
 use App\Http\Controllers\PatientsController;
 use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
+use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\Reports\InventoryManagementReportsController;
 use App\Http\Controllers\StocktakesController;
@@ -115,6 +117,9 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
     $router->apiResource('/expenses', ExpensesController::class);
     $router->apiResource('/users', UsersController::class);
+    $router->apiResource('/preferences', PreferencesController::class);
+
+    $router->get('/messages', MessagesController::class);
 
     $router->prefix('reports')->group(function ($router) {
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {

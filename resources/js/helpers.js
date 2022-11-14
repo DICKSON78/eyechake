@@ -123,6 +123,14 @@ export const getValidationRules = () => {
     phone: (value) => {
       const pattern = /^0\d{9}$/;
       return pattern.test(value) || "Invalid phone number.";
+    },
+    optionalPhone: (value) => {
+      const pattern = /^0\d{9}$/;
+      return !value ? true : (pattern.test(value) || "Invalid phone number.");
+    },
+    time: (value) => {
+      const pattern = /^\d{2}:\d{2}$/;
+      return pattern.test(value) || "Invalid time.";
     }
   };
 };

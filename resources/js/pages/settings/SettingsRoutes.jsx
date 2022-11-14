@@ -9,6 +9,7 @@ import ExpenseCategories from "./expense-categories/ExpenseCategories";
 import Departments from "./departments/Departments";
 import JobTitles from "./job-titles/JobTitles";
 import ClinicDetails from "./ClinicDetails";
+import Preferences from "./Preferences";
 
 const SettingsRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const SettingsRoutes = () => {
       <Route path="/departments" element={<Departments />}/>
       <Route path="/job-titles" element={<JobTitles />}/>
       <Route path="/clinic-details" element={<ClinicDetails />}/>
+      <Route path="/preferences" element={<Preferences />}/>
     </Routes>
   );
 };
