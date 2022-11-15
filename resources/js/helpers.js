@@ -129,8 +129,15 @@ export const getValidationRules = () => {
       return !value ? true : (pattern.test(value) || "Invalid phone number.");
     },
     time: (value) => {
-      const pattern = /^\d{2}:\d{2}$/;
-      return pattern.test(value) || "Invalid time.";
+      const pattern = /^(\d{2}):(\d{2})$/;
+      const matches = pattern.exec(value);
+      if (matches && matches.length === 3) {
+        const hours = parseInt(matches[1]);
+        const minutes = parseInt(matches[2]);
+        return (hours <= 23 && minutes <= 59) || "Invalid time.";
+      }
+
+      return "Invalid time.";
     }
   };
 };

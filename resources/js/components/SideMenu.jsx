@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 import {
   BadgeRounded as JobTitlesIcon,
@@ -93,7 +94,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           show: !!drawerOpen && user.privileges.payment_center,
         },
         {
-          id: "8",
+          id: "9",
           title: "Patients Sent to Cashier",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-cash-patients",
@@ -518,6 +519,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                 "&.Mui-selected": {
                   color: (theme) => theme.palette.primary.main,
                   borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
+                  backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
 
                   "& .MuiListItemIcon-root": {
                     color: "inherit"
@@ -555,6 +557,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                         "&.Mui-selected": {
                           color: (theme) => theme.palette.primary.main,
                           borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
+                          backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
 
                           "& .MuiListItemIcon-root": {
                             color: "inherit"
