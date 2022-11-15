@@ -150,7 +150,8 @@ const Preferences = () => {
                           ref={consultationMessageRef}
                           fullWidth
                           multiline
-                          rows={3}
+                          minRows={5}
+                          maxRows={10}
                           required
                           defaultValue={formData.preferences[1].value}
                           onChange={(value) => setPreference(1, value)}
@@ -165,7 +166,8 @@ const Preferences = () => {
                           ref={reminderMessageRef}
                           fullWidth
                           multiline
-                          rows={3}
+                          minRows={5}
+                          maxRows={10}
                           required
                           defaultValue={formData.preferences[2].value}
                           onChange={(value) => setPreference(2, value)}
