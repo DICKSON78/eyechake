@@ -106,7 +106,7 @@ class ConsultationsController extends Controller
                     $query->where('to_return_date', '>=', $now);
 
                     if ($to_return_date) {
-                        $query->orWhere('to_return_date', $to_return_date);
+                        $query->where('to_return_date', $to_return_date);
                     }
                 });
         }
