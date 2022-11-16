@@ -337,9 +337,10 @@ class ConsultationsController extends Controller
     {
         $request->validate([
             'patient_to_return' => 'nullable|in:Yes,No',
-            'to_return_date' => 'nullable|date_format:Y-m-d',
+            'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
             'send_to_optician' => 'nullable|in:Yes,No',
             'optician' => 'nullable|in:Yes,No',
+            'is_vip' => 'nullable|in:Yes,No',
         ]);
 
         $user = $request->user();
@@ -380,6 +381,12 @@ class ConsultationsController extends Controller
                     $sms_service->sendMessage($patient->id, $message);
                 }
             }
+        }
+
+        if ($request->is_vip) {
+            $patient = $data->payment_cache_item->payment_cache->check_in->patient;
+            $patient->is_vip = $request->is_vip;
+            $patient->save();
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

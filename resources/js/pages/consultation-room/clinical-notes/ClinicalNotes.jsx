@@ -96,6 +96,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
   const [remarks, setRemarks] = useState(consultation.remarks);
   const [sendToOptician, setSendToOptician] = useState("No");
+  const [vipPatient, setVipPatient] = useState("No");
 
   const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
@@ -181,6 +182,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : null,
             remarks,
             send_to_optician: sendToOptician,
+            is_vip: vipPatient,
           });
         }}
       />
@@ -234,9 +236,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 xs={12}
               >
                 <TextField
-                  ref={chiefComplaintRef}
-                  disabled={consultation.status === "Consulted"}
-                  fullWidth
+                  ref={chiefComplaintRef} fullWidth
                   label="C/C"
                   multiline
                   rows={2}
@@ -254,7 +254,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
               >
                 <TextField
                   ref={historyPresentIllnessRef}
-                  disabled={consultation.status === "Consulted"}
                   fullWidth
                   label="H/I"
                   multiline
@@ -272,7 +271,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
               >
                 <TextField
                   ref={familyHistoryRef}
-                  disabled={consultation.status === "Consulted"}
                   fullWidth
                   label="F/H"
                   multiline
@@ -395,9 +393,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <FormControlLabel
                   control={(
                     <Checkbox
-                      disabled={consultation.status === "Consulted"}
-                      checked={patientToReturn === "Yes"}
-                      onChange={(event) => setPatientToReturn(event.target.checked ? "Yes" : "No")}
+                      defaultChecked={patientToReturn === "Yes"}
+                      onChange={(event) => {
+                        if (consultation.status === "Consulted") {
+                          const value = event.target.checked ? "Yes" : "No";
+                          autoSave("patient_to_return", value);
+                          consultation.patient_to_return = value;
+                        }
+                        setPatientToReturn(event.target.checked ? "Yes" : "No");
+                      }}
                     />
                   )}
                   label="Patient to Return"
@@ -412,15 +416,16 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 {patientToReturn === "Yes" ?
                   <DatePicker
                     ref={patientToReturnDateRef}
-                    disabled={consultation.status === "Consulted"}
                     fullWidth
                     label="Return Date"
                     horizontal
-                    type={consultation.status === "Consulted" ? "text" : "date"}
                     required={patientToReturn === "Yes"}
                     value={patientToReturnDate}
                     onChange={(value) => {
                       if (!isNaN(value)) {
+                        if (consultation.status === "Consulted") {
+                          autoSave("to_return_date", formatDateForDb(value));
+                        }
                         setPatientToReturnDate(value);
                       }
                     }}
@@ -436,14 +441,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
               >
                 <TextField
                   ref={remarksRef}
-                  disabled={consultation.status === "Consulted"}
                   fullWidth
                   placeholder="Type remarks..."
                   multiline
                   rows={3}
                   horizontal
                   defaultValue={remarks}
-                  onChange={(value) => setRemarks(value)}
+                  onChange={(value) => {
+                    if (consultation.status === "Consulted") {
+                      autoSave("remarks", value);
+                    }
+                    setRemarks(value);
+                  }}
                 />
               </Grid>
               {consultation.status === "Pending" ?
@@ -468,6 +477,28 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         />
                       )}
                       label="Send to Optician"
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={6}
+                    sm={12}
+                    xs={12}
+                  />
+                  <Grid
+                    item
+                    md={6}
+                    sm={12}
+                    xs={12}
+                  >
+                    <FormControlLabel
+                      control={(
+                        <Checkbox
+                          checked={vipPatient === "Yes"}
+                          onChange={(event) => setVipPatient(event.target.checked ? "Yes" : "No")}
+                        />
+                      )}
+                      label="VIP Patient"
                     />
                   </Grid>
                 </React.Fragment>

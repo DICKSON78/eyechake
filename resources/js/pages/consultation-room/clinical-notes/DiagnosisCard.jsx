@@ -49,7 +49,6 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
               {
                 value: (
                   <Button
-                    disabled={consultation.status === "Consulted"}
                     variant="contained"
                     color="secondary"
                     disableElevation

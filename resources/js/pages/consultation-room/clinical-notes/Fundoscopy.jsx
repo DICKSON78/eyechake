@@ -36,7 +36,6 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
       >
         <TextField
           ref={reRef}
-          disabled={status === "Consulted"}
           fullWidth
           label="RE"
           multiline
@@ -54,7 +53,6 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
       >
         <TextField
           ref={leRef}
-          disabled={status === "Consulted"}
           fullWidth
           label="LE"
           multiline

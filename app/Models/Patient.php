@@ -14,7 +14,7 @@ class Patient extends Model
 
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
-        'national_id', 'phone', 'occupation', 'payment_mode_id', 'created_by',
+        'national_id', 'phone', 'occupation', 'payment_mode_id', 'is_vip', 'created_by',
     ];
 
     public function region()

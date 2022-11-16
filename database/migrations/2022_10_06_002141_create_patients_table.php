@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('occupation')->nullable();
             $table->bigInteger('payment_mode_id')->unsigned()->nullable();
+            $table->enum('is_vip', ['Yes', 'No'])->default('No');
             $table->timestamp('created_at')->nullable();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->timestamp('updated_at')->nullable();

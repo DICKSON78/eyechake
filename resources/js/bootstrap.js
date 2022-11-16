@@ -1,7 +1,7 @@
 import _ from "lodash";
 window._ = _;
 
-window.APP_NAME = "Eye Care";
+window.APP_NAME = "EyeCare";
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests

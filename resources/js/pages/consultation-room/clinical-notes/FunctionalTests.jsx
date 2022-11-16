@@ -47,7 +47,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={reNpcRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.re_npc : null}
               onChange={(value) => autoSave("re_npc", value)}
@@ -56,7 +55,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={leNpcRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.le_npc : null}
               onChange={(value) => autoSave("le_npc", value)}
@@ -68,7 +66,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={reNpaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.re_npa : null}
               onChange={(value) => autoSave("re_npa", value)}
@@ -77,7 +74,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={leNpaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.le_npa : null}
               onChange={(value) => autoSave("le_npa", value)}
@@ -89,7 +85,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={reConfrontationRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.re_confrontation : null}
               onChange={(value) => autoSave("re_confrontation", value)}
@@ -98,7 +93,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={leConfrontationRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.le_confrontation : null}
               onChange={(value) => autoSave("le_confrontation", value)}
@@ -110,7 +104,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={reCoverTestRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.re_cover_test : null}
               onChange={(value) => autoSave("re_cover_test", value)}
@@ -119,7 +112,6 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
           <TableCell>
             <TextField
               ref={leCoverTestRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={functional_tests ? functional_tests.le_cover_test : null}
               onChange={(value) => autoSave("le_cover_test", value)}

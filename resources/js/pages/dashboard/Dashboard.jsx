@@ -8,7 +8,6 @@ import {
   MedicalInformationRounded as PharmacyIcon,
   MeetingRoomRounded as ConsultationsIcon,
   MoneyRounded as NetProfitIcon,
-  PersonAddRounded as NewPatientsIcon,
   TrendingDownRounded as ExpensesIcon
 } from "@mui/icons-material";
 
@@ -19,9 +18,20 @@ import LoadingSkeleton from "./LoadingSkeleton";
 import InfoCard from "./InfoCard";
 
 import { useTheme } from "@mui/material/styles";
-import { blue, cyan, deepOrange, green, lightBlue, lime, orange, pink, purple, red, teal, yellow } from "@mui/material/colors";
-
-import moment from "moment";
+import {
+  blue,
+  cyan,
+  deepOrange,
+  green,
+  lightBlue,
+  lime,
+  orange,
+  pink,
+  purple,
+  red,
+  teal,
+  yellow
+} from "@mui/material/colors";
 import { useFetch } from "../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../helpers";
 
@@ -68,7 +78,7 @@ const Dashboard = () => {
   const [expensesChart, setExpensesChart] = useState();
   const [paymentsChart, setPaymentsChart] = useState();
   const [params, setParams] = useState({
-    start_date: moment().subtract(7, "days").toDate(),
+    start_date: new Date(),
     end_date: undefined,
   });
 

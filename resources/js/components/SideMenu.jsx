@@ -342,12 +342,6 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               icon: <ReportsIcon />,
               to: "/item-quantity-dispensed",
             },
-            {
-              id: "31.3",
-              title: "Stock Ledger",
-              icon: <ReportsIcon />,
-              to: "/stock-ledger",
-            },
           ],
         },
         {
@@ -374,6 +368,12 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/expenses",
+            },
+            {
+              id: "34.2",
+              title: "Profit & Loss Report",
+              icon: <ReportsIcon />,
+              to: "/profit-and-loss",
             },
           ],
         },

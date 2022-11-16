@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Alert, Box, Button, CardActions, CardContent, Checkbox, Divider, FormControlLabel, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
@@ -45,6 +45,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     phone: item.phone,
     occupation: item.phone,
     payment_mode_id: item.payment_mode_id,
+    is_vip: item.is_vip,
   });
 
   const { data: paymentModes } = useFetch("api/payment-modes", {
@@ -312,6 +313,25 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 optionsValue="id"
                 value={paymentModes.length ? (formData.payment_mode_id || "") : ""}
                 onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    defaultChecked={item.is_vip === "Yes"}
+                    onChange={(event) => setFormData({
+                      ...formData,
+                      is_vip: event.target.checked ? "Yes" : "No"
+                    })}
+                  />
+                )}
+                label="VIP Patient"
               />
             </Grid>
           </Grid>

@@ -92,7 +92,6 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
               {
                 value: (
                   <Button
-                    disabled={consultation.status === "Consulted"}
                     variant="contained"
                     color="secondary"
                     disableElevation

@@ -55,7 +55,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reLidRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_lid : null}
               onChange={(value) => autoSave("re_lid", value)}
@@ -64,7 +63,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leLidRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_lid : null}
               onChange={(value) => autoSave("le_lid", value)}
@@ -76,7 +74,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reScleraRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_sclera : null}
               onChange={(value) => autoSave("re_sclera", value)}
@@ -85,7 +82,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leScleraRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_sclera : null}
               onChange={(value) => autoSave("le_sclera", value)}
@@ -97,7 +93,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reCorneaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_cornea : null}
               onChange={(value) => autoSave("re_cornea", value)}
@@ -106,7 +101,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leCorneaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_cornea : null}
               onChange={(value) => autoSave("le_cornea", value)}
@@ -118,7 +112,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reConjuctivaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_conjuctiva : null}
               onChange={(value) => autoSave("re_conjuctiva", value)}
@@ -127,7 +120,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leConjuctivaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_conjuctiva : null}
               onChange={(value) => autoSave("le_conjuctiva", value)}
@@ -139,7 +131,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reIrisRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_iris : null}
               onChange={(value) => autoSave("re_iris", value)}
@@ -148,7 +139,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leIrisRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_iris : null}
               onChange={(value) => autoSave("le_iris", value)}
@@ -160,7 +150,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={rePupilRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_pupil : null}
               onChange={(value) => autoSave("re_pupil", value)}
@@ -169,7 +158,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={lePupilRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_pupil : null}
               onChange={(value) => autoSave("le_pupil", value)}
@@ -181,7 +169,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reLensRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_lens : null}
               onChange={(value) => autoSave("re_lens", value)}
@@ -190,7 +177,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leLensRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_lens : null}
               onChange={(value) => autoSave("le_lens", value)}
@@ -202,7 +188,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={reIopRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.re_iop : null}
               onChange={(value) => autoSave("re_iop", value)}
@@ -211,7 +196,6 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
           <TableCell>
             <TextField
               ref={leIopRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={external_examination ? external_examination.le_iop : null}
               onChange={(value) => autoSave("le_iop", value)}

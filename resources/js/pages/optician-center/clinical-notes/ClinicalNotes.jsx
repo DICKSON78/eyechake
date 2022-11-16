@@ -72,6 +72,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const [remarks, setRemarks] = useState(consultation.remarks);
 
+  const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
 
   useEffect(() => {
@@ -97,6 +98,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
       setError(errorComplete);
     }
   }, [errorComplete]);
+
+  const autoSave = (field, value) => {
+    if (value !== consultation[field]) {
+      handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
+        what: "Consultation",
+        [field]: value
+      });
+    }
+  };
 
   const openSelectItemsModal = (title, type) => {
     let component = (
@@ -208,14 +218,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
               >
                 <TextField
                   ref={remarksRef}
-                  disabled={consultation.optician_status === "Consulted"}
                   fullWidth
                   placeholder="Type remarks..."
                   multiline
                   rows={3}
                   horizontal
                   defaultValue={remarks}
-                  onChange={(value) => setRemarks(value)}
+                  onChange={(value) => {
+                    if (consultation.optician_status === "Consulted") {
+                      autoSave("remarks", value);
+                    }
+                    setRemarks(value);
+                  }}
                 />
               </Grid>
             </Grid>

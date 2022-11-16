@@ -52,7 +52,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
           <TableCell>
             <TextField
               ref={unaidedReVaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_re_va : null}
               onChange={(value) => autoSave("unaided_re_va", value)}
@@ -61,7 +60,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
           <TableCell>
             <TextField
               ref={unaidedLeVaRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_le_va : null}
               onChange={(value) => autoSave("unaided_le_va", value)}
@@ -74,7 +72,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
             >
               <TextField
                 ref={aidedReVaRef}
-                disabled={status === "Consulted"}
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_re_va : null}
                 onChange={(value) => autoSave("aided_re_va", value)}
@@ -84,7 +81,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               />
               <TextField
                 ref={aidedReVaDescriptionRef}
-                disabled={status === "Consulted"}
                 placeholder="Enter description"
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_re_va_description : null}
@@ -99,7 +95,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
             >
               <TextField
                 ref={aidedLeVaRef}
-                disabled={status === "Consulted"}
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_le_va : null}
                 onChange={(value) => autoSave("aided_le_va", value)}
@@ -109,7 +104,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               />
               <TextField
                 ref={aidedLeVaDescriptionRef}
-                disabled={status === "Consulted"}
                 placeholder="Enter description"
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_le_va_description : null}
@@ -123,7 +117,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
           <TableCell>
             <TextField
               ref={unaidedRePhRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_re_ph : null}
               onChange={(value) => autoSave("unaided_re_ph", value)}
@@ -132,7 +125,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
           <TableCell>
             <TextField
               ref={unaidedLePhRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_le_ph : null}
               onChange={(value) => autoSave("unaided_le_ph", value)}
@@ -146,7 +138,6 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
           <TableCell colSpan={2}>
             <TextField
               ref={unaidedIpdRef}
-              disabled={status === "Consulted"}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_ipd : null}
               onChange={(value) => autoSave("unaided_ipd", value)}
