@@ -41,7 +41,8 @@ class DashboardController extends Controller
         ];
 
         $data['counts']['total_sales'] = PatientPaymentCacheItem::query()
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
+            ->whereIn('status', ['Paid', 'Served'])
+            ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum(DB::raw('unit_price * quantity'));
@@ -55,7 +56,8 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Glass');
             })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
+            ->whereIn('status', ['Paid', 'Served'])
+            ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum(DB::raw('unit_price * quantity'));
@@ -64,13 +66,16 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Pharmacy');
             })
-            ->whereIn('status', ['Paid', 'Billed', 'Served'])
+            ->whereIn('status', ['Paid', 'Served'])
+            ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['counts']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
             ->where('consultations.consultant', 'Doctor')
+            ->whereIn('it.status', ['Paid', 'Served'])
+            ->whereNull('it.bill_id')
             ->whereDate('it.created_at', '>=', $start_date)
             ->whereDate('it.created_at', '<=', $end_date)
             ->sum(DB::raw('it.unit_price * it.quantity'));
