@@ -25,7 +25,7 @@ const PatientBills = () => {
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
   });
 

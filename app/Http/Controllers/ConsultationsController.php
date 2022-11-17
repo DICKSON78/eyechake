@@ -246,7 +246,7 @@ class ConsultationsController extends Controller
     {
         $request->validate([
             'patient_to_return' => 'nullable|in:Yes,No',
-            'to_return_date' => 'nullable|date_format:Y-m-d',
+            'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
             'status' => 'nullable|in:Pending,Consulted'
         ]);
 

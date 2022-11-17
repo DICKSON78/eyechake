@@ -179,7 +179,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
           modalRef.current.close();
           handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
             patient_to_return: patientToReturn,
-            to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : null,
+            to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : undefined,
             remarks,
             send_to_optician: sendToOptician,
             is_vip: vipPatient,

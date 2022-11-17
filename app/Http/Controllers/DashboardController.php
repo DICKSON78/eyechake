@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\Expense;
 use App\Models\Patient;
+use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
@@ -46,6 +47,10 @@ class DashboardController extends Controller
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum(DB::raw('unit_price * quantity'));
+        $data['counts']['total_sales'] += PatientItemBillPayment::query()
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum('amount');
 
         $data['counts']['discount'] = PatientItemPayment::query()
             ->whereDate('created_at', '>=', $start_date)

@@ -39,7 +39,8 @@ const LogIn = () => {
     }
   }, [data]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
     if (formRef.current.validate()) {
       handlePost();
     }
