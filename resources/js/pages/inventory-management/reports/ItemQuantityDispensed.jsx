@@ -21,7 +21,7 @@ const ItemQuantityDispensed = () => {
     consultation_type: "Pharmacy,Glass",
     payment_mode_id: undefined,
     q: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
   });
 

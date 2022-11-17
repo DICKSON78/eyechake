@@ -19,8 +19,6 @@ const CreditCollection = () => {
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
-    page: 1,
-    per_page: 25,
     with_patient: true,
     payment_mode_type: "Credit",
     status: "Paid,Served",
@@ -30,7 +28,7 @@ const CreditCollection = () => {
     patient_phone: undefined,
     payment_mode_id: undefined,
     q: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
     sort_direction: "desc",
   });

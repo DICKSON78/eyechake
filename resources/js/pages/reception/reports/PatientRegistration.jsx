@@ -25,8 +25,6 @@ const PatientRegistration = () => {
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
-    page: 1,
-    per_page: 25,
     id: undefined,
     name: undefined,
     gender: undefined,

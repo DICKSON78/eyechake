@@ -18,8 +18,6 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
-    page: 1,
-    per_page: 25,
     with_patient: true,
     consultation_type: consultationType,
     payment_mode_type: paymentModeType,
@@ -30,7 +28,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
     patient_phone: undefined,
     payment_mode_id: undefined,
     q: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
     sort_direction: "desc",
   });

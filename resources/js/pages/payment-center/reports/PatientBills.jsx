@@ -11,8 +11,6 @@ import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "..
 const PatientBills = ({ status }) => {
 
   const [params, setParams] = useState({
-    page: 1,
-    per_page: 25,
     status,
     with_items: true,
     id: undefined,
@@ -20,7 +18,7 @@ const PatientBills = ({ status }) => {
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
   });
 

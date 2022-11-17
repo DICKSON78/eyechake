@@ -15,7 +15,7 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
   const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
   const { data, loading, error, handleFetch } = useFetch(uri, {
-    per_page: perPage.value,
+    per_page: perPage,
     page,
     ...(params || {})
   }, true, { total: 0, data: [], }, (response) => response.data.data);

@@ -15,11 +15,9 @@ const Expenses = () => {
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
-    page: 1,
-    per_page: 25,
     status: undefined,
     category_id: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
   });
 
