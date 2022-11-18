@@ -24,7 +24,7 @@ const CashCollection = ({ module }) => {
     patient_gender: undefined,
     patient_phone: undefined,
     payment_channel_id: undefined,
-    start_date: undefined,
+    start_date: new Date(),
     end_date: undefined,
     sort_direction: "desc",
   });

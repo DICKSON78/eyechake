@@ -28,7 +28,7 @@ const CreditCollection = ({ module }) => {
     patient_phone: undefined,
     payment_mode_id: undefined,
     q: undefined,
-    start_date: undefined,
+    start_date: new Date(),
     end_date: undefined,
     sort_direction: "desc",
   });
