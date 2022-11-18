@@ -8,11 +8,10 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const PatientBills = ({ status }) => {
+const PatientBills = ({ module, status }) => {
 
   const [params, setParams] = useState({
     status,
-    with_items: true,
     id: undefined,
     patient_id: undefined,
     patient_name: undefined,
@@ -31,7 +30,7 @@ const PatientBills = ({ status }) => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Payment Center" },
+        { title: module || "Payment Center" },
         { title: "Reports" },
         { title: `${status} Patient Bills Report` },
       ]}
@@ -175,43 +174,6 @@ const PatientBills = ({ status }) => {
             field: "amount_paid",
             headerName: "Amount Paid",
             valueGetter: (item, index) => numberFormat(item.amount_paid || 0),
-          },
-          {
-            field: "created_by",
-            headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
-          },
-          {
-            field: "created_at",
-            headerName: "Date",
-          },
-        ]}
-        nestedObject="items"
-        nestedColumns={[
-          {
-            field: "name",
-            headerName: "Item Name",
-            valueGetter: (item, index) => item.item.name,
-          },
-          {
-            field: "code",
-            headerName: "Item Code",
-            valueGetter: (item, index) => item.item.code,
-          },
-          {
-            field: "unit_of_measure_id",
-            headerName: "Unit of Measure",
-            valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
-          },
-          {
-            field: "quantity",
-            headerName: "Quantity",
-            valueGetter: (item, index) => numberFormat(item.quantity),
-          },
-          {
-            field: "subtotal",
-            headerName: "Subtotal",
-            valueGetter: (item, index) => numberFormat(item.unit_price * item.quantity),
           },
           {
             field: "created_by",

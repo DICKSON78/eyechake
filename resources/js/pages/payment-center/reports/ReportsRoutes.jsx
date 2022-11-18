@@ -4,6 +4,7 @@ import CashCollection from "./CashCollection";
 import CreditCollection from "./CreditCollection";
 import PatientBills from "./PatientBills";
 import BillCollection from "./BillCollection";
+import Expenses from "../../financial-management/reports/Expenses";
 
 const ReportsRoutes = () => {
   return (
@@ -18,15 +19,24 @@ const ReportsRoutes = () => {
       />
       <Route
         path="/pending-patient-bills"
-        element={<PatientBills status="Pending" />}
+        element={<PatientBills status="Pending"/>}
       />
       <Route
         path="/cleared-patient-bills"
-        element={<PatientBills status="Cleared" />}
+        element={<PatientBills status="Cleared"/>}
       />
       <Route
         path="/patient-bill-collection"
         element={<BillCollection />}
+      />
+      <Route
+        path="/expenses"
+        element={(
+          <Expenses
+            module="Payment Center"
+            createdBy={window.user.id}
+          />
+        )}
       />
     </Routes>
   );

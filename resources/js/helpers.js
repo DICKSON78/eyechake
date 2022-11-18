@@ -221,6 +221,37 @@ export const getAge = (date) => {
 };
 
 /**
+ * Get address from `region`, `district` and `ward`.
+ * @param region
+ * @param district
+ * @param ward
+ * @returns {string}
+ */
+export const getAddress = (region, district, ward) => {
+  let address = "";
+
+  if (ward) {
+    address += ward.name;
+  }
+  if (district) {
+    address += `, ${district.name}`;
+
+    if (address.indexOf(", ") === 0) {
+      address = address.substr(2);
+    }
+  }
+  if (region) {
+    address += `, ${region.name}`;
+
+    if (address.indexOf(", ") === 0) {
+      address = address.substr(2);
+    }
+  }
+
+  return address;
+};
+
+/**
  * Get date range title for reports.
  * @param startDate
  * @param endDate

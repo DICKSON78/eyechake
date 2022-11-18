@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { CheckRounded as CheckIcon, EditRounded as EditIcon } from "@mui/icons-material";
+import { Alert, Button, Card, CardContent, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
+import { CheckRounded as CheckIcon, EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table, { PageSizeSelect } from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -10,12 +10,16 @@ import Filters from "./Filters";
 import EditPatient from "./EditPatient";
 
 import { useFetch } from "../../../hooks";
-import { formatError, getAge, getNonNull } from "../../../helpers";
+import { formatError, getAddress, getAge, getNonNull } from "../../../helpers";
 
 const Patients = () => {
 
   const navigate = useNavigate();
   const modalRef = useRef();
+
+  const [item, setItem] = useState();
+  const [anchorEl, setAnchorEl] = useState();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [params, setParams] = useState({
     page: 1,
@@ -47,6 +51,17 @@ const Patients = () => {
     );
 
     modalRef.current.open("Edit Patient", component, "md");
+  };
+
+  const handleMenuOpen = (event, item) => {
+    setAnchorEl(event.target);
+    setIsMenuOpen(true);
+    setItem(item);
+  };
+
+  const handleMenuClose = () => {
+    setIsMenuOpen(false);
+    setAnchorEl(null);
   };
 
   return (
@@ -122,9 +137,9 @@ const Patients = () => {
                 headerName: "Phone Number",
               },
               {
-                field: "region_id",
-                headerName: "Location",
-                valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
+                field: "address",
+                headerName: "Address",
+                valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
               },
               {
                 field: "payment_mode_id",
@@ -171,6 +186,14 @@ const Patients = () => {
                     >
                       Check-In
                     </Button>
+                    <Tooltip title="More">
+                      <IconButton
+                        size="small"
+                        onClick={(event) => handleMenuOpen(event, item)}
+                      >
+                        <MoreIcon fontSize="small"/>
+                      </IconButton>
+                    </Tooltip>
                   </Stack>
                 ),
               }
@@ -183,6 +206,27 @@ const Patients = () => {
           />
         </CardContent>
       </Card>
+      {item ?
+        <Menu
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          open={isMenuOpen}
+          onClose={handleMenuClose}
+        >
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              navigate(`/reception/patients/${item.id}/records`);
+            }}
+          >
+            View Records
+          </MenuItem>
+        </Menu>
+        : null
+      }
       <Modal ref={modalRef}/>
     </Page>
   );

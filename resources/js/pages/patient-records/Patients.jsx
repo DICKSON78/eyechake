@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "../reception/patients/Filters";
 
 import { useFetch } from "../../hooks";
-import { formatError, getNonNull } from "../../helpers";
+import { formatError, getAddress, getNonNull } from "../../helpers";
 
 const Patients = () => {
 
@@ -98,9 +98,9 @@ const Patients = () => {
                 headerName: "Phone Number",
               },
               {
-                field: "region_id",
-                headerName: "Location",
-                valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
+                field: "address",
+                headerName: "Address",
+                valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
               },
               {
                 field: "payment_mode_id",

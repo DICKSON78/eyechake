@@ -43,7 +43,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     ward_id: item.ward_id,
     national_id: item.national_id,
     phone: item.phone,
-    occupation: item.phone,
+    occupation: item.occupation,
     payment_mode_id: item.payment_mode_id,
     is_vip: item.is_vip,
   });

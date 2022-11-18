@@ -6,6 +6,7 @@ import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatien
 import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
 import PatientBills from "./patient-bills/PatientBills";
 import PatientBill from "./patient-bills/PatientBill";
+import Expenses from "../financial-management/expenses/Expenses";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
 const PaymentCenterRoutes = () => {
@@ -39,9 +40,18 @@ const PaymentCenterRoutes = () => {
         element={<PatientBill />}
       />
       <Route
-        path="/reports/*"
-        element={<ReportsRoutes />}
+        path="/expenses"
+        element={(
+          <Expenses
+            module="Payment Center"
+            createdBy={window.user.id}
+          />
+        )}
       />
+      {/*<Route*/}
+        {/*path="/reports/*"*/}
+        {/*element={<ReportsRoutes />}*/}
+      {/*/>*/}
     </Routes>
   );
 };

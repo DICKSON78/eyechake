@@ -13,7 +13,7 @@ import PayExpense from "./PayExpense";
 import { useFetch } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull, numberFormat } from "../../../helpers";
 
-const Expenses = () => {
+const Expenses = ({ module, createdBy }) => {
 
   const modalRef = useRef();
 
@@ -29,6 +29,7 @@ const Expenses = () => {
     category_id: undefined,
     start_date: new Date(),
     end_date: undefined,
+    created_by: createdBy,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/expenses", {
@@ -44,6 +45,10 @@ const Expenses = () => {
   useEffect(() => {
     document.title = `Expenses - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    setParams({ ...params, created_by: createdBy });
+  }, [createdBy]);
 
   const openCreateExpenseModal = () => {
     let component = (
@@ -111,7 +116,7 @@ const Expenses = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Financial Management" },
+        { title: module || "Financial Management" },
         { title: "Expenses" },
       ]}
     >

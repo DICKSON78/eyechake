@@ -10,7 +10,7 @@ import TextField from "../../../components/TextField";
 import useFetch from "../../../hooks/useFetch";
 import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const BillCollection = () => {
+const BillCollection = ({ module }) => {
 
   const { data: paymentChannels } = useFetch("api/payment-channels", {
     status: "Active",
@@ -38,7 +38,7 @@ const BillCollection = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Payment Center" },
+        { title: module || "Payment Center" },
         { title: "Reports" },
         { title: "Bill Collection Report" },
       ]}

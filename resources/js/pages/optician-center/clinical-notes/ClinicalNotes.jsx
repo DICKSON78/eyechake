@@ -203,6 +203,21 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
                 />
               </Grid>
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <ConsultationItemsCard
+                  title="Others"
+                  consultationType="Others"
+                  loading={loadingItems}
+                  items={items}
+                  consultation={consultation}
+                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                />
+              </Grid>
             </Grid>
 
             <Subheader title="Remarks"/>

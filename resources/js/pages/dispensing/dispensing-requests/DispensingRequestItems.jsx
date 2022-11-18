@@ -102,10 +102,6 @@ const DispensingRequestItems = ({ consultationType }) => {
     return null;
   };
 
-  const getTotalAmount = () => {
-    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case "Pending":
@@ -189,19 +185,9 @@ const DispensingRequestItems = ({ consultationType }) => {
                   valueGetter: (item, index) => item.payment_mode.name,
                 },
                 {
-                  field: "unit_price",
-                  headerName: "Unit Price",
-                  valueGetter: (item, index) => numberFormat(item.unit_price || 0),
-                },
-                {
                   field: "quantity",
                   headerName: "Quantity",
                   valueGetter: (item, index) => numberFormat(item.quantity || 0),
-                },
-                {
-                  field: "total_price",
-                  headerName: "Subtotal",
-                  valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
                 },
                 {
                   field: "dosage",
@@ -257,12 +243,6 @@ const DispensingRequestItems = ({ consultationType }) => {
               checkboxSelection={(item, index) => item.status === "Paid" || item.status === "Billed"}
               checked={selectedItems}
               setChecked={setSelectedItems}
-              footerItems={[
-                [
-                  { value: "TOTAL", tableCellProps: { colSpan: 7 }, },
-                  { value: numberFormat(getTotalAmount() || 0), }
-                ]
-              ]}
             />
             {handleFeedback()}
           </CardContent>

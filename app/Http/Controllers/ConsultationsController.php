@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\SmsService;
 use App\Http\Traits\ApiResponse;
+use App\Jobs\SendConsultationMessageJob;
 use App\Models\Consultation;
 use App\Models\ConsultationExternalExamination;
 use App\Models\ConsultationFunctionalTest;
@@ -13,7 +13,6 @@ use App\Models\ConsultationVisualAcuity;
 use App\Models\Item;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
-use App\Models\Preference;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -369,18 +368,7 @@ class ConsultationsController extends Controller
 
         // send message to patient
         if ($data->consultant == 'Doctor') {
-            $send_messages = Preference::find('SEND_MESSAGES');
-
-            if ($send_messages && $send_messages->value == 'Yes') {
-                $message = Preference::find('CONSULTATION_MESSAGE');
-                if ($message) {
-                    $patient = $data->payment_cache_item->payment_cache->check_in->patient;
-                    $sms_service = new SmsService();
-                    $message = $message->value;
-                    $message = str_replace('{name}', $patient->first_name, $message);
-                    $sms_service->sendMessage($patient->id, $message);
-                }
-            }
+            SendConsultationMessageJob::dispatch($data);
         }
 
         if ($request->is_vip) {

@@ -7,7 +7,7 @@ import Filters from "../expenses/Filters";
 import { useFetch } from "../../../hooks";
 import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const Expenses = () => {
+const Expenses = ({ module, createdBy }) => {
 
   const { data: categories } = useFetch("api/expense-categories", {
     status: "Active",
@@ -19,11 +19,16 @@ const Expenses = () => {
     category_id: undefined,
     start_date: undefined,
     end_date: undefined,
+    created_by: createdBy,
   });
 
   useEffect(() => {
     document.title = `Expenses Report - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    setParams({ ...params, created_by: createdBy });
+  }, [createdBy]);
 
   const getStatus = (item) => {
     if (item.paid_amount < item.total_amount) {
@@ -50,7 +55,7 @@ const Expenses = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Financial Management" },
+        { title: module || "Financial Management" },
         { title: "Reports" },
         { title: "Expenses Report" },
       ]}

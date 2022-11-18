@@ -156,6 +156,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
             { label: "Phone Number", value: patient.phone },
             { label: "Region", value: getNonNull(patient.region).name },
             { label: "District", value: getNonNull(patient.district).name },
+            { label: "Ward", value: getNonNull(patient.ward).name },
             { label: "Payment Mode", value: consultation.payment_cache_item.payment_mode.name },
             { label: "Consultant", value: getNonNull(consultation.payment_cache_item.consultant).full_name },
             { label: "Consultation Date", value: consultation.created_at },
