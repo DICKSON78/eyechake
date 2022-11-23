@@ -63,14 +63,14 @@ const PendingCreditPatients = () => {
       <Card>
         <PageHeader
           title="Credit Patients Approval"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

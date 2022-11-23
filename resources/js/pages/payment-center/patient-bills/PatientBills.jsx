@@ -65,14 +65,14 @@ const PatientBills = () => {
       <Card>
         <PageHeader
           title={`${capitalize(status)} Patient Bills`}
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

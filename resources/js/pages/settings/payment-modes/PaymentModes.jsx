@@ -89,7 +89,7 @@ const PaymentModes = () => {
       <Card>
         <PageHeader
           title="Payment Modes"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -104,7 +104,7 @@ const PaymentModes = () => {
                 New Payment Mode
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

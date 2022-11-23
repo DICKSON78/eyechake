@@ -280,11 +280,7 @@ const PatientRegistration = () => {
                         setFormData({ ...formData, date_of_birth: moment().subtract(age, "years").format("YYYY-MM-DD") })
                       }
                     }}
-                    containerProps={{
-                      sx: {
-                        width: 80,
-                      }
-                    }}
+                    containerProps={{ sx: { width: 80 } }}
                   />
                 </Stack>
               </Grid>

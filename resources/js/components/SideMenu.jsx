@@ -291,11 +291,11 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               icon: <ReportsIcon />,
               to: "/cash-collection",
             },
-            {
-              title: "Credit Collection Report",
-              icon: <ReportsIcon />,
-              to: "/credit-collection",
-            },
+            // {
+            //   title: "Credit Collection Report",
+            //   icon: <ReportsIcon />,
+            //   to: "/credit-collection",
+            // },
             {
               title: "Pending Patient Bills Report",
               icon: <ReportsIcon />,
@@ -307,9 +307,9 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               to: "/cleared-patient-bills",
             },
             {
-              title: "Bill Collection Report",
+              title: "Bill Payment Report",
               icon: <ReportsIcon />,
-              to: "/patient-bill-collection",
+              to: "/patient-bill-payments",
             },
             {
               title: "Expenses Report",

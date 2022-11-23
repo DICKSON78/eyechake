@@ -90,7 +90,7 @@ const UnitsOfMeasure = () => {
       <Card>
         <PageHeader
           title="Units of Measure"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -105,7 +105,7 @@ const UnitsOfMeasure = () => {
                 New Unit of Measure
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

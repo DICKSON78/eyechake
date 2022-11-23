@@ -4,7 +4,7 @@ import Expenses from "./Expenses";
 import CashCollection from "../../payment-center/reports/CashCollection";
 import CreditCollection from "../../payment-center/reports/CreditCollection";
 import PatientBills from "../../payment-center/reports/PatientBills";
-import BillCollection from "../../payment-center/reports/BillCollection";
+import BillPayments from "../../payment-center/reports/BillPayments";
 
 const ReportsRoutes = () => {
   return (
@@ -36,8 +36,8 @@ const ReportsRoutes = () => {
         )}
       />
       <Route
-        path="/patient-bill-collection"
-        element={<BillCollection module="Financial Management" />}
+        path="/patient-bill-payments"
+        element={<BillPayments module="Financial Management" />}
       />
       <Route
         path="/expenses"

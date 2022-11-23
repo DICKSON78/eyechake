@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import CashCollection from "./CashCollection";
 import CreditCollection from "./CreditCollection";
 import PatientBills from "./PatientBills";
-import BillCollection from "./BillCollection";
+import BillPayments from "./BillPayments";
 import Expenses from "../../financial-management/reports/Expenses";
 
 const ReportsRoutes = () => {
@@ -26,8 +26,8 @@ const ReportsRoutes = () => {
         element={<PatientBills status="Cleared"/>}
       />
       <Route
-        path="/patient-bill-collection"
-        element={<BillCollection />}
+        path="/patient-bill-payments"
+        element={<BillPayments />}
       />
       <Route
         path="/expenses"

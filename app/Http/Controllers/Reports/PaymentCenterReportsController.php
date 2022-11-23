@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers\Reports;
+
+use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponse;
+use App\Models\PatientItemBillPayment;
+use App\Models\PatientItemPayment;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class PaymentCenterReportsController extends Controller
+{
+    use ApiResponse;
+
+    public function getCashCollectionReport(Request $request)
+    {
+        $per_page = $request->per_page ?? 25;
+        $payment_channel_id = $request->payment_channel_id;
+        $patient_name = $request->patient_name;
+        $patient_id = $request->patient_id;
+        $patient_gender = $request->patient_gender;
+        $patient_phone = $request->patient_phone;
+        $start_date = $request->start_date;
+        $end_date = $request->end_date;
+        $item_payments = PatientItemPayment::with(['channel', 'creator'])
+            ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
+            ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+            ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+        $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
+            ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
+            ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
+            ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+            ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+
+        if ($payment_channel_id) {
+            $item_payments->where('patient_item_payments.channel_id', $payment_channel_id);
+            $bill_payments->where('patient_item_bill_payments.channel_id', $payment_channel_id);
+        }
+
+        if ($patient_name) {
+            $item_payments->whereRaw('concat(pt.first_name, coalesce(pt.middle_name, ""), pt.last_name) like ?', [str_replace(' ', '', '%' . $patient_name . '%')]);
+            $bill_payments->whereRaw('concat(pt.first_name, coalesce(pt.middle_name, ""), pt.last_name) like ?', [str_replace(' ', '', '%' . $patient_name . '%')]);
+        }
+
+        if ($patient_id) {
+            $item_payments->where('pch.patient_id', $patient_id);
+            $bill_payments->where('pch.patient_id', $patient_id);
+        }
+
+        if ($patient_gender) {
+            $item_payments->where('pt.gender', $patient_gender);
+            $bill_payments->where('pt.gender', $patient_gender);
+        }
+
+        if ($patient_phone) {
+            $item_payments->where('pt.phone', 'like', '%' . $patient_phone . '%');
+            $bill_payments->where('pt.phone', 'like', '%' . $patient_phone . '%');
+        }
+
+        if ($start_date) {
+            $item_payments->whereDate('patient_item_payments.created_at', '>=', $start_date);
+            $bill_payments->whereDate('patient_item_bill_payments.created_at', '>=', $start_date);
+        }
+
+        if ($end_date) {
+            $item_payments->whereDate('patient_item_payments.created_at', '<=', $end_date);
+            $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
+        }
+
+        $item_payments->select(DB::raw("'Immediate' as payment_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by');
+        $bill_payments->select(DB::raw("'Bill' as payment_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by');
+
+        $data = $item_payments->union($bill_payments);
+        $data->orderBy('created_at', 'desc');
+        $data = $data->paginate($per_page);
+        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+    }
+}

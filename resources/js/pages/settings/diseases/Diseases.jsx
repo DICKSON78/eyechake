@@ -89,7 +89,7 @@ const Diseases = () => {
       <Card>
         <PageHeader
           title="Diseases"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -104,7 +104,7 @@ const Diseases = () => {
                 New Disease
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

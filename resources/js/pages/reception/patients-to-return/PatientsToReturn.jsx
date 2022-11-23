@@ -58,14 +58,14 @@ const PatientsToReturn = () => {
       <Card>
         <PageHeader
           title="Patients to Return"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

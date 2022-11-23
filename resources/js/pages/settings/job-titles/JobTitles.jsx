@@ -89,7 +89,7 @@ const JobTitles = () => {
       <Card>
         <PageHeader
           title="Job Titles"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -104,7 +104,7 @@ const JobTitles = () => {
                 New Job Title
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

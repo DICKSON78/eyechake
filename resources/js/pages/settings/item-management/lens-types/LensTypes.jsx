@@ -90,7 +90,7 @@ const LensTypes = () => {
       <Card>
         <PageHeader
           title="Lens Types"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -105,7 +105,7 @@ const LensTypes = () => {
                 New Lens Type
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

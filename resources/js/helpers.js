@@ -5,8 +5,8 @@
 import moment from "moment";
 
 /**
- * Formats a number into comma-separated sections.
- * @param number {Number} Number to be formatted
+ * Formats a `number` into comma-separated sections.
+ * @param number {Number}
  * @returns {String}
  */
 export const numberFormat = (number) => {
@@ -54,31 +54,11 @@ export const capitalize = (text) => {
 /**
  * Formats a date object or string to the format of year-month-date.
  * @param date
- * @returns {string}
+ * @returns {String}
  */
 export const formatDateForDb = (date) => {
   if (typeof date === "string") date = new Date(date);
   return moment(date).format("YYYY-MM-DD");
-};
-
-/**
- * Formats a date object or string to the format of year-month-date hours:minutes.
- * @param date
- * @returns {string}
- */
-export const formatDateTimeForDb = (date) => {
-  if (typeof date === "string") date = new Date(date);
-  return moment(date).format("YYYY-MM-DD HH:mm");
-};
-
-/**
- * Formats a date object or string to the format of hours:minutes.
- * @param date
- * @returns {string}
- */
-export const formatTimeForDb = (date) => {
-  if (typeof date === "string") date = new Date(date);
-  return moment(date).format("HH:mm");
 };
 
 /**
@@ -97,7 +77,7 @@ export const debounce = (fn, delay) => {
 /**
  * Returns an empty object if the argument is null.
  * @param object
- * @returns {*}
+ * @returns {Object}
  */
 export const getNonNull = (object) => (object ? object : {});
 
@@ -154,7 +134,7 @@ export const getValidationError = (message) => {
 /**
  * Formats an error body into a user-friendly error message.
  * @param errorBody
- * @returns {string}
+ * @returns {String}
  */
 export const formatError = (errorBody) => {
   let message = "Something went wrong.";
@@ -180,9 +160,9 @@ export const formatError = (errorBody) => {
           message = data.message;
         }
 
-        if (data.data) {
+        if (data.errors) {
           let errors = [];
-          Object.keys(data.data).forEach((e, i) => errors.push(data.data[e][0]));
+          Object.keys(data.errors).forEach((e, i) => errors.push(data.errors[e][0]));
           message = errors.join("\n");
         }
       }
@@ -221,11 +201,23 @@ export const getAge = (date) => {
 };
 
 /**
+ * Get full name from `firstName`, `middleName` and `lastName`.
+ * @param firstName
+ * @param middleName
+ * @param lastName
+ * @returns {String}
+ */
+export const getFullName = (firstName, middleName, lastName) => {
+  let fullName = `${firstName} ${middleName || ""} ${lastName}`.trim();
+  return fullName.replace(/\s{2,}/g, " ");
+};
+
+/**
  * Get address from `region`, `district` and `ward`.
  * @param region
  * @param district
  * @param ward
- * @returns {string}
+ * @returns {String}
  */
 export const getAddress = (region, district, ward) => {
   let address = "";
@@ -255,7 +247,7 @@ export const getAddress = (region, district, ward) => {
  * Get date range title for reports.
  * @param startDate
  * @param endDate
- * @returns {string}
+ * @returns {String}
  */
 export const getDateRangeTitle = (startDate, endDate) => {
   let title = "";

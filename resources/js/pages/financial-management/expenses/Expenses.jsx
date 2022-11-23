@@ -132,7 +132,7 @@ const Expenses = ({ module, createdBy }) => {
       <Card>
         <PageHeader
           title="Expenses"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -146,7 +146,7 @@ const Expenses = ({ module, createdBy }) => {
                 New Expense
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

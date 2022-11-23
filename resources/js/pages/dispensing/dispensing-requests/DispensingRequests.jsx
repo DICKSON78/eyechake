@@ -64,14 +64,14 @@ const DispensingRequests = ({ consultationType }) => {
       <Card>
         <PageHeader
           title="Dispensing Requests"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

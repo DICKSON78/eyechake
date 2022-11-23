@@ -29,6 +29,7 @@ use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\Reports\InventoryManagementReportsController;
+use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\UsersController;
@@ -121,6 +122,11 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->get('/messages', MessagesController::class);
 
+    $router->prefix('reports')->group(function ($router) {
+        $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
+            $router->get('/cash-collection', 'getCashCollectionReport');
+        });
+    });
     $router->prefix('reports')->group(function ($router) {
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
             $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');

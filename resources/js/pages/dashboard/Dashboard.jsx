@@ -309,7 +309,7 @@ const Dashboard = () => {
     >
       <PageHeader
         title="Dashboard"
-        trailing={
+        trailing={(
           <React.Fragment>
             <DatePicker
               fullWidth
@@ -329,7 +329,7 @@ const Dashboard = () => {
               }}
             />
           </React.Fragment>
-        }
+        )}
         containerProps={{
           spacing: 1,
           p: 0,

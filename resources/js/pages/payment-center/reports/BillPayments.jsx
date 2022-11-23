@@ -10,7 +10,7 @@ import TextField from "../../../components/TextField";
 import useFetch from "../../../hooks/useFetch";
 import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const BillCollection = ({ module }) => {
+const BillPayments = ({ module }) => {
 
   const { data: paymentChannels } = useFetch("api/payment-channels", {
     status: "Active",
@@ -31,7 +31,7 @@ const BillCollection = ({ module }) => {
   });
 
   useEffect(() => {
-    document.title = `Bill Collection Report - ${window.APP_NAME}`;
+    document.title = `Bill Payment Report - ${window.APP_NAME}`;
   }, []);
 
   return (
@@ -40,11 +40,11 @@ const BillCollection = ({ module }) => {
         { title: "Home" },
         { title: module || "Payment Center" },
         { title: "Reports" },
-        { title: "Bill Collection Report" },
+        { title: "Bill Payment Report" },
       ]}
     >
       <Report
-        title="Bill Collection Report"
+        title="Bill Payment Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
         uri="api/patient-item-bill-payments"
         params={{
@@ -209,4 +209,4 @@ const BillCollection = ({ module }) => {
   );
 };
 
-export default BillCollection;
+export default BillPayments;

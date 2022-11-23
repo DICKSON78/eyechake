@@ -71,7 +71,12 @@ const App = () => {
           </Route>
           <Route
             path="/"
-            element={<DefaultLayout setThemeMode={setThemeMode} setUser={setUser}/>}
+            element={(
+              <DefaultLayout
+                setThemeMode={setThemeMode}
+                setUser={setUser}
+              />
+            )}
           >
             <React.Fragment>
               <Route

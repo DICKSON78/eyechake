@@ -75,7 +75,7 @@ const PendingConsultationPatients = () => {
       <Card>
         <PageHeader
           title={getTitle()}
-          trailing={
+          trailing={(
             <React.Fragment>
               <FormControlLabel
                 control={(
@@ -94,7 +94,7 @@ const PendingConsultationPatients = () => {
                 onChange={(value) => setParams({ ...params, per_page: value })}
               />
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>

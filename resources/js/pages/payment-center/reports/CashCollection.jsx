@@ -8,7 +8,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
 
 const CashCollection = ({ module }) => {
 
@@ -18,7 +18,6 @@ const CashCollection = ({ module }) => {
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
-    with_patient: true,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -26,7 +25,6 @@ const CashCollection = ({ module }) => {
     payment_channel_id: undefined,
     start_date: new Date(),
     end_date: undefined,
-    sort_direction: "desc",
   });
 
   useEffect(() => {
@@ -45,7 +43,7 @@ const CashCollection = ({ module }) => {
       <Report
         title="Cash Collection Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
-        uri="api/patient-item-payments"
+        uri="api/reports/payment-center/cash-collection"
         params={{
           ...params,
           start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
@@ -156,12 +154,12 @@ const CashCollection = ({ module }) => {
           {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.full_name,
+            valueGetter: (item, index) => getFullName(item.first_name, item.middle_name, item.last_name),
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient_id,
+            valueGetter: (item, index) => item.patient_id,
           },
           {
             field: "amount",
@@ -191,6 +189,10 @@ const CashCollection = ({ module }) => {
           {
             field: "created_at",
             headerName: "Date",
+          },
+          {
+            field: "payment_type",
+            headerName: "Payment Type",
           },
         ]}
         summationFooterColumns={[

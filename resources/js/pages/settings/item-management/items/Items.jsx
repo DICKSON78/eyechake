@@ -108,7 +108,7 @@ const Items = () => {
       <Card>
         <PageHeader
           title="Items"
-          trailing={
+          trailing={(
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
@@ -122,16 +122,14 @@ const Items = () => {
                 New Item
               </Button>
             </React.Fragment>
-          }
+          )}
         />
         <Divider />
         <CardContent>
           <Filters
             params={params}
             setParams={setParams}
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           />
           <Table
             loading={loading}
