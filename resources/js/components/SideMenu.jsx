@@ -115,6 +115,24 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           show: user.privileges.payment_center,
         },
         {
+          title: "Reports",
+          icon: <ReportsIcon />,
+          to: "/payment-center/reports",
+          show: user.privileges.financial_management,
+          items: [
+            {
+              title: "Daily Cash Collection Report",
+              icon: <ReportsIcon />,
+              to: "/daily-cash-collection",
+            },
+            {
+              title: "Expenses Report",
+              icon: <ReportsIcon />,
+              to: "/expenses",
+            },
+          ],
+        },
+        {
           title: "CONSULTATION ROOM",
           show: !!drawerOpen && user.privileges.consultation_room,
         },
@@ -316,11 +334,11 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               icon: <ReportsIcon />,
               to: "/expenses",
             },
-            {
-              title: "Profit & Loss Report",
-              icon: <ReportsIcon />,
-              to: "/profit-and-loss",
-            },
+            // {
+            //   title: "Profit & Loss Report",
+            //   icon: <ReportsIcon />,
+            //   to: "/profit-and-loss",
+            // },
           ],
         },
         {

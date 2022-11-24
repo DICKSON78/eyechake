@@ -1,0 +1,181 @@
+import React, { useEffect, useState } from "react";
+
+import { Card, CardContent, Grid } from "@mui/material";
+import Page from "../../../components/Page";
+import Report from "../../../components/reports/Report";
+import Select from "../../../components/Select";
+import TextField from "../../../components/TextField";
+
+import useFetch from "../../../hooks/useFetch";
+import { formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
+
+const DailyCashCollection = ({ module }) => {
+
+  const { data: paymentChannels } = useFetch("api/payment-channels", {
+    status: "Active",
+    per_page: 500
+  }, true, [], (response) => response.data.data.data);
+
+  const [params, setParams] = useState({
+    patient_id: undefined,
+    patient_name: undefined,
+    patient_gender: undefined,
+    patient_phone: undefined,
+    payment_channel_id: undefined,
+    start_date: new Date(),
+  });
+
+  useEffect(() => {
+    document.title = `Daily Cash Collection Report - ${window.APP_NAME}`;
+  }, []);
+
+  return (
+    <Page
+      breadcrumbs={[
+        { title: "Home" },
+        { title: module || "Payment Center" },
+        { title: "Reports" },
+        { title: "Daily Cash Collection Report" },
+      ]}
+    >
+      <Report
+        title="Daily Cash Collection Report"
+        subtitle={getDateRangeTitle(params.start_date, params.end_date)}
+        uri="api/reports/payment-center/cash-collection"
+        params={{
+          ...params,
+          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+        }}
+        prependInner={(
+          <React.Fragment>
+            <Card
+              variant="outlined"
+              sx={{ mb: 2 }}
+            >
+              <CardContent>
+                <Grid
+                  container
+                  columnSpacing={2}
+                  rowSpacing={1}
+                >
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Patient Name"
+                      defaultValue={params.patient_name}
+                      onChange={(value) => setParams({ ...params, patient_name: value })}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Patient Number"
+                      defaultValue={params.patient_id}
+                      onChange={(value) => setParams({ ...params, patient_id: value })}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      label="Gender"
+                      fullWidth
+                      options={["Male", "Female"]}
+                      clearable
+                      value={params.patient_gender || ""}
+                      onChange={(value) => setParams({ ...params, patient_gender: value })}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      label="Payment Channel"
+                      fullWidth
+                      options={paymentChannels}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      clearable
+                      value={paymentChannels.length ? (params.payment_channel_id || "") : ""}
+                      onChange={(value) => setParams({ ...params, payment_channel_id: value })}
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </React.Fragment>
+        )}
+        columns={[
+          {
+            field: "patient_name",
+            headerName: "Patient Name",
+            valueGetter: (item, index) => getFullName(item.first_name, item.middle_name, item.last_name),
+          },
+          {
+            field: "patient_id",
+            headerName: "Patient Number",
+            valueGetter: (item, index) => item.patient_id,
+          },
+          {
+            field: "amount",
+            headerName: "Amount",
+            valueGetter: (item, index) => numberFormat(item.amount),
+          },
+          {
+            field: "discount",
+            headerName: "Discount",
+            valueGetter: (item, index) => numberFormat(item.discount),
+          },
+          {
+            field: "subtotal",
+            headerName: "Subtotal",
+            valueGetter: (item, index) => numberFormat(item.amount - item.discount),
+          },
+          {
+            field: "channel",
+            headerName: "Payment Channel",
+            valueGetter: (item, index) => getNonNull(item.channel).name,
+          },
+          {
+            field: "created_by",
+            headerName: "Created By",
+            valueGetter: (item) => getNonNull(item.creator).full_name
+          },
+          {
+            field: "created_at",
+            headerName: "Date",
+          },
+          {
+            field: "payment_type",
+            headerName: "Payment Type",
+          },
+        ]}
+        summationFooterColumns={[
+          { value: "TOTAL", span: 3, index: 1 },
+          { reducer: (acc, item, index) => acc + item.amount, index: 3 },
+          { reducer: (acc, item, index) => acc + item.discount, index: 4 },
+          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 5 },
+        ]}
+      />
+    </Page>
+  );
+};
+
+export default DailyCashCollection;

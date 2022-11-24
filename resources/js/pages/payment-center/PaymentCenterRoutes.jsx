@@ -48,10 +48,10 @@ const PaymentCenterRoutes = () => {
           />
         )}
       />
-      {/*<Route*/}
-        {/*path="/reports/*"*/}
-        {/*element={<ReportsRoutes />}*/}
-      {/*/>*/}
+      <Route
+        path="/reports/*"
+        element={<ReportsRoutes />}
+      />
     </Routes>
   );
 };

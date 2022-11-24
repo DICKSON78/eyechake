@@ -36,7 +36,7 @@ const Expenses = ({ module, createdBy }) => {
     }
 
     if (item.paid_amount >= item.total_amount) {
-      return "Paid"
+      return "Cleared"
     }
   };
 
@@ -44,7 +44,7 @@ const Expenses = ({ module, createdBy }) => {
     switch (status) {
       case "Pending":
         return "warning";
-      case "Paid":
+      case "Cleared":
         return "success";
     }
 

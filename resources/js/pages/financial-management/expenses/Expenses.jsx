@@ -27,7 +27,7 @@ const Expenses = ({ module, createdBy }) => {
     per_page: 25,
     status: "Pending",
     category_id: undefined,
-    start_date: new Date(),
+    start_date: undefined,
     end_date: undefined,
     created_by: createdBy,
   });
@@ -97,7 +97,7 @@ const Expenses = ({ module, createdBy }) => {
     }
 
     if (item.paid_amount >= item.total_amount) {
-      return "Paid"
+      return "Cleared"
     }
   };
 
@@ -105,7 +105,7 @@ const Expenses = ({ module, createdBy }) => {
     switch (status) {
       case "Pending":
         return "warning";
-      case "Paid":
+      case "Cleared":
         return "success";
     }
 

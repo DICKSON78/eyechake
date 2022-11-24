@@ -31,7 +31,7 @@ class ExpensesController extends Controller
             $data->whereRaw('paid_amount < total_amount');
         }
 
-        if ($status == 'Paid') {
+        if ($status == 'Cleared') {
             $data->whereRaw('paid_amount >= total_amount');
         }
 
