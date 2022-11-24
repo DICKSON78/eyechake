@@ -118,7 +118,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/payment-center/reports",
-          show: user.privileges.financial_management,
+          show: user.privileges.payment_center,
           items: [
             {
               title: "Daily Cash Collection Report",

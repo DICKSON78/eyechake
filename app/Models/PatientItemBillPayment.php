@@ -17,6 +17,11 @@ class PatientItemBillPayment extends Model
         return $this->belongsTo(PatientItemBill::class, 'bill_id');
     }
 
+//    public function items()
+//    {
+//        return $this->hasManyThrough(PatientPaymentCacheItem::class, PatientItemBill::class, 'bill_id', 'bill_id');
+//    }
+
     public function channel()
     {
         return $this->belongsTo(PaymentChannel::class, 'channel_id');
