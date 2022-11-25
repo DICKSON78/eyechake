@@ -358,7 +358,7 @@ const Dashboard = () => {
         >
           <InfoCard
             title="Total Sales"
-            count={numberFormat(data.counts.total_sales)}
+            count={numberFormat(data.counts.total_sales - data.counts.discount)}
             icon={<SalesIcon />}
             color={purple[300]}
           />
