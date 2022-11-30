@@ -265,7 +265,6 @@ const Default = ({ setThemeMode, setUser }) => {
               sx={{
                 width: drawerWidth,
                 flexShrink: 0,
-                boxSizing: "border-box",
                 ...(isDrawerOpen && {
                   ...drawerOpenedMixin(theme),
                   "& .MuiDrawer-paper": drawerOpenedMixin(theme),

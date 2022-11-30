@@ -97,6 +97,14 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             ]
           ]}
         />
+
+        <Descriptions
+          columns={2}
+          items={[
+            { label: "GRAND TOTAL", value: numberFormat((getTotalAmount() || 0) - receipt.discount) },
+          ]}
+          valueStyle={{ fontWeight: "bold" }}
+        />
       </Page>
     </Document>
   );

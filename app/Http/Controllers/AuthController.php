@@ -43,20 +43,6 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
-    {
-        $user = $request->user();
-
-        if ($user) {
-            $user->api_token = null;
-            $user->save();
-
-            return $this->sendResponse(null, Response::HTTP_OK, 'Logged out successfully.');
-        }
-
-        return $this->sendResponse(null, Response::HTTP_NOT_FOUND, 'User not found.');
-    }
-
     public function changePassword(Request $request)
     {
         $request->validate([

@@ -117,7 +117,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
     $router->apiResource('/expenses', ExpensesController::class);
-    $router->apiResource('/users', UsersController::class);
     $router->apiResource('/preferences', PreferencesController::class);
 
     $router->get('/messages', MessagesController::class);

@@ -78,23 +78,18 @@ const theme = createTheme({
     },
     MuiPaper: {
       styleOverrides: {
-        elevation1: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
-        backgroundImage: "none",
+        root: {
+          backgroundImage: "none",
+        },
+        elevation1: {
+          boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
+        },
       }
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
           border: "1px solid rgba(255, 255, 255, 0.15)",
-          backgroundImage: "none",
-
-          "&.MuiPaper-elevation0": {
-            //boxShadow: "none",
-          },
-          "&.MuiPaper-outlined": {
-            //boxShadow: "none",
-          },
         }
       }
     },

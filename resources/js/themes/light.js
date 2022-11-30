@@ -78,20 +78,6 @@ const theme = createTheme({
         },
       }
     },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.15)",
-
-          "&.MuiPaper-elevation0": {
-            boxShadow: "none",
-          },
-          "&.MuiPaper-outlined": {
-            boxShadow: "none",
-          },
-        },
-      }
-    },
     MuiCardHeader: {
       styleOverrides: {
         root: {
