@@ -51,7 +51,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     $user = $request->user();
     $user->department = Department::find($user->department_id);
     $user->job_title = JobTitle::find($user->job_title_id);
@@ -67,7 +67,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => 'auth:api'], function ($router) {
+Route::group(['middleware' => 'auth:sanctum'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
     $router->get('/dashboard', DashboardController::class);
     $router->apiResource('/clinic-details', ClinicDetailsController::class);

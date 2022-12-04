@@ -2,7 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Alert, Box, Button, InputAdornment, LinearProgress, Paper } from "@mui/material";
-import { Lock as LockIcon, Person2 as UsernameIcon } from "@mui/icons-material";
+import {
+  Lock as LockIcon,
+  Person2 as UsernameIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon
+} from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
@@ -24,6 +29,8 @@ const LogIn = () => {
   });
   const { data, loading, error, handlePost } = usePost("api/auth/login", formData);
 
+  const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
     document.title = `Login - ${window.APP_NAME}`;
   }, []);
@@ -31,8 +38,8 @@ const LogIn = () => {
   useEffect(() => {
     if (data) {
       window.user = data.data.user;
-      window.localStorage.removeItem("api_token");
-      window.localStorage.setItem("api_token", data.data.api_token);
+      window.localStorage.removeItem("token");
+      window.localStorage.setItem("token", data.data.token);
       window.setTimeout(() => {
         navigate("/dashboard");
       }, 1000);
@@ -106,13 +113,22 @@ const LogIn = () => {
             <TextField
               ref={passwordRef}
               placeholder="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               fullWidth
               required
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <LockIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                   </InputAdornment>
                 ),
               }}

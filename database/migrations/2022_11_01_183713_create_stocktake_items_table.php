@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('stocktake_items', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('stocktake_id')->unsigned();
-            $table->bigInteger('item_id')->unsigned();
+            $table->foreignId('stocktake_id');
+            $table->foreignId('item_id');
             $table->double('quantity')->unsigned();
             $table->double('unit_buying_price')->unsigned()->nullable();
             $table->date('manufacture_date')->nullable();

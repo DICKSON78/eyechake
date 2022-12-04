@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('item_prices', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('item_id')->unsigned();
-            $table->bigInteger('payment_mode_id')->unsigned();
+            $table->foreignId('item_id');
+            $table->foreignId('payment_mode_id');
             $table->double('unit_price')->unsigned();
             $table->timestamps();
 

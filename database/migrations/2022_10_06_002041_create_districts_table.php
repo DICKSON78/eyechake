@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('districts', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->bigInteger('region_id')->unsigned();
+            $table->foreignId('region_id');
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
 

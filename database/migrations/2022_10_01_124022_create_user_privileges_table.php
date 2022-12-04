@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('user_privileges', function (Blueprint $table) {
-            $table->bigInteger('user_id')->unsigned()->primary();
+            $table->foreignId('user_id')->primary();
             $table->boolean('dashboard')->default(0);
             $table->boolean('reception')->default(0);
             $table->boolean('payment_center')->default(0);

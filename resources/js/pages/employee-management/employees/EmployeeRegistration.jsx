@@ -306,7 +306,7 @@ const EmployeeRegistration = () => {
                         sx={{ cursor: "pointer" }}
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                       </InputAdornment>
                     ),
                   }}

@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('patient_item_payments', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('channel_id')->unsigned()->nullable();
+            $table->foreignId('channel_id')->nullable();
             $table->double('amount')->unsigned();
             $table->double('discount')->unsigned()->default(0);
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('channel_id')

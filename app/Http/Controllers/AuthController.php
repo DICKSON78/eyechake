@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -29,12 +28,10 @@ class AuthController extends Controller
                     'You do not have access to the system.');
             }
 
-            $token = Str::random(32);
-            $user->api_token = $token;
-            $user->save();
+            $token = $user->createToken('MyApp')->plainTextToken;
 
             return $this->sendResponse([
-                'api_token' => $token,
+                'token' => $token,
                 'user' => $user
             ], Response::HTTP_OK, 'Logged in successfully.');
         } else {

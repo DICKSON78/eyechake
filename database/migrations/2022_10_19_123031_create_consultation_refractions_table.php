@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('consultation_refractions', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('consultation_id')->unsigned();
+            $table->foreignId('consultation_id');
             $table->string('ob_re_sph')->nullable();
             $table->string('ob_re_cyl')->nullable();
             $table->string('ob_re_axis')->nullable();
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('sub_le_add')->nullable();
             $table->string('sub_le_add_va')->nullable();
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('consultation_id')

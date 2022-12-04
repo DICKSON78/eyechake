@@ -7,21 +7,21 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $appends = ['full_name'];
 
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'username', 'department_id', 'job_title_id',
-        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'password', 'api_token',
-        'created_by', 'status',
+        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'password', 'created_by', 'status',
     ];
 
     protected $hidden = [
-        'password',
+        'password', 'remember_token',
     ];
 
     public function department()

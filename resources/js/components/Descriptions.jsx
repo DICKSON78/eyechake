@@ -30,7 +30,7 @@ const Descriptions = ({ columns, items, containerProps, itemSpacing, itemProps }
             </Typography>
             <Typography
               variant="body2"
-              sx={{ mt: "4px" }}
+              sx={{ mt: 0.5 }}
             >
               {e.value}
             </Typography>

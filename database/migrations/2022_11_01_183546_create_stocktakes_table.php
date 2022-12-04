@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('stocktakes', function (Blueprint $table) {
             $table->id();
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->text('reason');
             $table->timestamp('updated_at')->nullable();
 

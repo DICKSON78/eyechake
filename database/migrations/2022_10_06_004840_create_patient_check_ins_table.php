@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('patient_check_ins', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('patient_id')->unsigned();
-            $table->bigInteger('payment_mode_id')->unsigned(); // This could be retrieved from patient, but patient's payment mode can changed and cause improper financial reports
+            $table->foreignId('patient_id');
+            $table->foreignId('payment_mode_id'); // This could be retrieved from patient, but patient's payment mode can changed and cause improper financial reports
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('patient_id')

@@ -14,7 +14,7 @@ window.axios = axios;
 
 window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 window.axios.interceptors.request.use((config) => {
-    config.headers.Authorization = `Bearer ${localStorage.getItem("api_token") || null}`;
+    config.headers.Authorization = `Bearer ${localStorage.getItem("token") || null}`;
     return config;
   }
 );

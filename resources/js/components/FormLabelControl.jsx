@@ -11,16 +11,16 @@ const FormLabelControl = ({ containerProps, label, required, children }) => {
       {label ?
         <Typography
           sx={{
-            marginLeft: "4px",
-            marginBottom: "4px",
+            ml: 0.5,
+            mb: 0.5,
           }}
         >
           {label}
           {required ?
             <Box
               component="span"
-              color={(theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main}
-              ml="2px"
+              color={(theme) => theme.palette.error.main}
+              ml={0.25}
             >
               *
             </Box>

@@ -17,10 +17,10 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('code')->unique()->nullable();
-            $table->bigInteger('item_type_id')->unsigned()->nullable();
-            $table->bigInteger('consultation_type_id')->unsigned()->nullable();
-            $table->bigInteger('unit_of_measure_id')->unsigned()->nullable();
-            $table->bigInteger('lens_type_id')->unsigned()->nullable();
+            $table->foreignId('item_type_id')->nullable();
+            $table->foreignId('consultation_type_id')->nullable();
+            $table->foreignId('unit_of_measure_id')->nullable();
+            $table->foreignId('lens_type_id')->nullable();
             $table->enum('is_consultation_item', ['Yes', 'No'])->default('No');
             $table->enum('is_stock_item', ['Yes', 'No'])->default('No');
             $table->double('balance')->nullable();

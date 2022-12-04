@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('consultations', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('payment_cache_item_id')->unsigned();
+            $table->foreignId('payment_cache_item_id');
             $table->enum('consultant', ['Doctor', 'Optician'])->default('Doctor');
             $table->text('chief_complaint')->nullable();
             $table->text('history_present_illness')->nullable();
@@ -24,10 +24,10 @@ return new class extends Migration
             $table->date('to_return_date')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->enum('status', ['Pending', 'Consulted'])->default('Pending');
             $table->dateTime('sent_to_optician_at')->nullable();
-            $table->bigInteger('sent_to_optician_by')->unsigned()->nullable();
+            $table->foreignId('sent_to_optician_by')->nullable();
             $table->enum('optician_status', ['Pending', 'Consulted'])->nullable();
             $table->timestamp('updated_at')->nullable();
 

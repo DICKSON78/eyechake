@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('patient_payment_cache', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('check_in_id')->unsigned();
-            $table->bigInteger('consultation_id')->unsigned()->nullable(); // if items were ordered from consultation
+            $table->foreignId('check_in_id');
+            $table->foreignId('consultation_id')->nullable(); // if items were ordered from consultation
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('check_in_id')

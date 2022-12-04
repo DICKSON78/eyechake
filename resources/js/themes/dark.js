@@ -50,7 +50,7 @@ const theme = createTheme({
     fontSize: 12,
   },
   shape: {
-    borderRadius: 5
+    borderRadius: 5,
   },
   components: {
     MuiAppBar: {
@@ -83,7 +83,7 @@ const theme = createTheme({
         },
         elevation1: {
           boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
-        },
+        }
       }
     },
     MuiCard: {
@@ -103,7 +103,7 @@ const theme = createTheme({
         title: {
           fontSize: "16px",
           fontWeight: 400,
-        },
+        }
       }
     },
     MuiCardContent: {
@@ -111,8 +111,8 @@ const theme = createTheme({
         root: {
           "&:last-child": {
             paddingBottom: 16,
-          },
-        },
+          }
+        }
       }
     },
     MuiAlert: {
@@ -143,8 +143,8 @@ const theme = createTheme({
           },
           "&:hover:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline": {
             borderColor: "rgba(255, 255, 255, 0.25) !important",
-          },
-        },
+          }
+        }
       }
     },
     MuiFormHelperText: {
@@ -152,7 +152,7 @@ const theme = createTheme({
         root: {
           marginLeft: "4px",
           marginRight: "4px",
-        },
+        }
       }
     },
     MuiTableBody: {
@@ -165,8 +165,8 @@ const theme = createTheme({
             padding: "12px",
             backgroundColor: "#2c2f3e",
             fontWeight: 500,
-          },
-        },
+          }
+        }
       }
     },
     MuiTableCell: {
@@ -182,7 +182,7 @@ const theme = createTheme({
           padding: "12px",
           fontSize: "0.75rem",
           fontWeight: 700,
-        },
+        }
       }
     },
     MuiTableRow: {
@@ -191,37 +191,37 @@ const theme = createTheme({
           "&.expanded": {
             backgroundColor: alpha("#345ea8", 0.12),
           }
-        },
+        }
       }
     },
     MuiSvgIcon: {
       styleOverrides: {
         root: {
           verticalAlign: "bottom",
-        },
+        }
       }
     },
     MuiAvatar: {
       styleOverrides: {
         root: {
           color: "inherit",
-        },
+        }
       }
     },
     MuiLink: {
       styleOverrides: {
         root: {
           cursor: "pointer",
-        },
+        }
       }
     },
     MuiSkeleton: {
       styleOverrides: {
         rounded: {
           borderRadius: 5,
-        },
+        }
       }
-    },
+    }
   }
 });
 

@@ -20,16 +20,16 @@ return new class extends Migration
             $table->string('last_name');
             $table->enum('gender', ['Male', 'Female']);
             $table->date('date_of_birth')->nullable();
-            $table->bigInteger('region_id')->unsigned()->nullable();
-            $table->bigInteger('district_id')->unsigned()->nullable();
-            $table->bigInteger('ward_id')->unsigned()->nullable();
+            $table->foreignId('region_id')->nullable();
+            $table->foreignId('district_id')->nullable();
+            $table->foreignId('ward_id')->nullable();
             $table->string('national_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('occupation')->nullable();
-            $table->bigInteger('payment_mode_id')->unsigned()->nullable();
+            $table->foreignId('payment_mode_id')->nullable();
             $table->enum('is_vip', ['Yes', 'No'])->default('No');
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('region_id')

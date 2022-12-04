@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('category_id')->unsigned();
+            $table->foreignId('category_id');
             $table->double('total_amount')->unsigned();
             $table->double('paid_amount')->unsigned()->default(0);
             $table->string('description')->nullable();
             $table->date('expense_date');
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('category_id')

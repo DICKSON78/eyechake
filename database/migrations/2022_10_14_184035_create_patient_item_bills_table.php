@@ -18,10 +18,10 @@ return new class extends Migration
             $table->double('amount')->unsigned();
             $table->double('discount')->unsigned()->default(0);
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->enum('status', ['Pending', 'Cleared'])->default('Pending');
             $table->dateTime('cleared_at')->nullable();
-            $table->bigInteger('cleared_by')->unsigned()->nullable();
+            $table->foreignId('cleared_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('created_by')

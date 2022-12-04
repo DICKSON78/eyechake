@@ -89,7 +89,7 @@ const ChangePassword = ({ modal }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                     </InputAdornment>
                   ),
                 }}
@@ -115,7 +115,7 @@ const ChangePassword = ({ modal }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                     </InputAdornment>
                   ),
                 }}

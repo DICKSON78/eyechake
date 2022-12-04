@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->text('message');
             $table->string('phone');
-            $table->bigInteger('patient_id')->unsigned()->nullable();
+            $table->foreignId('patient_id')->nullable();
             $table->text('api_response')->nullable();
             $table->timestamps();
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('consultation_functional_tests', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('consultation_id')->unsigned();
+            $table->foreignId('consultation_id');
             $table->string('re_npc')->nullable();
             $table->string('re_npa')->nullable();
             $table->string('re_confrontation')->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('le_confrontation')->nullable();
             $table->string('le_cover_test')->nullable();
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('consultation_id')

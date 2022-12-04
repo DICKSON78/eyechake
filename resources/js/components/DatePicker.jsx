@@ -74,11 +74,11 @@ class DatePicker extends React.Component {
             <Typography
               sx={{
                 ...(horizontal && {
-                  marginRight: "8px",
+                  mr: 1,
                 }),
                 ...(!horizontal && {
-                  marginLeft: "4px",
-                  marginBottom: "4px",
+                  ml: 0.5,
+                  mb: 0.5,
                 }),
               }}
             >
@@ -86,9 +86,9 @@ class DatePicker extends React.Component {
               {required ?
                 <Typography
                   component="span"
-                  color={(theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main}
+                  color={(theme) => theme.palette.error.main}
                   fontWeight="bold"
-                  ml="2px"
+                  ml={0.25}
                 >
                   *
                 </Typography>
@@ -129,9 +129,9 @@ class DatePicker extends React.Component {
               <Typography
                 variant="body2"
                 sx={{
-                  color: (theme) => theme.palette.mode === "light" ? theme.palette.error.main : theme.palette.error.main,
-                  marginLeft: "4px",
-                  marginTop: "2px",
+                  color: (theme) => theme.palette.error.main,
+                  ml: 0.5,
+                  mt: 0.25,
                 }}
               >
                 {this.state.error}

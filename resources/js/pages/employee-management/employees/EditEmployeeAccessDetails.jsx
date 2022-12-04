@@ -114,7 +114,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                     </InputAdornment>
                   ),
                 }}

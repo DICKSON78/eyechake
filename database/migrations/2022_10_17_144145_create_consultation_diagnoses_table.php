@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('consultation_diagnoses', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('consultation_id')->unsigned();
-            $table->bigInteger('disease_id')->unsigned();
+            $table->foreignId('consultation_id');
+            $table->foreignId('disease_id');
             $table->enum('diagnosis_type', ['Preliminary', 'Final']);
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('consultation_id')

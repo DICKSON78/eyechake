@@ -19,17 +19,17 @@ return new class extends Migration
             $table->string('middle_name')->nullable();
             $table->string('last_name');
             $table->string('username')->unique();
-            $table->bigInteger('department_id')->unsigned()->nullable();
-            $table->bigInteger('job_title_id')->unsigned()->nullable();
+            $table->foreignId('department_id')->nullable();
+            $table->foreignId('job_title_id')->nullable();
             $table->string('employee_number')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->enum('gender', ['Male', 'Female'])->nullable();
             $table->string('national_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('password');
-            $table->string('api_token')->nullable();
+            $table->rememberToken();
             $table->timestamp('created_at')->nullable();
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->foreignId('created_by')->nullable();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamp('updated_at')->nullable();
 
