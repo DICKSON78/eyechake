@@ -228,6 +228,15 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                       valueGetter: (item, index) => numberFormat(item.amount || 0),
                     },
                     {
+                      field: "created_by",
+                      headerName: "Created By",
+                      valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                    },
+                    {
+                      field: "created_at",
+                      headerName: "Date",
+                    },
+                    {
                       field: "actions",
                       headerName: "Actions",
                       renderCell: (item) => (
