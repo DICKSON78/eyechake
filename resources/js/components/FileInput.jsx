@@ -71,7 +71,7 @@ class FileInput extends React.Component {
             {required ?
               <Typography
                 component="span"
-                color={(theme) => theme.palette.error.main}
+                color="error.main"
                 fontWeight="bold"
                 ml={0.25}
               >
@@ -102,7 +102,7 @@ class FileInput extends React.Component {
             <Typography
               variant="body2"
               sx={{
-                color: (theme) => theme.palette.error.main,
+                color: "error.main",
                 ml: 0.5,
                 mt: 0.25,
               }}

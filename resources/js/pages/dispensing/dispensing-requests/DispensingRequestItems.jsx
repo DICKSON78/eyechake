@@ -10,9 +10,8 @@ import Table from "../../../components/Table";
 import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePatch, usePost } from "../../../hooks";
 import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
-import usePatch from "../../../hooks/usePatch";
 
 const DispensingRequestItems = ({ consultationType }) => {
 

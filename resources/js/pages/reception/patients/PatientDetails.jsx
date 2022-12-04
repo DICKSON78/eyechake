@@ -64,14 +64,14 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
             sx: {
               mb: 2,
               p: 2,
-              bgcolor: (theme) => theme.palette.primary.main,
+              bgcolor: "primary.main",
             }
           }}
           itemSpacing={1}
           itemProps={{
             sx: {
               "& .MuiTypography-root": {
-                color: (theme) => theme.palette.primary.contrastText,
+                color: "primary.contrastText",
               }
             }
           }}

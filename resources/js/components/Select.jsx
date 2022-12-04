@@ -84,9 +84,9 @@ class Select extends React.Component {
             {required ?
               <Typography
                 component="span"
-                color={(theme) => theme.palette.error.main}
+                color="error.main"
                 fontWeight="bold"
-                ml="2px"
+                ml={0.25}
               >
                 *
               </Typography>
@@ -144,9 +144,9 @@ class Select extends React.Component {
             <Typography
               variant="body2"
               sx={{
-                color: (theme) => theme.palette.error.main,
-                marginLeft: "4px",
-                marginTop: "2px",
+                color: "error.main",
+                ml: 0.5,
+                mt: 0.25,
               }}
             >
               {this.state.error}
