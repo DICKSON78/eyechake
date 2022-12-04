@@ -108,7 +108,7 @@ class DashboardController extends Controller
             ->count();
 
         $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.paid_amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where (date(exp.expense_date) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
-        $data['statistics']['payments_by_channel'] = DB::select('select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id', [$start_date, $end_date]);
+        $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 }
