@@ -72,11 +72,11 @@ class Select extends React.Component {
           <Typography
             sx={{
               ...(horizontal && {
-                marginRight: "8px",
+                mr: 1,
               }),
               ...(!horizontal && {
-                marginLeft: "4px",
-                marginBottom: "4px",
+                ml: 0.5,
+                mb: 0.5,
               }),
             }}
           >
