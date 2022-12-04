@@ -5,6 +5,7 @@ import {
   InputAdornment,
   LinearProgress,
   Pagination,
+  PaginationItem,
   Stack,
   Table as MuiTable,
   TableBody,
@@ -14,7 +15,11 @@ import {
   TableRow,
   Typography
 } from "@mui/material";
-import { SearchRounded as SearchIcon } from "@mui/icons-material";
+import {
+  ChevronLeftRounded as ChevronLeftIcon,
+  ChevronRightRounded as ChevronRightIcon,
+  SearchRounded as SearchIcon
+} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Select from "./Select";
 import TextField from "./TextField";
@@ -353,6 +358,12 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                 onPageChange(page1);
               }
             }}
+            renderItem={(item) => (
+              <PaginationItem
+                slots={{ previous: ChevronLeftIcon, next: ChevronRightIcon }}
+                {...item}
+              />
+            )}
           />
         </Stack>
         : null

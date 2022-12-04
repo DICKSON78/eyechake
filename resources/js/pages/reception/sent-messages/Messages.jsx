@@ -60,7 +60,7 @@ const Messages = () => {
             <React.Fragment>
               <PageSizeSelect
                 pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value })}
+                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
               />
             </React.Fragment>
           )}

@@ -125,8 +125,6 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
         $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
             $router->get('/cash-collection', 'getCashCollectionReport');
         });
-    });
-    $router->prefix('reports')->group(function ($router) {
         $router->controller(InventoryManagementReportsController::class)->prefix('inventory-management')->group(function ($router) {
             $router->get('/item-quantity-dispensed', 'getItemQuantityDispensedReport');
         });

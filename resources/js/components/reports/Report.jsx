@@ -80,7 +80,10 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
               />
               <PageSizeSelect
                 pageSize={perPage}
-                onChange={(value) => setPerPage(value)}
+                onChange={(value) => {
+                  setPerPage(value);
+                  setPage(1);
+                }}
               />
             </React.Fragment>
           }
