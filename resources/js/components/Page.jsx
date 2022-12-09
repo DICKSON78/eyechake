@@ -18,7 +18,6 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
           <Box flexGrow={1}>
             <Typography
               variant="h6"
-              fontSize="16px"
               fontWeight="400"
               {...(titleProps || {})}
             >

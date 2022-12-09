@@ -15,7 +15,8 @@ import {
   Radio,
   Skeleton,
   Stack,
-  Tooltip
+  Tooltip,
+  Typography
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/CloseRounded";
 
@@ -324,12 +325,20 @@ const CheckInPatient = () => {
                         key={e.id}
                         control={(
                           <Radio
+                            size="small"
                             checked={selectedItem === e}
                             onChange={(event) => setSelectedItem(e)}
                           />
                         )}
-                        label={e.name}
-                        sx={{ display: "block" }}
+                        label={(
+                          <Typography
+                            variant="body2"
+                            display="inline-block"
+                          >
+                            {e.name}
+                          </Typography>
+                        )}
+                        sx={{ display: "inline-flex" }}
                       />
                     ))}
                   </CardContent>

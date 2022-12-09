@@ -47,8 +47,11 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "Custom, sans-serif",
-    h6: {
+    h5: {
       fontSize: 18,
+    },
+    h6: {
+      fontSize: 16,
     },
     subtitle1: {
       fontSize: 14,
@@ -98,10 +101,6 @@ const theme = createTheme({
           "&.no-action-margin-right .MuiCardHeader-action": {
             marginRight: 0,
           }
-        },
-        title: {
-          fontSize: "16px",
-          fontWeight: 400,
         }
       }
     },
@@ -138,6 +137,12 @@ const theme = createTheme({
         },
         outlined: {
           textTransform: "none",
+        },
+        sizeSmall: {
+          fontSize: "0.7rem",
+        },
+        sizeLarge: {
+          fontSize: "0.8rem",
         }
       }
     },
@@ -207,6 +212,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           verticalAlign: "bottom",
+          fontSize: "1.25rem",
         }
       }
     },
@@ -214,6 +220,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           cursor: "pointer",
+        }
+      }
+    },
+    MuiListSubheader: {
+      styleOverrides: {
+        root: {
+          fontSize: "0.75rem",
         }
       }
     },
