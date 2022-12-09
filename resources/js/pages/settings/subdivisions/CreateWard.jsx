@@ -92,6 +92,7 @@ const CreateWard = ({ modal, district, onSuccess }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -99,6 +100,7 @@ const CreateWard = ({ modal, district, onSuccess }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

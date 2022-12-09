@@ -94,6 +94,7 @@ const CreateDepartment = ({ modal, fetchDepartments }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -101,6 +102,7 @@ const CreateDepartment = ({ modal, fetchDepartments }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

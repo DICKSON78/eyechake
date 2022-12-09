@@ -273,6 +273,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Close

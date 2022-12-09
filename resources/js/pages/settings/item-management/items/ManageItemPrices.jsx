@@ -244,6 +244,7 @@ const ManageItemPrices = ({ item, modal }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Close

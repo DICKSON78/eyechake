@@ -25,12 +25,14 @@ const ConfirmationDialog = ({ message, onCancel, onOk }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={onCancel}
         >
           Cancel
         </Button>
         <Button
           variant="text"
+          size="large"
           onClick={onOk}
         >
           Yes

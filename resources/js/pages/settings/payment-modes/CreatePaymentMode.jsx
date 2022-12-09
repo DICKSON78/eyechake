@@ -112,6 +112,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -119,6 +120,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

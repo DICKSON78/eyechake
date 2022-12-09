@@ -499,6 +499,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Close

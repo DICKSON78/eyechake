@@ -126,6 +126,7 @@ const EditLensType = ({ item, modal, fetchLensTypes }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -133,6 +134,7 @@ const EditLensType = ({ item, modal, fetchLensTypes }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

@@ -217,6 +217,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Close

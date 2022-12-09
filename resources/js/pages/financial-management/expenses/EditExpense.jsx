@@ -152,6 +152,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -159,6 +160,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

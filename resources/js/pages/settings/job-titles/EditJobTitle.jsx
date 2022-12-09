@@ -127,6 +127,7 @@ const EditJobTitle = ({ item, modal, fetchJobTitles }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -134,6 +135,7 @@ const EditJobTitle = ({ item, modal, fetchJobTitles }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

@@ -127,6 +127,7 @@ const EditDisease = ({ item, modal, fetchDiseases }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -134,6 +135,7 @@ const EditDisease = ({ item, modal, fetchDiseases }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

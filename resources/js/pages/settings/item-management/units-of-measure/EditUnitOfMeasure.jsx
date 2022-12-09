@@ -126,6 +126,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -133,6 +134,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save

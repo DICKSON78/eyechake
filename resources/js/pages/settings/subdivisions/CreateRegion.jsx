@@ -78,6 +78,7 @@ const CreateRegion = ({ modal, onSuccess }) => {
         <Box flexGrow={1}/>
         <Button
           variant="text"
+          size="large"
           onClick={() => modal.close()}
         >
           Cancel
@@ -85,6 +86,7 @@ const CreateRegion = ({ modal, onSuccess }) => {
         <Button
           disabled={loading}
           variant="text"
+          size="large"
           onClick={handleSubmit}
         >
           Save
