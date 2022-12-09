@@ -355,11 +355,11 @@ const Stocktaking = () => {
                           defaultValue={unitBuyingPrice}
                           rules={[
                             (value) => {
-                              value = value.trim();
+                              value = (value || "").trim();
                               return !value ? true : validationRules.number(value);
                             },
                             (value) => {
-                              value = value.trim();
+                              value = (value || "").trim();
                               return !value ? true : (value > 0 || "Price has to be greater than 0.");
                             },
                           ]}

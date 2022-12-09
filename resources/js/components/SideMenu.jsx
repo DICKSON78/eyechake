@@ -436,7 +436,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
     <List
       component="nav"
       subheader={drawerOpen ?
-        <ListSubheader sx={{ px: 3 }}>MENU</ListSubheader>
+        <ListSubheader sx={{ px: { xs: 2, sm: 2, md: 3 } }}>MENU</ListSubheader>
         : null
       }
       dense
@@ -445,7 +445,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         !e.to ?
           <ListSubheader
             key={e.title}
-            sx={{ px: 3 }}
+            sx={{ px: { xs: 2, sm: 2, md: 3 } }}
           >
             {e.title}
           </ListSubheader>
@@ -474,7 +474,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                     color: "inherit"
                   }
                 },
-                px: 3,
+                px: { xs: 2, sm: 2, md: 3 },
               }}
             >
               {e.icon ?
@@ -512,7 +512,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                             color: "inherit"
                           }
                         },
-                        px: 3,
+                        px: { xs: 2, sm: 2, md: 3 },
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>{f.icon}</ListItemIcon>

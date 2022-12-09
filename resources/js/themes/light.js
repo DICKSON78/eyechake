@@ -46,11 +46,25 @@ const theme = createTheme({
     divider: "#e0e0e0",
   },
   typography: {
-    fontFamily: [
-      "Custom",
-      "sans-serif",
-    ].join(","),
-    fontSize: 12,
+    fontFamily: "Custom, sans-serif",
+    h6: {
+      fontSize: 18,
+    },
+    subtitle1: {
+      fontSize: 14,
+    },
+    subtitle2: {
+      fontSize: 13,
+    },
+    body1: {
+      fontSize: 13,
+    },
+    body2: {
+      fontSize: 12,
+    },
+    button: {
+      fontSize: 12,
+    }
   },
   shape: {
     borderRadius: 5,
@@ -104,6 +118,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: "none",
+        }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        sizeSmall: {
+          fontSize: "0.75rem",
         }
       }
     },

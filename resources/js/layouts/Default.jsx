@@ -148,7 +148,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   color="inherit"
                   onClick={toggleDrawer}
                 >
-                  <MenuIcon open/>
+                  <MenuIcon />
                 </IconButton>
               </Tooltip>
 
