@@ -47,7 +47,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     phone: item.phone,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/users/${item.id}`, {
+  const { data, loading, error, handlePatch } = usePatch(`api/employees/${item.id}`, {
     ...formData,
     date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
   });

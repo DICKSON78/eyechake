@@ -36,7 +36,7 @@ class PatientPaymentCacheController extends Controller
         $patient_phone = $request->patient_phone;
         $item_status = $request->item_status;
         $item_payment_mode_id = $request->item_payment_mode_id;
-        $item_payment_mode_type = $request->item_payment_mode_type;
+        $item_transaction_type = $request->item_transaction_type;
         $item_consultation_type = $request->item_consultation_type;
         $item_consultant_id = $request->item_consultant_id;
         $start_date = $request->start_date;
@@ -85,9 +85,9 @@ class PatientPaymentCacheController extends Controller
             });
         }
 
-        if ($item_payment_mode_type) {
-            $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_type) {
-                $query->where('payment_type', $item_payment_mode_type);
+        if ($item_transaction_type) {
+            $data->whereHas('items.payment_mode', function ($query) use ($item_transaction_type) {
+                $query->where('transaction_type', $item_transaction_type);
             });
         }
 

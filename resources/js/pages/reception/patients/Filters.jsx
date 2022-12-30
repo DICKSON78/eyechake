@@ -96,20 +96,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               onChange={(value) => setParams({ ...params, payment_mode_id: value })}
             />
           </Grid>
-          <Grid
-            item
-            md
-            sm={6}
-            xs={12}
-          >
-            <Select
-              label="VIP Patient"
-              fullWidth
-              options={["Yes", "No"]}
-              clearable
-              onChange={(value) => setParams({ ...params, is_vip: value })}
-            />
-          </Grid>
         </Grid>
       </CardContent>
     </Card>

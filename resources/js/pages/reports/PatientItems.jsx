@@ -21,7 +21,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   const [params, setParams] = useState({
     with_patient: true,
     consultation_type: consultationType,
-    payment_mode_type: paymentModeType,
+    transaction_type: paymentModeType,
     status,
     patient_id: undefined,
     patient_name: undefined,
@@ -39,7 +39,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   }, [title]);
 
   useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType, payment_mode_type: paymentModeType, status });
+    setParams({ ...params, consultation_type: consultationType, transaction_type: paymentModeType, status });
   }, [consultationType, paymentModeType, status]);
 
   const getStatusColor = (status) => {

@@ -178,8 +178,8 @@ const DailyCashCollection = ({ module }) => {
             headerName: "Date",
           },
           {
-            field: "payment_type",
-            headerName: "Payment Type",
+            field: "transaction_type",
+            headerName: "Transaction Type",
           },
         ]}
         summationFooterColumns={[

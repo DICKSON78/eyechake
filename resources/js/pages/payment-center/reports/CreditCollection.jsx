@@ -15,13 +15,13 @@ const CreditCollection = ({ module }) => {
 
   const { data: paymentModes } = useFetch("api/payment-modes", {
     status: "Active",
-    payment_type: "Credit",
+    transaction_type: "Credit",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
     with_patient: true,
-    payment_mode_type: "Credit",
+    transaction_type: "Credit",
     status: "Paid,Served",
     patient_id: undefined,
     patient_name: undefined,

@@ -35,7 +35,7 @@ class PatientPaymentCacheItemsController extends Controller
         $q = $request->q;
         $payment_cache_id = $request->payment_cache_id;
         $payment_mode_id = $request->payment_mode_id;
-        $payment_mode_type = $request->payment_mode_type;
+        $transaction_type = $request->transaction_type;
         $consultation_type = $request->consultation_type;
         $consultant_id = $request->consultant_id;
         $consultation_id = $request->consultation_id;
@@ -79,9 +79,9 @@ class PatientPaymentCacheItemsController extends Controller
             $data->where('payment_mode_id', $payment_mode_id);
         }
 
-        if ($payment_mode_type) {
-            $data->whereHas('payment_mode', function ($query) use ($payment_mode_type) {
-                $query->where('payment_type', $payment_mode_type);
+        if ($transaction_type) {
+            $data->whereHas('payment_mode', function ($query) use ($transaction_type) {
+                $query->where('transaction_type', $transaction_type);
             });
         }
 
@@ -364,15 +364,18 @@ class PatientPaymentCacheItemsController extends Controller
 
             if ($item) {
                 $item->status = $status;
-                $item->served_by = $user->id;
-                $item->served_at = Carbon::now();
-                $item->save();
 
-                if ($status == 'Served' && $item->item->is_stock_item == 'Yes') {
-                    $item->item->balance -= $item->quantity;
-                    $item->item->save();
+                if ($status == 'Served') {
+                    $item->served_by = $user->id;
+                    $item->served_at = Carbon::now();
+
+                    if ($item->item->is_stock_item == 'Yes') {
+                        $item->item->balance -= $item->quantity;
+                        $item->item->save();
+                    }
                 }
 
+                $item->save();
                 $data[] = $item;
             }
         }

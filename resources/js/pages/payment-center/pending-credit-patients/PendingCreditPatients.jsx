@@ -20,7 +20,7 @@ const PendingCreditPatients = () => {
     page: 1,
     per_page: 25,
     item_status: "Pending",
-    item_payment_mode_type: "Credit",
+    item_transaction_type: "Credit",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,

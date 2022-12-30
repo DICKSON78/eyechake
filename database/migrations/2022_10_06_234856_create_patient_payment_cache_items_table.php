@@ -50,7 +50,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->foreign('consultant_id')
                 ->references('id')
-                ->on('users')
+                ->on('employees')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
             $table->foreign('payment_mode_id')

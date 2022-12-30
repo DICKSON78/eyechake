@@ -120,8 +120,8 @@ const PaymentModes = () => {
                 headerName: "Description",
               },
               {
-                field: "payment_type",
-                headerName: "Payment Type",
+                field: "transaction_type",
+                headerName: "Transaction Type",
               },
               {
                 field: "status",

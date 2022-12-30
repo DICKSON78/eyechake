@@ -39,11 +39,13 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Dashboard",
           icon: <HomeIcon />,
           to: "/dashboard",
+          show: true,
         },
         {
           title: "Patient Records",
           icon: <ReportsIcon />,
           to: "/patient-records/patients",
+          show: true,
         },
         {
           title: "RECEPTION",
@@ -77,6 +79,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Patient Registration Report",
               icon: <ReportsIcon />,
               to: "/patient-registration",
+              show: user.privileges.reception,
             },
           ]
         },
@@ -124,11 +127,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Daily Cash Collection Report",
               icon: <ReportsIcon />,
               to: "/daily-cash-collection",
+              show: user.privileges.payment_center,
+            },
+            {
+              title: "Daily Credit Collection Report",
+              icon: <ReportsIcon />,
+              to: "/daily-credit-collection",
+              show: user.privileges.payment_center,
             },
             {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/expenses",
+              show: user.privileges.payment_center,
             },
           ],
         },
@@ -180,16 +191,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Items Dispensed Report",
               icon: <ReportsIcon />,
               to: "/items-dispensed",
+              show: user.privileges.optician_center,
             },
             {
               title: "Items Not Dispensed Report",
               icon: <ReportsIcon />,
               to: "/items-not-dispensed",
+              show: user.privileges.optician_center,
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
               to: "/item-balance",
+              show: user.privileges.optician_center,
             },
           ],
         },
@@ -213,16 +227,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Medicines Dispensed Report",
               icon: <ReportsIcon />,
               to: "/medicines-dispensed",
+              show: user.privileges.medicine_center,
             },
             {
               title: "Medicines Not Dispensed Report",
               icon: <ReportsIcon />,
               to: "/medicines-not-dispensed",
+              show: user.privileges.medicine_center,
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
               to: "/item-balance",
+              show: user.privileges.medicine_center,
             },
           ],
         },
@@ -246,11 +263,13 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Served Procedures Report",
               icon: <ReportsIcon />,
               to: "/served-procedures",
+              show: user.privileges.procedure_room,
             },
             {
               title: "Pending Procedures Report",
               icon: <ReportsIcon />,
               to: "/pending-procedures",
+              show: user.privileges.procedure_room,
             },
           ],
         },
@@ -265,12 +284,6 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           show: user.privileges.inventory_management,
         },
         {
-          title: "Previous Stocktakes",
-          icon: <ItemsIcon />,
-          to: "/inventory-management/stocktakes",
-          show: false,
-        },
-        {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/inventory-management/reports",
@@ -280,11 +293,13 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
               to: "/item-balance",
+              show: user.privileges.inventory_management,
             },
             {
               title: "Quantity Dispensed Report",
               icon: <ReportsIcon />,
               to: "/item-quantity-dispensed",
+              show: user.privileges.inventory_management,
             },
           ],
         },
@@ -308,37 +323,38 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Cash Collection Report",
               icon: <ReportsIcon />,
               to: "/cash-collection",
+              show: user.privileges.financial_management,
             },
-            // {
-            //   title: "Credit Collection Report",
-            //   icon: <ReportsIcon />,
-            //   to: "/credit-collection",
-            // },
+            {
+              title: "Credit Collection Report",
+              icon: <ReportsIcon />,
+              to: "/credit-collection",
+              show: user.privileges.financial_management,
+            },
             {
               title: "Pending Patient Bills Report",
               icon: <ReportsIcon />,
               to: "/pending-patient-bills",
+              show: user.privileges.financial_management,
             },
             {
               title: "Cleared Patient Bills Report",
               icon: <ReportsIcon />,
               to: "/cleared-patient-bills",
+              show: user.privileges.financial_management,
             },
             {
               title: "Bill Payment Report",
               icon: <ReportsIcon />,
               to: "/patient-bill-payments",
+              show: user.privileges.financial_management,
             },
             {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/expenses",
+              show: user.privileges.financial_management,
             },
-            // {
-            //   title: "Profit & Loss Report",
-            //   icon: <ReportsIcon />,
-            //   to: "/profit-and-loss",
-            // },
           ],
         },
         {
@@ -365,16 +381,19 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Units of Measure",
               icon: <SettingsIcon />,
               to: "/units-of-measure",
+              show: user.privileges.settings,
             },
             {
               title: "Lens Types",
               icon: <SettingsIcon />,
               to: "/lens-types",
+              show: user.privileges.settings,
             },
             {
               title: "Items",
               icon: <SettingsIcon />,
               to: "/items",
+              show: user.privileges.settings,
             },
           ],
         },
@@ -441,7 +460,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
       }
       dense
     >
-      {items.filter((e) => (typeof e.show === "undefined") || e.show).map((e) => (
+      {items.filter((e) => (typeof e.show === "boolean") && e.show).map((e) => (
         !e.to ?
           <ListSubheader
             key={e.title}
@@ -454,7 +473,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
             <ListItemButton
               selected={location.pathname.indexOf(e.to) !== -1}
               onClick={() => {
-                if (e.items && e.items.length) {
+                if (e.items && e.items.filter((f) => (typeof f.show === "boolean") && f.show).length) {
                   setOpen(open === e.to ? null : e.to);
                 } else {
                   if (typeof setDrawerOpen === "function") {
@@ -471,7 +490,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                   backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
 
                   "& .MuiListItemIcon-root": {
-                    color: "inherit"
+                    color: "inherit",
                   }
                 },
                 px: { xs: 2, sm: 2, md: 3 },
@@ -488,7 +507,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               }
             </ListItemButton>
 
-            {e.items && e.items.length ?
+            {e.items && e.items.filter((f) => (typeof f.show === "boolean") && f.show).length ?
               <Collapse
                 in={open === e.to}
                 unmountOnExit
@@ -497,7 +516,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                   component="div"
                   dense
                 >
-                  {e.items.filter((f) => (typeof f.show === "undefined") || f.show).map(f => (
+                  {e.items.filter((f) => (typeof f.show === "boolean") && f.show).map(f => (
                     <ListItemButton
                       key={f.to}
                       selected={location.pathname.indexOf(e.to + f.to) !== -1}
@@ -509,7 +528,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                           backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
 
                           "& .MuiListItemIcon-root": {
-                            color: "inherit"
+                            color: "inherit",
                           }
                         },
                         px: { xs: 2, sm: 2, md: 3 },

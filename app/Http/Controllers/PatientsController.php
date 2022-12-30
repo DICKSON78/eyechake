@@ -35,7 +35,6 @@ class PatientsController extends Controller
         $district_id = $request->district_id;
         $ward_id = $request->ward_id;
         $payment_mode_id = $request->payment_mode_id;
-        $is_vip = $request->is_vip;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator']);
@@ -70,10 +69,6 @@ class PatientsController extends Controller
 
         if ($payment_mode_id) {
             $data->where('payment_mode_id', $payment_mode_id);
-        }
-
-        if ($is_vip) {
-            $data->where('is_vip', $is_vip);
         }
 
         if ($start_date) {

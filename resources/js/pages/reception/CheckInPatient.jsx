@@ -51,7 +51,7 @@ const CheckInPatient = () => {
     status: "Active",
     per_page: 500
   }, false, [], (response) => response.data.data.data);
-  const { data: users, handleFetch: fetchUsers } = useFetch("api/users", {
+  const { data: employees, handleFetch: fetchEmployees } = useFetch("api/employees", {
     status: "Active",
     per_page: 500
   }, false, [], (response) => response.data.data.data);
@@ -96,7 +96,7 @@ const CheckInPatient = () => {
   useEffect(() => {
     if (patient) {
       fetchPaymentModes();
-      fetchUsers();
+      fetchEmployees();
       fetchItemTypes();
       setPaymentMode(patient.payment_mode);
     }
@@ -253,9 +253,8 @@ const CheckInPatient = () => {
                   ref={consultantRef}
                   label="Consultant"
                   fullWidth
-                  options={users}
+                  options={employees}
                   optionsLabel="full_name"
-                  optionsValue="id"
                   onChange={(value) => setConsultant(value)}
                 />
               </Grid>
@@ -508,9 +507,9 @@ const CheckInPatient = () => {
               disabled={loading}
               variant="contained"
               disableElevation
-              onClick={() => confirmSubmit(paymentMode && paymentMode.payment_type === "Credit" ? "Confirm Send for Approval" : "Confirm Send to Cashier")}
+              onClick={() => confirmSubmit(paymentMode && paymentMode.transaction_type === "Credit" ? "Confirm Send for Approval" : "Confirm Send to Cashier")}
             >
-              {paymentMode && paymentMode.payment_type === "Credit" ? "Send for Approval" : "Send to Cashier"}
+              {paymentMode && paymentMode.transaction_type === "Credit" ? "Send for Approval" : "Send to Cashier"}
             </Button>
           </Stack>
         </Card>

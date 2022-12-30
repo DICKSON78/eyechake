@@ -15,27 +15,18 @@ class User extends Authenticatable
 
     protected $appends = ['full_name'];
 
-    protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'username', 'department_id', 'job_title_id',
-        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'password', 'created_by', 'status',
-    ];
+    protected $fillable = ['username', 'password', 'created_by', 'status'];
 
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    public function department()
+    public function employee()
     {
-        return $this->belongsTo(Department::class, 'department_id');
+        return $this->hasOne(Employee::class, 'user_id');
     }
 
-    public function job_title()
+    public function privileges()
     {
-        return $this->belongsTo(JobTitle::class, 'job_title_id');
-    }
-
-    public function privileges() {
-        return $this->hasOne(UserPrivilege::class, 'user_id');
+        return $this->hasMany(UserPrivilege::class, 'user_id');
     }
 
     public function creator()
@@ -45,13 +36,8 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
-        $name = sprintf('%s %s %s', $this->first_name, $this->middle_name, $this->last_name);
-        return preg_replace('/\s{2,}/', ' ', trim($name));
-    }
-
-    public function scopeFullName($query, $value)
-    {
-        return $query->whereRaw('concat(first_name, coalesce(middle_name, ""), last_name) like ?', [str_replace(' ', '', $value)]);
+        $employee = $this->employee;
+        return $employee ? $employee->full_name : $this->username;
     }
 
     protected function serializeDate(DateTimeInterface $date)

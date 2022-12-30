@@ -24,12 +24,12 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
-  const paymentTypeRef = useRef();
+  const transactionTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: item.name,
     description: item.description,
-    payment_type: item.payment_type,
+    transaction_type: item.transaction_type,
     status: item.status,
   });
 
@@ -102,13 +102,13 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
               xs={12}
             >
               <Select
-                ref={paymentTypeRef}
-                label="Payment Type"
+                ref={transactionTypeRef}
+                label="Transaction Type"
                 fullWidth
                 required
                 options={["Cash", "Credit"]}
-                value={formData.payment_type || null}
-                onChange={(value) => setFormData({ ...formData, payment_type: value })}
+                value={formData.transaction_type || null}
+                onChange={(value) => setFormData({ ...formData, transaction_type: value })}
               />
             </Grid>
             <Grid

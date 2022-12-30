@@ -154,7 +154,7 @@ class ConsultationsController extends Controller
             'consultation_id' => 'required|exists:consultations,id',
             'item_id' => 'required|exists:items,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
-            'consultant_id' => 'nullable|exists:users,id',
+            'consultant_id' => 'nullable|exists:employees,id',
             'quantity' => 'required|numeric|min:1',
         ]);
 
@@ -347,7 +347,6 @@ class ConsultationsController extends Controller
             'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
             'send_to_optician' => 'nullable|in:Yes,No',
             'optician' => 'nullable|in:Yes,No',
-            'is_vip' => 'nullable|in:Yes,No',
         ]);
 
         $user = $request->user();
@@ -356,6 +355,12 @@ class ConsultationsController extends Controller
         $input['status'] = 'Consulted';
 
         $data->update($input);
+
+        $data->payment_cache_item->update([
+            'status' => 'Served',
+            'served_at' => Carbon::now(),
+            'served_by' => $user->id,
+        ]);
 
         if ($request->send_to_optician == 'Yes') {
             $data->update([
@@ -371,18 +376,14 @@ class ConsultationsController extends Controller
         }
 
         // update consultant
-        $data->payment_cache_item->consultant_id = $user->id;
-        $data->payment_cache_item->save();
+        if ($user->employee) {
+            $data->payment_cache_item->consultant_id = $user->employee->id;
+            $data->payment_cache_item->save();
+        }
 
         // send message to patient
         if ($data->consultant == 'Doctor') {
             SendConsultationMessageJob::dispatch($data);
-        }
-
-        if ($request->is_vip) {
-            $patient = $data->payment_cache_item->payment_cache->check_in->patient;
-            $patient->is_vip = $request->is_vip;
-            $patient->save();
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

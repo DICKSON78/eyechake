@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
+use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\ExpenseCategoriesController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ItemPricesController;
@@ -32,10 +33,8 @@ use App\Http\Controllers\Reports\InventoryManagementReportsController;
 use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\UnitsOfMeasureController;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
-use App\Models\Department;
-use App\Models\JobTitle;
+use App\Models\Employee;
 use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -53,12 +52,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     $user = $request->user();
-    $user->department = Department::find($user->department_id);
-    $user->job_title = JobTitle::find($user->job_title_id);
-    $user->privileges = UserPrivilege::find($user->id);
+    $user->employee = Employee::with(['department', 'job_title'])->where('user_id', $user->id)->first();
+    $user_privileges = UserPrivilege::where('user_id', $user->id)->get()->toArray();
+    $user_privileges = array_map(function ($e) {
+        return $e['privilege'];
+    }, $user_privileges);
 
-    if (!$user->privileges) {
-        $user->privileges = new stdClass();
+    $user->privileges = new stdClass();
+    foreach ($user_privileges as $privilege) {
+        $user->privileges->$privilege = true;
     }
     return $user;
 });
@@ -73,7 +75,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
     $router->apiResource('/clinic-details', ClinicDetailsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
-    $router->apiResource('/users', UsersController::class);
+    $router->apiResource('/employees', EmployeesController::class);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/payment-channels', PaymentChannelsController::class);
     $router->apiResource('/units-of-measure', UnitsOfMeasureController::class);

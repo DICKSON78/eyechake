@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->string('code')->unique()->nullable();
             $table->foreignId('item_type_id')->nullable();
             $table->foreignId('consultation_type_id')->nullable();
@@ -25,8 +25,6 @@ return new class extends Migration
             $table->enum('is_stock_item', ['Yes', 'No'])->default('No');
             $table->double('balance')->nullable();
             $table->double('unit_buying_price')->unsigned()->nullable();
-            $table->date('manufacture_date')->nullable();
-            $table->date('expiry_date')->nullable();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
 

@@ -14,12 +14,12 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
-  const paymentTypeRef = useRef();
+  const transactionTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: undefined,
     description: undefined,
-    payment_type: undefined,
+    transaction_type: undefined,
   });
 
   const { data, loading, error, handlePost } = usePost("api/payment-modes", formData);
@@ -90,12 +90,12 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
               xs={12}
             >
               <Select
-                ref={paymentTypeRef}
-                label="Payment Type"
+                ref={transactionTypeRef}
+                label="Transaction Type"
                 fullWidth
                 required
                 options={["Cash", "Credit"]}
-                onChange={(value) => setFormData({ ...formData, payment_type: value })}
+                onChange={(value) => setFormData({ ...formData, transaction_type: value })}
               />
             </Grid>
           </Grid>

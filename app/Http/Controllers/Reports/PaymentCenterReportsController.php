@@ -79,8 +79,8 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
         }
 
-        $item_payments->select(DB::raw("'Immediate' as payment_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by');
-        $bill_payments->select(DB::raw("'Bill' as payment_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by');
+        $item_payments->select(DB::raw("'Immediate' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by');
+        $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by');
 
         $data = $item_payments->union($bill_payments);
         $data->orderBy('created_at', 'desc');

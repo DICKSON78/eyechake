@@ -12,7 +12,8 @@ import {
   FormControlLabel,
   Grid,
   InputAdornment,
-  LinearProgress
+  LinearProgress,
+  Paper
 } from "@mui/material";
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
 import Form from "../../../components/Form";
@@ -35,11 +36,11 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   const [formData, setFormData] = useState({
     username: item.username,
     password: undefined,
-    privileges: item.privileges,
+    privileges: item.user ? item.user.privileges.map((e) => e.privilege) : [],
     status: item.status,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/users/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(`api/employees/${item.id}`, formData);
 
   useEffect(() => {
     if (data) {
@@ -61,6 +62,73 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
     if (formRef.current.validate()) {
       handlePatch();
     }
+  };
+
+  const getPrivilegesTree = (items) => {
+    if (!items) return null;
+
+    return items.map(e => {
+      const hasChildren = e.children && e.children.length;
+      return (
+        hasChildren ?
+          <Paper
+            key={e.value}
+            variant="outlined"
+            sx={{ my: 1, px: 2, py: 1 }}
+          >
+            <Grid
+              container
+              spacing={2}
+            >
+              <Grid
+                item
+                md={3}
+                sm={6}
+                xs={12}
+              >
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={formData.privileges.indexOf(e.value) !== -1}
+                      onChange={(event) => setFormData({
+                        ...formData,
+                        privileges: event.target.checked ?
+                          [...formData.privileges, e.value] :
+                          formData.privileges.filter((f) => f !== e.value),
+                      })}
+                    />
+                  )}
+                  label={e.label}
+                />
+              </Grid>
+              <Grid
+                item
+                md={9}
+                sm={12}
+                xs={12}
+              >
+                {getPrivilegesTree(e.children)}
+              </Grid>
+            </Grid>
+          </Paper>
+          :
+          <FormControlLabel
+            key={e.value}
+            control={(
+              <Checkbox
+                checked={formData.privileges.indexOf(e.value) !== -1}
+                onChange={(event) => setFormData({
+                  ...formData,
+                  privileges: event.target.checked ?
+                    [...formData.privileges, e.value] :
+                    formData.privileges.filter((f) => f !== e.value),
+                })}
+              />
+            )}
+            label={e.label}
+          />
+      );
+    });
   };
 
   return (
@@ -125,21 +193,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
             />
             <Divider />
             <CardContent>
-              {PRIVILEGES.map((e) => (
-                <FormControlLabel
-                  key={e.value}
-                  control={(
-                    <Checkbox
-                      checked={!!formData.privileges[e.value]}
-                      onChange={(event) => setFormData({
-                        ...formData,
-                        privileges: { ...formData.privileges, [e.value]: event.target.checked }
-                      })}
-                    />
-                  )}
-                  label={e.label}
-                />
-              ))}
+              {getPrivilegesTree(PRIVILEGES)}
             </CardContent>
           </Card>
 

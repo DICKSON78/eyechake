@@ -11,6 +11,7 @@ import {
   Grid,
   InputAdornment,
   LinearProgress,
+  Paper,
   Stack
 } from "@mui/material";
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
@@ -69,10 +70,10 @@ const EmployeeRegistration = () => {
     national_id: undefined,
     phone: undefined,
     password: undefined,
-    privileges: {},
+    privileges: [],
   });
 
-  const { data, loading, error, handlePost } = usePost("api/users", {
+  const { data, loading, error, handlePost } = usePost("api/employees", {
     ...formData,
     date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
   });
@@ -101,6 +102,73 @@ const EmployeeRegistration = () => {
     if (formRef.current.validate()) {
       handlePost();
     }
+  };
+
+  const getPrivilegesTree = (items) => {
+    if (!items) return null;
+
+    return items.map(e => {
+      const hasChildren = e.children && e.children.length;
+      return (
+        hasChildren ?
+          <Paper
+            key={e.value}
+            variant="outlined"
+            sx={{ my: 1, px: 2, py: 1 }}
+          >
+            <Grid
+              container
+              spacing={2}
+            >
+              <Grid
+                item
+                md={3}
+                sm={6}
+                xs={12}
+              >
+                <FormControlLabel
+                  control={(
+                    <Checkbox
+                      checked={formData.privileges.indexOf(e.value) !== -1}
+                      onChange={(event) => setFormData({
+                        ...formData,
+                        privileges: event.target.checked ?
+                          [...formData.privileges, e.value] :
+                          formData.privileges.filter((f) => f !== e.value),
+                      })}
+                    />
+                  )}
+                  label={e.label}
+                />
+              </Grid>
+              <Grid
+                item
+                md={9}
+                sm={12}
+                xs={12}
+              >
+                {getPrivilegesTree(e.children)}
+              </Grid>
+            </Grid>
+          </Paper>
+          :
+          <FormControlLabel
+            key={e.value}
+            control={(
+              <Checkbox
+                checked={formData.privileges.indexOf(e.value) !== -1}
+                onChange={(event) => setFormData({
+                  ...formData,
+                  privileges: event.target.checked ?
+                    [...formData.privileges, e.value] :
+                    formData.privileges.filter((f) => f !== e.value),
+                })}
+              />
+            )}
+            label={e.label}
+          />
+      );
+    });
   };
 
   return (
@@ -315,20 +383,7 @@ const EmployeeRegistration = () => {
               />
               <Divider />
               <CardContent>
-                {PRIVILEGES.map((e) => (
-                  <FormControlLabel
-                    key={e.value}
-                    control={(
-                      <Checkbox
-                        onChange={(event) => setFormData({
-                          ...formData,
-                          privileges: { ...formData.privileges, [e.value]: event.target.checked }
-                        })}
-                      />
-                    )}
-                    label={e.label}
-                  />
-                ))}
+                {getPrivilegesTree(PRIVILEGES)}
               </CardContent>
             </Card>
           </Form>

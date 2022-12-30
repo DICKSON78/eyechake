@@ -50,7 +50,7 @@ const PendingPatientItems = () => {
     status: "Pending",
     per_page: 500,
     payment_cache_id: paymentCacheId,
-    payment_mode_type: "Cash"
+    transaction_type: "Cash"
   }, false, [], (response) => response.data.data.data);
 
   const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/make-cash-payment", {

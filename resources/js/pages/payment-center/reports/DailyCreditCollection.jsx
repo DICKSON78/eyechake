@@ -4,32 +4,36 @@ import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
-import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { debounce, formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
+import { debounce, formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
-const CashCollection = ({ module }) => {
+const DailyCreditCollection = ({ module }) => {
 
-  const { data: paymentChannels } = useFetch("api/payment-channels", {
+  const { data: paymentModes } = useFetch("api/payment-modes", {
     status: "Active",
+    transaction_type: "Credit",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
+    with_patient: true,
+    transaction_type: "Credit",
+    status: "Paid,Served",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    payment_channel_id: undefined,
+    payment_mode_id: undefined,
+    q: undefined,
     start_date: new Date(),
-    end_date: undefined,
+    sort_direction: "desc",
   });
 
   useEffect(() => {
-    document.title = `Cash Collection Report - ${window.APP_NAME}`;
+    document.title = `Daily Credit Collection Report - ${window.APP_NAME}`;
   }, []);
 
   return (
@@ -38,13 +42,13 @@ const CashCollection = ({ module }) => {
         { title: "Home" },
         { title: module || "Payment Center" },
         { title: "Reports" },
-        { title: "Cash Collection Report" },
+        { title: "Daily Credit Collection Report" },
       ]}
     >
       <Report
-        title="Cash Collection Report"
+        title="Daily Credit Collection Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
-        uri="api/reports/payment-center/cash-collection"
+        uri="api/patient-payment-cache-items"
         params={{
           ...params,
           start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
@@ -64,33 +68,7 @@ const CashCollection = ({ module }) => {
                 >
                   <Grid
                     item
-                    md={3}
-                    sm={6}
-                    xs={12}
-                  >
-                    <DatePicker
-                      fullWidth
-                      label="Start Date"
-                      value={params.start_date || null}
-                      onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={3}
-                    sm={6}
-                    xs={12}
-                  >
-                    <DatePicker
-                      fullWidth
-                      label="End Date"
-                      value={params.end_date || null}
-                      onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={3}
+                    md
                     sm={6}
                     xs={12}
                   >
@@ -111,7 +89,7 @@ const CashCollection = ({ module }) => {
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md
                     sm={6}
                     xs={12}
                   >
@@ -132,7 +110,7 @@ const CashCollection = ({ module }) => {
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md
                     sm={6}
                     xs={12}
                   >
@@ -146,18 +124,38 @@ const CashCollection = ({ module }) => {
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md
                     sm={6}
                     xs={12}
                   >
                     <Select
-                      label="Payment Channel"
+                      label="Payment Mode"
                       fullWidth
-                      options={paymentChannels}
+                      options={paymentModes}
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_channel_id: value })}
+                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md
+                    sm={6}
+                    xs={12}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Item Name/Code"
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
                     />
                   </Grid>
                 </Grid>
@@ -169,32 +167,37 @@ const CashCollection = ({ module }) => {
           {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => getFullName(item.first_name, item.middle_name, item.last_name),
+            valueGetter: (item, index) => item.payment_cache.check_in.patient.full_name,
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) => item.patient_id,
+            valueGetter: (item, index) => item.payment_cache.check_in.patient_id,
           },
           {
-            field: "amount",
-            headerName: "Amount",
-            valueGetter: (item, index) => numberFormat(item.amount),
+            field: "name",
+            headerName: "Item Name",
+            valueGetter: (item, index) => item.item.name,
           },
           {
-            field: "discount",
-            headerName: "Discount",
-            valueGetter: (item, index) => numberFormat(item.discount),
+            field: "code",
+            headerName: "Item Code",
+            valueGetter: (item, index) => item.item.code,
+          },
+          {
+            field: "unit_of_measure_id",
+            headerName: "Unit of Measure",
+            valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+          },
+          {
+            field: "quantity",
+            headerName: "Quantity",
+            valueGetter: (item, index) => numberFormat(item.quantity),
           },
           {
             field: "subtotal",
             headerName: "Subtotal",
-            valueGetter: (item, index) => numberFormat(item.amount - item.discount),
-          },
-          {
-            field: "channel",
-            headerName: "Payment Channel",
-            valueGetter: (item, index) => getNonNull(item.channel).name,
+            valueGetter: (item, index) => numberFormat(item.unit_price * item.quantity),
           },
           {
             field: "created_by",
@@ -205,20 +208,14 @@ const CashCollection = ({ module }) => {
             field: "created_at",
             headerName: "Date",
           },
-          {
-            field: "transaction_type",
-            headerName: "Transaction Type",
-          },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 3, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 3 },
-          { reducer: (acc, item, index) => acc + item.discount, index: 4 },
-          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 5 },
+          { value: "TOTAL", span: 7, index: 1 },
+          { reducer: (acc, item, index) => acc + (item.unit_price * item.quantity), index: 7 },
         ]}
       />
     </Page>
   );
 };
 
-export default CashCollection;
+export default DailyCreditCollection;

@@ -40,7 +40,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const [error, setError] = useState();
 
   const [paymentMode, setPaymentMode] = useState(consultation.payment_cache_item.payment_mode);
-  const [consultant, setConsultant] = useState(window.user);
+  const [consultant, setConsultant] = useState(window.user.employee);
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
   const [lensTypeId, setLensTypeId] = useState();
@@ -57,7 +57,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     status: "Active",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
-  const { data: users, handleFetch: fetchUsers } = useFetch("api/users", {
+  const { data: employees, handleFetch: fetchEmployees } = useFetch("api/employees", {
     status: "Active",
     per_page: 500
   }, true, [], (response) => response.data.data.data);
@@ -215,7 +215,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               ref={consultantRef}
               label="Consultant"
               fullWidth
-              options={users}
+              options={employees}
               optionsLabel="full_name"
               isOptionEqualToValue={(option, value) => option.id === value.id}
               value={consultant || null}

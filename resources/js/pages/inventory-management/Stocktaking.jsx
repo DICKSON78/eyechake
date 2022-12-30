@@ -21,14 +21,12 @@ import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
-import DatePicker from "../../components/DatePicker";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
 import {
   debounce,
-  formatDateForDb,
   formatError,
   getNonNull,
   getValidationError,
@@ -48,7 +46,6 @@ const Stocktaking = () => {
   const itemRef = useRef();
   const quantityRef = useRef();
   const unitBuyingPriceRef = useRef();
-  const expiryDateRef = useRef();
 
   const [reason, setReason] = useState();
   const [itemName, setItemName] = useState();
@@ -57,7 +54,6 @@ const Stocktaking = () => {
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState();
   const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
-  const [expiryDate, setExpiryDate] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
@@ -112,13 +108,11 @@ const Stocktaking = () => {
         item_name: selectedItem.name,
         quantity,
         unit_buying_price: unitBuyingPrice,
-        expiry_date: expiryDate ? formatDateForDb(expiryDate) : null,
       }]);
 
       setSelectedItem(null);
       setQuantity(null);
       setUnitBuyingPrice(null);
-      setExpiryDate(null);
     }
   };
 
@@ -287,7 +281,7 @@ const Stocktaking = () => {
                     >
                       <Grid
                         item
-                        md={3}
+                        md={4}
                         sm={4}
                         xs={12}
                       >
@@ -302,13 +296,13 @@ const Stocktaking = () => {
                       </Grid>
                       <Grid
                         item
-                        md={2}
+                        md={3}
                         sm={4}
                         xs={12}
                       >
                         <TextField
                           disabled={true}
-                          label="UoM"
+                          label="Unit of Measure"
                           fullWidth
                           required
                           value={getNonNull(selectedItem.unit_of_measure).name || ""}
@@ -316,13 +310,13 @@ const Stocktaking = () => {
                       </Grid>
                       <Grid
                         item
-                        md={1}
+                        md={2}
                         sm={4}
                         xs={12}
                       >
                         <TextField
                           ref={quantityRef}
-                          label="Qty"
+                          label="Quantity"
                           fullWidth
                           required
                           defaultValue={quantity}
@@ -361,20 +355,6 @@ const Stocktaking = () => {
                             value = validateInteger(value);
                             setUnitBuyingPrice(value);
                           }}
-                        />
-                      </Grid>
-                      <Grid
-                        item
-                        md={3}
-                        sm={4}
-                        xs={12}
-                      >
-                        <DatePicker
-                          ref={expiryDateRef}
-                          label="Expiry Date"
-                          fullWidth
-                          value={expiryDate}
-                          onChange={(value) => setExpiryDate(!isNaN(value) ? value : null)}
                         />
                       </Grid>
                       <Grid
@@ -420,7 +400,6 @@ const Stocktaking = () => {
                         headerName: "Unit Buying Price",
                         valueGetter: (item, index) => numberFormat(item.unit_buying_price || 0),
                       },
-                      { field: "expiry_date", headerName: "Expiry Date", },
                       {
                         field: "actions",
                         headerName: "Actions",

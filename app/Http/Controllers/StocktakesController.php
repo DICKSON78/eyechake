@@ -60,7 +60,6 @@ class StocktakesController extends Controller
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.quantity' => 'required|numeric|min:1',
             'items.*.unit_buying_price' => 'nullable|numeric|min:1',
-            'items.*.expiry_date' => 'nullable|date_format:Y-m-d',
         ]);
 
         $user = $request->user();
@@ -85,7 +84,6 @@ class StocktakesController extends Controller
                         $item->update([
                             'balance' => $stocktake_item->quantity,
                             'unit_buying_price' => $stocktake_item->unit_buying_price,
-                            'expiry_date' => $stocktake_item->expiry_date
                         ]);
                     }
                 }

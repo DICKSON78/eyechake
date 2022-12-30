@@ -10,7 +10,7 @@ class StocktakeItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['stocktake_id', 'item_id', 'quantity', 'unit_buying_price', 'manufacture_date', 'expiry_date'];
+    protected $fillable = ['stocktake_id', 'item_id', 'quantity', 'unit_buying_price'];
 
     public function item()
     {

@@ -33,7 +33,7 @@ const Employees = () => {
     job_title_id: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/users", params, true, {
+  const { data, loading, error, handleFetch } = useFetch("api/employees", params, true, {
     data: [],
     total: 0,
     page: 1

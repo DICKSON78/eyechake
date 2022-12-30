@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button, Card, CardContent, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
-import { CheckRounded as CheckIcon, EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
+import { EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -29,7 +29,6 @@ const Patients = () => {
     name: undefined,
     gender: undefined,
     payment_mode_id: undefined,
-    is_vip: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
@@ -148,11 +147,6 @@ const Patients = () => {
               {
                 field: "created_at",
                 headerName: "Date",
-              },
-              {
-                field: "is_vip",
-                headerName: "VIP",
-                renderCell: (item, index) => item.is_vip === "Yes" ? <CheckIcon color="success"/> : null
               },
               {
                 field: "actions",

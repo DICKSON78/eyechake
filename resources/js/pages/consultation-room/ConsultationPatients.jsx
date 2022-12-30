@@ -81,7 +81,7 @@ const ConsultationPatients = () => {
                     checked={!!params.consultant_id}
                     onChange={(event) => setParams({
                       ...params,
-                      consultant_id: event.target.checked ? window.user.id : undefined
+                      consultant_id: event.target.checked ? getNonNull(window.user.employee).id : undefined
                     })}
                   />
                 )}

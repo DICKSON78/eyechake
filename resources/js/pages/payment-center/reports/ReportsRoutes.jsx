@@ -1,9 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import DailyCashCollection from "./DailyCashCollection";
-import CreditCollection from "./CreditCollection";
-import PatientBills from "./PatientBills";
-import BillPayments from "./BillPayments";
+import DailyCreditCollection from "./DailyCreditCollection";
 import Expenses from "../../financial-management/reports/Expenses";
 
 const ReportsRoutes = () => {
@@ -14,20 +12,8 @@ const ReportsRoutes = () => {
         element={<DailyCashCollection />}
       />
       <Route
-        path="/credit-collection"
-        element={<CreditCollection />}
-      />
-      <Route
-        path="/pending-patient-bills"
-        element={<PatientBills status="Pending"/>}
-      />
-      <Route
-        path="/cleared-patient-bills"
-        element={<PatientBills status="Cleared"/>}
-      />
-      <Route
-        path="/patient-bill-payments"
-        element={<BillPayments />}
+        path="/daily-credit-collection"
+        element={<DailyCreditCollection />}
       />
       <Route
         path="/expenses"

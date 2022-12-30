@@ -33,7 +33,7 @@ const PendingPatientItems = () => {
     status: "Pending",
     per_page: 500,
     payment_cache_id: paymentCacheId,
-    payment_mode_type: "Credit"
+    transaction_type: "Credit"
   }, false, [], (response) => response.data.data.data);
 
   const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/approve-credit-payment", {

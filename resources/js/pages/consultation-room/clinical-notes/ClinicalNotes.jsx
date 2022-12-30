@@ -97,7 +97,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
   const [remarks, setRemarks] = useState(consultation.remarks);
   const [sendToOptician, setSendToOptician] = useState("No");
-  const [vipPatient, setVipPatient] = useState("No");
 
   const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
@@ -195,7 +194,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
             to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : undefined,
             remarks,
             send_to_optician: sendToOptician,
-            is_vip: vipPatient,
           });
         }}
       />
@@ -478,28 +476,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         />
                       )}
                       label="Send to Optician"
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={6}
-                    sm={12}
-                    xs={12}
-                  />
-                  <Grid
-                    item
-                    md={6}
-                    sm={12}
-                    xs={12}
-                  >
-                    <FormControlLabel
-                      control={(
-                        <Checkbox
-                          checked={vipPatient === "Yes"}
-                          onChange={(event) => setVipPatient(event.target.checked ? "Yes" : "No")}
-                        />
-                      )}
-                      label="VIP Patient"
                     />
                   </Grid>
                 </React.Fragment>

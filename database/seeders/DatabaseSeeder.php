@@ -46,8 +46,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::insert([
-            'first_name' => 'System',
-            'last_name' => 'Administrator',
             'username' => 'admin',
             'password' => Hash::make('1234'),
             'created_at' => $now,
@@ -55,18 +53,17 @@ class DatabaseSeeder extends Seeder
         ]);
 
         UserPrivilege::insert([
-            'user_id' => 1,
-            'dashboard' => 1,
-            'reception' => 1,
-            'payment_center' => 1,
-            'consultation_room' => 1,
-            'optician_center' => 1,
-            'medicine_center' => 1,
-            'procedure_room' => 1,
-            'inventory_management' => 1,
-            'financial_management' => 1,
-            'employee_management' => 1,
-            'settings' => 1,
+            ['user_id' => 1, 'privilege' => 'dashboard'],
+            ['user_id' => 1, 'privilege' => 'reception'],
+            ['user_id' => 1, 'privilege' => 'payment_center'],
+            ['user_id' => 1, 'privilege' => 'consultation_room'],
+            ['user_id' => 1, 'privilege' => 'optician_center'],
+            ['user_id' => 1, 'privilege' => 'medicine_center'],
+            ['user_id' => 1, 'privilege' => 'procedure_room'],
+            ['user_id' => 1, 'privilege' => 'inventory_management'],
+            ['user_id' => 1, 'privilege' => 'financial_management'],
+            ['user_id' => 1, 'privilege' => 'employee_management'],
+            ['user_id' => 1, 'privilege' => 'settings'],
         ]);
 
         ConsultationType::insert([

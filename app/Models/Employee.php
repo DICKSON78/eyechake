@@ -6,35 +6,30 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Patient extends Model
+class Employee extends Model
 {
     use HasFactory;
 
     protected $appends = ['full_name'];
 
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
-        'national_id', 'phone', 'occupation', 'payment_mode_id', 'created_by',
+        'first_name', 'middle_name', 'last_name', 'department_id', 'job_title_id', 'employee_number',
+        'date_of_birth', 'gender', 'national_id', 'phone', 'user_id', 'created_by', 'status',
     ];
 
-    public function region()
+    public function department()
     {
-        return $this->belongsTo(Region::class, 'region_id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function district()
+    public function job_title()
     {
-        return $this->belongsTo(District::class, 'district_id');
+        return $this->belongsTo(JobTitle::class, 'job_title_id');
     }
 
-    public function ward()
+    public function user()
     {
-        return $this->belongsTo(Ward::class, 'ward_id');
-    }
-
-    public function payment_mode()
-    {
-        return $this->belongsTo(PaymentMode::class, 'payment_mode_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function creator()

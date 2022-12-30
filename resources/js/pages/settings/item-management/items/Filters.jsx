@@ -104,7 +104,6 @@ const Filters = ({ params, setParams, ...rest }) => {
             <FormControlLabel
               control={(
                 <Checkbox
-                  checked={params.is_consultation_item === "Yes"}
                   onChange={(event) => setParams({
                     ...params,
                     is_consultation_item: event.target.checked ? "Yes" : "No"

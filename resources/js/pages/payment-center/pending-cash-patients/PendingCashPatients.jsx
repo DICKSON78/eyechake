@@ -20,7 +20,7 @@ const PendingCashPatients = () => {
     page: 1,
     per_page: 25,
     item_status: "Pending",
-    item_payment_mode_type: "Cash",
+    item_transaction_type: "Cash",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,

@@ -19,8 +19,6 @@ return new class extends Migration
             $table->foreignId('item_id');
             $table->double('quantity')->unsigned();
             $table->double('unit_buying_price')->unsigned()->nullable();
-            $table->date('manufacture_date')->nullable();
-            $table->date('expiry_date')->nullable();
             $table->timestamps();
 
             $table->foreign('stocktake_id')

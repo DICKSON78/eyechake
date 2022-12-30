@@ -333,7 +333,7 @@ const Default = ({ setThemeMode, setUser }) => {
             >
               <CardHeader
                 title={user.full_name}
-                subheader={getNonNull(user.job_title).name}
+                subheader={getNonNull(getNonNull(user.employee).job_title).name}
                 titleTypographyProps={{
                   variant: "subtitle1",
                   fontWeight: "500",
