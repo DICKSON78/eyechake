@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
+import { Button, Card, CardContent, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { CheckRounded as CheckIcon, EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import EditPatient from "./EditPatient";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatError, getAddress, getAge, getNonNull } from "../../../helpers";
 
 const Patients = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
 
@@ -40,6 +41,12 @@ const Patients = () => {
   useEffect(() => {
     document.title = `Patients - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const openEditPatientModal = (item) => {
     let component = (
@@ -72,24 +79,11 @@ const Patients = () => {
         { title: "Patients/Customers" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
         <PageHeader
           title="Registered Patients"
           trailing={(
             <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
               <Button
                 variant="contained"
                 disableElevation
@@ -158,7 +152,7 @@ const Patients = () => {
               {
                 field: "is_vip",
                 headerName: "VIP",
-                renderCell: (item, index) => item.is_vip === "Yes" ? <CheckIcon color="success" /> : null
+                renderCell: (item, index) => item.is_vip === "Yes" ? <CheckIcon color="success"/> : null
               },
               {
                 field: "actions",
@@ -203,6 +197,7 @@ const Patients = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>
@@ -213,6 +208,7 @@ const Patients = () => {
             vertical: "bottom",
             horizontal: "left",
           }}
+          PaperProps={{ variant: "elevation" }}
           open={isMenuOpen}
           onClose={handleMenuClose}
         >

@@ -19,6 +19,13 @@ class PatientItemBillPaymentsController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $bill_id = $request->bill_id;
         $payment_channel_id = $request->payment_channel_id;
@@ -123,9 +130,9 @@ class PatientItemBillPaymentsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'bill_id' => 'nullable|exists:patient_item_bills,id',
+            'bill_id' => 'sometimes|required|exists:patient_item_bills,id',
             'channel_id' => 'nullable|exists:payment_channels,id',
-            'amount' => 'nullable|numeric|min:0',
+            'amount' => 'sometimes|required|numeric|min:0',
         ]);
 
         $data = PatientItemBillPayment::findOrFail($id);

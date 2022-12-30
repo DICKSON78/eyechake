@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   CardActions,
@@ -15,10 +14,12 @@ import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 
-import { useFetch, usePost } from "../../../../hooks";
+import { useFetch, usePost, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
 
 const CreateItem = ({ modal, fetchItems }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const nameRef = useRef();
@@ -61,12 +62,19 @@ const CreateItem = ({ modal, fetchItems }) => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        modal.close();
         fetchItems();
+        modal.close();
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -74,26 +82,10 @@ const CreateItem = ({ modal, fetchItems }) => {
     }
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -139,11 +131,9 @@ const CreateItem = ({ modal, fetchItems }) => {
                 required
                 options={itemTypes}
                 optionsLabel="name"
-                optionsValue="id"
-                value={formData.item_type_id || ""}
                 onChange={(value) => {
-                  setItemType(itemTypes.find((e) => e.id === value));
-                  setFormData({ ...formData, item_type_id: value });
+                  setItemType(value);
+                  setFormData({ ...formData, item_type_id: value.id });
                 }}
               />
             </Grid>
@@ -161,7 +151,6 @@ const CreateItem = ({ modal, fetchItems }) => {
                 options={consultationTypes}
                 optionsLabel="name"
                 optionsValue="id"
-                value={formData.consultation_type_id || ""}
                 onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
               />
             </Grid>
@@ -179,7 +168,6 @@ const CreateItem = ({ modal, fetchItems }) => {
                 optionsLabel="name"
                 optionsValue="id"
                 clearable
-                value={formData.unit_of_measure_id || ""}
                 onChange={(value) => setFormData({ ...formData, unit_of_measure_id: value })}
               />
             </Grid>
@@ -194,11 +182,9 @@ const CreateItem = ({ modal, fetchItems }) => {
                   ref={lensTypeRef}
                   label="Lens Type"
                   fullWidth
-                  required
                   options={lensTypes}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={formData.lens_type_id || ""}
                   onChange={(value) => setFormData({ ...formData, lens_type_id: value })}
                 />
                 : null

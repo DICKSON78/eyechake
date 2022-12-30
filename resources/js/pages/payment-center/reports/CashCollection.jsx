@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Grid } from "@mui/material";
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import DatePicker from "../../../components/DatePicker";
@@ -8,7 +9,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
+import { debounce, formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
 
 const CashCollection = ({ module }) => {
 
@@ -96,8 +97,16 @@ const CashCollection = ({ module }) => {
                     <TextField
                       fullWidth
                       label="Patient Name"
-                      defaultValue={params.patient_name}
-                      onChange={(value) => setParams({ ...params, patient_name: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      defaultValue={params.name}
+                      onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -109,8 +118,16 @@ const CashCollection = ({ module }) => {
                     <TextField
                       fullWidth
                       label="Patient Number"
-                      defaultValue={params.patient_id}
-                      onChange={(value) => setParams({ ...params, patient_id: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      defaultValue={params.id}
+                      onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -124,7 +141,6 @@ const CashCollection = ({ module }) => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      value={params.patient_gender || ""}
                       onChange={(value) => setParams({ ...params, patient_gender: value })}
                     />
                   </Grid>
@@ -141,7 +157,6 @@ const CashCollection = ({ module }) => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={paymentChannels.length ? (params.payment_channel_id || "") : ""}
                       onChange={(value) => setParams({ ...params, payment_channel_id: value })}
                     />
                   </Grid>

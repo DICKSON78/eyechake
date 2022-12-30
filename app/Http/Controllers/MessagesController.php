@@ -13,6 +13,13 @@ class MessagesController extends Controller
 
     public function __invoke(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;

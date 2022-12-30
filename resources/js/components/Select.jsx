@@ -1,13 +1,11 @@
 import React from "react";
-import { Box, InputAdornment, MenuItem, Select as MuiSelect, Typography } from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
-import CloseIcon from "@mui/icons-material/CloseRounded";
+import { Autocomplete, Box, CircularProgress, Paper, Stack, TextField, Typography } from "@mui/material";
+import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
+import ClearIcon from "@mui/icons-material/CloseRounded";
 
 class Select extends React.Component {
   constructor(props) {
     super(props);
-
-    this.input = React.createRef();
 
     this.state = {
       value: props.value,
@@ -53,18 +51,17 @@ class Select extends React.Component {
   }
 
   setValue(value, validate = false) {
-    this.input.value = value;
     this._onChange(value, validate);
   }
 
   render() {
-    const { containerProps, label, placeholder, required, horizontal, options, optionsLabel, optionsValue, clearable, endAdornment, ...rest } = this.props;
+    const { containerProps, label, placeholder, required, horizontal, options, optionsLabel, optionsValue, clearable, endAdornment, loading, ...rest } = this.props;
     return (
       <Box
         component="div"
         {...(horizontal && {
           display: "flex",
-          flexDirection: "row"
+          flexDirection: "row",
         })}
         {...containerProps}
       >
@@ -77,7 +74,7 @@ class Select extends React.Component {
               ...(!horizontal && {
                 ml: 0.5,
                 mb: 0.5,
-              }),
+              })
             }}
           >
             {label}
@@ -101,45 +98,57 @@ class Select extends React.Component {
             flexGrow: 1,
           })}
         >
-          <MuiSelect
-            ref={(ref) => this.input = ref}
-            variant="outlined"
-            size="small"
-            margin="none"
-            displayEmpty
+          <Autocomplete
             {...rest}
-            required={required}
-            error={!!this.state.error}
-            onChange={(event) => this._onChange(event.target.value, true)}
-            renderValue={
-              !this.state.value ? () => (
-                <Typography sx={{ opacity: 0.42 }}>
-                  {placeholder || "Select..."}
-                </Typography>
-              ) : undefined
-            }
-            IconComponent={ArrowDropDownIcon}
-            endAdornment={
-              clearable && this.state.value ? (
-                <InputAdornment
-                  position="end"
-                  sx={{ cursor: "pointer", mr: 2 }}
-                  onClick={() => this._onChange(undefined, true)}
-                >
-                  <CloseIcon fontSize="small"/>
-                </InputAdornment>
-              ) : endAdornment
-            }
-          >
-            {options.map(e => (
-              <MenuItem
-                key={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
-                value={typeof e === "string" || typeof e === "number" ? e : e[optionsValue]}
-              >
-                {typeof e === "string" || typeof e === "number" ? e : e[optionsLabel]}
-              </MenuItem>
-            ))}
-          </MuiSelect>
+            getOptionLabel={(option) => (optionsLabel ? option[optionsLabel] : option) || ""}
+            options={options}
+            disableClearable={!clearable}
+            loading={loading}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder={placeholder || "Select"}
+                variant="outlined"
+                size="small"
+                margin="none"
+                required={required}
+                error={!!this.state.error}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                    >
+                      {loading ?
+                        <CircularProgress color="inherit" size={18}/>
+                        : null
+                      }
+                      {endAdornment}
+                      {params.InputProps.endAdornment}
+                    </Stack>
+                  ),
+                }}
+              />
+            )}
+            clearIcon={<ClearIcon />}
+            popupIcon={<DropDownIcon />}
+            PaperComponent={(params) => (
+              <Paper
+                variant="elevation"
+                elevation={8}
+                {...params}
+              />
+            )}
+            onChange={(event, value) => {
+              if (typeof value === "object" && value && optionsValue) {
+                this._onChange(value[optionsValue], true);
+              } else {
+                this._onChange(value, true);
+              }
+            }}
+          />
           {this.state.error ?
             <Typography
               variant="body2"

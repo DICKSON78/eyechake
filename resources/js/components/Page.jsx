@@ -9,7 +9,9 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
       spacing={2}
       alignItems="center"
       flexWrap="wrap"
-      p={2}
+      px={2}
+      py={1.5}
+      borderRadius={(theme) => `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`}
       {...(containerProps || {})}
     >
       {leading}
@@ -49,7 +51,7 @@ const Page = ({ breadcrumbs, children }) => {
     return (
       <Breadcrumbs separator={<ChevronRightIcon fontSize="small"/>}>
         {breadcrumbs.map((e, i, a) => {
-          if (e.path) {
+          if (e.to) {
             return (
               <Link
                 key={e.title}
@@ -82,6 +84,7 @@ const Page = ({ breadcrumbs, children }) => {
         <React.Fragment>
           <Paper
             square
+            variant="elevation"
             elevation={0}
             sx={{ px: { xs: 2, sm: 2, md: 3 }, py: 1 }}
           >

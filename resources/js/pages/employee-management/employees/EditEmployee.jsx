@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 
-import { useFetch, usePatch } from "../../../hooks";
+import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError } from "../../../helpers";
 
 const EditEmployee = ({ item, modal, fetchEmployees }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const firstNameRef = useRef();
@@ -50,14 +52,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
   });
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePatch();
-    }
-  };
-
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         fetchEmployees();
         modal.close();
@@ -65,26 +62,22 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     }
   }, [data]);
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
     }
+  }, [error]);
 
-    return null;
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePatch();
+    }
   };
 
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -160,7 +153,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 fullWidth
                 required
                 options={["Male", "Female"]}
-                value={formData.gender || ""}
+                value={formData.gender || null}
                 onChange={(value) => setFormData({ ...formData, gender: value })}
               />
             </Grid>
@@ -192,7 +185,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 options={departments}
                 optionsLabel="name"
                 optionsValue="id"
-                value={departments.length ? (formData.department_id || "") : ""}
+                value={departments.find((e) => e.id === formData.department_id) || null}
                 onChange={(value) => setFormData({ ...formData, department_id: value })}
               />
             </Grid>
@@ -210,7 +203,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 options={jobTitles}
                 optionsLabel="name"
                 optionsValue="id"
-                value={jobTitles.length ? (formData.job_title_id || "") : ""}
+                value={jobTitles.find((e) => e.id === formData.job_title_id) || null}
                 onChange={(value) => setFormData({ ...formData, job_title_id: value })}
               />
             </Grid>

@@ -1,21 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Skeleton, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
-import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatError, getValidationError, numberFormat } from "../../../helpers";
 
 const PendingPatientItems = () => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
@@ -54,11 +53,18 @@ const PendingPatientItems = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       fetchItems();
 
       setSelectedItems([]);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const confirmSubmitApprove = () => {
     if (!selectedItems.length) {
@@ -79,27 +85,8 @@ const PendingPatientItems = () => {
     modalRef.current.open("Approve Items", component, "sm");
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   const getTotalAmount = () => {
     return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
-  };
-
-  const getSelectedAmount = () => {
-    return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
 
   return (
@@ -176,27 +163,6 @@ const PendingPatientItems = () => {
                 ]
               ]}
             />
-
-            <Grid
-              container
-              spacing={2}
-              mt={1}
-            >
-              <Grid
-                item
-                md={4}
-                sm={4}
-                xs={12}
-              >
-                <TextField
-                  disabled
-                  label="Selected Grand Total"
-                  fullWidth
-                  value={numberFormat(getSelectedAmount())}
-                />
-              </Grid>
-            </Grid>
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading && <LinearProgress />}
@@ -208,6 +174,7 @@ const PendingPatientItems = () => {
             flexWrap="wrap"
             p={2}
           >
+            {false &&
             <Button
               disabled={loading}
               variant="contained"
@@ -216,7 +183,7 @@ const PendingPatientItems = () => {
               onClick={() => console.log(true)}
             >
               Print Receipt
-            </Button>
+            </Button>}
             <Button
               disabled={loading}
               variant="contained"

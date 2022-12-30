@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 
 import { Box, Container, Paper, Typography } from "@mui/material";
 
+import logo from "../../images/logo.png";
+
 const Auth = () => {
 
   return (
@@ -17,8 +19,19 @@ const Auth = () => {
         justifyContent="center"
         minHeight="100vh"
       >
-        <Outlet />
-        <Paper variant="outlined" sx={{ mt: 1 }}>
+        <Paper>
+          <Box
+            component="img"
+            display="block"
+            width={80}
+            mt={2}
+            mx="auto"
+            alt="Logo"
+            src={logo}
+          />
+          <Outlet />
+        </Paper>
+        <Paper sx={{ mt: 1 }}>
           <Typography
             variant="body2"
             color="text.secondary"

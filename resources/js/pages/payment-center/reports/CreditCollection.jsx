@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Grid } from "@mui/material";
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import DatePicker from "../../../components/DatePicker";
@@ -8,7 +9,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
+import { debounce, formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
 const CreditCollection = ({ module }) => {
 
@@ -102,8 +103,16 @@ const CreditCollection = ({ module }) => {
                     <TextField
                       fullWidth
                       label="Patient Name"
-                      defaultValue={params.patient_name}
-                      onChange={(value) => setParams({ ...params, patient_name: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      defaultValue={params.name}
+                      onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -115,8 +124,16 @@ const CreditCollection = ({ module }) => {
                     <TextField
                       fullWidth
                       label="Patient Number"
-                      defaultValue={params.patient_id}
-                      onChange={(value) => setParams({ ...params, patient_id: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      defaultValue={params.id}
+                      onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -130,7 +147,6 @@ const CreditCollection = ({ module }) => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      value={params.patient_gender || ""}
                       onChange={(value) => setParams({ ...params, patient_gender: value })}
                     />
                   </Grid>
@@ -147,7 +163,6 @@ const CreditCollection = ({ module }) => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={paymentModes.length ? (params.payment_mode_id || "") : ""}
                       onChange={(value) => setParams({ ...params, payment_mode_id: value })}
                     />
                   </Grid>
@@ -160,8 +175,15 @@ const CreditCollection = ({ module }) => {
                     <TextField
                       fullWidth
                       label="Item Name/Code"
-                      defaultValue={params.q}
-                      onChange={(value) => setParams({ ...params, q: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
                     />
                   </Grid>
                 </Grid>

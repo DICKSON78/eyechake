@@ -60,7 +60,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              value={categories.length ? (params.category_id || "") : ""}
               onChange={(value) => setParams({ ...params, category_id: value })}
             />
           </Grid>
@@ -75,7 +74,7 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Pending", "Cleared"]}
               clearable
-              value={params.status || ""}
+              value={params.status || null}
               onChange={(value) => setParams({ ...params, status: value })}
             />
           </Grid>

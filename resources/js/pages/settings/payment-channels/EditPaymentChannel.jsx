@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   CardActions,
@@ -14,10 +13,12 @@ import {
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
-import { usePatch } from "../../../hooks";
+import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const EditPaymentChannel = ({ item, modal, fetchPaymentChannels }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const nameRef = useRef();
@@ -26,19 +27,26 @@ const EditPaymentChannel = ({ item, modal, fetchPaymentChannels }) => {
   const [formData, setFormData] = useState({
     name: item.name,
     description: item.description,
-    payment_type: item.payment_type,
     status: item.status,
   });
+
   const { data, loading, error, handlePatch } = usePatch(`api/payment-channels/${item.id}`, formData);
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        modal.close();
         fetchPaymentChannels();
+        modal.close();
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -46,26 +54,10 @@ const EditPaymentChannel = ({ item, modal, fetchPaymentChannels }) => {
     }
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
-      {loading && <LinearProgress />}
+      {loading ? <LinearProgress /> : null}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container

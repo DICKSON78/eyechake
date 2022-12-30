@@ -1,20 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import CreateExpense from "./CreateExpense";
 import EditExpense from "./EditExpense";
 import PayExpense from "./PayExpense";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull, numberFormat } from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
 
+  const addToast = useToast();
   const modalRef = useRef();
 
   const { data: categories } = useFetch("api/expense-categories", {
@@ -49,6 +50,12 @@ const Expenses = ({ module, createdBy }) => {
   useEffect(() => {
     setParams({ ...params, created_by: createdBy });
   }, [createdBy]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const openCreateExpenseModal = () => {
     let component = (
@@ -120,24 +127,11 @@ const Expenses = ({ module, createdBy }) => {
         { title: "Expenses" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
         <PageHeader
           title="Expenses"
           trailing={(
             <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
               <Button
                 variant="contained"
                 disableElevation
@@ -252,6 +246,7 @@ const Expenses = ({ module, createdBy }) => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
             footerItems={[
               [
                 { value: "TOTAL", tableCellProps: { colSpan: 2 } },

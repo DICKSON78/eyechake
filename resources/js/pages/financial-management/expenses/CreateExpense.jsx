@@ -1,16 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import DatePicker from "../../../components/DatePicker";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationRules } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const CreateExpense = ({ modal, fetchExpenses }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const categoryRef = useRef();
@@ -39,12 +41,19 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        modal.close();
         fetchExpenses();
+        modal.close();
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -52,26 +61,10 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
     }
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -91,7 +84,6 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                 options={categories}
                 optionsLabel="name"
                 optionsValue="id"
-                value={formData.category_id || ""}
                 onChange={(value) => setFormData({ ...formData, category_id: value })}
               />
             </Grid>

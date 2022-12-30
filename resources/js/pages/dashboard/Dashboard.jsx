@@ -1,21 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Card, CardContent, CardHeader, Divider, Grid, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader, Divider, Grid, IconButton, Tooltip as MuiTooltip } from "@mui/material";
 import {
   AccountBalanceRounded as SalesIcon,
   CenterFocusStrongRounded as GlassIcon,
   DiscountRounded as DiscountIcon,
   DoneAllRounded as DoneIcon,
+  FilterAltRounded as FilterIcon,
   MedicalInformationRounded as PharmacyIcon,
   MeetingRoomRounded as ConsultationsIcon,
   MoneyRounded as NetProfitIcon,
   TrendingDownRounded as ExpensesIcon
 } from "@mui/icons-material";
 
-import Page, { Header as PageHeader } from "../../components/Page";
+import Page from "../../components/Page";
 import Modal from "../../components/Modal";
-import DatePicker from "../../components/DatePicker";
 import LoadingSkeleton from "./LoadingSkeleton";
 import InfoCard from "./InfoCard";
+import Filters from "./Filters";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -32,7 +33,7 @@ import {
   teal,
   yellow
 } from "@mui/material/colors";
-import { useFetch } from "../../hooks";
+import { useFetch, useToast } from "../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../helpers";
 
 import {
@@ -68,6 +69,7 @@ Chart.defaults.font.size = 11;
 const Dashboard = () => {
 
   const theme = useTheme();
+  const addToast = useToast();
 
   const modalRef = useRef();
   const salesChartCanvasRef = useRef();
@@ -97,6 +99,12 @@ const Dashboard = () => {
       renderCharts();
     }
   }, [data, salesChartCanvasRef, expensesChartCanvasRef, paymentsChartCanvasRef, theme]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const renderCharts = () => {
     if (salesChart) {
@@ -299,6 +307,18 @@ const Dashboard = () => {
     setPaymentsChart(chart);
   };
 
+  const openFiltersModal = () => {
+    const component = (
+      <Filters
+        modal={modalRef.current}
+        params={params}
+        setParams={setParams}
+      />
+    );
+
+    modalRef.current.open("Filter", component, "sm");
+  };
+
   return (
     <Page
       title="Dashboard"
@@ -307,49 +327,24 @@ const Dashboard = () => {
         { title: "Dashboard" },
       ]}
     >
-      <PageHeader
+      <CardHeader
         title="Dashboard"
-        trailing={(
-          <React.Fragment>
-            <DatePicker
-              fullWidth
-              value={params.start_date || null}
-              onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
-              containerProps={{
-                width: 156,
-              }}
-            />
-            <Typography>~</Typography>
-            <DatePicker
-              fullWidth
-              value={params.end_date || null}
-              onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
-              containerProps={{
-                width: 156,
-              }}
-            />
-          </React.Fragment>
+        action={(
+          <MuiTooltip title="Show filters">
+            <IconButton onClick={openFiltersModal}>
+              <FilterIcon />
+            </IconButton>
+          </MuiTooltip>
         )}
-        containerProps={{
-          spacing: 1,
+        titleTypographyProps={{
+          variant: "h4",
+          fontWeight: 500,
+        }}
+        sx={{
           p: 0,
           mb: 2,
         }}
-        titleProps={{
-          variant: "h5",
-          fontWeight: 500,
-          fontSize: "22px",
-        }}
       />
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       {loading && <LoadingSkeleton />}
       {!loading && data ?
         <Grid
@@ -412,7 +407,10 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader title="Sales Statistics"/>
+              <CardHeader
+                title="Sales Statistics"
+                titleTypographyProps={{ variant: "h6" }}
+              />
               <Divider />
               <CardContent>
                 <canvas ref={salesChartCanvasRef}/>
@@ -426,7 +424,10 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader title="Expense Statistics"/>
+              <CardHeader
+                title="Expense Statistics"
+                titleTypographyProps={{ variant: "h6" }}
+              />
               <Divider />
               <CardContent>
                 <canvas ref={expensesChartCanvasRef}/>
@@ -440,7 +441,10 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader title="Payment Statistics"/>
+              <CardHeader
+                title="Payment Statistics"
+                titleTypographyProps={{ variant: "h6" }}
+              />
               <Divider />
               <CardContent>
                 <canvas ref={paymentsChartCanvasRef}/>

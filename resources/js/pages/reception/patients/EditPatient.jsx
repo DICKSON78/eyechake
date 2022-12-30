@@ -1,17 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Box, Button, CardActions, CardContent, Checkbox, Divider, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Grid,
+  LinearProgress
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 
-import { useFetch, usePatch } from "../../../hooks";
+import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationRules } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const EditPatient = ({ item, modal, fetchPatients }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const firstNameRef = useRef();
@@ -76,12 +88,19 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         fetchPatients();
         modal.close();
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   useEffect(() => {
     if (formData.region_id) {
@@ -95,26 +114,10 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     }
   }, [formData.district_id]);
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -176,7 +179,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 fullWidth
                 required
                 options={["Male", "Female"]}
-                value={formData.gender || ""}
+                value={formData.gender || null}
                 onChange={(value) => setFormData({ ...formData, gender: value })}
               />
             </Grid>
@@ -208,7 +211,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 options={regions}
                 optionsLabel="name"
                 optionsValue="id"
-                value={regions.length ? (formData.region_id || "") : ""}
+                value={regions.find((e) => e.id === formData.region_id) || null}
                 onChange={(value) => {
                   setDistricts([]);
                   setWards([]);
@@ -230,7 +233,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 options={districts}
                 optionsLabel="name"
                 optionsValue="id"
-                value={districts.length ? (formData.district_id || "") : ""}
+                value={districts.find((e) => e.id === formData.district_id) || null}
                 onChange={(value) => {
                   setWards([]);
                   setFormData({ ...formData, district_id: value, ward_id: null })
@@ -250,7 +253,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 options={wards}
                 optionsLabel="name"
                 optionsValue="id"
-                value={wards.length ? (formData.ward_id || "") : ""}
+                value={wards.find((e) => e.id === formData.ward_id) || null}
                 onChange={(value) => setFormData({ ...formData, ward_id: value })}
               />
             </Grid>
@@ -311,7 +314,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 options={paymentModes}
                 optionsLabel="name"
                 optionsValue="id"
-                value={paymentModes.length ? (formData.payment_mode_id || "") : ""}
+                value={paymentModes.find((e) => e.id === formData.payment_mode_id) || null}
                 onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
               />
             </Grid>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, Grid } from "@mui/material";
-
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import DatePicker from "../../../components/DatePicker";
@@ -8,7 +8,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getNonNull, getDateRangeTitle, numberFormat } from "../../../helpers";
+import { debounce, formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
 const ItemQuantityDispensed = () => {
 
@@ -93,8 +93,15 @@ const ItemQuantityDispensed = () => {
                     <TextField
                       fullWidth
                       label="Item Name/Code"
-                      defaultValue={params.q}
-                      onChange={(value) => setParams({ ...params, q: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -110,7 +117,6 @@ const ItemQuantityDispensed = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={paymentModes.length ? (params.payment_mode_id || "") : ""}
                       onChange={(value) => setParams({ ...params, payment_mode_id: value })}
                     />
                   </Grid>

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   CardActions,
@@ -15,10 +14,12 @@ import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
-import { usePatch } from "../../../hooks";
+import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const nameRef = useRef();
@@ -31,7 +32,24 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
     payment_type: item.payment_type,
     status: item.status,
   });
+
   const { data, loading, error, handlePatch } = usePatch(`api/payment-modes/${item.id}`, formData);
+
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+      window.setTimeout(() => {
+        fetchPaymentModes();
+        modal.close();
+      }, 1000);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -39,35 +57,10 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
     }
   };
 
-  useEffect(() => {
-    if (data) {
-      window.setTimeout(() => {
-        modal.close();
-        fetchPaymentModes();
-      }, 1000);
-    }
-  }, [data]);
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {loading ? <LinearProgress /> : null}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -114,7 +107,7 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
                 fullWidth
                 required
                 options={["Cash", "Credit"]}
-                value={formData.payment_type || ""}
+                value={formData.payment_type || null}
                 onChange={(value) => setFormData({ ...formData, payment_type: value })}
               />
             </Grid>

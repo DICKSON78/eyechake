@@ -29,6 +29,14 @@ class ConsultationsController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d',
+            'to_return_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $optician_status = $request->optician_status;
@@ -244,9 +252,9 @@ class ConsultationsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'patient_to_return' => 'nullable|in:Yes,No',
+            'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
-            'status' => 'nullable|in:Pending,Consulted'
+            'status' => 'sometimes|required|in:Pending,Consulted'
         ]);
 
         $data = Consultation::findOrFail($id);
@@ -266,7 +274,7 @@ class ConsultationsController extends Controller
         switch ($request->what) {
             case 'Consultation': {
                 $request->validate([
-                    'patient_to_return' => 'nullable|in:Yes,No',
+                    'patient_to_return' => 'sometimes|required|in:Yes,No',
                     'to_return_date' => 'nullable|date_format:Y-m-d',
                 ]);
                 $data->update($request->except('what'));
@@ -335,7 +343,7 @@ class ConsultationsController extends Controller
     public function completeClinicalNotes(Request $request, $id)
     {
         $request->validate([
-            'patient_to_return' => 'nullable|in:Yes,No',
+            'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
             'send_to_optician' => 'nullable|in:Yes,No',
             'optician' => 'nullable|in:Yes,No',

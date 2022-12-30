@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -13,19 +12,22 @@ import {
   IconButton,
   LinearProgress,
   Radio,
-  Tooltip
+  Tooltip,
+  Typography
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
-import { useDelete, useFetch, usePost } from "../../../hooks";
-import { formatError, getNonNull, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
+import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
+import { debounce, formatError, getNonNull, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const SelectItems = ({ consultation, selected: initial, consultationType, fetchItems: fetchConsultationItems, modal }) => {
+
+  const addToast = useToast();
 
   const paymentModeRef = useRef();
   const consultantRef = useRef();
@@ -136,6 +138,18 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     }
   }, [errorDelete]);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handlePostItem = () => {
     setData(null);
     setError(null);
@@ -160,21 +174,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     handleDelete(`api/patient-payment-cache-items/${item.id}`);
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {(loadingPost || loadingDelete) ?
@@ -182,7 +181,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         : null
       }
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Grid
           container
           spacing={2}
@@ -190,7 +188,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         >
           <Grid
             item
-            md={3}
+            md={3.5}
             sm={12}
             xs={12}
           >
@@ -202,9 +200,9 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               required
               options={paymentModes}
               optionsLabel="name"
-              optionsValue="id"
-              value={paymentModes.length ? (paymentMode ? paymentMode.id : "") : ""}
-              onChange={(value) => setPaymentMode(paymentModes.find((e) => e.id === value))}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={paymentMode || null}
+              onChange={(value) => setPaymentMode(value)}
             />
           </Grid>
           <Grid
@@ -219,9 +217,9 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               fullWidth
               options={users}
               optionsLabel="full_name"
-              optionsValue="id"
-              value={users.length ? (consultant ? consultant.id : "") : ""}
-              onChange={(value) => setConsultant(users.find((e) => e.id === value))}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={consultant || null}
+              onChange={(value) => setConsultant(value)}
             />
           </Grid>
         </Grid>
@@ -232,7 +230,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         >
           <Grid
             item
-            md={3}
+            md={3.5}
             sm={12}
             xs={12}
           >
@@ -242,7 +240,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                 titleTypographyProps={{ variant: "subtitle1" }}
                 action={(
                   <SearchTextField
-                    onChange={(value) => setItemName(value)}
+                    onChange={(value) => debounce(() => setItemName(value), 1000)}
                     sx={{ width: 116 }}
                   />
                 )}
@@ -258,7 +256,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                       fullWidth
                       clearable
                       options={["Lens", "Frame"]}
-                      value={itemType || ""}
                       onChange={(value) => setItemType(value)}
                     />
                     {itemType === "Lens" ?
@@ -269,11 +266,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         options={lensTypes}
                         optionsLabel="name"
                         optionsValue="id"
-                        value={lensTypeId || ""}
                         onChange={(value) => setLensTypeId(value)}
-                        containerProps={{
-                          mt: 2
-                        }}
+                        containerProps={{ mt: 2 }}
                       />
                       : null
                     }
@@ -288,6 +282,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                     key={e.id}
                     control={(
                       <Radio
+                        size="small"
                         checked={selectedItem === e}
                         onChange={(event) => {
                           if (event.target.checked) {
@@ -296,8 +291,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         }}
                       />
                     )}
-                    label={e.name}
-                    sx={{ display: "block" }}
+                    label={<Typography variant="body2">{e.name}</Typography>}
+                    sx={{ display: "flex" }}
                   />
                 ))}
               </CardContent>
@@ -306,7 +301,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
 
           <Grid
             item
-            md={9}
+            md={8.5}
             sm={12}
             xs={12}
           >

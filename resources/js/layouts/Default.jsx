@@ -19,12 +19,12 @@ import {
   Modal as MuiModal,
   Popover,
   Stack,
+  ThemeProvider,
   Toolbar,
   Tooltip,
   Typography,
   useMediaQuery
 } from "@mui/material";
-
 import {
   DarkModeRounded as DarkModeIcon,
   ExpandMoreRounded as ChevronDownIcon,
@@ -34,6 +34,7 @@ import {
 } from "@mui/icons-material";
 import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
 
+import darkTheme from "../themes/dark";
 import SideMenu from "../components/SideMenu";
 import Modal from "../components/Modal";
 import ChangePassword from "../pages/auth/ChangePassword";
@@ -135,96 +136,102 @@ const Default = ({ setThemeMode, setUser }) => {
   return (
     <React.Fragment>
       {appReady ?
-        <Box sx={{ display: "flex" }}>
-          <AppBar
-            position="fixed"
-            elevation={0}
-            sx={{ zIndex: theme.zIndex.drawer + 1 }}
-          >
-            <Toolbar>
-              <Tooltip title="Toggle menu">
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  onClick={toggleDrawer}
-                >
-                  <MenuIcon />
-                </IconButton>
-              </Tooltip>
+        <React.Fragment>
+          <ThemeProvider theme={darkTheme}>
+            <AppBar
+              position="fixed"
+              variant="elevation"
+              elevation={1}
+              sx={{
+                zIndex: theme.zIndex.drawer + 1,
+                bgcolor: theme.palette.mode === "light" ? theme.palette.primary.main : "background.paper",
+              }}
+            >
+              <Toolbar>
+                <Tooltip title="Toggle menu">
+                  <IconButton
+                    edge="start"
+                    color="inherit"
+                    onClick={toggleDrawer}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                </Tooltip>
 
-              {/*<Box*/}
-              {/*component="img"*/}
-              {/*src={logo}*/}
-              {/*alt="Logo"*/}
-              {/*width={32}*/}
-              {/*height={32}*/}
-              {/*ml={2}*/}
-              {/*/>*/}
+                {/*<Box*/}
+                {/*component="img"*/}
+                {/*src={logo}*/}
+                {/*alt="Logo"*/}
+                {/*width={32}*/}
+                {/*height={32}*/}
+                {/*ml={2}*/}
+                {/*/>*/}
 
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                ml={1}
-              >
-                EYE
                 <Typography
-                  component="span"
-                  color="secondary"
                   variant="h5"
                   fontWeight="bold"
+                  ml={1}
                 >
-                  CARE
+                  EYE
+                  <Typography
+                    component="span"
+                    color="secondary"
+                    variant="h5"
+                    fontWeight="bold"
+                  >
+                    CARE
+                  </Typography>
                 </Typography>
-              </Typography>
 
-              <Box sx={{ flexGrow: 1 }}/>
+                <Box sx={{ flexGrow: 1 }}/>
 
-              <Tooltip title={theme.palette.mode === "light" ? "Enable dark mode" : "Disable dark mode"}>
+                <Tooltip title={theme.palette.mode === "light" ? "Enable dark mode" : "Disable dark mode"}>
+                  <IconButton
+                    color="inherit"
+                    sx={{ mr: { xs: 2, sm: 2, md: 1 } }}
+                    onClick={toggleTheme}
+                  >
+                    {theme.palette.mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+                  </IconButton>
+                </Tooltip>
+
+                <Chip
+                  sx={{
+                    bgcolor: "rgba(0, 0, 0, 0.32)",
+                    display: { xs: "none", sm: "none", md: "inline-flex" },
+                  }}
+                  color="primary"
+                  avatar={
+                    <Avatar>
+                      <UserIcon fontSize="small"/>
+                    </Avatar>
+                  }
+                  label={
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                    >
+                      <Typography variant="body2">
+                        {user.full_name}
+                      </Typography>
+                      <ChevronDownIcon sx={{ ml: 0.5 }}/>
+                    </Stack>
+                  }
+                  onClick={handleAccountMenuOpen}
+                >
+                </Chip>
+
                 <IconButton
                   color="inherit"
-                  sx={{ mr: { xs: 2, sm: 2, md: 1 } }}
-                  onClick={toggleTheme}
+                  sx={{ display: { xs: "inline-flex", sm: "inline-flex", md: "none" } }}
+                  onClick={handleAccountMenuOpen}
                 >
-                  {theme.palette.mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+                  <MoreIcon />
                 </IconButton>
-              </Tooltip>
-
-              <Chip
-                sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.12)",
-                  display: { xs: "none", sm: "none", md: "inline-flex" },
-                }}
-                color="primary"
-                avatar={
-                  <Avatar>
-                    <UserIcon fontSize="small"/>
-                  </Avatar>
-                }
-                label={
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                  >
-                    <Typography variant="body2">
-                      {user.full_name}
-                    </Typography>
-                    <ChevronDownIcon />
-                  </Stack>
-                }
-                onClick={handleAccountMenuOpen}
-              >
-              </Chip>
-
-              <IconButton
-                color="inherit"
-                sx={{ display: { xs: "inline-flex", sm: "inline-flex", md: "none" } }}
-                onClick={handleAccountMenuOpen}
-              >
-                <MoreIcon />
-              </IconButton>
-            </Toolbar>
-            <Divider />
-          </AppBar>
+              </Toolbar>
+              <Divider />
+            </AppBar>
+          </ThemeProvider>
 
           {/* Drawer for small screens */}
           {breakpointDownMedium ?
@@ -240,7 +247,7 @@ const Default = ({ setThemeMode, setUser }) => {
                 "& .MuiDrawer-paper": {
                   boxSizing: "border-box",
                   width: drawerWidth,
-                },
+                }
               }}
               onClose={toggleDrawer}
             >
@@ -255,59 +262,59 @@ const Default = ({ setThemeMode, setUser }) => {
           }
           {/*****/}
 
-          {/* Drawer for large screens */}
-          {breakpointUpMedium ?
-            <Drawer
-              variant="permanent"
-              ModalProps={{
-                disableScrollLock: true,
-              }}
+          <Box sx={{ display: "flex" }}>
+            {/* Drawer for large screens */}
+            {breakpointUpMedium ?
+              <Drawer
+                variant="permanent"
+                ModalProps={{ disableScrollLock: true }}
+                sx={{
+                  width: drawerWidth,
+                  flexShrink: 0,
+                  ...(isDrawerOpen && {
+                    ...drawerOpenedMixin(theme),
+                    "& .MuiDrawer-paper": drawerOpenedMixin(theme),
+                  }),
+                  ...(!isDrawerOpen && {
+                    ...drawerClosedMixin(theme),
+                    "& .MuiDrawer-paper": drawerClosedMixin(theme),
+                  })
+                }}
+              >
+                <Toolbar />
+                <SideMenu
+                  drawerOpen={isDrawerOpen}
+                  user={user}
+                />
+              </Drawer>
+              : null
+            }
+            {/*****/}
+
+            <Box
+              component="main"
               sx={{
-                width: drawerWidth,
-                flexShrink: 0,
-                ...(isDrawerOpen && {
-                  ...drawerOpenedMixin(theme),
-                  "& .MuiDrawer-paper": drawerOpenedMixin(theme),
-                }),
-                ...(!isDrawerOpen && {
-                  ...drawerClosedMixin(theme),
-                  "& .MuiDrawer-paper": drawerClosedMixin(theme),
-                }),
+                flexGrow: 1,
+                minHeight: "100vh",
+                overflow: "auto",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <Toolbar />
-              <SideMenu
-                drawerOpen={isDrawerOpen}
-                user={user}
-              />
-            </Drawer>
-            : null
-          }
-          {/*****/}
-
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              minHeight: "100vh",
-              overflow: "auto",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <Toolbar />
-            <Box flexGrow={1}>
-              <Outlet />
+              <Box flexGrow={1}>
+                <Outlet />
+              </Box>
+              <Divider/>
+              <Toolbar sx={{ bgcolor: "background.paper" }}>
+                <Typography
+                  textAlign="center"
+                  flexGrow={1}
+                >
+                  &copy; {new Date().getFullYear()}. Developed with <HeartIcon /> by SmartSoft.
+                </Typography>
+              </Toolbar>
             </Box>
-            <Divider/>
-            <Toolbar sx={{ bgcolor: "background.paper" }}>
-              <Typography
-                textAlign="center"
-                flexGrow={1}
-              >
-                &copy; {new Date().getFullYear()}. Developed with <HeartIcon /> by SmartSoft.
-              </Typography>
-            </Toolbar>
           </Box>
 
           <Popover
@@ -316,10 +323,14 @@ const Default = ({ setThemeMode, setUser }) => {
               vertical: "bottom",
               horizontal: "left",
             }}
+            PaperProps={{ variant: "elevation" }}
             open={isAccountMenuOpen}
             onClose={handleAccountMenuClose}
           >
-            <Card sx={{ width: 250 }}>
+            <Card
+              variant="elevation"
+              sx={{ width: 250 }}
+            >
               <CardHeader
                 title={user.full_name}
                 subheader={getNonNull(user.job_title).name}
@@ -360,7 +371,7 @@ const Default = ({ setThemeMode, setUser }) => {
               </MenuList>
             </Card>
           </Popover>
-        </Box>
+        </React.Fragment>
         : null
       }
 

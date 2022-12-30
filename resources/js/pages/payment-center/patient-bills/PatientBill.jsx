@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, CardHeader, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
+import { Button, Card, CardContent, CardHeader, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -13,11 +13,12 @@ import PatientBillPayments from "./PatientBillPayments";
 import BillPDF from "./BillPDF";
 
 import { capitalize, formatError, getNonNull, numberFormat } from "../../../helpers";
-import { useFetch, usePatch } from "../../../hooks";
+import { useFetch, usePatch, useToast } from "../../../hooks";
 
 
 const PatientBill = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const { status, patientId, billId } = useParams();
 
@@ -56,6 +57,7 @@ const PatientBill = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       fetchBill();
     }
   }, [data]);
@@ -71,6 +73,12 @@ const PatientBill = () => {
       setError(errorClearBill);
     }
   }, [errorClearBill]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const showBillPaymentsModal = () => {
     let component = (
@@ -99,21 +107,6 @@ const PatientBill = () => {
     );
 
     modalRef.current.open("Clear Bill", component, "sm");
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   const getTotalAmount = () => {
@@ -190,9 +183,7 @@ const PatientBill = () => {
             <Card variant="outlined">
               <CardHeader
                 title="Bill Items"
-                titleTypographyProps={{
-                  variant: "subtitle1"
-                }}
+                titleTypographyProps={{ variant: "subtitle1" }}
               />
               <Divider />
               <CardContent>
@@ -241,7 +232,6 @@ const PatientBill = () => {
                 />
               </CardContent>
             </Card>
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading && <LinearProgress />}

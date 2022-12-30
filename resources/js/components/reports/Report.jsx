@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 
-import { Alert, Card, CardContent, Divider } from "@mui/material";
+import { Card, CardContent, Divider } from "@mui/material";
 import { Header as PageHeader } from "../Page";
-import Table, { PageSizeSelect } from "../Table";
+import Table from "../Table";
 import PDFReport from "./PDFReport";
 import SpreadsheetReport from "./SpreadsheetReport";
 
 import { formatError, numberFormat } from "../../helpers";
-import { useFetch } from "../../hooks";
+import { useFetch, useToast } from "../../hooks";
 
 const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch, headerTrailingContent, prependInner, nestedObject, nestedColumns, summationFooterColumns }) => {
   columns = columns.filter((e) => typeof e.show === "undefined" || e.show);
 
+  const addToast = useToast();
   const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
   const { data, loading, error, handleFetch } = useFetch(uri, {
@@ -25,6 +26,12 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
       onFetch(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const getFooterItems = () => {
     let footerColumns = [];
@@ -46,93 +53,79 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
   };
 
   return (
-    <React.Fragment>
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
-      <Card>
-        <PageHeader
-          title={title}
-          trailing={
-            <React.Fragment>
-              {headerTrailingContent}
-              <PDFReport
-                title={title}
-                subtitle={subtitle}
-                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
-                items={data.data}
-                orientation={pdfOrientation}
-                nestedObject={nestedObject}
-                nestedColumns={nestedColumns}
-                summationFooterColumns={summationFooterColumns}
+    <Card>
+      <PageHeader
+        title={title}
+        trailing={
+          <React.Fragment>
+            {headerTrailingContent}
+            <PDFReport
+              title={title}
+              subtitle={subtitle}
+              columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
+              items={data.data}
+              orientation={pdfOrientation}
+              nestedObject={nestedObject}
+              nestedColumns={nestedColumns}
+              summationFooterColumns={summationFooterColumns}
+            />
+            <SpreadsheetReport
+              title={title}
+              columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
+              items={data.data}
+              format="xlsx"
+            />
+          </React.Fragment>
+        }
+      />
+      <Divider />
+      <CardContent>
+        {prependInner}
+        <Table
+          loading={loading}
+          columns={[
+            {
+              field: "index",
+              headerName: "S/N",
+              valueGetter: (item, index) => ((perPage * (page - 1)) + index + 1),
+            },
+            ...(columns || []),
+          ]}
+          items={data.data}
+          itemCount={data.total}
+          page={page}
+          pageSize={perPage}
+          onPageChange={(page) => setPage(page)}
+          onPageSizeChange={(value) => {
+            setPerPage(value);
+            setPage(1);
+          }}
+          renderExpanded={nestedObject ?
+            (item, index) => (
+              <Table
+                columns={[
+                  {
+                    field: "index",
+                    headerName: "S/N",
+                    valueGetter: (item, index) => (index + 1),
+                  },
+                  ...(nestedColumns || []),
+                ]}
+                items={data.data[index] ? data.data[index][nestedObject] : []}
+                hidePaginationFooter
               />
-              <SpreadsheetReport
-                title={title}
-                columns={columns.filter((col) => (typeof col.webOnly === "undefined") || !col.webOnly)}
-                items={data.data}
-                format="xlsx"
-              />
-              <PageSizeSelect
-                pageSize={perPage}
-                onChange={(value) => {
-                  setPerPage(value);
-                  setPage(1);
-                }}
-              />
-            </React.Fragment>
+            ) : null
+          }
+          repeatHead={!!nestedObject}
+          footerItems={summationFooterColumns ?
+            [
+              getFooterItems(),
+            ]
+            : null
           }
         />
-        <Divider />
-        <CardContent>
-          {prependInner}
-          <Table
-            loading={loading}
-            columns={[
-              {
-                field: "index",
-                headerName: "S/N",
-                valueGetter: (item, index) => ((perPage * (page - 1)) + index + 1),
-              },
-              ...(columns || []),
-            ]}
-            items={data.data}
-            itemCount={data.total}
-            page={page}
-            pageSize={perPage}
-            onPageChange={(page) => setPage(page)}
-            renderExpanded={nestedObject ?
-              (item, index) => (
-                <Table
-                  columns={[
-                    {
-                      field: "index",
-                      headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
-                    },
-                    ...(nestedColumns || []),
-                  ]}
-                  items={data.data[index] ? data.data[index][nestedObject] : []}
-                  hidePaginationFooter
-                />
-              ) : null
-            }
-            repeatHead={!!nestedObject}
-            footerItems={summationFooterColumns ?
-              [
-                getFooterItems(),
-              ]
-              : null
-            }
-          />
-        </CardContent>
-      </Card>
-    </React.Fragment>
+      </CardContent>
+    </Card>
   );
 };
 

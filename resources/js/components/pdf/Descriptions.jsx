@@ -31,7 +31,9 @@ const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, va
               <Text style={[
                 styles.text,
                 {
-                  flex: 1,
+                  ...(!vertical && {
+                    flex: 1,
+                  }),
                   fontWeight: "bold",
                   ...(labelStyle || {}),
                 }]}

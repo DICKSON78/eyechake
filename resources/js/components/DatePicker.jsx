@@ -3,6 +3,12 @@ import { Box, TextField, Typography } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers";
+import {
+  ArrowDropDownRounded as ArrowDropDownIcon,
+  CalendarMonthRounded as CalendarIcon,
+  ChevronLeftRounded as ChevronLeftIcon,
+  ChevronRightRounded as ChevronRightIcon
+} from "@mui/icons-material";
 
 class DatePicker extends React.Component {
   constructor(props) {
@@ -13,6 +19,7 @@ class DatePicker extends React.Component {
     this.state = {
       value: props.value,
       error: null,
+      open: false,
     };
   }
 
@@ -66,7 +73,7 @@ class DatePicker extends React.Component {
           component="div"
           {...(horizontal && {
             display: "flex",
-            flexDirection: "row"
+            flexDirection: "row",
           })}
           {...containerProps}
         >
@@ -79,7 +86,7 @@ class DatePicker extends React.Component {
                 ...(!horizontal && {
                   ml: 0.5,
                   mb: 0.5,
-                }),
+                })
               }}
             >
               {label}
@@ -105,7 +112,16 @@ class DatePicker extends React.Component {
           >
             <MuiDatePicker
               inputRef={(ref) => this.input = ref}
-              onChange={(value) => this._onChange(value, true)}
+              PaperProps={{ variant: "elevation" }}
+              components={{
+                LeftArrowIcon: ChevronLeftIcon,
+                OpenPickerIcon: CalendarIcon,
+                RightArrowIcon: ChevronRightIcon,
+                SwitchViewIcon: ArrowDropDownIcon
+              }}
+              inputFormat="yyyy-MM-dd"
+              mask="____-__-__"
+              {...rest}
               renderInput={(params) => (
                 <TextField
                   variant="outlined"
@@ -119,11 +135,12 @@ class DatePicker extends React.Component {
                 />
               )}
               InputProps={{
-                error: !!this.state.error
+                error: !!this.state.error,
+                onClick: () => this.setState({ open: true }),
               }}
-              inputFormat="yyyy-MM-dd"
-              mask="____-__-__"
-              {...rest}
+              open={this.state.open}
+              onClose={() => this.setState({ open: false })}
+              onChange={(value) => this._onChange(value, true)}
             />
             {this.state.error ?
               <Typography

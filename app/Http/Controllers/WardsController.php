@@ -19,6 +19,11 @@ class WardsController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
@@ -80,9 +85,9 @@ class WardsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'nullable|unique:wards,name,' . $id,
-            'district_id' => 'nullable|exists:districts,id',
-            'status' => 'nullable|in:Active,Inactive',
+            'name' => 'sometimes|required|unique:wards,name,' . $id,
+            'district_id' => 'sometimes|required|exists:districts,id',
+            'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
         $data = Ward::findOrFail($id);

@@ -1,18 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-import { Alert, Card, CardContent, Chip, Divider, Stack } from "@mui/material";
+import { Card, CardContent, Chip, Divider, Stack } from "@mui/material";
 import { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
-
-import { useFetch } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
 import PatientFilePDF from "./PatientFilePDF";
+
+import { useFetch, useToast } from "../../../hooks";
+import { formatError, getNonNull } from "../../../helpers";
 
 const PatientFile = ({ patient }) => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
   const modalRef = useRef();
 
   const [params, setParams] = useState({
@@ -31,6 +30,12 @@ const PatientFile = ({ patient }) => {
     document.title = `Patient File - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Consulted":
@@ -42,27 +47,8 @@ const PatientFile = ({ patient }) => {
 
   return (
     <React.Fragment>
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
-        <PageHeader
-          title="Patient File"
-          trailing={(
-            <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
-            </React.Fragment>
-          )}
-        />
+        <PageHeader title="Patient File"/>
         <Divider />
         <CardContent>
           <Table
@@ -132,6 +118,7 @@ const PatientFile = ({ patient }) => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

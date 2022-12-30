@@ -9,5 +9,5 @@ export const PRIVILEGES = [
   { label: "Inventory Management", value: "inventory_management" },
   { label: "Financial Management", value: "financial_management" },
   { label: "Employee Management", value: "employee_management" },
-  { label: "settings", value: "settings" },
+  { label: "Settings", value: "settings" },
 ];

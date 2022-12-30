@@ -1,17 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Grid, LinearProgress, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
-import { usePost } from "../../hooks";
+import { usePost, useToast } from "../../hooks";
 import { formatError } from "../../helpers";
 
 const ClinicDetails = () => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
 
   const modalRef = useRef();
   const formRef = useRef();
@@ -33,25 +32,22 @@ const ClinicDetails = () => {
     document.title = `Clinic Details - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePost();
     }
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -131,7 +127,6 @@ const ClinicDetails = () => {
               </Grid>
             </Grid>
           </Form>
-          {handleFeedback()}
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}

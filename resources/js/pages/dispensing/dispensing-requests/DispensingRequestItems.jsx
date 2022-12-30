@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Chip, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -10,12 +10,12 @@ import Table from "../../../components/Table";
 import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-import { useFetch, usePatch, usePost } from "../../../hooks";
+import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
 import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
 
 const DispensingRequestItems = ({ consultationType }) => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
@@ -54,10 +54,17 @@ const DispensingRequestItems = ({ consultationType }) => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       fetchItems();
       setSelectedItems([]);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const autoSave = (item, field, value) => {
     if (value !== item[field]) {
@@ -84,21 +91,6 @@ const DispensingRequestItems = ({ consultationType }) => {
     );
 
     modalRef.current.open(title, component, "sm");
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   const getStatusColor = (status) => {
@@ -243,7 +235,6 @@ const DispensingRequestItems = ({ consultationType }) => {
               checked={selectedItems}
               setChecked={setSelectedItems}
             />
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading && <LinearProgress />}

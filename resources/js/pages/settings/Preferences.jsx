@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -20,13 +19,14 @@ import Modal from "../../components/Modal";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
-import { useFetch, usePost } from "../../hooks";
+import { useFetch, usePost, useToast } from "../../hooks";
 import { formatError, getNonNull, getValidationRules } from "../../helpers";
 
 const validationRules = getValidationRules();
 
 const Preferences = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
@@ -70,6 +70,18 @@ const Preferences = () => {
     document.title = `System Preferences - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePost();
@@ -80,21 +92,6 @@ const Preferences = () => {
     let formData1 = formData;
     formData1.preferences[index].value = value;
     setFormData(formData1);
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -195,7 +192,6 @@ const Preferences = () => {
               </TableBody>
             </Table>
           </Form>
-          {handleFeedback()}
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}

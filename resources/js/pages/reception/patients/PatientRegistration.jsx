@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert, Button, Card, CardContent, Divider, Grid, InputAdornment, LinearProgress, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Grid, InputAdornment, LinearProgress, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -13,13 +13,14 @@ import CreateDistrict from "../../settings/subdivisions/CreateDistrict";
 import CreateWard from "../../settings/subdivisions/CreateWard";
 
 import moment from "moment";
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationRules, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const PatientRegistration = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
@@ -86,11 +87,18 @@ const PatientRegistration = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         navigate(`/reception/patients/${data.data.id}/check-in`);
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   useEffect(() => {
     setFormData({ ...formData, district_id: null });
@@ -163,21 +171,6 @@ const PatientRegistration = () => {
     modalRef.current.open("Create Ward", component);
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <Page
       breadcrumbs={[
@@ -248,7 +241,6 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   options={["Male", "Female"]}
-                  value={formData.gender || ""}
                   onChange={(value) => setFormData({ ...formData, gender: value })}
                 />
               </Grid>
@@ -277,7 +269,10 @@ const PatientRegistration = () => {
                     onChange={(value) => {
                       const age = validateInteger(value);
                       if (age) {
-                        setFormData({ ...formData, date_of_birth: moment().subtract(age, "years").format("YYYY-MM-DD") })
+                        setFormData({
+                          ...formData,
+                          date_of_birth: moment().subtract(age, "years").format("YYYY-MM-DD")
+                        })
                       }
                     }}
                     containerProps={{ sx: { width: 80 } }}
@@ -297,8 +292,7 @@ const PatientRegistration = () => {
                   required
                   options={regions}
                   optionsLabel="name"
-                  optionsValue="id"
-                  value={formData.region_id || ""}
+                  value={region || null}
                   endAdornment={
                     <InputAdornment
                       position="end"
@@ -309,8 +303,8 @@ const PatientRegistration = () => {
                     </InputAdornment>
                   }
                   onChange={(value) => {
-                    setRegion(regions.find((e) => e.id === value));
-                    setFormData({ ...formData, region_id: value });
+                    setRegion(value);
+                    setFormData({ ...formData, region_id: value ? value.id : null });
                   }}
                 />
               </Grid>
@@ -327,8 +321,7 @@ const PatientRegistration = () => {
                   required
                   options={districts}
                   optionsLabel="name"
-                  optionsValue="id"
-                  value={formData.district_id || ""}
+                  value={district || null}
                   endAdornment={
                     region ?
                       <InputAdornment
@@ -341,8 +334,8 @@ const PatientRegistration = () => {
                       : null
                   }
                   onChange={(value) => {
-                    setDistrict(districts.find((e) => e.id === value));
-                    setFormData({ ...formData, district_id: value });
+                    setDistrict(value);
+                    setFormData({ ...formData, district_id: value ? value.id : null });
                   }}
                 />
               </Grid>
@@ -359,7 +352,7 @@ const PatientRegistration = () => {
                   options={wards}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={formData.ward_id || ""}
+                  value={wards.find((e) => e.id === formData.ward_id) || null}
                   endAdornment={
                     district ?
                       <InputAdornment
@@ -428,13 +421,11 @@ const PatientRegistration = () => {
                   options={paymentModes}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={formData.payment_mode_id || ""}
                   onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
                 />
               </Grid>
             </Grid>
           </Form>
-          {handleFeedback()}
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}

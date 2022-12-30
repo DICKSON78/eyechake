@@ -19,6 +19,11 @@ class ItemsController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
@@ -102,8 +107,8 @@ class ItemsController extends Controller
             'consultation_type_id' => 'required|exists:consultation_types,id',
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
             'lens_type_id' => 'nullable|exists:lens_types,id',
-            'is_consultation_item' => 'nullable|in:Yes,No',
-            'is_stock_item' => 'nullable|in:Yes,No',
+            'is_consultation_item' => 'required|in:Yes,No',
+            'is_stock_item' => 'required|in:Yes,No',
         ]);
 
         $data = Item::create($request->only(
@@ -135,14 +140,15 @@ class ItemsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
+            'name' => 'sometimes|required',
             'code' => 'nullable|unique:items,code,' . $id,
-            'item_type_id' => 'nullable|exists:item_types,id',
-            'consultation_type_id' => 'nullable|exists:consultation_types,id',
+            'item_type_id' => 'sometimes|required|exists:item_types,id',
+            'consultation_type_id' => 'sometimes|required|exists:consultation_types,id',
             'unit_of_measure_id' => 'nullable|exists:units_of_measure,id',
             'lens_type_id' => 'nullable|exists:lens_types,id',
-            'is_consultation_item' => 'nullable|in:Yes,No',
-            'is_stock_item' => 'nullable|in:Yes,No',
-            'status' => 'nullable|in:Active,Inactive',
+            'is_consultation_item' => 'sometimes|required|in:Yes,No',
+            'is_stock_item' => 'sometimes|required|in:Yes,No',
+            'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
         $data = Item::findOrFail($id);

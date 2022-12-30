@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Card, CardContent, Divider } from "@mui/material";
+import { Card, CardContent, Divider } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
 
 const PatientsToReturn = () => {
 
+  const addToast = useToast();
   const modalRef = useRef();
 
   const [params, setParams] = useState({
@@ -38,6 +39,12 @@ const PatientsToReturn = () => {
     document.title = `Patients to Return - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   return (
     <Page
       breadcrumbs={[
@@ -46,27 +53,8 @@ const PatientsToReturn = () => {
         { title: "Patients to Return" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
-        <PageHeader
-          title="Patients to Return"
-          trailing={(
-            <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
-            </React.Fragment>
-          )}
-        />
+        <PageHeader title="Patients to Return"/>
         <Divider />
         <CardContent>
           <Filters
@@ -122,6 +110,7 @@ const PatientsToReturn = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

@@ -2,10 +2,12 @@ import React, { useEffect } from "react";
 import { Alert, Skeleton } from "@mui/material";
 import Descriptions from "../../../components/Descriptions";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatError, getAddress, getAge, getNonNull } from "../../../helpers";
 
 const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
+
+  const addToast = useToast();
 
   const { data, loading, error } = useFetch(`api/patients/${patientId}`, null, true, null, (response) => response.data.data);
 
@@ -20,6 +22,12 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
       onLoadSuccess(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleFeedback = () => {
     if (error) {
@@ -61,6 +69,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
             { label: "Payment Mode", value: getNonNull(data.payment_mode).name },
           ]}
           containerProps={{
+            variant: "elevation",
             sx: {
               mb: 2,
               p: 2,

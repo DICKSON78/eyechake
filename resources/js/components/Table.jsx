@@ -2,26 +2,27 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Checkbox,
+  IconButton,
   InputAdornment,
   LinearProgress,
-  Pagination,
-  PaginationItem,
-  Stack,
   Table as MuiTable,
   TableBody,
   TableCell,
   TableFooter,
   TableHead,
+  TablePagination,
   TableRow,
   Typography
 } from "@mui/material";
 import {
+  ArrowDropDownRounded as ArrowDropDownIcon,
   ChevronLeftRounded as ChevronLeftIcon,
   ChevronRightRounded as ChevronRightIcon,
+  FirstPageRounded as FirstPageIcon,
+  LastPageRounded as LastPageIcon,
   SearchRounded as SearchIcon
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import Select from "./Select";
 import TextField from "./TextField";
 
 const NoItemsOverlayContainer = styled("div")(({ theme, height }) => ({
@@ -128,19 +129,6 @@ const ColumnHeaderTitleContainer = styled("div")(({ theme }) => ({
   textOverflow: "ellipsis",
 }));
 
-const PageSizeSelect = ({ placeholder, pageSize, onChange, sx }) => {
-  return (
-    <Select
-      placeholder={placeholder}
-      options={[5, 10, 25, 50, 100, 250]}
-      value={pageSize}
-      onChange={onChange}
-      inputProps={{ sx: { py: "6px" } }}
-      sx={{ width: 80, ...(sx || {}) }}
-    />
-  );
-};
-
 const SearchTextField = ({ placeholder, onChange, sx }) => {
   return (
     <TextField
@@ -160,7 +148,38 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
   );
 };
 
-const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems, renderExpanded, repeatHead }) => {
+const TablePaginationActions = ({ count, page, rowsPerPage, onPageChange }) => {
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={(event) => onPageChange(event, 0)}
+        disabled={page === 0}
+      >
+        <FirstPageIcon />
+      </IconButton>
+      <IconButton
+        onClick={(event) => onPageChange(event, page - 1)}
+        disabled={page === 0}
+      >
+        <ChevronLeftIcon />
+      </IconButton>
+      <IconButton
+        onClick={(event) => onPageChange(event, page + 1)}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      >
+        <ChevronRightIcon />
+      </IconButton>
+      <IconButton
+        onClick={(event) => onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1))}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+      >
+        <LastPageIcon />
+      </IconButton>
+    </Box>
+  );
+};
+
+const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, onPageSizeChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems, renderExpanded, repeatHead }) => {
 
   columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
   checked = checked || [];
@@ -173,10 +192,6 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
   useEffect(() => {
     setState({ ...state, items });
   }, [items]);
-
-  const getNumberOfPages = () => {
-    return Math.ceil(itemCount / pageSize);
-  };
 
   const getCheckableItems = () => {
     if (typeof checkboxSelection === "function") {
@@ -334,43 +349,33 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
         }
       </MuiTable>
       {!hidePaginationFooter ?
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          pt={2}
-        >
-          {itemCount ?
-            <Typography variant="body2">
-              Showing {(pageSize * (page - 1)) + 1}-{(pageSize * (page - 1)) + items.length} of {itemCount}
-            </Typography>
-            : null
-          }
-          <Box flexGrow={1}/>
-          <Pagination
-            page={page}
-            count={getNumberOfPages()}
-            boundaryCount={3}
-            shape="rounded"
-            color="primary"
-            onChange={(event, page1) => {
-              if (typeof onPageChange === "function") {
-                onPageChange(page1);
-              }
-            }}
-            renderItem={(item) => (
-              <PaginationItem
-                slots={{ previous: ChevronLeftIcon, next: ChevronRightIcon }}
-                {...item}
-              />
-            )}
-          />
-        </Stack>
+        <TablePagination
+          component="div"
+          count={itemCount}
+          page={page - 1}
+          onPageChange={(event, page1) => {
+            if (typeof onPageChange === "function") {
+              onPageChange(page1 + 1);
+            }
+          }}
+          rowsPerPageOptions={[5, 10, 25, 50, 100, 250]}
+          rowsPerPage={pageSize}
+          onRowsPerPageChange={(event) => {
+            if (typeof onPageSizeChange === "function") {
+              onPageSizeChange(event.target.value);
+            }
+          }}
+          SelectProps={{
+            IconComponent: ArrowDropDownIcon,
+            MenuProps: { PaperProps: { variant: "elevation" } }
+          }}
+          ActionsComponent={TablePaginationActions}
+        />
         : null
       }
     </Box>
   );
 };
 
-export { NoItemsOverlay, PageSizeSelect, SearchTextField };
+export { NoItemsOverlay, SearchTextField };
 export default Table;

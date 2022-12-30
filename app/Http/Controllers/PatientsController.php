@@ -19,6 +19,13 @@ class PatientsController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $id = $request->id;
         $name = $request->name;
@@ -129,10 +136,14 @@ class PatientsController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'region_id' => 'nullable|exists:regions,id',
-            'district_id' => 'nullable|exists:districts,id',
+            'first_name' => 'sometimes|required',
+            'last_name' => 'sometimes|required',
+            'gender' => 'sometimes|required|in:Male,Female',
+            'date_of_birth' => 'nullable|date_format:Y-m-d',
+            'region_id' => 'sometimes|required|exists:regions,id',
+            'district_id' => 'sometimes|required|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
-            'payment_mode_id' => 'nullable|exists:payment_modes,id',
+            'payment_mode_id' => 'sometimes|required|exists:payment_modes,id',
         ]);
 
         $data = Patient::findOrFail($id);

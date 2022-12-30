@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Chip, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -10,13 +10,13 @@ import Table from "../../../components/Table";
 import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatError, getValidationError, numberFormat } from "../../../helpers";
 import usePatch from "../../../hooks/usePatch";
 
 const ProcedureRequestItems = () => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
@@ -55,10 +55,17 @@ const ProcedureRequestItems = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       fetchItems();
       setSelectedItems([]);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const autoSave = (item, field, value) => {
     if (value !== item[field]) {
@@ -85,21 +92,6 @@ const ProcedureRequestItems = () => {
     );
 
     modalRef.current.open(title, component, "sm");
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   const getTotalAmount = () => {
@@ -233,7 +225,6 @@ const ProcedureRequestItems = () => {
                 ]
               ]}
             />
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading && <LinearProgress />}

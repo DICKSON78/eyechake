@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
-import { usePost } from "../../../hooks";
+import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreateRegion = ({ modal, onSuccess }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const nameRef = useRef();
@@ -14,16 +16,12 @@ const CreateRegion = ({ modal, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: undefined,
   });
-  const { data, loading, error, handlePost } = usePost("api/regions", formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
-    }
-  };
+  const { data, loading, error, handlePost } = usePost("api/regions", formData);
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         modal.close();
         onSuccess(data.data);
@@ -31,26 +29,22 @@ const CreateRegion = ({ modal, onSuccess }) => {
     }
   }, [data]);
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
     }
+  }, [error]);
 
-    return null;
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePost();
+    }
   };
 
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container

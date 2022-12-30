@@ -1,7 +1,10 @@
 import React from "react";
-import { Card, CardContent, Grid } from "@mui/material";
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import DatePicker from "../../../components/DatePicker";
 import TextField from "../../../components/TextField";
+
+import { debounce } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -50,8 +53,16 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               fullWidth
               label="Patient Name"
-              defaultValue={params.patient_name}
-              onChange={(value) => setParams({ ...params, patient_name: value })}
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
+              defaultValue={params.name}
+              onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -63,8 +74,16 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               fullWidth
               label="Patient Number"
-              defaultValue={params.patient_id}
-              onChange={(value) => setParams({ ...params, patient_id: value })}
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
+              defaultValue={params.id}
+              onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
             />
           </Grid>
         </Grid>

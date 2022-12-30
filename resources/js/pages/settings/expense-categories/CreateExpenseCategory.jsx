@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
-import { usePost } from "../../../hooks";
+import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreateExpenseCategory = ({ modal, fetchExpenseCategories }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const nameRef = useRef();
@@ -21,12 +23,19 @@ const CreateExpenseCategory = ({ modal, fetchExpenseCategories }) => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        modal.close();
         fetchExpenseCategories();
+        modal.close();
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -34,26 +43,11 @@ const CreateExpenseCategory = ({ modal, fetchExpenseCategories }) => {
     }
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
 
   return (
     <React.Fragment>
-      {loading && <LinearProgress />}
+      {loading ? <LinearProgress /> : null}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -67,7 +61,7 @@ const CreateExpenseCategory = ({ modal, fetchExpenseCategories }) => {
             >
               <TextField
                 ref={nameRef}
-                label="Category Name"
+                label="Name"
                 fullWidth
                 required
                 onChange={(value) => setFormData({ ...formData, name: value })}

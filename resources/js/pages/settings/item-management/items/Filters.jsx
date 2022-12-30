@@ -1,8 +1,11 @@
 import React from "react";
-import { Card, CardContent, Checkbox, FormControlLabel, Grid } from "@mui/material";
+import { Card, CardContent, Checkbox, FormControlLabel, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 import useFetch from "../../../../hooks/useFetch";
+
+import { debounce } from "../../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -34,7 +37,15 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               label="Item Name/Code"
               fullWidth
-              onChange={(value) => setParams({ ...params, q: value })}
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
+              onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -50,7 +61,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              value={itemTypes.length ? (params.item_type_id || "") : ""}
               onChange={(value) => setParams({ ...params, item_type_id: value })}
             />
           </Grid>
@@ -67,7 +77,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              value={consultationTypes.length ? (params.consultation_type_id || "") : ""}
               onChange={(value) => setParams({ ...params, consultation_type_id: value })}
             />
           </Grid>
@@ -82,7 +91,7 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Active", "Inactive"]}
               clearable
-              value={params.status || ""}
+              value={params.status || null}
               onChange={(value) => setParams({ ...params, status: value })}
             />
           </Grid>

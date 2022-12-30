@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -19,11 +18,13 @@ import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
-import { usePatch } from "../../../hooks";
+import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 import { PRIVILEGES } from "../../../constants";
 
 const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const usernameRef = useRef();
@@ -40,14 +41,9 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
 
   const { data, loading, error, handlePatch } = usePatch(`api/users/${item.id}`, formData);
 
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePatch();
-    }
-  };
-
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         fetchEmployees();
         modal.close();
@@ -55,26 +51,22 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
     }
   }, [data]);
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
     }
+  }, [error]);
 
-    return null;
+  const handleSubmit = () => {
+    if (formRef.current.validate()) {
+      handlePatch();
+    }
   };
 
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Form ref={formRef}>
           <Grid
             container
@@ -151,7 +143,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
             </CardContent>
           </Card>
 
-          <Box p={2}>
+          <Box mt={2}>
             <FormControlLabel
               control={(
                 <Checkbox

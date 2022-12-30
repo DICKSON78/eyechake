@@ -19,6 +19,11 @@ class JobTitlesController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
@@ -74,8 +79,8 @@ class JobTitlesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'nullable|unique:job_titles,name,' . $id,
-            'status' => 'nullable|in:Active,Inactive',
+            'name' => 'sometimes|required|unique:job_titles,name,' . $id,
+            'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
         $data = JobTitle::findOrFail($id);

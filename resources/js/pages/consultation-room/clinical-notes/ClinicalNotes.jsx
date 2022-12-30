@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -33,12 +32,13 @@ import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
-import { useFetch, usePatch } from "../../../hooks";
+import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
     <Paper
+      variant="elevation"
       sx={{
         bgcolor: "info.main",
         my: 2,
@@ -60,6 +60,7 @@ const Subheader = ({ title, sx }) => {
 
 const ClinicalNotes = ({ patient, consultation }) => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
@@ -116,7 +117,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
       window.setTimeout(() => {
         navigate("/consultation-room/consultation-patients/pending");
-      }, 1500);
+      }, 1000);
     }
   }, [dataComplete]);
 
@@ -125,6 +126,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
       setError(errorComplete);
     }
   }, [errorComplete]);
+
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const autoSave = (field, value) => {
     if (value !== consultation[field]) {
@@ -189,21 +202,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     );
 
     modalRef.current.open("Confirm Save", component, "sm");
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -348,34 +346,34 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 />
               </Grid>
               {/*<Grid*/}
-                {/*item*/}
-                {/*md={6}*/}
-                {/*sm={12}*/}
-                {/*xs={12}*/}
+              {/*item*/}
+              {/*md={6}*/}
+              {/*sm={12}*/}
+              {/*xs={12}*/}
               {/*>*/}
-                {/*<ConsultationItemsCard*/}
-                  {/*title="Glass"*/}
-                  {/*consultationType="Glass"*/}
-                  {/*loading={loadingItems}*/}
-                  {/*items={items}*/}
-                  {/*consultation={consultation}*/}
-                  {/*onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}*/}
-                {/*/>*/}
+              {/*<ConsultationItemsCard*/}
+              {/*title="Glass"*/}
+              {/*consultationType="Glass"*/}
+              {/*loading={loadingItems}*/}
+              {/*items={items}*/}
+              {/*consultation={consultation}*/}
+              {/*onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}*/}
+              {/*/>*/}
               {/*</Grid>*/}
               {/*<Grid*/}
-                {/*item*/}
-                {/*md={6}*/}
-                {/*sm={12}*/}
-                {/*xs={12}*/}
+              {/*item*/}
+              {/*md={6}*/}
+              {/*sm={12}*/}
+              {/*xs={12}*/}
               {/*>*/}
-                {/*<ConsultationItemsCard*/}
-                  {/*title="Others"*/}
-                  {/*consultationType="Others"*/}
-                  {/*loading={loadingItems}*/}
-                  {/*items={items}*/}
-                  {/*consultation={consultation}*/}
-                  {/*onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}*/}
-                {/*/>*/}
+              {/*<ConsultationItemsCard*/}
+              {/*title="Others"*/}
+              {/*consultationType="Others"*/}
+              {/*loading={loadingItems}*/}
+              {/*items={items}*/}
+              {/*consultation={consultation}*/}
+              {/*onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}*/}
+              {/*/>*/}
               {/*</Grid>*/}
             </Grid>
 
@@ -393,12 +391,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <FormControlLabel
                   control={(
                     <Checkbox
-                      defaultChecked={patientToReturn === "Yes"}
+                      checked={patientToReturn === "Yes"}
                       onChange={(event) => {
                         if (consultation.status === "Consulted") {
                           const value = event.target.checked ? "Yes" : "No";
                           autoSave("patient_to_return", value);
                           consultation.patient_to_return = value;
+                          if (value === "No") {
+                            autoSave("to_return_date", null);
+                          }
                         }
                         setPatientToReturn(event.target.checked ? "Yes" : "No");
                       }}
@@ -505,8 +506,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 : null
               }
             </Grid>
-
-            {handleFeedback()}
           </CardContent>
         </Form>
         {consultation.status === "Pending" ?

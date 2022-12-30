@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -27,8 +25,9 @@ import DatePicker from "../../components/DatePicker";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
-import { useFetch, usePost } from "../../hooks";
+import { useFetch, usePost, useToast } from "../../hooks";
 import {
+  debounce,
   formatDateForDb,
   formatError,
   getNonNull,
@@ -42,7 +41,7 @@ const validationRules = getValidationRules();
 
 const Stocktaking = () => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
 
   const modalRef = useRef();
   const reasonRef = useRef();
@@ -94,6 +93,18 @@ const Stocktaking = () => {
     }
   }, [itemType]);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handleAddItem = () => {
     if (quantityRef.current.validate() && unitBuyingPriceRef.current.validate()) {
       setSelectedItems([...selectedItems, {
@@ -140,21 +151,6 @@ const Stocktaking = () => {
     modalRef.current.open("Confirm Save", component, "sm");
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <Page
       breadcrumbs={[
@@ -174,7 +170,7 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={3}
+              md={3.5}
               sm={12}
               xs={12}
             >
@@ -208,7 +204,7 @@ const Stocktaking = () => {
           >
             <Grid
               item
-              md={3}
+              md={3.5}
               sm={12}
               xs={12}
             >
@@ -218,7 +214,7 @@ const Stocktaking = () => {
                   titleTypographyProps={{ variant: "subtitle1" }}
                   action={(
                     <SearchTextField
-                      onChange={(value) => setItemName(value)}
+                      onChange={(value) => debounce(() => setItemName(value), 1000)}
                     />
                   )}
                   className="no-action-margin-right"
@@ -230,7 +226,6 @@ const Stocktaking = () => {
                     fullWidth
                     clearable
                     options={["Pharmaceutical", "Lens", "Frame"]}
-                    value={itemType || ""}
                     onChange={(value) => setItemType(value)}
                   />
                   {itemType === "Lens" ?
@@ -241,11 +236,8 @@ const Stocktaking = () => {
                       options={lensTypes}
                       optionsLabel="name"
                       optionsValue="id"
-                      value={lensTypeId || ""}
                       onChange={(value) => setLensTypeId(value)}
-                      containerProps={{
-                        mt: 2
-                      }}
+                      containerProps={{ mt: 2 }}
                     />
                     : null
                   }
@@ -262,15 +254,8 @@ const Stocktaking = () => {
                           onChange={(event) => setSelectedItem(e)}
                         />
                       )}
-                      label={(
-                        <Typography
-                          variant="body2"
-                          display="inline-block"
-                        >
-                          {e.name}
-                        </Typography>
-                      )}
-                      sx={{ display: "inline-flex" }}
+                      label={<Typography variant="body2">{e.name}</Typography>}
+                      sx={{ display: "flex" }}
                     />
                   ))}
                 </CardContent>
@@ -279,7 +264,7 @@ const Stocktaking = () => {
 
             <Grid
               item
-              md={9}
+              md={8.5}
               sm={12}
               xs={12}
             >
@@ -461,7 +446,6 @@ const Stocktaking = () => {
               </Card>
             </Grid>
           </Grid>
-          {handleFeedback()}
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}

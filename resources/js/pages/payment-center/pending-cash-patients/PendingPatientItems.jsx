@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Grid, LinearProgress, Skeleton, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Grid, LinearProgress, Skeleton, Stack } from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -14,14 +14,14 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import PaymentReceiptPDF from "./PaymentReceiptPDF";
 import { pdf } from "@react-pdf/renderer";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const PendingPatientItems = () => {
 
-  const navigate = useNavigate();
+  const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
@@ -73,6 +73,7 @@ const PendingPatientItems = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       fetchItems();
 
       setSelectedItems([]);
@@ -81,6 +82,12 @@ const PendingPatientItems = () => {
       generatePaymentReceipt();
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const confirmSubmit = (title, action) => {
     if (!selectedItems.length) {
@@ -113,21 +120,6 @@ const PendingPatientItems = () => {
     modalRef.current.open(title, component, "sm");
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   const getTotalAmount = () => {
     return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
@@ -137,17 +129,19 @@ const PendingPatientItems = () => {
   };
 
   const generatePaymentReceipt = useCallback(async () => {
-    setLoadingReceipt(true);
-    const blob = await pdf(
-      <PaymentReceiptPDF
-        receipt={data.data}
-        items={data.data.items}
-        patient={patient}
-      />
-    ).toBlob();
-    setLoadingReceipt(false);
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, "_blank");
+    if (data.data.items) {
+      setLoadingReceipt(true);
+      const blob = await pdf(
+        <PaymentReceiptPDF
+          receipt={data.data}
+          items={data.data.items}
+          patient={patient}
+        />
+      ).toBlob();
+      setLoadingReceipt(false);
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    }
   }, [data]);
 
   return (
@@ -276,13 +270,11 @@ const PendingPatientItems = () => {
                   fullWidth
                   options={paymentChannels}
                   optionsLabel="name"
-                  optionsValue="id"
-                  value={paymentChannels.length ? (paymentChannel ? paymentChannel.id : "") : ""}
-                  onChange={(value) => setPaymentChannel(paymentChannels.find((e) => e.id === value))}
+                  value={paymentChannel || null}
+                  onChange={(value) => setPaymentChannel(value)}
                 />
               </Grid>
             </Grid>
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading || loadingReceipt ?
@@ -297,7 +289,7 @@ const PendingPatientItems = () => {
             flexWrap="wrap"
             p={2}
           >
-            {data ?
+            {data && data.data.items ?
               <Button
                 disabled={loading}
                 variant="contained"

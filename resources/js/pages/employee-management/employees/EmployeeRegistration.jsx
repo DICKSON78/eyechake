@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -22,12 +21,13 @@ import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 
-import { useFetch, usePost } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatDateForDb, formatError } from "../../../helpers";
 import { PRIVILEGES } from "../../../constants";
 
 const EmployeeRegistration = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
@@ -83,31 +83,24 @@ const EmployeeRegistration = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
+
       window.setTimeout(() => {
         navigate("/employee-management/employees");
       }, 1000);
     }
   }, [data]);
 
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePost();
     }
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -193,7 +186,6 @@ const EmployeeRegistration = () => {
                   fullWidth
                   required
                   options={["Male", "Female"]}
-                  value={formData.gender || ""}
                   onChange={(value) => setFormData({ ...formData, gender: value })}
                 />
               </Grid>
@@ -225,7 +217,6 @@ const EmployeeRegistration = () => {
                   options={departments}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={formData.department_id || ""}
                   onChange={(value) => setFormData({ ...formData, department_id: value })}
                 />
               </Grid>
@@ -243,7 +234,6 @@ const EmployeeRegistration = () => {
                   options={jobTitles}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={formData.job_title_id || ""}
                   onChange={(value) => setFormData({ ...formData, job_title_id: value })}
                 />
               </Grid>
@@ -327,9 +317,9 @@ const EmployeeRegistration = () => {
               <CardContent>
                 {PRIVILEGES.map((e) => (
                   <FormControlLabel
+                    key={e.value}
                     control={(
                       <Checkbox
-                        // defaultChecked={formData.privileges[e.value]}
                         onChange={(event) => setFormData({
                           ...formData,
                           privileges: { ...formData.privileges, [e.value]: event.target.checked }
@@ -342,7 +332,6 @@ const EmployeeRegistration = () => {
               </CardContent>
             </Card>
           </Form>
-          {handleFeedback()}
         </CardContent>
         <Divider />
         {loading && <LinearProgress />}

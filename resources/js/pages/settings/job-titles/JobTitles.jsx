@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect, SearchTextField } from "../../../components/Table";
+import Table, { SearchTextField } from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import CreateJobTitle from "./CreateJobTitle";
 import EditJobTitle from "./EditJobTitle";
 
-import { useFetch } from "../../../hooks";
-import { formatError } from "../../../helpers";
+import { useFetch, useToast } from "../../../hooks";
+import { debounce, formatError } from "../../../helpers";
 
 const JobTitles = () => {
+
+  const addToast = useToast();
 
   const modalRef = useRef();
 
@@ -30,6 +32,12 @@ const JobTitles = () => {
   useEffect(() => {
     document.title = `Job Titles - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const openCreateJobTitleModal = () => {
     let component = (
@@ -77,25 +85,12 @@ const JobTitles = () => {
         { title: "Job Titles" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
         <PageHeader
           title="Job Titles"
           trailing={(
             <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
-              <SearchTextField onChange={(value) => setParams({ ...params, q: value })}/>
+              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
                 disableElevation
@@ -141,7 +136,7 @@ const JobTitles = () => {
                 renderCell: (item) => (
                   <Stack
                     direction="row"
-                    alignJobTitles="center"
+                    alignItems="center"
                     divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
@@ -162,6 +157,7 @@ const JobTitles = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

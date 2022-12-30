@@ -11,6 +11,7 @@ const InfoCard = ({ title, count, icon, color }) => {
       xs={12}
     >
       <Card
+        variant="elevation"
         sx={{
           p: 3,
           backgroundColor: (theme) => theme.palette.mode === "light"

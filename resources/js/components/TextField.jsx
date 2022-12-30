@@ -62,7 +62,7 @@ class TextField extends React.Component {
         component="div"
         {...(horizontal && {
           display: "flex",
-          flexDirection: "row"
+          flexDirection: "row",
         })}
         {...containerProps}
       >
@@ -75,7 +75,7 @@ class TextField extends React.Component {
               ...(!horizontal && {
                 ml: 0.5,
                 mb: 0.5,
-              }),
+              })
             }}
           >
             {label}

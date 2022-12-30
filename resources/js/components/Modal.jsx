@@ -59,7 +59,7 @@ class Modal extends React.Component {
             maxWidth={this.state.size}
             py={2}
           >
-            <Card>
+            <Card variant="elevation">
               <CardHeader
                 title={this.state.title}
                 subheader={this.state.subtitle}

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -13,15 +12,18 @@ import {
   Grid,
   IconButton,
   LinearProgress,
-  Tooltip
+  Tooltip,
+  Typography
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 
-import { useDelete, useFetch, usePost } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
+import { debounce, formatError, getNonNull } from "../../../helpers";
 
 const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fetchDiagnoses, modal }) => {
+
+  const addToast = useToast();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
@@ -67,6 +69,18 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
     }
   }, [errorDelete]);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const handlePostDiagnosis = (item) => {
     setData(null);
     setError(null);
@@ -83,21 +97,6 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
     handleDelete(`api/consultation-diagnoses/${item.id}`);
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {(loadingPost || loadingDelete) ?
@@ -105,7 +104,6 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
         : null
       }
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Grid
           container
           spacing={2}
@@ -122,7 +120,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                 titleTypographyProps={{ variant: "subtitle1" }}
                 action={(
                   <SearchTextField
-                    onChange={(value) => setDiseaseName(value)}
+                    onChange={(value) => debounce(() => setDiseaseName(value), 1000)}
                   />
                 )}
                 className="no-action-margin-right"
@@ -135,6 +133,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                     key={e.id}
                     control={(
                       <Checkbox
+                        size="small"
                         checked={!!selected.find((f) => f.disease_id === e.id)}
                         onChange={(event) => {
                           if (event.target.checked) {
@@ -148,8 +147,8 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                         }}
                       />
                     )}
-                    label={e.name}
-                    sx={{ display: "block" }}
+                    label={<Typography variant="body2">{e.name}</Typography>}
+                    sx={{ display: "flex" }}
                   />
                 ))}
               </CardContent>

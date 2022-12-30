@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
 
 const PatientBills = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
 
@@ -45,6 +46,12 @@ const PatientBills = () => {
     setParams({ ...params, status: capitalize(status) });
   }, [status]);
 
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   return (
     <Page
       breadcrumbs={[
@@ -53,27 +60,8 @@ const PatientBills = () => {
         { title: `${capitalize(status)} Patient Bills` },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
-        <PageHeader
-          title={`${capitalize(status)} Patient Bills`}
-          trailing={(
-            <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
-            </React.Fragment>
-          )}
-        />
+        <PageHeader title={`${capitalize(status)} Patient Bills`}/>
         <Divider />
         <CardContent>
           <Filters
@@ -150,6 +138,7 @@ const PatientBills = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 import { alpha, createTheme } from "@mui/material/styles";
-import { amber, lightBlue, purple, red } from "@mui/material/colors";
+import { amber, green, grey, lightBlue, purple, red } from "@mui/material/colors";
 
 const theme = createTheme({
   palette: {
@@ -17,7 +17,7 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     success: {
-      main: "#36b555",
+      main: green[600],
       contrastText: "#fff",
     },
     warning: {
@@ -29,7 +29,7 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     neutral: {
-      main: "#808080",
+      main: grey[500],
       contrastText: "#fff",
     },
     purple: {
@@ -47,6 +47,9 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "Custom, sans-serif",
+    h4: {
+      fontSize: 22,
+    },
     h5: {
       fontSize: 18,
     },
@@ -76,7 +79,7 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          boxShadow: "0 8px 24px rgba(229, 228, 230, 0.4)",
+          boxShadow: "0 8px 24px 0 rgba(169, 184, 200, 0.24)",
         }
       }
     },
@@ -91,8 +94,20 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         elevation1: {
-          boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.15)",
+          boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
         }
+      },
+      variants: [
+        {
+          props: { variant: "outlined-elevated" },
+          style: {
+            boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
+            border: "1px solid #e5e5e5",
+          }
+        }
+      ],
+      defaultProps: {
+        variant: "outlined-elevated",
       }
     },
     MuiCardHeader: {
@@ -114,10 +129,8 @@ const theme = createTheme({
       }
     },
     MuiAlert: {
-      styleOverrides: {
-        root: {
-          boxShadow: "none",
-        }
+      defaultProps: {
+        variant: "filled",
       }
     },
     MuiChip: {
@@ -213,6 +226,9 @@ const theme = createTheme({
         root: {
           verticalAlign: "bottom",
           fontSize: "1.25rem",
+        },
+        fontSizeSmall: {
+          fontSize: "1.05rem",
         }
       }
     },

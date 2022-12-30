@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
 
 const DispensingRequests = ({ consultationType }) => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
 
@@ -44,6 +45,12 @@ const DispensingRequests = ({ consultationType }) => {
     document.title = `Dispensing Requests - ${window.APP_NAME}`;
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   return (
     <Page
       breadcrumbs={[
@@ -52,27 +59,8 @@ const DispensingRequests = ({ consultationType }) => {
         { title: "Dispensing Requests" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
-        <PageHeader
-          title="Dispensing Requests"
-          trailing={(
-            <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
-            </React.Fragment>
-          )}
-        />
+        <PageHeader title="Dispensing Requests"/>
         <Divider />
         <CardContent>
           <Filters
@@ -149,6 +137,7 @@ const DispensingRequests = ({ consultationType }) => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

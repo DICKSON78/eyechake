@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -19,12 +18,14 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import Table from "../../../components/Table";
 
-import { useDelete, useFetch, usePost } from "../../../hooks";
+import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
 import { formatError, getNonNull, getValidationRules, numberFormat } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const PatientBillPayments = ({ bill, fetchBill, modal }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const paymentChannelRef = useRef();
@@ -90,6 +91,17 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
     }
   }, [errorDelete]);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -105,21 +117,6 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
     handleDelete(`api/patient-item-bill-payments/${item.id}`);
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   const getTotalAmount = () => {
     return billPayments.reduce((acc, e) => acc + e.amount, 0);
   };
@@ -131,7 +128,6 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
         : null
       }
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Grid
           container
           spacing={2}
@@ -159,7 +155,6 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                       options={paymentChannels}
                       optionsLabel="name"
                       optionsValue="id"
-                      value={formData.channel_id || ""}
                       onChange={(value) => setFormData({ ...formData, channel_id: value })}
                       containerProps={{ sx: { mb: 2 } }}
                     />

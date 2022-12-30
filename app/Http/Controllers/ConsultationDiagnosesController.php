@@ -20,6 +20,11 @@ class ConsultationDiagnosesController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $consultation_id = $request->consultation_id;
         $diagnosis_type = $request->diagnosis_type;

@@ -17,6 +17,13 @@ class PaymentCenterReportsController extends Controller
 
     public function getCashCollectionReport(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $payment_channel_id = $request->payment_channel_id;
         $patient_name = $request->patient_name;

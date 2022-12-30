@@ -1,19 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Alert, Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../../components/Page";
-import Table, { PageSizeSelect } from "../../../../components/Table";
+import Table from "../../../../components/Table";
 import Modal from "../../../../components/Modal";
 import Filters from "./Filters";
 import CreateItem from "./CreateItem";
 import EditItem from "./EditItem";
 import ManageItemPrices from "./ManageItemPrices";
 
-import { useFetch } from "../../../../hooks";
+import { useFetch, useToast } from "../../../../hooks";
 import { formatError, getNonNull } from "../../../../helpers";
 
 const Items = () => {
+
+  const addToast = useToast();
 
   const modalRef = useRef();
 
@@ -36,6 +38,12 @@ const Items = () => {
   useEffect(() => {
     document.title = `Items - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const openCreateItemModal = () => {
     let component = (
@@ -96,24 +104,11 @@ const Items = () => {
         { title: "Items" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
         <PageHeader
           title="Items"
           trailing={(
             <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
               <Button
                 variant="contained"
                 disableElevation
@@ -219,6 +214,7 @@ const Items = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>

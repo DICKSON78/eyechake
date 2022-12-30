@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -19,12 +18,14 @@ import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 import Table from "../../../../components/Table";
 
-import { useDelete, useFetch, usePost } from "../../../../hooks";
+import { useDelete, useFetch, usePost, useToast } from "../../../../hooks";
 import { formatError, getNonNull, getValidationRules, numberFormat } from "../../../../helpers";
 
 const validationRules = getValidationRules();
 
 const ManageItemPrices = ({ item, modal }) => {
+
+  const addToast = useToast();
 
   const formRef = useRef();
   const paymentModeRef = useRef();
@@ -88,6 +89,17 @@ const ManageItemPrices = ({ item, modal }) => {
     }
   }, [errorDelete]);
 
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
@@ -103,21 +115,6 @@ const ManageItemPrices = ({ item, modal }) => {
     handleDelete(`api/item-prices/${item.id}`);
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mb: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <React.Fragment>
       {(loadingFetchItemPrices || loadingPost || loadingDelete) ?
@@ -125,14 +122,13 @@ const ManageItemPrices = ({ item, modal }) => {
         : null
       }
       <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
-        {handleFeedback()}
         <Grid
           container
           spacing={2}
         >
           <Grid
             item
-            md={6}
+            md={5}
             sm={12}
             xs={12}
           >
@@ -152,7 +148,6 @@ const ManageItemPrices = ({ item, modal }) => {
                     options={paymentModes}
                     optionsLabel="name"
                     optionsValue="id"
-                    value={formData.payment_mode_id || ""}
                     onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
                     containerProps={{ sx: { mb: 2 } }}
                   />
@@ -184,7 +179,7 @@ const ManageItemPrices = ({ item, modal }) => {
           </Grid>
           <Grid
             item
-            md={6}
+            md={7}
             sm={12}
             xs={12}
           >

@@ -21,6 +21,11 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $id = $request->id;
         $name = $request->name;
@@ -132,22 +137,26 @@ class UsersController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'username' => 'nullable|unique:users,username,' . $id,
-            'department_id' => 'nullable|exists:departments,id',
-            'job_title_id' => 'nullable|exists:job_titles,id',
+            'first_name' => 'sometimes|required',
+            'last_name' => 'sometimes|required',
+            'username' => 'sometimes|required|unique:users,username,' . $id,
+            'gender' => 'sometimes|required|in:Male,Female',
+            'date_of_birth' => 'nullable|date_format:Y-m-d',
+            'department_id' => 'sometimes|required|exists:departments,id',
+            'job_title_id' => 'sometimes|required|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number,' . $id,
-            'status' => 'nullable|in:Active,Inactive',
-            'privileges.dashboard' => 'nullable|boolean',
-            'privileges.reception' => 'nullable|boolean',
-            'privileges.payment_center' => 'nullable|boolean',
-            'privileges.consultation_room' => 'nullable|boolean',
-            'privileges.optician_center' => 'nullable|boolean',
-            'privileges.medicine_center' => 'nullable|boolean',
-            'privileges.procedure_room' => 'nullable|boolean',
-            'privileges.inventory_management' => 'nullable|boolean',
-            'privileges.financial_management' => 'nullable|boolean',
-            'privileges.employee_management' => 'nullable|boolean',
-            'privileges.settings' => 'nullable|boolean',
+            'status' => 'sometimes|required|in:Active,Inactive',
+            'privileges.dashboard' => 'sometimes|required|boolean',
+            'privileges.reception' => 'sometimes|required|boolean',
+            'privileges.payment_center' => 'sometimes|required|boolean',
+            'privileges.consultation_room' => 'sometimes|required|boolean',
+            'privileges.optician_center' => 'sometimes|required|boolean',
+            'privileges.medicine_center' => 'sometimes|required|boolean',
+            'privileges.procedure_room' => 'sometimes|required|boolean',
+            'privileges.inventory_management' => 'sometimes|required|boolean',
+            'privileges.financial_management' => 'sometimes|required|boolean',
+            'privileges.employee_management' => 'sometimes|required|boolean',
+            'privileges.settings' => 'sometimes|required|boolean',
         ]);
 
         $data = User::findOrFail($id);

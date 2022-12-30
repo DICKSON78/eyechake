@@ -19,6 +19,13 @@ class ExpensesController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $category_id = $request->category_id;
@@ -100,10 +107,10 @@ class ExpensesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'category_id' => 'nullable|exists:expense_categories,id',
-            'total_amount' => 'nullable|numeric|min:0',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'expense_date' => 'nullable|date_format:Y-m-d',
+            'category_id' => 'sometimes|required|exists:expense_categories,id',
+            'total_amount' => 'sometimes|required|numeric|min:0',
+            'paid_amount' => 'sometimes|required|numeric|min:0',
+            'expense_date' => 'sometimes|required|date_format:Y-m-d',
         ]);
 
         $data = Expense::findOrFail($id);

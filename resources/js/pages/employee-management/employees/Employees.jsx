@@ -1,32 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  Tooltip
-} from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
-import Table, { PageSizeSelect } from "../../../components/Table";
+import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import EditEmployee from "./EditEmployee";
 import EditEmployeeAccessDetails from "./EditEmployeeAccessDetails";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatError, getNonNull } from "../../../helpers";
 
 const Employees = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
 
@@ -53,6 +42,12 @@ const Employees = () => {
   useEffect(() => {
     document.title = `Employees - ${window.APP_NAME}`;
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const openEditEmployeeModal = (item) => {
     let component = (
@@ -106,24 +101,11 @@ const Employees = () => {
         { title: "Employees" },
       ]}
     >
-      {error ?
-        <Alert
-          sx={{ mb: 2 }}
-          severity="error"
-        >
-          {formatError(error)}
-        </Alert>
-        : null
-      }
       <Card>
         <PageHeader
           title="Employees"
           trailing={(
             <React.Fragment>
-              <PageSizeSelect
-                pageSize={params.per_page}
-                onChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
-              />
               <Button
                 variant="contained"
                 disableElevation
@@ -230,6 +212,7 @@ const Employees = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
+            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
           />
         </CardContent>
       </Card>
@@ -240,6 +223,7 @@ const Employees = () => {
             vertical: "bottom",
             horizontal: "left",
           }}
+          PaperProps={{ variant: "elevation" }}
           open={isMenuOpen}
           onClose={handleMenuClose}
         >

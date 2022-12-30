@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Box, Button, InputAdornment, LinearProgress, Paper } from "@mui/material";
+import { Alert, Box, Button, InputAdornment, LinearProgress } from "@mui/material";
 import {
   Lock as LockIcon,
   Person2 as UsernameIcon,
@@ -10,8 +10,6 @@ import {
 } from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
-
-import logo from "../../../images/logo.png";
 
 import { usePost } from "../../hooks";
 import { formatError } from "../../helpers";
@@ -57,7 +55,10 @@ const LogIn = () => {
     if (data || error) {
       return (
         <Alert
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 2,
+            border: "none",
+          }}
           severity={error ? "error" : "success"}
         >
           {error ? formatError(error) : data ? data.message : null}
@@ -70,86 +71,73 @@ const LogIn = () => {
 
   return (
     <React.Fragment>
-      <Paper variant="outlined">
-        {loading &&
-        <LinearProgress
-          sx={{
-            borderTopLeftRadius: (theme) => theme.shape.borderRadius,
-            borderTopRightRadius: (theme) => theme.shape.borderRadius
-          }}
-        />}
-        <Box p={2}>
-          <Box
-            component="img"
-            display="block"
-            width={80}
-            mb={2}
-            mx="auto"
-            alt="Logo"
-            src={logo}
+      <Box p={2}>
+        {handleFeedback()}
+        <Form
+          ref={formRef}
+          onSubmit={handleSubmit}
+        >
+          <TextField
+            ref={usernameRef}
+            placeholder="Username"
+            fullWidth
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <UsernameIcon />
+                </InputAdornment>
+              ),
+            }}
+            containerProps={{ sx: { mb: 2 } }}
+            onChange={(value) => setFormData({ ...formData, username: value })}
           />
-
-          {handleFeedback()}
-
-          <Form
-            ref={formRef}
-            onSubmit={handleSubmit}
+          <TextField
+            ref={passwordRef}
+            placeholder="Password"
+            type={showPassword ? "text" : "password"}
+            fullWidth
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                </InputAdornment>
+              ),
+            }}
+            containerProps={{ sx: { mb: 2 } }}
+            onChange={(value) => setFormData({ ...formData, password: value })}
+          />
+          <Button
+            disabled={loading}
+            fullWidth
+            disableElevation
+            variant="contained"
+            color="primary"
+            size="large"
+            type="submit"
+            onClick={handleSubmit}
           >
-            <TextField
-              ref={usernameRef}
-              placeholder="Username"
-              fullWidth
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <UsernameIcon />
-                  </InputAdornment>
-                ),
-              }}
-              containerProps={{ sx: { mb: 2 } }}
-              onChange={(value) => setFormData({ ...formData, username: value })}
-            />
-            <TextField
-              ref={passwordRef}
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              fullWidth
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment
-                    position="end"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </InputAdornment>
-                ),
-              }}
-              containerProps={{ sx: { mb: 2 } }}
-              onChange={(value) => setFormData({ ...formData, password: value })}
-            />
-            <Button
-              disabled={loading}
-              fullWidth
-              disableElevation
-              variant="contained"
-              color="primary"
-              size="large"
-              type="submit"
-              onClick={handleSubmit}
-            >
-              Login
-            </Button>
-          </Form>
-        </Box>
-      </Paper>
+            Login
+          </Button>
+        </Form>
+      </Box>
+      {loading &&
+      <LinearProgress
+        sx={{
+          borderBottomLeftRadius: (theme) => theme.shape.borderRadius,
+          borderBottomRightRadius: (theme) => theme.shape.borderRadius
+        }}
+      />}
     </React.Fragment>
   );
 };

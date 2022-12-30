@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, CardContent, Grid } from "@mui/material";
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import DatePicker from "../../../components/DatePicker";
@@ -8,7 +9,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getAge, getDateRangeTitle, getNonNull } from "../../../helpers";
+import { debounce, formatDateForDb, getAddress, getAge, getDateRangeTitle, getNonNull } from "../../../helpers";
 
 const PatientRegistration = () => {
 
@@ -119,8 +120,16 @@ const PatientRegistration = () => {
                     <TextField
                       fullWidth
                       label="Patient Name"
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
                       defaultValue={params.name}
-                      onChange={(value) => setParams({ ...params, name: value })}
+                      onChange={(value) => debounce(() => setParams({ ...params, name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -132,8 +141,16 @@ const PatientRegistration = () => {
                     <TextField
                       fullWidth
                       label="Patient Number"
-                      defaultValue={params.patient_id}
-                      onChange={(value) => setParams({ ...params, id: value })}
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      defaultValue={params.id}
+                      onChange={(value) => debounce(() => setParams({ ...params, id: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -147,7 +164,6 @@ const PatientRegistration = () => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      value={params.gender || ""}
                       onChange={(value) => setParams({ ...params, gender: value })}
                     />
                   </Grid>
@@ -164,7 +180,6 @@ const PatientRegistration = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={paymentModes.length ? (params.payment_mode_id || "") : ""}
                       onChange={(value) => setParams({ ...params, payment_mode_id: value })}
                     />
                   </Grid>
@@ -181,7 +196,6 @@ const PatientRegistration = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={params.region_id || ""}
                       onChange={(value) => setParams({ ...params, region_id: value })}
                     />
                   </Grid>
@@ -199,7 +213,7 @@ const PatientRegistration = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      value={params.district_id || ""}
+                      value={districts.find((e) => e.id === params.district_id) || null}
                       onChange={(value) => setParams({ ...params, district_id: value })}
                     />
                   </Grid>
@@ -231,9 +245,9 @@ const PatientRegistration = () => {
             headerName: "Phone Number",
           },
           {
-            field: "region_id",
-            headerName: "Location",
-            valueGetter: (item, index) => `${getNonNull(item.district).name}, ${getNonNull(item.region).name}`,
+            field: "address",
+            headerName: "Address",
+            valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
           },
           {
             field: "payment_mode_id",

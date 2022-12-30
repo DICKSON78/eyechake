@@ -1,8 +1,11 @@
 import React from "react";
-import { Card, CardContent, Grid } from "@mui/material";
+import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/SearchRounded";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import useFetch from "../../../hooks/useFetch";
+
+import { debounce } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -30,8 +33,16 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               fullWidth
               label="Patient Name"
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
               defaultValue={params.name}
-              onChange={(value) => setParams({ ...params, name: value })}
+              onChange={(value) => debounce(() => setParams({ ...params, name: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -43,8 +54,16 @@ const Filters = ({ params, setParams, ...rest }) => {
             <TextField
               fullWidth
               label="Patient Number"
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
               defaultValue={params.id}
-              onChange={(value) => setParams({ ...params, id: value })}
+              onChange={(value) => debounce(() => setParams({ ...params, id: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -58,7 +77,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Male", "Female"]}
               clearable
-              value={params.gender || ""}
               onChange={(value) => setParams({ ...params, gender: value })}
             />
           </Grid>
@@ -75,7 +93,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              value={paymentModes.length ? (params.payment_mode_id || "") : ""}
               onChange={(value) => setParams({ ...params, payment_mode_id: value })}
             />
           </Grid>
@@ -90,7 +107,6 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Yes", "No"]}
               clearable
-              value={params.is_vip || ""}
               onChange={(value) => setParams({ ...params, is_vip: value })}
             />
           </Grid>

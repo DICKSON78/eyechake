@@ -455,7 +455,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               selected={location.pathname.indexOf(e.to) !== -1}
               onClick={() => {
                 if (e.items && e.items.length) {
-                  setOpen(!open ? e.to : null);
+                  setOpen(open === e.to ? null : e.to);
                 } else {
                   if (typeof setDrawerOpen === "function") {
                     setDrawerOpen(false);

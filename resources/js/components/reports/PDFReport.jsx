@@ -27,7 +27,7 @@ const PDFReportDocument = ({ title, subtitle, orientation, columns, items, neste
     let footerColumns = [
       { value: null, style: { flex: 0.5 } }, // index cell
       ...columns.map((col) => {
-        return { value: null };
+        return { value: null, style: col.style };
       })
     ];
 

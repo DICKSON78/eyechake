@@ -1,18 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  Alert,
-  Button,
-  Card,
-  CardContent,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography
-} from "@mui/material";
+import { Button, Card, CardContent, Divider, Grid, LinearProgress, Paper, Stack, Typography } from "@mui/material";
 
 import { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -24,12 +13,13 @@ import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "../../consultation-room/clinical-notes/SelectItems";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
-import { useFetch, usePatch } from "../../../hooks";
+import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatError, getValidationError } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
     <Paper
+      variant="elevation"
       sx={{
         bgcolor: "info.main",
         my: 2,
@@ -51,6 +41,7 @@ const Subheader = ({ title, sx }) => {
 
 const ClinicalNotes = ({ patient, consultation }) => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
@@ -99,6 +90,19 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   }, [errorComplete]);
 
+
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
   const autoSave = (field, value) => {
     if (value !== consultation[field]) {
       handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
@@ -145,21 +149,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     );
 
     modalRef.current.open("Confirm Save", component, "sm");
-  };
-
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
   };
 
   return (
@@ -248,8 +237,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 />
               </Grid>
             </Grid>
-
-            {handleFeedback()}
           </CardContent>
         </Form>
         {consultation.optician_status === "Pending" ?

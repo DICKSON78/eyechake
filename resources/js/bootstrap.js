@@ -1,6 +1,3 @@
-import _ from "lodash";
-window._ = _;
-
 window.APP_NAME = "EyeCare";
 
 /**
@@ -18,9 +15,9 @@ window.axios.interceptors.request.use((config) => {
     return config;
   }
 );
-window.axios.interceptors.response.use(response => {
+window.axios.interceptors.response.use((response) => {
   return response;
-}, error => {
+}, (error) => {
   if (error.response && error.response.status === 401 && window.location.href.indexOf("/login") === -1) {
     return window.location.href = "/login";
   }

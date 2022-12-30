@@ -19,6 +19,11 @@ class ItemPricesController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $item_id = $request->item_id;
         $payment_mode_id = $request->payment_mode_id;
@@ -85,9 +90,9 @@ class ItemPricesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'item_id' => 'nullable|exists:items,id',
-            'payment_mode_id' => 'nullable|exists:payment_modes,id',
-            'unit_price' => 'nullable|numeric|min:0',
+            'item_id' => 'sometimes|required|exists:items,id',
+            'payment_mode_id' => 'sometimes|required|exists:payment_modes,id',
+            'unit_price' => 'sometimes|required|numeric|min:0',
         ]);
 
         $data = ItemPrice::findOrFail($id);

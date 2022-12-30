@@ -1,5 +1,5 @@
 import { alpha, createTheme } from "@mui/material/styles";
-import { amber, purple, red } from "@mui/material/colors";
+import { amber, green, grey, lightBlue, purple, red } from "@mui/material/colors";
 
 const theme = createTheme({
   palette: {
@@ -13,11 +13,11 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     info: {
-      main: "#345ea8",
+      main: lightBlue[600],
       contrastText: "#fff",
     },
     success: {
-      main: "#36b555",
+      main: green[600],
       contrastText: "#fff",
     },
     warning: {
@@ -29,7 +29,7 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     neutral: {
-      main: "#808080",
+      main: grey[600],
       contrastText: "#fff",
     },
     purple: {
@@ -44,6 +44,9 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "Custom, sans-serif",
+    h4: {
+      fontSize: 22,
+    },
     h5: {
       fontSize: 18,
     },
@@ -81,7 +84,7 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.36)",
+          boxShadow: "0 8px 24px 0 rgba(0, 0, 0, 0.15)",
         }
       }
     },
@@ -101,7 +104,16 @@ const theme = createTheme({
         elevation1: {
           boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
         }
-      }
+      },
+      variants: [
+        {
+          props: { variant: "outlined-elevated" },
+          style: {
+            boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+          }
+        }
+      ]
     },
     MuiCard: {
       styleOverrides: {
@@ -129,10 +141,8 @@ const theme = createTheme({
       }
     },
     MuiAlert: {
-      styleOverrides: {
-        root: {
-          boxShadow: "none",
-        }
+      defaultProps: {
+        variant: "filled",
       }
     },
     MuiChip: {
@@ -225,6 +235,9 @@ const theme = createTheme({
         root: {
           verticalAlign: "bottom",
           fontSize: "1.25rem",
+        },
+        fontSizeSmall: {
+          fontSize: "1.05rem",
         }
       }
     },

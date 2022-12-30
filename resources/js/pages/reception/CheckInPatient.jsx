@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
-  Alert,
   Button,
   Card,
   CardContent,
@@ -28,13 +27,14 @@ import Select from "../../components/Select";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
-import { useFetch, usePost } from "../../hooks";
-import { formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../helpers";
+import { useFetch, usePost, useToast } from "../../hooks";
+import { debounce, formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../helpers";
 
 const validationRules = getValidationRules();
 
 const CheckInPatient = () => {
 
+  const addToast = useToast();
   const navigate = useNavigate();
   const { patientId } = useParams();
 
@@ -129,11 +129,18 @@ const CheckInPatient = () => {
 
   useEffect(() => {
     if (data) {
+      addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
         navigate("/reception/patients");
       }, 1000);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
 
   const handleAddItem = () => {
     if (consultantRef.current.validate() && quantityRef.current.validate()) {
@@ -179,21 +186,6 @@ const CheckInPatient = () => {
     modalRef.current.open(title, component, "sm");
   };
 
-  const handleFeedback = () => {
-    if (data || error) {
-      return (
-        <Alert
-          sx={{ mt: 2 }}
-          severity={error ? "error" : "success"}
-        >
-          {error ? formatError(error) : data ? data.message : null}
-        </Alert>
-      );
-    }
-
-    return null;
-  };
-
   const getTotalAmount = () => {
     return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
   };
@@ -234,7 +226,7 @@ const CheckInPatient = () => {
             >
               <Grid
                 item
-                md={3}
+                md={3.5}
                 sm={12}
                 xs={12}
               >
@@ -246,9 +238,9 @@ const CheckInPatient = () => {
                   required
                   options={paymentModes}
                   optionsLabel="name"
-                  optionsValue="id"
-                  value={paymentModes.length ? (paymentMode ? paymentMode.id : "") : ""}
-                  onChange={(value) => setPaymentMode(paymentModes.find((e) => e.id === value))}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  value={paymentMode || null}
+                  onChange={(value) => setPaymentMode(value)}
                 />
               </Grid>
               <Grid
@@ -264,8 +256,7 @@ const CheckInPatient = () => {
                   options={users}
                   optionsLabel="full_name"
                   optionsValue="id"
-                  value={users.length ? (consultant ? consultant.id : "") : ""}
-                  onChange={(value) => setConsultant(users.find((e) => e.id === value))}
+                  onChange={(value) => setConsultant(value)}
                 />
               </Grid>
             </Grid>
@@ -276,7 +267,7 @@ const CheckInPatient = () => {
             >
               <Grid
                 item
-                md={3}
+                md={3.5}
                 sm={12}
                 xs={12}
               >
@@ -286,7 +277,7 @@ const CheckInPatient = () => {
                     titleTypographyProps={{ variant: "subtitle1" }}
                     action={(
                       <SearchTextField
-                        onChange={(value) => setItemName(value)}
+                        onChange={(value) => debounce(() => setItemName(value), 1000)}
                       />
                     )}
                     className="no-action-margin-right"
@@ -298,7 +289,6 @@ const CheckInPatient = () => {
                       fullWidth
                       clearable
                       options={itemTypes}
-                      value={itemType || ""}
                       onChange={(value) => setItemType(value)}
                     />
                     {itemType === "Lens" ?
@@ -309,11 +299,8 @@ const CheckInPatient = () => {
                         options={lensTypes}
                         optionsLabel="name"
                         optionsValue="id"
-                        value={lensTypeId || ""}
                         onChange={(value) => setLensTypeId(value)}
-                        containerProps={{
-                          mt: 2
-                        }}
+                        containerProps={{ mt: 2 }}
                       />
                       : null
                     }
@@ -330,15 +317,8 @@ const CheckInPatient = () => {
                             onChange={(event) => setSelectedItem(e)}
                           />
                         )}
-                        label={(
-                          <Typography
-                            variant="body2"
-                            display="inline-block"
-                          >
-                            {e.name}
-                          </Typography>
-                        )}
-                        sx={{ display: "inline-flex" }}
+                        label={<Typography variant="body2">{e.name}</Typography>}
+                        sx={{ display: "flex" }}
                       />
                     ))}
                   </CardContent>
@@ -347,7 +327,7 @@ const CheckInPatient = () => {
 
               <Grid
                 item
-                md={9}
+                md={8.5}
                 sm={12}
                 xs={12}
               >
@@ -513,7 +493,6 @@ const CheckInPatient = () => {
                 </Card>
               </Grid>
             </Grid>
-            {handleFeedback()}
           </CardContent>
           <Divider />
           {loading && <LinearProgress />}

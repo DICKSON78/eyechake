@@ -19,6 +19,11 @@ class PaymentModesController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:0',
+            'page' => 'sometimes|integer|min:1',
+        ]);
+
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
         $q = $request->q;
@@ -80,9 +85,9 @@ class PaymentModesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'nullable|unique:payment_modes,name,' . $id,
-            'payment_type' => 'nullable|in:Cash,Credit',
-            'status' => 'nullable|in:Active,Inactive',
+            'name' => 'sometimes|required|unique:payment_modes,name,' . $id,
+            'payment_type' => 'sometimes|required|in:Cash,Credit',
+            'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
         $data = PaymentMode::findOrFail($id);
