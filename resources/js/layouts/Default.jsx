@@ -183,7 +183,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   </Typography>
                 </Typography>
 
-                <Box sx={{ flexGrow: 1 }}/>
+                <Box flexGrow={1}/>
 
                 <Tooltip title={theme.palette.mode === "light" ? "Enable dark mode" : "Disable dark mode"}>
                   <IconButton

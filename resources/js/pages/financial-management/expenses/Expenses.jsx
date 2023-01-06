@@ -100,11 +100,11 @@ const Expenses = ({ module, createdBy }) => {
 
   const getStatus = (item) => {
     if (item.paid_amount < item.total_amount) {
-      return "Pending"
+      return "Pending";
     }
 
     if (item.paid_amount >= item.total_amount) {
-      return "Cleared"
+      return "Cleared";
     }
   };
 
