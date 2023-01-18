@@ -291,11 +291,11 @@ const PendingPatientItems = () => {
           >
             {data && data.data.items ?
               <Button
-                disabled={loading}
+                disabled={loadingReceipt}
                 variant="contained"
                 color="purple"
                 disableElevation
-                onClick={() => generatePaymentReceipt()}
+                onClick={generatePaymentReceipt}
               >
                 Print Receipt
               </Button>

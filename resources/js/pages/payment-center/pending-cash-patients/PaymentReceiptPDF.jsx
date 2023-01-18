@@ -58,9 +58,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             { label: "Created By", value: getNonNull(receipt.creator).full_name },
             { label: "Date Created", value: receipt.created_at },
           ]}
-          containerStyle={{
-            marginBottom: 8
-          }}
+          containerStyle={{ marginBottom: 8 }}
         />
 
         <Table
@@ -81,19 +79,19 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             {
               field: "quantity",
               headerName: "Quantity",
-              valueGetter: (item, index) => numberFormat(item.quantity || 0),
+              valueGetter: (item, index) => numberFormat(item.quantity),
             },
             {
               field: "total_price",
               headerName: "Subtotal",
-              valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+              valueGetter: (item, index) => numberFormat((item.unit_price || 0) * item.quantity),
             }
           ]}
           items={items}
           footerItems={[
             [
               { value: "TOTAL", style: { flex: 0.786 }, },
-              { value: numberFormat(getTotalAmount() || 0), style: { flex: 0.214 }, }
+              { value: numberFormat(getTotalAmount()), style: { flex: 0.214 }, }
             ]
           ]}
         />
@@ -101,7 +99,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
         <Descriptions
           columns={2}
           items={[
-            { label: "GRAND TOTAL", value: numberFormat((getTotalAmount() || 0) - receipt.discount) },
+            { label: "GRAND TOTAL", value: numberFormat((getTotalAmount()) - receipt.discount) },
           ]}
           valueStyle={{ fontWeight: "bold" }}
         />

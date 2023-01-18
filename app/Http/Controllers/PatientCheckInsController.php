@@ -129,6 +129,7 @@ class PatientCheckInsController extends Controller
                             'payment_mode_id' => $input_item['payment_mode_id'],
                             'unit_price' => $item->prices[0]->unit_price,
                             'quantity' => $input_item['quantity'],
+                            'comments' => Arr::get($input_item, 'comments'),
                             'created_by' => $user->id,
                         ]);
                     }

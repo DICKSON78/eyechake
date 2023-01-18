@@ -28,7 +28,14 @@ import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
-import { debounce, formatError, getValidationError, getValidationRules, numberFormat, validateInteger } from "../../helpers";
+import {
+  debounce,
+  formatError,
+  getValidationError,
+  getValidationRules,
+  numberFormat,
+  validateInteger
+} from "../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -67,6 +74,7 @@ const CheckInPatient = () => {
   const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
+  const [comments, setComments] = useState(1);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
@@ -152,12 +160,14 @@ const CheckInPatient = () => {
         consultation_type_id: selectedItem.consultation_type_id,
         unit_price: selectedItem.prices[0].unit_price,
         quantity,
+        comments,
         consultant_id: consultant ? consultant.id : null,
         consultant_name: consultant ? consultant.full_name : null,
       }]);
 
       setSelectedItem(null);
       setQuantity(1);
+      setComments(undefined);
     }
   };
 
@@ -349,7 +359,7 @@ const CheckInPatient = () => {
                       >
                         <Grid
                           item
-                          md={4}
+                          md={3}
                           sm={4}
                           xs={12}
                         >
@@ -364,7 +374,7 @@ const CheckInPatient = () => {
                         </Grid>
                         <Grid
                           item
-                          md={3}
+                          md={1.5}
                           sm={4}
                           xs={12}
                         >
@@ -377,7 +387,7 @@ const CheckInPatient = () => {
                         </Grid>
                         <Grid
                           item
-                          md={2}
+                          md={1.5}
                           sm={4}
                           xs={12}
                         >
@@ -395,6 +405,18 @@ const CheckInPatient = () => {
                               value = validateInteger(value);
                               setQuantity(value);
                             }}
+                          />
+                        </Grid>
+                        <Grid
+                          item
+                          md={3}
+                          sm={4}
+                          xs={12}
+                        >
+                          <TextField
+                            label="Comments"
+                            fullWidth
+                            onChange={(value) => setComments(value)}
                           />
                         </Grid>
                         <Grid
@@ -461,6 +483,10 @@ const CheckInPatient = () => {
                           field: "total_price",
                           headerName: "Subtotal",
                           valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                        },
+                        {
+                          field: "comments",
+                          headerName: "Comments",
                         },
                         {
                           field: "actions",

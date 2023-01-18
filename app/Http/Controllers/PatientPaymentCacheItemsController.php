@@ -200,7 +200,7 @@ class PatientPaymentCacheItemsController extends Controller
                             ]);
                         } else {
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
-                                Consultation::create([
+                                $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
                                     'consultant' => 'Optician',
                                     'consultant_id' => $item->consultant_id,
@@ -210,6 +210,9 @@ class PatientPaymentCacheItemsController extends Controller
                                     'sent_to_optician_by' => $user->id,
                                     'optician_status' => 'Pending',
                                 ]);
+
+                                $item->payment_cache->consultation_id = $consultation->id;
+                                $item->payment_cache->save();
                             }
                         }
                     }
@@ -261,7 +264,7 @@ class PatientPaymentCacheItemsController extends Controller
                         ]);
                     } else {
                         if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
-                            Consultation::create([
+                            $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
                                 'consultant' => 'Optician',
                                 'consultant_id' => $item->consultant_id,
@@ -271,6 +274,9 @@ class PatientPaymentCacheItemsController extends Controller
                                 'sent_to_optician_by' => $user->id,
                                 'optician_status' => 'Pending',
                             ]);
+
+                            $item->payment_cache->consultation_id = $consultation->id;
+                            $item->payment_cache->save();
                         }
                     }
                 }
@@ -321,7 +327,7 @@ class PatientPaymentCacheItemsController extends Controller
                             ]);
                         } else {
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
-                                Consultation::create([
+                                $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
                                     'consultant' => 'Optician',
                                     'consultant_id' => $item->consultant_id,
@@ -331,6 +337,9 @@ class PatientPaymentCacheItemsController extends Controller
                                     'sent_to_optician_by' => $user->id,
                                     'optician_status' => 'Pending',
                                 ]);
+
+                                $item->payment_cache->consultation_id = $consultation->id;
+                                $item->payment_cache->save();
                             }
                         }
                     }
