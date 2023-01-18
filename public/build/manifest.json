@@ -1,11 +1,11 @@
 {
-  "resources/images/logo.png": {
-    "file": "assets/logo.1ba8d48c.png",
-    "src": "resources/images/logo.png"
-  },
   "resources/images/loader.svg": {
     "file": "assets/loader.80d3ba24.svg",
     "src": "resources/images/loader.svg"
+  },
+  "resources/images/logo.png": {
+    "file": "assets/logo.6e1675b6.png",
+    "src": "resources/images/logo.png"
   },
   "resources/fonts/Custom-Regular.ttf": {
     "file": "assets/Custom-Regular.707fdc5c.ttf",
@@ -20,11 +20,11 @@
     "src": "resources/fonts/Custom-Bold.ttf"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app.2993c2e9.js",
+    "file": "assets/app.5ba47315.js",
     "src": "resources/js/app.jsx",
     "isEntry": true,
     "assets": [
-      "assets/logo.1ba8d48c.png",
+      "assets/logo.6e1675b6.png",
       "assets/loader.80d3ba24.svg",
       "assets/Custom-Regular.707fdc5c.ttf",
       "assets/Custom-Italic.3225cec6.ttf",
