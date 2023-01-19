@@ -53,7 +53,7 @@ const App = () => {
             }
           }}
         />
-        <Router>
+        <Router basename="/">
           <Routes>
             <Route
               path="/"
