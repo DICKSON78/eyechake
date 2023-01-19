@@ -356,11 +356,14 @@ class ConsultationsController extends Controller
 
         $data->update($input);
 
-        $data->payment_cache_item->update([
-            'status' => 'Served',
-            'served_at' => Carbon::now(),
-            'served_by' => $user->id,
-        ]);
+        // update item if it is not dispensable
+        if ($data->payment_cache_item->item->is_stock_item == 'No') {
+            $data->payment_cache_item->update([
+                'status' => 'Served',
+                'served_at' => Carbon::now(),
+                'served_by' => $user->id,
+            ]);
+        }
 
         if ($request->send_to_optician == 'Yes') {
             $data->update([
