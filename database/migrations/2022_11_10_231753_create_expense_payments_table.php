@@ -13,19 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('expense_payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id');
-            $table->double('total_amount')->unsigned();
+            $table->foreignId('expense_id');
+            $table->double('amount')->unsigned();
             $table->string('description')->nullable();
-            $table->date('expense_date');
             $table->timestamp('created_at')->nullable();
             $table->foreignId('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
 
-            $table->foreign('category_id')
+            $table->foreign('expense_id')
                 ->references('id')
-                ->on('expense_categories')
+                ->on('expenses')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('created_by')
@@ -43,6 +42,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('expenses');
+        Schema::dropIfExists('expense_payments');
     }
 };

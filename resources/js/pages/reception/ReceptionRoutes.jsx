@@ -4,6 +4,7 @@ import PatientRegistration from "./patients/PatientRegistration";
 import Patients from "./patients/Patients";
 import CheckInPatient from "./CheckInPatient";
 import PatientRecords from "./patients/PatientRecords";
+import GlassPatientsRoutes from "./glass-patients/GlassPatientsRoutes";
 import PatientsToReturn from "./patients-to-return/PatientsToReturn";
 import SentMessages from "./sent-messages/Messages";
 import ReportsRoutes from "./reports/ReportsRoutes";
@@ -27,6 +28,10 @@ const ReceptionRoutes = () => {
       <Route
         path="/patients/new"
         element={<PatientRegistration />}
+      />
+      <Route
+        path="/glass-patients/*"
+        element={<GlassPatientsRoutes />}
       />
       <Route
         path="/to-return/patients"

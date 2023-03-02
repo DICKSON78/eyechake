@@ -202,13 +202,11 @@ class PatientPaymentCacheItemsController extends Controller
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                                 $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
-                                    'consultant' => 'Optician',
+                                    'patient_direction' => 'Direct to Optician',
                                     'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
                                     'status' => 'Consulted',
-                                    'sent_to_optician_at' => Carbon::now(),
-                                    'sent_to_optician_by' => $user->id,
-                                    'optician_status' => 'Pending',
+                                    'require_glass' => 'Yes',
                                 ]);
 
                                 $item->payment_cache->consultation_id = $consultation->id;
@@ -266,13 +264,11 @@ class PatientPaymentCacheItemsController extends Controller
                         if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                             $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
-                                'consultant' => 'Optician',
+                                'patient_direction' => 'Optician',
                                 'consultant_id' => $item->consultant_id,
                                 'created_by' => $user->id,
                                 'status' => 'Consulted',
-                                'sent_to_optician_at' => Carbon::now(),
-                                'sent_to_optician_by' => $user->id,
-                                'optician_status' => 'Pending',
+                                'require_glass' => 'Yes',
                             ]);
 
                             $item->payment_cache->consultation_id = $consultation->id;
@@ -329,13 +325,11 @@ class PatientPaymentCacheItemsController extends Controller
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                                 $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
-                                    'consultant' => 'Optician',
+                                    'patient_direction' => 'Optician',
                                     'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
                                     'status' => 'Consulted',
-                                    'sent_to_optician_at' => Carbon::now(),
-                                    'sent_to_optician_by' => $user->id,
-                                    'optician_status' => 'Pending',
+                                    'require_glass' => 'Yes',
                                 ]);
 
                                 $item->payment_cache->consultation_id = $consultation->id;

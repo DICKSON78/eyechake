@@ -1,20 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Grid, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography
+} from "@mui/material";
 
 import { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import Table from "../../../components/Table";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import Refraction from "./Refraction";
-import ConsultationItemsCard from "./ConsultationItemsCard";
-import SelectItems from "../../consultation-room/clinical-notes/SelectItems";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
-import { useFetch, usePatch, useToast } from "../../../hooks";
-import { formatError, getValidationError } from "../../../helpers";
+import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
+import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
@@ -59,12 +69,14 @@ const ClinicalNotes = ({ patient, consultation }) => {
   } = useFetch("api/patient-payment-cache-items", {
     per_page: 500,
     consultation_id: consultation.id,
+    consultation_type: "Glass",
   }, false, [], (response) => response.data.data.data);
 
   const [remarks, setRemarks] = useState(consultation.remarks);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const { handlePatch: handleAutoSave } = usePatch();
-  const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
+  const { data: dataDispense, loading: loadingDispense, error: errorDispense, handlePost: handleDispense } = usePost();
 
   useEffect(() => {
     document.title = `Clinical Notes - ${window.APP_NAME}`;
@@ -75,20 +87,20 @@ const ClinicalNotes = ({ patient, consultation }) => {
   }, []);
 
   useEffect(() => {
-    if (dataComplete) {
-      setData(dataComplete);
+    if (dataDispense) {
+      setData(dataDispense);
 
       window.setTimeout(() => {
-        navigate("/optician-center/consultation-patients/pending");
+        navigate("/optician-center/glass-patients");
       }, 1500);
     }
-  }, [dataComplete]);
+  }, [dataDispense]);
 
   useEffect(() => {
-    if (errorComplete) {
-      setError(errorComplete);
+    if (errorDispense) {
+      setError(errorDispense);
     }
-  }, [errorComplete]);
+  }, [errorDispense]);
 
 
   useEffect(() => {
@@ -112,26 +124,16 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   };
 
-  const openSelectItemsModal = (title, type) => {
-    let component = (
-      <SelectItems
-        modal={modalRef.current}
-        consultation={consultation}
-        consultationType={type}
-        selected={items.filter((e) => e.consultation_type.name === type)}
-        fetchItems={fetchItems}
-      />
-    );
-
-    modalRef.current.open(title, component, "lg");
-  };
-
-  const confirmComplete = () => {
+  const confirmDispense = () => {
     setData(null);
     setError(null);
 
     if (!formRef.current.validate()) {
       return setError(getValidationError("Please complete all the required fields."));
+    }
+
+    if (!selectedItems.length) {
+      return setError(getValidationError("Please select at least one item."));
     }
 
     let component = (
@@ -140,15 +142,41 @@ const ClinicalNotes = ({ patient, consultation }) => {
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
-          handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
-            remarks,
-            optician: "Yes",
+          handleDispense("api/patient-payment-cache-items/dispense", {
+            payment_cache_id: consultation.payment_cache_item.payment_cache_id,
+            items: selectedItems.map((e) => e.id),
           });
         }}
       />
     );
 
-    modalRef.current.open("Confirm Save", component, "sm");
+    modalRef.current.open("Confirm Dispense", component, "sm");
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "warning";
+      case "Paid":
+        return "info";
+      case "Billed":
+        return "purple";
+      case "Served":
+        return "success";
+    }
+
+    return "neutral";
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "Pending":
+        return "Not Paid";
+      case "Served":
+        return "Dispensed";
+    }
+
+    return status;
   };
 
   return (
@@ -173,41 +201,61 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Refraction consultation={consultation}/>
 
             <Subheader title="Management"/>
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <ConsultationItemsCard
-                  title="Glass"
-                  consultationType="Glass"
-                  loading={loadingItems}
-                  items={items}
-                  consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
-                />
-              </Grid>
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <ConsultationItemsCard
-                  title="Others"
-                  consultationType="Others"
-                  loading={loadingItems}
-                  items={items}
-                  consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
-                />
-              </Grid>
-            </Grid>
+            <Table
+              loading={loadingItems}
+              columns={[
+                {
+                  field: "index",
+                  headerName: "S/N",
+                  valueGetter: (item, index) => (index + 1),
+                },
+                {
+                  field: "item_id",
+                  headerName: "Item Name",
+                  valueGetter: (item, index) => item.item.name,
+                },
+                {
+                  field: "unit_of_measure_id",
+                  headerName: "UoM",
+                  valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+                },
+                {
+                  field: "balance",
+                  headerName: "Item Balance",
+                  valueGetter: (item, index) => numberFormat(item.item.balance || 0),
+                },
+                {
+                  field: "payment_mode_id",
+                  headerName: "Payment Mode",
+                  valueGetter: (item, index) => item.payment_mode.name,
+                },
+                {
+                  field: "quantity",
+                  headerName: "Quantity",
+                  valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                },
+                {
+                  field: "comments",
+                  headerName: "Comments",
+                },
+                {
+                  field: "status",
+                  headerName: "Status",
+                  renderCell: (item, index) => (
+                    <Chip
+                      size="small"
+                      color={getStatusColor(item.status)}
+                      label={getStatusLabel(item.status)}
+                    />
+                  ),
+                }
+              ]}
+              items={items}
+              hidePaginationFooter
+              checkboxSelection={(item, index) => item.status === "Paid" || item.status === "Billed"}
+              checked={selectedItems}
+              setChecked={setSelectedItems}
+            />
 
             <Subheader title="Remarks"/>
             <Grid
@@ -221,6 +269,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 xs={12}
               >
                 <TextField
+                  disabled
                   ref={remarksRef}
                   fullWidth
                   placeholder="Type remarks..."
@@ -228,41 +277,31 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   rows={3}
                   horizontal
                   defaultValue={remarks}
-                  onChange={(value) => {
-                    if (consultation.optician_status === "Consulted") {
-                      autoSave("remarks", value);
-                    }
-                    setRemarks(value);
-                  }}
+                  onChange={(value) => autoSave("remarks", value)}
                 />
               </Grid>
             </Grid>
           </CardContent>
         </Form>
-        {consultation.optician_status === "Pending" ?
-          <React.Fragment>
-            <Divider />
-            {loadingComplete && <LinearProgress />}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              justifyContent="flex-end"
-              flexWrap="wrap"
-              p={2}
-            >
-              <Button
-                disabled={loadingComplete}
-                variant="contained"
-                disableElevation
-                onClick={confirmComplete}
-              >
-                Save Notes
-              </Button>
-            </Stack>
-          </React.Fragment>
-          : null
-        }
+        <Divider />
+        {loadingDispense && <LinearProgress />}
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="flex-end"
+          flexWrap="wrap"
+          p={2}
+        >
+          <Button
+            disabled={loadingDispense}
+            variant="contained"
+            disableElevation
+            onClick={confirmDispense}
+          >
+            Dispense
+          </Button>
+        </Stack>
       </Card>
       <Modal ref={modalRef}/>
     </React.Fragment>

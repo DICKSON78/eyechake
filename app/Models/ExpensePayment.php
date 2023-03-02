@@ -6,25 +6,20 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Expense extends Model
+class ExpensePayment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['category_id', 'total_amount', 'description', 'expense_date', 'created_by'];
+    protected $fillable = ['expense_id', 'amount', 'amount', 'description', 'created_by'];
 
-    public function category()
+    public function expense()
     {
-        return $this->belongsTo(ExpenseCategory::class, 'category_id');
+        return $this->belongsTo(Expense::class, 'expense_id');
     }
 
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function getPaidAmountAttribute()
-    {
-        return ExpensePayment::where('expense_id', $this->id)->sum('amount');
     }
 
     protected function serializeDate(DateTimeInterface $date)

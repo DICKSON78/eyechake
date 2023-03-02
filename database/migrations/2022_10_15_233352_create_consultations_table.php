@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('consultations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payment_cache_item_id');
-            $table->enum('consultant', ['Doctor', 'Optician'])->default('Doctor');
+            $table->enum('patient_direction', ['Direct to Doctor', 'Direct to Optician'])->default('Direct to Doctor');
             $table->text('chief_complaint')->nullable();
             $table->text('history_present_illness')->nullable();
             $table->text('family_history')->nullable();
@@ -26,9 +26,9 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
             $table->foreignId('created_by')->nullable();
             $table->enum('status', ['Pending', 'Consulted'])->default('Pending');
+            $table->enum('require_glass', ['Yes', 'No'])->default('No');
             $table->dateTime('sent_to_optician_at')->nullable();
             $table->foreignId('sent_to_optician_by')->nullable();
-            $table->enum('optician_status', ['Pending', 'Consulted'])->nullable();
             $table->timestamp('updated_at')->nullable();
 
             $table->foreign('payment_cache_item_id')

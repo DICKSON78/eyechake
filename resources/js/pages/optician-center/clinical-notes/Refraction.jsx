@@ -1,31 +1,8 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
-import TextField from "../../../components/TextField";
-import usePatch from "../../../hooks/usePatch";
 
-const RefractionDetails = ({ consultation: { id, optician_status, refraction } }, ref) => {
-
-  const subReSphRef = useRef();
-  const subReCylRef = useRef();
-  const subReAxisRef = useRef();
-  const subReVaRef = useRef();
-  const subReAddRef = useRef();
-  const subReAddVaRef = useRef();
-  const subLeSphRef = useRef();
-  const subLeCylRef = useRef();
-  const subLeAxisRef = useRef();
-  const subLeVaRef = useRef();
-  const subLeAddRef = useRef();
-  const subLeAddVaRef = useRef();
-
-  const { handlePatch: handleAutoSave } = usePatch();
-
-  const autoSave = (field, value) => {
-    if (!refraction || (refraction && value !== refraction[field])) {
-      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Refraction", [field]: value });
-    }
-  };
+const RefractionDetails = ({ consultation: { refraction } }, ref) => {
 
   useImperativeHandle(ref, () => ({
     validate: () => {
@@ -49,117 +26,33 @@ const RefractionDetails = ({ consultation: { id, optician_status, refraction } }
       <TableBody>
         <TableRow>
           <TableCell component="th">SPH</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReSphRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_sph : null}
-              onChange={(value) => autoSave("sub_re_sph", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeSphRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_sph : null}
-              onChange={(value) => autoSave("sub_le_sph", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_sph : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_sph : null}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell component="th">CYL</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReCylRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_cyl : null}
-              onChange={(value) => autoSave("sub_re_cyl", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeCylRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_cyl : null}
-              onChange={(value) => autoSave("sub_le_cyl", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_cyl : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_cyl : null}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell component="th">AXIS</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReAxisRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_axis : null}
-              onChange={(value) => autoSave("sub_re_axis", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeAxisRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_axis : null}
-              onChange={(value) => autoSave("sub_le_axis", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_axis : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_axis : null}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell component="th">VA</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReVaRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_va : null}
-              onChange={(value) => autoSave("sub_re_va", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeVaRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_va : null}
-              onChange={(value) => autoSave("sub_le_va", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_va : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_va : null}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell component="th">ADD</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReAddRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_add : null}
-              onChange={(value) => autoSave("sub_re_add", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeAddRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_add : null}
-              onChange={(value) => autoSave("sub_le_add", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_add : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_add : null}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell component="th">VA</TableCell>
-          <TableCell>
-            <TextField
-              ref={subReAddVaRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_re_add_va : null}
-              onChange={(value) => autoSave("sub_re_add_va", value)}
-            />
-          </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeAddVaRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_add_va : null}
-              onChange={(value) => autoSave("sub_le_add_va", value)}
-            />
-          </TableCell>
+          <TableCell>{refraction ? refraction.sub_re_add_va : null}</TableCell>
+          <TableCell>{refraction ? refraction.sub_le_add_va : null}</TableCell>
         </TableRow>
       </TableBody>
     </Table>

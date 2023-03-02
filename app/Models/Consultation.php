@@ -11,9 +11,9 @@ class Consultation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'payment_cache_item_id', 'consultant', 'chief_complaint', 'history_present_illness',
+        'payment_cache_item_id', 'patient_direction', 'chief_complaint', 'history_present_illness',
         'family_history', 'patient_to_return', 'to_return_date', 'remarks', 'created_by', 'status',
-        'sent_to_optician_at', 'sent_to_optician_by', 'optician_status',
+        'require_glass', 'sent_to_optician_at', 'sent_to_optician_by',
     ];
 
     protected $casts = [
@@ -23,6 +23,11 @@ class Consultation extends Model
     public function payment_cache_item()
     {
         return $this->belongsTo(PatientPaymentCacheItem::class, 'payment_cache_item_id');
+    }
+
+    public function payment_cache()
+    {
+        return $this->hasMany(PatientPaymentCache::class, 'consultation_id');
     }
 
     public function diagnoses()

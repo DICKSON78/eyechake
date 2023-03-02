@@ -1,28 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
-import Page, { Header as PageHeader } from "../../components/Page";
-import Table from "../../components/Table";
-import Modal from "../../components/Modal";
-import Filters from "../consultation-room/PatientFilters";
+import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Table from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import Filters from "../../consultation-room/PatientFilters";
 
-import { useFetch, useToast } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
+import { useFetch, useToast } from "../../../hooks";
+import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
 
-const ConsultationPatients = () => {
+const GlassPatients = () => {
 
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
 
-  const { status } = useParams();
-
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    status: "Consulted",
-    optician_status: capitalize(status),
+    status: "Awaiting Glass",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -43,9 +40,8 @@ const ConsultationPatients = () => {
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `${getTitle()} - ${window.APP_NAME}`;
-    setParams({ ...params, optician_status: capitalize(status) });
-  }, [status]);
+    document.title = `Glass Patients - ${window.APP_NAME}`;
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -53,42 +49,17 @@ const ConsultationPatients = () => {
     }
   }, [error]);
 
-  const getTitle = () => {
-    if (status === "pending") {
-      return "Patients Sent to Optician";
-    }
-    if (status === "consulted") {
-      return "Consulted Patients";
-    }
-  };
-
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Optician Center" },
-        { title: getTitle() },
+        { title: "Reception" },
+        { title: "Glass Patients" },
       ]}
     >
       <Card>
         <PageHeader
-          title={getTitle()}
-          trailing={(
-            <React.Fragment>
-              <FormControlLabel
-                control={(
-                  <Checkbox
-                    checked={!!params.consultant_id}
-                    onChange={(event) => setParams({
-                      ...params,
-                      consultant_id: event.target.checked ? getNonNull(window.user.employee).id : undefined
-                    })}
-                  />
-                )}
-                label="My Patients Only"
-              />
-            </React.Fragment>
-          )}
+          title="Glass Patients"
         />
         <Divider />
         <CardContent>
@@ -133,18 +104,12 @@ const ConsultationPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.to_optician_sender).full_name,
-                show: status === "pending"
+                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? getNonNull(item.payment_cache_item.consultant).full_name : getNonNull(item.creator).full_name,
               },
               {
-                field: "consultant",
-                headerName: "Consultant",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
-                show: status === "consulted"
-              },
-              {
-                field: "sent_to_optician_at",
+                field: "created_at",
                 headerName: "Date",
+                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? item.payment_cache_item.served_at : item.created_at,
               },
               {
                 field: "actions",
@@ -160,9 +125,9 @@ const ConsultationPatients = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/optician-center/consultation-patients/${status}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/reception/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >
-                      {status === "pending" ? "Manage" : "View"}
+                      Manage
                     </Button>
                   </Stack>
                 ),
@@ -182,4 +147,4 @@ const ConsultationPatients = () => {
   );
 };
 
-export default ConsultationPatients;
+export default GlassPatients;

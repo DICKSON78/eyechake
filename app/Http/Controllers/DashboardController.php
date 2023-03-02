@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
-use App\Models\Expense;
+use App\Models\ExpensePayment;
 use App\Models\Patient;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
@@ -83,17 +83,17 @@ class DashboardController extends Controller
             ->sum(DB::raw('unit_price * quantity'));
 
         $data['counts']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
-            ->where('consultations.consultant', 'Doctor')
+            ->where('consultations.patient_direction', 'Direct to Doctor')
             ->whereIn('it.status', ['Paid', 'Served'])
             ->whereNull('it.bill_id')
             ->whereDate('it.created_at', '>=', $start_date)
             ->whereDate('it.created_at', '<=', $end_date)
             ->sum(DB::raw('it.unit_price * it.quantity'));
 
-        $data['counts']['expenses'] = Expense::query()
-            ->whereDate('expense_date', '>=', $start_date)
-            ->whereDate('expense_date', '<=', $end_date)
-            ->sum('paid_amount');
+        $data['counts']['expenses'] = ExpensePayment::query()
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum('amount');
 
         $data['counts']['new_patients'] = Patient::query()
             ->whereDate('created_at', '>=', $start_date)
@@ -101,18 +101,13 @@ class DashboardController extends Controller
             ->count();
         $data['counts']['consulted_patients'] = Consultation::query()
             ->where(function ($query) {
-                $query->where(function ($query2) {
-                    $query2->where('consultant', 'Doctor')->where('status', 'Consulted');
-                });
-                $query->orWhere(function ($query2) {
-                    $query2->where('consultant', 'Optician')->where('optician_status', 'Consulted');
-                });
+                $query->where('patient_direction', 'Direct to Doctor')->where('status', 'Consulted');
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(exp.paid_amount) as amount FROM expenses as exp inner join expense_categories as cat on exp.category_id = cat.id where (date(exp.expense_date) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
+        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount FROM expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
         $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }

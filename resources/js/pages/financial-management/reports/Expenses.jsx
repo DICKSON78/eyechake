@@ -3,16 +3,9 @@ import { Chip } from "@mui/material";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../expenses/Filters";
-
-import { useFetch } from "../../../hooks";
 import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
-
-  const { data: categories } = useFetch("api/expense-categories", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
 
   const [params, setParams] = useState({
     status: undefined,

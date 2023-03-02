@@ -11,6 +11,7 @@ use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
 use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\ExpenseCategoriesController;
+use App\Http\Controllers\ExpensePaymentsController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ItemPricesController;
 use App\Http\Controllers\ItemsController;
@@ -119,6 +120,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
 
     $router->apiResource('/expense-categories', ExpenseCategoriesController::class);
     $router->apiResource('/expenses', ExpensesController::class);
+    $router->apiResource('/expense-payments', ExpensePaymentsController::class);
     $router->apiResource('/preferences', PreferencesController::class);
 
     $router->get('/messages', MessagesController::class);

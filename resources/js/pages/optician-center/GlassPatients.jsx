@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
-import Filters from "./PatientFilters";
+import Filters from "../consultation-room/PatientFilters";
 
 import { useFetch, useToast } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
+import { formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
 
 const ConsultationPatients = () => {
 
@@ -16,13 +16,10 @@ const ConsultationPatients = () => {
   const navigate = useNavigate();
   const modalRef = useRef();
 
-  const { status } = useParams();
-
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    patient_direction: "Direct to Doctor",
-    status: capitalize(status),
+    status: "Sent to Optician",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -43,9 +40,8 @@ const ConsultationPatients = () => {
   }, (response) => response.data.data);
 
   useEffect(() => {
-    document.title = `${getTitle()} - ${window.APP_NAME}`;
-    setParams({ ...params, status: capitalize(status) });
-  }, [status]);
+    document.title = `Patients Sent to Optician - ${window.APP_NAME}`;
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -53,26 +49,17 @@ const ConsultationPatients = () => {
     }
   }, [error]);
 
-  const getTitle = () => {
-    if (status === "pending") {
-      return "Patients Sent to Doctor";
-    }
-    if (status === "consulted") {
-      return "Consulted Patients";
-    }
-  };
-
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Consultation Room" },
-        { title: getTitle() },
+        { title: "Optician Center" },
+        { title: "Patients Sent to Optician" },
       ]}
     >
       <Card>
         <PageHeader
-          title={getTitle()}
+          title="Patients Sent to Optician"
           trailing={(
             <React.Fragment>
               <FormControlLabel
@@ -81,7 +68,7 @@ const ConsultationPatients = () => {
                     checked={!!params.consultant_id}
                     onChange={(event) => setParams({
                       ...params,
-                      consultant_id: event.target.checked ? getNonNull(window.user.employee).id : undefined
+                      consultant_id: event.target.checked ? window.user.id : undefined
                     })}
                   />
                 )}
@@ -133,16 +120,10 @@ const ConsultationPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
-                show: status === "pending"
+                valueGetter: (item, index) => getNonNull(item.to_optician_sender).full_name,
               },
               {
-                field: "consultant",
-                headerName: "Consultant",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
-              },
-              {
-                field: "created_at",
+                field: "sent_to_optician_at",
                 headerName: "Date",
               },
               {
@@ -159,9 +140,9 @@ const ConsultationPatients = () => {
                       variant="contained"
                       disableElevation
                       size="small"
-                      onClick={() => navigate(`/consultation-room/consultation-patients/${status}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() => navigate(`/optician-center/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >
-                      {status === "pending" ? "Manage" : "View"}
+                      Manage
                     </Button>
                   </Stack>
                 ),

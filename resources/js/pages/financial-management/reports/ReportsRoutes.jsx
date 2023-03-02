@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Expenses from "./Expenses";
+import ExpensePayments from "./ExpensePayments";
 import CashCollection from "../../payment-center/reports/CashCollection";
 import CreditCollection from "../../payment-center/reports/CreditCollection";
 import PatientBills from "../../payment-center/reports/PatientBills";
@@ -42,6 +43,10 @@ const ReportsRoutes = () => {
       <Route
         path="/expenses"
         element={<Expenses />}
+      />
+      <Route
+        path="/expense-payments"
+        element={<ExpensePayments />}
       />
     </Routes>
   );

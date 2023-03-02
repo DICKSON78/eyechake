@@ -3,16 +3,16 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 
 import { Skeleton } from "@mui/material";
 
-import Page from "../../components/Page";
-import Modal from "../../components/Modal";
-import PatientDetails from "../reception/patients/PatientDetails";
+import Page from "../../../components/Page";
+import Modal from "../../../components/Modal";
+import PatientDetails from "../patients/PatientDetails";
 import ClinicalNotes from "./clinical-notes/ClinicalNotes";
-import useFetch from "../../hooks/useFetch";
+import useFetch from "../../../hooks/useFetch";
 
-const ConsultationPatientRoutes = () => {
+const GlassPatientRoutes = () => {
 
   const navigate = useNavigate();
-  const { status, patientId, consultationId } = useParams();
+  const { patientId, consultationId } = useParams();
 
   const modalRef = useRef();
 
@@ -23,25 +23,16 @@ const ConsultationPatientRoutes = () => {
 
   useEffect(() => {
     if (!patientId || !consultationId) {
-      navigate(`/consultation-room/consultation-patients/${status}`);
+      navigate("/reception/glass-patients");
     }
   }, []);
-
-  const getFromListTitle = () => {
-    if (status === "pending") {
-      return "Patients Sent to Doctor";
-    }
-    if (status === "consulted") {
-      return "Consulted Patients";
-    }
-  };
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Consultation Room" },
-        { title: getFromListTitle() },
+        { title: "Reception" },
+        { title: "Glass Patients" },
         { title: patientId },
       ]}
     >
@@ -67,7 +58,6 @@ const ConsultationPatientRoutes = () => {
               <ClinicalNotes
                 patient={patient}
                 consultation={consultation}
-                status={status}
               />
             )}
           />
@@ -79,4 +69,4 @@ const ConsultationPatientRoutes = () => {
   );
 };
 
-export default ConsultationPatientRoutes;
+export default GlassPatientRoutes;

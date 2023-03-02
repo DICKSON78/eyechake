@@ -1,0 +1,264 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Button, Card, CardContent, Divider, Grid, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+
+import { Header as PageHeader } from "../../../../components/Page";
+import Modal from "../../../../components/Modal";
+import Form from "../../../../components/Form";
+import TextField from "../../../../components/TextField";
+import ConfirmationDialog from "../../../../components/ConfirmationDialog";
+import Refraction from "./Refraction";
+import ConsultationItemsCard from "../../../consultation-room/clinical-notes/ConsultationItemsCard";
+import SelectItems from "../../../consultation-room/clinical-notes/SelectItems";
+import PatientFilePDF from "../../../patient-records/patient-file/PatientFilePDF";
+
+import { useFetch, usePatch, useToast } from "../../../../hooks";
+import { formatError, getValidationError } from "../../../../helpers";
+
+const Subheader = ({ title, sx }) => {
+  return (
+    <Paper
+      variant="elevation"
+      sx={{
+        bgcolor: "info.main",
+        my: 2,
+        ...(sx || {}),
+      }}
+    >
+      <Typography
+        variant="subtitle1"
+        fontWeight="500"
+        px={2}
+        py={1}
+        color="info.contrastText"
+      >
+        {title}
+      </Typography>
+    </Paper>
+  );
+};
+
+const ClinicalNotes = ({ patient, consultation }) => {
+
+  const addToast = useToast();
+  const navigate = useNavigate();
+
+  const modalRef = useRef();
+  const formRef = useRef();
+  const remarksRef = useRef();
+
+  const [data, setData] = useState();
+  const [error, setError] = useState();
+
+  const {
+    data: items,
+    setData: setItems,
+    loading: loadingItems,
+    handleFetch: fetchItems
+  } = useFetch("api/patient-payment-cache-items", {
+    per_page: 500,
+    consultation_id: consultation.id,
+  }, false, [], (response) => response.data.data.data);
+
+  const { handlePatch: handleAutoSave } = usePatch();
+  const {
+    data: dataSendToOptician,
+    loading: loadingSendToOptician,
+    error: errorSendToOptician,
+    handlePatch: handleSendToOptician
+  } = usePatch();
+
+  useEffect(() => {
+    document.title = `Clinical Notes - ${window.APP_NAME}`;
+  }, []);
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  useEffect(() => {
+    if (dataSendToOptician) {
+      setData(dataSendToOptician);
+
+      window.setTimeout(() => {
+        navigate("/reception/glass-patients");
+      }, 1500);
+    }
+  }, [dataSendToOptician]);
+
+  useEffect(() => {
+    if (errorSendToOptician) {
+      setError(errorSendToOptician);
+    }
+  }, [errorSendToOptician]);
+
+
+  useEffect(() => {
+    if (data) {
+      addToast({ message: data.message, severity: "success" });
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error]);
+
+  const autoSave = (field, value) => {
+    if (value !== consultation[field]) {
+      handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
+        what: "Consultation",
+        [field]: value
+      });
+    }
+  };
+
+  const openSelectItemsModal = (title, type) => {
+    let component = (
+      <SelectItems
+        modal={modalRef.current}
+        consultation={consultation}
+        consultationType={type}
+        selected={items.filter((e) => e.consultation_type.name === type)}
+        fetchItems={fetchItems}
+      />
+    );
+
+    modalRef.current.open(title, component, "lg");
+  };
+
+  const confirmSendToOptician = () => {
+    setData(null);
+    setError(null);
+
+    if (!formRef.current.validate()) {
+      return setError(getValidationError("Please complete all the required fields."));
+    }
+
+    let component = (
+      <ConfirmationDialog
+        message="Are you sure you want to perform this action?"
+        onCancel={() => modalRef.current.close()}
+        onOk={() => {
+          modalRef.current.close();
+          handleSendToOptician(`api/consultations/${consultation.id}`, {
+            send_to_optician: "Yes",
+          });
+        }}
+      />
+    );
+
+    modalRef.current.open("Confirm Send to Optician", component, "sm");
+  };
+
+  return (
+    <React.Fragment>
+      <Card>
+        <PageHeader
+          title="Clinical Notes"
+          trailing={(
+            <PatientFilePDF
+              consultationId={consultation.id}
+              patient={patient}
+            />
+          )}
+        />
+        <Divider />
+        <Form ref={formRef}>
+          <CardContent>
+            <Subheader
+              title="Refraction Details"
+              sx={{ mt: 0 }}
+            />
+            <Refraction consultation={consultation}/>
+
+            <Subheader title="Management"/>
+            <Grid
+              container
+              spacing={2}
+            >
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <ConsultationItemsCard
+                  title="Glass"
+                  consultationType="Glass"
+                  loading={loadingItems}
+                  items={items}
+                  consultation={consultation}
+                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                />
+              </Grid>
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <ConsultationItemsCard
+                  title="Others"
+                  consultationType="Others"
+                  loading={loadingItems}
+                  items={items}
+                  consultation={consultation}
+                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                />
+              </Grid>
+            </Grid>
+
+            <Subheader title="Remarks"/>
+            <Grid
+              container
+              spacing={2}
+            >
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <TextField
+                  ref={remarksRef}
+                  fullWidth
+                  placeholder="Type remarks..."
+                  multiline
+                  rows={3}
+                  horizontal
+                  defaultValue={consultation.remarks}
+                  onChange={(value) => autoSave("remarks", value)}
+                />
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Form>
+        <Divider />
+        {loadingSendToOptician && <LinearProgress />}
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="flex-end"
+          flexWrap="wrap"
+          p={2}
+        >
+          <Button
+            disabled={loadingSendToOptician}
+            variant="contained"
+            disableElevation
+            onClick={confirmSendToOptician}
+          >
+            Send to Optician
+          </Button>
+        </Stack>
+      </Card>
+      <Modal ref={modalRef}/>
+    </React.Fragment>
+  );
+};
+
+export default ClinicalNotes;

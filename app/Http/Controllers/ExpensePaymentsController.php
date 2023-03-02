@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Expense;
+use App\Models\ExpensePayment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ExpensesController extends Controller
+class ExpensePaymentsController extends Controller
 {
     use ApiResponse;
 
@@ -23,27 +23,32 @@ class ExpensesController extends Controller
             'per_page' => 'sometimes|integer|min:0',
             'page' => 'sometimes|integer|min:1',
             'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
+            'end_date' => 'sometimes|date_format:Y-m-d',
+            'sort_direction' => 'sometimes|in:asc,desc',
         ]);
 
         $per_page = $request->per_page ?? 25;
-        $status = $request->status;
+        $with_expense = $request->with_expense;
+        $expense_id = $request->expense_id;
         $category_id = $request->category_id;
         $created_by = $request->created_by;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $data = Expense::with(['category', 'creator']);
+        $sort_direction = $request->sort_direction ?? 'asc';
+        $data = ExpensePayment::with(['creator']);
 
-        if ($status == 'Pending') {
-            $data->whereRaw('(select sum(amount) from expense_payments where expense_id = expenses.id) < total_amount');
+        if ($with_expense) {
+            $data->with(['expense.category']);
         }
 
-        if ($status == 'Cleared') {
-            $data->whereRaw('(select sum(amount) from expense_payments where expense_id = expenses.id) >= total_amount');
+        if ($expense_id) {
+            $data->where('expense_id', $expense_id);
         }
 
         if ($category_id) {
-            $data->where('category_id', $category_id);
+            $data->whereHas('expense', function ($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            });
         }
 
         if ($created_by) {
@@ -51,19 +56,15 @@ class ExpensesController extends Controller
         }
 
         if ($start_date) {
-            $data->whereDate('expense_date', '>=', $start_date);
+            $data->whereDate('created_at', '>=', $start_date);
         }
 
         if ($end_date) {
-            $data->whereDate('expense_date', '<=', $end_date);
+            $data->whereDate('created_at', '<=', $end_date);
         }
 
-        $data->orderBy('created_at', 'desc');
+        $data->orderBy('created_at', $sort_direction);
         $data = $data->paginate($per_page);
-
-        $data->each(function ($e) {
-            $e->append('paid_amount');
-        });
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -76,14 +77,13 @@ class ExpensesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:expense_categories,id',
-            'total_amount' => 'required|numeric|min:0',
-            'expense_date' => 'required|date_format:Y-m-d',
+            'expense_id' => 'required|exists:expenses,id',
+            'amount' => 'required|numeric|min:0',
         ]);
 
         $input = $request->all();
         $input['created_by'] = $request->user()->id;
-        $data = Expense::create($input);
+        $data = ExpensePayment::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
@@ -95,7 +95,7 @@ class ExpensesController extends Controller
      */
     public function show($id)
     {
-        $data = Expense::with(['category', 'creator'])->findOrFail($id)->append('paid_amount');
+        $data = ExpensePayment::with(['expense.category', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -109,12 +109,11 @@ class ExpensesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'category_id' => 'sometimes|required|exists:expense_categories,id',
-            'total_amount' => 'sometimes|required|numeric|min:0',
-            'expense_date' => 'sometimes|required|date_format:Y-m-d',
+            'expense_id' => 'sometimes|required|exists:expenses,id',
+            'amount' => 'sometimes|required|numeric|min:0',
         ]);
 
-        $data = Expense::findOrFail($id);
+        $data = ExpensePayment::findOrFail($id);
         $data->update($request->all());
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
@@ -127,7 +126,7 @@ class ExpensesController extends Controller
      */
     public function destroy($id)
     {
-        $data = Expense::findOrFail($id);
+        $data = ExpensePayment::findOrFail($id);
         $data->delete();
         return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
     }

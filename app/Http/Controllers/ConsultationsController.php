@@ -39,9 +39,9 @@ class ConsultationsController extends Controller
 
         $per_page = $request->per_page ?? 25;
         $status = $request->status;
-        $optician_status = $request->optician_status;
+        $require_glass = $request->require_glass;
         $payment_cache_item_id = $request->payment_cache_item_id;
-        $consultant = $request->consultant;
+        $patient_direction = $request->patient_direction;
         $consultant_id = $request->consultant_id;
         $patient_id = $request->patient_id;
         $patient_name = $request->patient_name;
@@ -61,19 +61,36 @@ class ConsultationsController extends Controller
         }, 'creator', 'to_optician_sender']);
 
         if ($status) {
-            $data->where('status', $status);
+            if ($status === 'Awaiting Glass') {
+                $data->where('require_glass', 'Yes')
+                    ->where('status', 'Consulted')
+                    ->whereNull('sent_to_optician_at');
+            } else if ($status === 'Sent to Optician') {
+                $data->where('require_glass', 'Yes')
+                    ->where('status', 'Consulted')
+                    ->whereNotNull('sent_to_optician_at')
+                    ->whereHas('payment_cache.items', function ($query) {
+                        $query->whereHas('consultation_type', function ($query2) {
+                            $query2->where('name', 'Glass');
+                        });
+
+                        $query->where('status', '!=', 'Served');
+                    });
+            } else {
+                $data->where('status', $status);
+            }
         }
 
-        if ($optician_status) {
-            $data->where('optician_status', $optician_status);
+        if ($require_glass) {
+            $data->where('require_glass', $require_glass);
         }
 
         if ($payment_cache_item_id) {
             $data->where('payment_cache_item_id', $payment_cache_item_id);
         }
 
-        if ($consultant) {
-            $data->where('consultant', $consultant);
+        if ($patient_direction) {
+            $data->where('patient_direction', $patient_direction);
         }
 
         if ($consultant_id) {
@@ -345,13 +362,12 @@ class ConsultationsController extends Controller
         $request->validate([
             'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
-            'send_to_optician' => 'nullable|in:Yes,No',
-            'optician' => 'nullable|in:Yes,No',
+            'require_glass' => 'sometimes|required|in:Yes,No',
         ]);
 
         $user = $request->user();
         $data = Consultation::findOrFail($id);
-        $input = $request->only('patient_to_return', 'to_return_date', 'remarks');
+        $input = $request->only('patient_to_return', 'to_return_date', 'remarks', 'require_glass');
         $input['status'] = 'Consulted';
 
         $data->update($input);
@@ -365,19 +381,6 @@ class ConsultationsController extends Controller
             ]);
         }
 
-        if ($request->send_to_optician == 'Yes') {
-            $data->update([
-                'sent_to_optician_at' => Carbon::now(),
-                'sent_to_optician_by' => $user->id,
-                'optician_status' => 'Pending',
-            ]);
-        } else {
-            if ($request->optician == 'Yes') {
-                $data->optician_status = 'Consulted';
-                $data->save();
-            }
-        }
-
         // update consultant
         if ($user->employee) {
             $data->payment_cache_item->consultant_id = $user->employee->id;
@@ -385,7 +388,7 @@ class ConsultationsController extends Controller
         }
 
         // send message to patient
-        if ($data->consultant == 'Doctor') {
+        if ($data->patient_direction == 'Direct to Doctor') {
             SendConsultationMessageJob::dispatch($data);
         }
 

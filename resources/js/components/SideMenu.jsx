@@ -24,6 +24,7 @@ import {
   TrendingDownRounded as ExpensesIcon,
   WindowRounded as DepartmentsIcon
 } from "@mui/icons-material";
+import GlassPatientsIcon from "./icons/AddLens";
 
 const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
   const location = useLocation();
@@ -55,6 +56,12 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Patients/Customers",
           icon: <PeopleIcon />,
           to: "/reception/patients",
+          show: user.privileges.reception,
+        },
+        {
+          title: "Glass Patients",
+          icon: <GlassPatientsIcon />,
+          to: "/reception/glass-patients",
           show: user.privileges.reception,
         },
         {
@@ -166,19 +173,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
         {
           title: "Patients Sent to Optician",
           icon: <WaitingIcon />,
-          to: "/optician-center/consultation-patients/pending",
-          show: user.privileges.optician_center,
-        },
-        {
-          title: "Consulted Patients",
-          icon: <DoneIcon />,
-          to: "/optician-center/consultation-patients/consulted",
-          show: user.privileges.optician_center,
-        },
-        {
-          title: "Dispensing Requests",
-          icon: <WaitingIcon />,
-          to: "/optician-center/dispensing-requests",
+          to: "/optician-center/glass-patients",
           show: user.privileges.optician_center,
         },
         {
@@ -353,6 +348,12 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/expenses",
+              show: user.privileges.financial_management,
+            },
+            {
+              title: "Expense Payments Report",
+              icon: <ReportsIcon />,
+              to: "/expense-payments",
               show: user.privileges.financial_management,
             },
           ],

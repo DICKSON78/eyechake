@@ -96,7 +96,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [patientToReturn, setPatientToReturn] = useState(consultation.patient_to_return);
   const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
   const [remarks, setRemarks] = useState(consultation.remarks);
-  const [sendToOptician, setSendToOptician] = useState("No");
+  const [requireGlass, setSendToOptician] = useState("No");
 
   const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
@@ -193,7 +193,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             patient_to_return: patientToReturn,
             to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : undefined,
             remarks,
-            send_to_optician: sendToOptician,
+            require_glass: requireGlass,
           });
         }}
       />
@@ -471,11 +471,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     <FormControlLabel
                       control={(
                         <Checkbox
-                          checked={sendToOptician === "Yes"}
+                          checked={requireGlass === "Yes"}
                           onChange={(event) => setSendToOptician(event.target.checked ? "Yes" : "No")}
                         />
                       )}
-                      label="Send to Optician"
+                      label="Require Glass"
                     />
                   </Grid>
                 </React.Fragment>

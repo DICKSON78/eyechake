@@ -8,7 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import CreateExpense from "./CreateExpense";
 import EditExpense from "./EditExpense";
-import PayExpense from "./PayExpense";
+import ExpensePayments from "./ExpensePayments";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getNonNull, numberFormat } from "../../../helpers";
@@ -86,16 +86,16 @@ const Expenses = ({ module, createdBy }) => {
     modalRef.current.open("Edit Expense", component);
   };
 
-  const openPayExpenseModal = (item) => {
+  const openExpensePaymentsModal = (item) => {
     let component = (
-      <PayExpense
-        item={item}
+      <ExpensePayments
+        expense={item}
         modal={modalRef.current}
         fetchExpenses={handleFetch}
       />
     );
 
-    modalRef.current.open("Pay Expense", component);
+    modalRef.current.open("Expense Payments", component, "lg");
   };
 
   const getStatus = (item) => {
@@ -226,17 +226,14 @@ const Expenses = ({ module, createdBy }) => {
                       </Tooltip>
                       : null
                     }
-                    {item.paid_amount < item.total_amount ?
-                      <Button
-                        variant="contained"
-                        disableElevation
-                        size="small"
-                        onClick={() => openPayExpenseModal(item)}
-                      >
-                        Pay
-                      </Button>
-                      : null
-                    }
+                    <Button
+                      variant="contained"
+                      disableElevation
+                      size="small"
+                      onClick={() => openExpensePaymentsModal(item)}
+                    >
+                      Payments
+                    </Button>
                   </Stack>
                 ),
               }

@@ -166,7 +166,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
           }}
         />
 
-        {consultation.consultant === "Doctor" ?
+        {consultation.patient_direction === "Direct to Doctor" ?
           <React.Fragment>
             <Subheader
               title="History Taking"
@@ -447,12 +447,12 @@ const PDFReportDocument = ({ consultation, patient }) => {
         }
 
         <Subheader
-          title={consultation.consultant === "Doctor" ? "Diagnosis & Management" : "Management" }
+          title={consultation.patient_direction === "Direct to Doctor" ? "Diagnosis & Management" : "Management" }
           style={{ marginBottom: 4 }}
         />
 
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-          {consultation.consultant === "Doctor" ?
+          {consultation.patient_direction === "Direct to Doctor" ?
             <View style={{ width: "50%", paddingRight: 4, marginBottom: 4 }}>
               <DiagnosisCard
                 title="Diagnosis"
@@ -465,8 +465,8 @@ const PDFReportDocument = ({ consultation, patient }) => {
           <View
             style={{
               width: "50%",
-              paddingLeft: consultation.consultant === "Doctor" ? 4 : 0,
-              paddingRight: consultation.consultant === "Doctor" ? 0 : 4,
+              paddingLeft: consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+              paddingRight: consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
               marginBottom: 4
             }}
           >
@@ -479,8 +479,8 @@ const PDFReportDocument = ({ consultation, patient }) => {
           <View
             style={{
               width: "50%",
-              paddingLeft: consultation.consultant === "Doctor" ? 0 : 4,
-              paddingRight: consultation.consultant === "Doctor" ? 4 : 0,
+              paddingLeft: consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+              paddingRight: consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
               marginBottom: 4
             }}
           >
@@ -493,8 +493,8 @@ const PDFReportDocument = ({ consultation, patient }) => {
           <View
             style={{
               width: "50%",
-              paddingLeft: consultation.consultant === "Doctor" ? 4 : 0,
-              paddingRight: consultation.consultant === "Doctor" ? 0 : 4,
+              paddingLeft: consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+              paddingRight: consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
               marginBottom: 4
             }}
           >
@@ -507,8 +507,8 @@ const PDFReportDocument = ({ consultation, patient }) => {
           <View
             style={{
               width: "50%",
-              paddingLeft: consultation.consultant === "Doctor" ? 0 : 4,
-              paddingRight: consultation.consultant === "Doctor" ? 4 : 0,
+              paddingLeft: consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+              paddingRight: consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
               marginBottom: 4
             }}
           >
@@ -532,7 +532,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
               items={[
                 {
                   label: "Patient to Return",
-                  value: consultation.consultant === "Doctor" ? consultation.patient_to_return : null
+                  value: consultation.patient_direction === "Direct to Doctor" ? consultation.patient_to_return : null
                 },
                 { label: "Return Date", value: consultation.to_return_date },
                 { label: "Remarks", value: consultation.remarks },

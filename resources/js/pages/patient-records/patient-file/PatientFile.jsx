@@ -72,26 +72,11 @@ const PatientFile = ({ patient }) => {
                 field: "status",
                 headerName: "Status",
                 renderCell: (item) => (
-                  item.consultant === "Doctor" ?
-                    <Chip
-                      size="small"
-                      color={getStatusColor(item.status)}
-                      label={item.status}
-                    />
-                    : null
-                ),
-              },
-              {
-                field: "optician_status",
-                headerName: "Optician Status",
-                renderCell: (item) => (
-                  item.optician_status ?
-                    <Chip
-                      size="small"
-                      color={getStatusColor(item.optician_status)}
-                      label={item.optician_status}
-                    />
-                    : null
+                  <Chip
+                    size="small"
+                    color={getStatusColor(item.status)}
+                    label={item.status}
+                  />
                 ),
               },
               {
