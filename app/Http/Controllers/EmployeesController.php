@@ -35,7 +35,7 @@ class EmployeesController extends Controller
         $department_id = $request->department_id;
         $job_title_id = $request->job_title_id;
         $employee_number = $request->employee_number;
-        $data = Employee::with(['job_title', 'user.privileges', 'creator']);
+        $data = Employee::with(['department', 'job_title', 'user.privileges', 'creator']);
 
         if ($status) {
             $data->where('status', $status);
