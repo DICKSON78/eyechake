@@ -6,35 +6,35 @@ const LoadingSkeleton = () => {
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={3} sm={12} xs={12}>
-        <Skeleton variant="rounded" height={112}/>
+        <Skeleton variant="rounded" height={96}/>
       </Grid>
 
       <Grid item md={6} sm={12} xs={12}>

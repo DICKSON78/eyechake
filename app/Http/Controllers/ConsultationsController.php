@@ -271,11 +271,19 @@ class ConsultationsController extends Controller
         $request->validate([
             'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
-            'status' => 'sometimes|required|in:Pending,Consulted'
+            'status' => 'sometimes|required|in:Pending,Consulted',
+            'require_glass' => 'sometimes|required|in:Yes,No',
         ]);
 
         $data = Consultation::findOrFail($id);
         $data->update($request->all());
+
+        if ($request->send_to_optician == 'Yes') {
+            $data->update([
+                'sent_to_optician_at' => Carbon::now(),
+                'sent_to_optician_by' => $request->user()->id,
+            ]);
+        }
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
