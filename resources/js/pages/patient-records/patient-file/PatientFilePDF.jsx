@@ -173,30 +173,38 @@ const PDFReportDocument = ({ consultation, patient }) => {
               style={{ marginBottom: 4 }}
             />
 
-            <Table
-              containerStyle={{ marginBottom: 4 }}
-              columns={[
-                {
-                  field: "chief_complaint",
-                  headerName: "C/C",
-                },
-                {
-                  field: "history_present_illness",
-                  headerName: "H/I",
-                },
-                {
-                  field: "family_history",
-                  headerName: "F/H",
-                }
-              ]}
-              items={[
-                {
-                  chief_complaint: consultation.chief_complaint,
-                  history_present_illness: consultation.history_present_illness,
-                  family_history: consultation.family_history
-                },
-              ]}
-            />
+            <View style={[tableStyles.table, { marginBottom: 4 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>CC</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>HI</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>FH</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.chief_complaint}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.history_present_illness}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.family_history}</Text>
+              </View>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>GH</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>FOH</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>FGH</Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.general_health}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.family_ocular_history}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.family_general_history}</Text>
+              </View>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Pupils</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>EOM</Text>
+                <View style={tableStyles.tableCell}/>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.pupils}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.extra_ocular_muscles}</Text>
+                <View style={tableStyles.tableCell}/>
+              </View>
+            </View>
           </React.Fragment>
           : null
         }
@@ -352,64 +360,63 @@ const PDFReportDocument = ({ consultation, patient }) => {
         {consultation.refraction ?
           <React.Fragment>
             <Subheader
-              title="Refraction Details"
+              title="Refraction Details (Subjective)"
               style={{ marginBottom: 4 }}
             />
 
             <View style={[tableStyles.table, { marginBottom: 4 }]}>
               <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Objective Refraction</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>Subjective Refraction</Text>
-              </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <View style={[tableStyles.tableCellNoFlex, { width: 64 }]}/>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
-                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>RE</Text>
                 <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>LE</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>SPH</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_re_sph}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_le_sph}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_sph}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_sph}</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>SPH</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>CYL</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>AXIS</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>VA</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>SPH</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>CYL</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>AXIS</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>VA</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>CYL</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_re_cyl}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_le_cyl}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_cyl}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_cyl}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_sph}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_cyl}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_axis}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_va}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_sph}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_cyl}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_axis}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_va}</Text>
               </View>
               <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>AXIS</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_re_axis}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_le_axis}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_axis}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_axis}</Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>VA</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_re_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.ob_le_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_va}</Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>ADD</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>ADD</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>VA</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}/>
                 <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>ADD</Text>
+                <Text style={[styles.text, tableStyles.tableCell, { fontWeight: "bold" }]}>VA</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+              </View>
+              <View style={tableStyles.tableRow}>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_add}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_add}</Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>VA</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
-                <Text style={[styles.text, tableStyles.tableCell]}/>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_re_add_va}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_add}</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.refraction.sub_le_add_va}</Text>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
+                <Text style={[styles.text, tableStyles.tableCell]}/>
               </View>
             </View>
           </React.Fragment>

@@ -37,7 +37,7 @@ class PatientToReturnReminder extends Command
             if ($message) {
                 $today = Carbon::today();
                 $records = Consultation::where('status', 'Consulted')
-                    ->where('consultant', 'Doctor')
+                    ->where('patient_direction', 'Direct to Doctor')
                     ->where('patient_to_return', 'Yes')
                     ->whereNotNull('to_return_date')
                     ->where('to_return_date', '>=', $today)

@@ -37,18 +37,25 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell />
-          <TableCell colSpan={2}>Subjective Refraction</TableCell>
+          <TableCell colSpan={8}>Subjective Refraction</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell/>
-          <TableCell>RE</TableCell>
-          <TableCell>LE</TableCell>
+          <TableCell colSpan={4}>RE</TableCell>
+          <TableCell colSpan={4}>LE</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         <TableRow>
           <TableCell component="th">SPH</TableCell>
+          <TableCell component="th">CYL</TableCell>
+          <TableCell component="th">AXIS</TableCell>
+          <TableCell component="th">VA</TableCell>
+          <TableCell component="th">SPH</TableCell>
+          <TableCell component="th">CYL</TableCell>
+          <TableCell component="th">AXIS</TableCell>
+          <TableCell component="th">VA</TableCell>
+        </TableRow>
+        <TableRow>
           <TableCell>
             <TextField
               ref={subReSphRef}
@@ -59,34 +66,12 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
           </TableCell>
           <TableCell>
             <TextField
-              ref={subLeSphRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_sph : null}
-              onChange={(value) => autoSave("sub_le_sph", value)}
-            />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell component="th">CYL</TableCell>
-          <TableCell>
-            <TextField
               ref={subReCylRef}
               fullWidth
               defaultValue={refraction ? refraction.sub_re_cyl : null}
               onChange={(value) => autoSave("sub_re_cyl", value)}
             />
           </TableCell>
-          <TableCell>
-            <TextField
-              ref={subLeCylRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_cyl : null}
-              onChange={(value) => autoSave("sub_le_cyl", value)}
-            />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell component="th">AXIS</TableCell>
           <TableCell>
             <TextField
               ref={subReAxisRef}
@@ -97,21 +82,34 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
           </TableCell>
           <TableCell>
             <TextField
-              ref={subLeAxisRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_axis : null}
-              onChange={(value) => autoSave("sub_le_axis", value)}
-            />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell component="th">VA</TableCell>
-          <TableCell>
-            <TextField
               ref={subReVaRef}
               fullWidth
               defaultValue={refraction ? refraction.sub_re_va : null}
               onChange={(value) => autoSave("sub_re_va", value)}
+            />
+          </TableCell>
+          <TableCell>
+            <TextField
+              ref={subLeSphRef}
+              fullWidth
+              defaultValue={refraction ? refraction.sub_le_sph : null}
+              onChange={(value) => autoSave("sub_le_sph", value)}
+            />
+          </TableCell>
+          <TableCell>
+            <TextField
+              ref={subLeCylRef}
+              fullWidth
+              defaultValue={refraction ? refraction.sub_le_cyl : null}
+              onChange={(value) => autoSave("sub_le_cyl", value)}
+            />
+          </TableCell>
+          <TableCell>
+            <TextField
+              ref={subLeAxisRef}
+              fullWidth
+              defaultValue={refraction ? refraction.sub_le_axis : null}
+              onChange={(value) => autoSave("sub_le_axis", value)}
             />
           </TableCell>
           <TableCell>
@@ -123,8 +121,19 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
             />
           </TableCell>
         </TableRow>
+
+
         <TableRow>
           <TableCell component="th">ADD</TableCell>
+          <TableCell component="th">VA</TableCell>
+          <TableCell component="th"/>
+          <TableCell component="th"/>
+          <TableCell component="th">ADD</TableCell>
+          <TableCell component="th">VA</TableCell>
+          <TableCell component="th"/>
+          <TableCell component="th"/>
+        </TableRow>
+        <TableRow>
           <TableCell>
             <TextField
               ref={subReAddRef}
@@ -135,21 +144,20 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
           </TableCell>
           <TableCell>
             <TextField
-              ref={subLeAddRef}
-              fullWidth
-              defaultValue={refraction ? refraction.sub_le_add : null}
-              onChange={(value) => autoSave("sub_le_add", value)}
-            />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell component="th">VA</TableCell>
-          <TableCell>
-            <TextField
               ref={subReAddVaRef}
               fullWidth
               defaultValue={refraction ? refraction.sub_re_add_va : null}
               onChange={(value) => autoSave("sub_re_add_va", value)}
+            />
+          </TableCell>
+          <TableCell/>
+          <TableCell/>
+          <TableCell>
+            <TextField
+              ref={subLeAddRef}
+              fullWidth
+              defaultValue={refraction ? refraction.sub_le_add : null}
+              onChange={(value) => autoSave("sub_le_add", value)}
             />
           </TableCell>
           <TableCell>
@@ -160,6 +168,8 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
               onChange={(value) => autoSave("sub_le_add_va", value)}
             />
           </TableCell>
+          <TableCell/>
+          <TableCell/>
         </TableRow>
       </TableBody>
     </Table>

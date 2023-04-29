@@ -12,6 +12,10 @@ import {
   LinearProgress,
   Paper,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   Typography
 } from "@mui/material";
 
@@ -68,6 +72,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const chiefComplaintRef = useRef();
   const historyPresentIllnessRef = useRef();
   const familyHistoryRef = useRef();
+  const generalHealthRef = useRef();
+  const familyOcularHistoryRef = useRef();
+  const familyGeneralHistoryRef = useRef();
+  const pupilsRef = useRef();
+  const extraOcularMusclesRef = useRef();
   const patientToReturnDateRef = useRef();
   const remarksRef = useRef();
 
@@ -221,62 +230,121 @@ const ClinicalNotes = ({ patient, consultation }) => {
               title="History Taking"
               sx={{ mt: 0 }}
             />
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={4}
-                sm={8}
-                xs={12}
-              >
-                <TextField
-                  ref={chiefComplaintRef} fullWidth
-                  label="C/C"
-                  multiline
-                  rows={2}
-                  horizontal
-                  required
-                  defaultValue={consultation.chief_complaint}
-                  onChange={(value) => autoSave("chief_complaint", value)}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={8}
-                xs={12}
-              >
-                <TextField
-                  ref={historyPresentIllnessRef}
-                  fullWidth
-                  label="H/I"
-                  multiline
-                  rows={2}
-                  horizontal
-                  defaultValue={consultation.history_present_illness}
-                  onChange={(value) => autoSave("history_present_illness", value)}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={8}
-                xs={12}
-              >
-                <TextField
-                  ref={familyHistoryRef}
-                  fullWidth
-                  label="F/H"
-                  multiline
-                  rows={2}
-                  horizontal
-                  defaultValue={consultation.family_history}
-                  onChange={(value) => autoSave("family_history", value)}
-                />
-              </Grid>
-            </Grid>
+
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell component="th">
+                    <span>CC</span>
+                    <Typography
+                      component="span"
+                      color="error.main"
+                      fontWeight="700"
+                    >*</Typography>
+                  </TableCell>
+                  <TableCell component="th">HI</TableCell>
+                  <TableCell component="th">FH</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <TextField
+                      ref={chiefComplaintRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      required
+                      defaultValue={consultation.chief_complaint}
+                      onChange={(value) => autoSave("chief_complaint", value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      ref={historyPresentIllnessRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.history_present_illness}
+                      onChange={(value) => autoSave("history_present_illness", value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      ref={familyHistoryRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.family_history}
+                      onChange={(value) => autoSave("family_history", value)}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell component="th">GH</TableCell>
+                  <TableCell component="th">FOH</TableCell>
+                  <TableCell component="th">FGH</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <TextField
+                      ref={generalHealthRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.general_health}
+                      onChange={(value) => autoSave("general_health", value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      ref={familyOcularHistoryRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.family_ocular_history}
+                      onChange={(value) => autoSave("family_ocular_history", value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      ref={familyGeneralHistoryRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.family_general_history}
+                      onChange={(value) => autoSave("family_general_history", value)}
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell component="th">Pupils</TableCell>
+                  <TableCell component="th">EOM</TableCell>
+                  <TableCell component="th"/>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <TextField
+                      ref={pupilsRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.pupils}
+                      onChange={(value) => autoSave("pupils", value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      ref={extraOcularMusclesRef}
+                      fullWidth
+                      multiline
+                      rows={2}
+                      defaultValue={consultation.extra_ocular_muscles}
+                      onChange={(value) => autoSave("extra_ocular_muscles", value)}
+                    />
+                  </TableCell>
+                  <TableCell/>
+                </TableRow>
+              </TableBody>
+            </Table>
 
             <Subheader title="Visual Acuity (VA)"/>
             <VisualAcuity consultation={consultation}/>

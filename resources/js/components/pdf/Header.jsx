@@ -40,7 +40,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
       }}
     >
       <View
-        style={{ width: 96 }}>
+        style={{ width: 112 }}>
         <Image
           src={logo}
           style={{
@@ -91,7 +91,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         }
       </View>
       {!dense ?
-        <View style={{ width: 96 }}>
+        <View style={{ width: 112 }}>
           <Text
             style={[
               styles.text,
