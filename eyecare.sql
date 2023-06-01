@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2022 at 12:12 PM
+-- Generation Time: Jun 01, 2023 at 10:30 AM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.6
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `eyecare`
+-- Database: `eyecare_meb`
 --
 
 -- --------------------------------------------------------
@@ -42,7 +42,7 @@ CREATE TABLE `clinic_details` (
 --
 
 INSERT INTO `clinic_details` (`id`, `name`, `phone`, `email`, `address`, `created_at`, `updated_at`) VALUES
-(1, 'SmartSoft Clinic', '078576847', NULL, 'P. O. Box 795, DSM', '2022-11-05 14:24:18', '2022-11-05 14:24:18');
+(1, 'SmartSoft Clinic', '076855364', 'smartsoft@gmail.com', 'P. O. Box 879 DSM', '2022-12-30 17:43:09', '2022-12-30 17:43:09');
 
 -- --------------------------------------------------------
 
@@ -53,35 +53,39 @@ INSERT INTO `clinic_details` (`id`, `name`, `phone`, `email`, `address`, `create
 CREATE TABLE `consultations` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `payment_cache_item_id` bigint(20) UNSIGNED NOT NULL,
-  `consultant` enum('Doctor','Optician') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Doctor',
+  `patient_direction` enum('Direct to Doctor','Direct to Optician') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Direct to Doctor',
   `chief_complaint` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `history_present_illness` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `family_history` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `general_health` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `family_ocular_history` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `family_general_history` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pupils` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `extra_ocular_muscles` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `patient_to_return` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
   `to_return_date` date DEFAULT NULL,
   `remarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `status` enum('Pending','Consulted') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+  `require_glass` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
   `sent_to_optician_at` datetime DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
   `sent_to_optician_by` bigint(20) UNSIGNED DEFAULT NULL,
-  `optician_status` enum('Pending','Consulted') COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `consultations`
 --
 
-INSERT INTO `consultations` (`id`, `payment_cache_item_id`, `consultant`, `chief_complaint`, `history_present_illness`, `family_history`, `patient_to_return`, `to_return_date`, `remarks`, `created_at`, `created_by`, `status`, `sent_to_optician_at`, `updated_at`, `sent_to_optician_by`, `optician_status`) VALUES
-(1, 1, 'Doctor', 'test', NULL, NULL, '', NULL, NULL, '2022-10-15 10:37:49', 1, 'Consulted', NULL, '2022-11-18 17:32:11', NULL, NULL),
-(3, 3, 'Doctor', 'macho hayaoni mbali sana', 'tangu juzi', 'nyumbani wazima wote', 'Yes', '2022-10-31', 'Proceed with ordered items', '2022-10-15 10:41:27', 1, 'Consulted', NULL, '2022-11-18 17:32:52', NULL, NULL),
-(4, 12, 'Optician', NULL, NULL, NULL, 'No', NULL, NULL, '2022-10-21 23:47:58', 1, 'Consulted', '2022-10-22 02:47:58', '2022-10-21 23:47:58', 1, 'Pending'),
-(5, 16, 'Doctor', 'Blurry vision at distance and near', 'Onset year', 'NIL', 'Yes', '2022-11-17', 'Proceeded with given details and went on to dispense the glasses ordered. Done.', '2022-10-27 21:38:32', 1, 'Consulted', '2022-11-08 01:47:15', '2022-11-18 17:34:23', 1, 'Consulted'),
-(6, 20, 'Doctor', 'test', NULL, NULL, 'No', NULL, 'test', '2022-11-05 00:46:04', 1, 'Consulted', NULL, '2022-11-18 17:21:38', NULL, NULL),
-(7, 24, 'Optician', NULL, NULL, NULL, 'No', NULL, NULL, '2022-11-08 08:28:11', 1, 'Consulted', '2022-11-08 11:28:11', '2022-11-08 08:28:11', 1, 'Pending'),
-(8, 26, 'Doctor', NULL, NULL, NULL, 'No', NULL, NULL, '2022-11-30 10:05:24', 1, 'Pending', NULL, '2022-11-30 10:05:24', NULL, NULL),
-(9, 28, 'Doctor', NULL, NULL, NULL, 'No', NULL, NULL, '2022-11-30 14:49:36', 1, 'Pending', NULL, '2022-11-30 14:49:36', NULL, NULL);
+INSERT INTO `consultations` (`id`, `payment_cache_item_id`, `patient_direction`, `chief_complaint`, `history_present_illness`, `family_history`, `general_health`, `family_ocular_history`, `family_general_history`, `pupils`, `extra_ocular_muscles`, `patient_to_return`, `to_return_date`, `remarks`, `created_at`, `created_by`, `status`, `require_glass`, `sent_to_optician_at`, `sent_to_optician_by`, `updated_at`) VALUES
+(1, 1, 'Direct to Doctor', 'Blurry vision', 'the first time', 'fh', 'gh', 'foh', 'fgh', 'pp', 'eom', 'Yes', '2023-01-20', 'proceed with ordered items', '2022-12-30 20:10:19', 1, 'Consulted', 'Yes', '2022-12-31 00:35:12', 2, '2023-04-29 22:34:25'),
+(2, 3, 'Direct to Doctor', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'No', NULL, NULL, '2022-12-30 20:18:26', 1, 'Pending', 'No', NULL, NULL, '2022-12-30 20:18:26'),
+(3, 7, 'Direct to Optician', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'No', NULL, NULL, '2022-12-30 22:53:56', 2, 'Consulted', 'Yes', '2022-12-31 01:53:56', 2, '2022-12-30 22:53:56'),
+(5, 9, 'Direct to Optician', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'No', NULL, 'done', '2023-01-18 17:49:27', 1, 'Consulted', 'Yes', '2023-01-18 20:49:27', 1, '2023-01-19 11:22:56'),
+(6, 10, 'Direct to Doctor', 'Blurry vision', 'just started', 'elders use glasses', NULL, NULL, NULL, NULL, NULL, 'No', NULL, 'apewe pgx', '2023-03-02 16:33:28', 1, 'Consulted', 'Yes', '2023-03-02 20:50:18', 1, '2023-03-02 17:50:18'),
+(7, 12, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'No', NULL, 'mpe hiyo conv', '2023-03-02 16:33:49', 1, 'Consulted', 'Yes', '2023-03-02 19:38:48', 1, '2023-03-02 16:38:48'),
+(8, 14, 'Direct to Doctor', 'blurry', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'No', NULL, 'test', '2023-04-25 17:56:03', 1, 'Pending', 'Yes', NULL, NULL, '2023-04-25 18:01:07');
 
 -- --------------------------------------------------------
 
@@ -104,14 +108,9 @@ CREATE TABLE `consultation_diagnoses` (
 --
 
 INSERT INTO `consultation_diagnoses` (`id`, `consultation_id`, `disease_id`, `diagnosis_type`, `created_at`, `created_by`, `updated_at`) VALUES
-(9, 3, 3, 'Preliminary', '2022-10-17 18:06:39', 1, '2022-10-17 18:06:39'),
-(10, 3, 2, 'Preliminary', '2022-10-17 18:07:01', 1, '2022-10-17 18:07:01'),
-(11, 3, 1, 'Final', '2022-10-17 19:44:15', 1, '2022-10-17 19:44:15'),
-(12, 1, 1, 'Preliminary', '2022-10-20 20:08:00', 1, '2022-10-20 20:08:00'),
-(13, 1, 3, 'Preliminary', '2022-10-21 23:09:54', 1, '2022-10-21 23:09:54'),
-(14, 1, 3, 'Final', '2022-11-05 12:29:32', 1, '2022-11-05 12:29:32'),
-(15, 5, 1, 'Final', '2022-11-07 22:02:26', 1, '2022-11-07 22:02:26'),
-(16, 6, 1, 'Final', '2022-11-08 22:52:00', 1, '2022-11-08 22:52:00');
+(1, 1, 1, 'Final', '2022-12-30 21:32:41', 2, '2022-12-30 21:32:41'),
+(2, 6, 1, 'Final', '2023-03-02 17:46:54', 1, '2023-03-02 17:46:54'),
+(3, 8, 1, 'Final', '2023-04-25 17:58:47', 1, '2023-04-25 17:58:47');
 
 -- --------------------------------------------------------
 
@@ -148,9 +147,9 @@ CREATE TABLE `consultation_external_examinations` (
 --
 
 INSERT INTO `consultation_external_examinations` (`id`, `consultation_id`, `re_lid`, `re_sclera`, `re_cornea`, `re_conjuctiva`, `re_iris`, `re_pupil`, `re_lens`, `re_iop`, `le_lid`, `le_sclera`, `le_cornea`, `le_conjuctiva`, `le_iris`, `le_pupil`, `le_lens`, `le_iop`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 3, 'rlid', 'sce', 'c', 'cj', 'ir', 'pp', 'lr', 'ip', 'l', 'scl', 'ce', 'cjl', 'irl', 'ppl', 'll', 'ipl', '2022-10-19 21:48:15', 1, '2022-10-19 22:02:16'),
-(2, 1, 'HEALTHY', 'WHITE', 'CLEAR AND TRANSPARENT', 'HEALTHY', 'BROWN', NULL, NULL, NULL, 'HEALTHY', 'WHITE', NULL, NULL, NULL, NULL, NULL, NULL, '2022-10-20 20:08:25', 1, '2022-10-21 23:12:05'),
-(3, 5, 'HEALTHY', 'WHITE', 'CLEAR AND TRANSPARENT', 'WHITE', 'BROWN', 'PERRLA', 'CLEAR AND TRANSPARENT', NULL, 'HEALTHY', 'WHITE', 'CLEAR AND TRANSPARENT', 'WHITE', 'BROWN', 'PERRLA', 'CLEAR AND TRANSPARENT', NULL, '2022-11-07 22:36:23', 1, '2022-11-07 22:38:04');
+(1, 1, 'HEALTHY', 'BROWN', NULL, NULL, NULL, NULL, NULL, NULL, 'HEALTHY', 'BROWN', NULL, NULL, NULL, NULL, NULL, NULL, '2022-12-30 21:29:25', 2, '2022-12-30 21:29:53'),
+(2, 6, 'HEALTHY', 'BROWN', 'HEALTHY', NULL, NULL, NULL, NULL, NULL, 'HEALTHY', 'BROWN', 'HEALTHY', NULL, NULL, NULL, NULL, NULL, '2023-03-02 17:42:31', 1, '2023-03-02 17:43:18'),
+(3, 8, 'HE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'HE', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-04-25 17:57:39', 1, '2023-04-25 17:57:46');
 
 -- --------------------------------------------------------
 
@@ -179,7 +178,8 @@ CREATE TABLE `consultation_functional_tests` (
 --
 
 INSERT INTO `consultation_functional_tests` (`id`, `consultation_id`, `re_npc`, `re_npa`, `re_confrontation`, `re_cover_test`, `le_npc`, `le_npa`, `le_confrontation`, `le_cover_test`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 5, 'rnpc', 'rnpa', 'rcon', 'rcov', 'lnpc', 'lnpa', 'lcon', 'lcov', '2022-11-07 21:58:55', 1, '2022-11-07 21:59:32');
+(1, 1, 'NRE', 'PRE', NULL, NULL, 'NLE', 'PLE', NULL, NULL, '2022-12-30 21:30:57', 2, '2022-12-30 21:31:12'),
+(2, 8, 'npc re', NULL, NULL, NULL, 'npc le', NULL, NULL, NULL, '2023-04-25 17:57:53', 1, '2023-04-25 17:58:02');
 
 -- --------------------------------------------------------
 
@@ -202,9 +202,8 @@ CREATE TABLE `consultation_fundoscopies` (
 --
 
 INSERT INTO `consultation_fundoscopies` (`id`, `consultation_id`, `re`, `le`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 3, '6/7', '6/9', '2022-10-19 23:08:06', 1, '2022-10-19 23:08:22'),
-(2, 1, 'fund re', 'fund le', '2022-11-05 12:29:45', 1, '2022-11-05 12:29:55'),
-(3, 5, 'Good', 'Good', '2022-11-07 22:40:22', 1, '2022-11-07 22:40:29');
+(1, 1, 'FRE', 'FLE', '2022-12-30 21:32:30', 2, '2022-12-30 21:32:37'),
+(2, 8, 'f re', 'f le', '2023-04-25 17:58:32', 1, '2023-04-25 17:58:38');
 
 -- --------------------------------------------------------
 
@@ -245,10 +244,11 @@ CREATE TABLE `consultation_refractions` (
 --
 
 INSERT INTO `consultation_refractions` (`id`, `consultation_id`, `ob_re_sph`, `ob_re_cyl`, `ob_re_axis`, `ob_re_va`, `ob_le_sph`, `ob_le_cyl`, `ob_le_axis`, `ob_le_va`, `sub_re_sph`, `sub_re_cyl`, `sub_re_axis`, `sub_re_va`, `sub_re_add`, `sub_re_add_va`, `sub_le_sph`, `sub_le_cyl`, `sub_le_axis`, `sub_le_va`, `sub_le_add`, `sub_le_add_va`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', '-0.50', '75', NULL, NULL, NULL, 'PLANO', '-0.50', '95', NULL, NULL, NULL, '2022-10-21 23:13:32', 1, '2022-10-21 23:14:04'),
-(2, 4, '7/8', NULL, NULL, NULL, '7/9', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2022-11-05 13:26:23', 1, '2022-11-05 13:26:29'),
-(11, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', '-0.5', '75', '6/6', '+2.50', '1', 'PLANO', '-0.5', '95', '6/6', '+2.50', NULL, '2022-11-07 22:38:50', 1, '2022-11-16 12:42:23'),
-(12, 7, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2022-11-16 12:43:47', 1, '2022-11-16 12:43:50');
+(1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', '2.5', '0.05', '6/9', '0.1V', NULL, 'PLANO', '2.5', '0.05', '6/9', '0.1V', NULL, '2022-12-30 21:31:37', 2, '2022-12-30 21:32:25'),
+(2, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', '0.5', NULL, NULL, NULL, NULL, 'PLANO', '0.5', NULL, NULL, NULL, NULL, '2023-01-19 11:21:45', 1, '2023-01-19 11:22:07'),
+(3, 7, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', NULL, NULL, '6/6', '0.5', '6/7', 'PLANO', NULL, NULL, '6/7', '0.5', '7/7', '2023-03-02 16:35:26', 1, '2023-03-02 16:36:06'),
+(4, 6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PLANO', '0.5', NULL, '6/7', '1', '7/8', 'PLANO', '0.5', NULL, '6/7', '1', '7/8', '2023-03-02 17:45:21', 1, '2023-03-02 17:46:19'),
+(5, 8, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PL', '0.5', NULL, NULL, NULL, NULL, 'PL', '0.5', NULL, NULL, NULL, NULL, '2023-04-25 17:58:15', 1, '2023-04-25 17:58:30');
 
 -- --------------------------------------------------------
 
@@ -270,10 +270,10 @@ CREATE TABLE `consultation_types` (
 --
 
 INSERT INTO `consultation_types` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Pharmacy', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(2, 'Glass', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(3, 'Procedure', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(4, 'Others', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32');
+(1, 'Pharmacy', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(2, 'Glass', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(3, 'Procedure', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(4, 'Others', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09');
 
 -- --------------------------------------------------------
 
@@ -303,9 +303,9 @@ CREATE TABLE `consultation_visual_acuities` (
 --
 
 INSERT INTO `consultation_visual_acuities` (`id`, `consultation_id`, `unaided_re_va`, `unaided_re_ph`, `unaided_ipd`, `unaided_le_va`, `unaided_le_ph`, `aided_re_va`, `aided_re_va_description`, `aided_le_va`, `aided_le_va_description`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 3, '7/9', '2', 'good', '8/9', '5', '9/9', NULL, '9/99', NULL, '2022-10-19 22:39:11', 1, '2022-10-19 22:39:56'),
-(2, 1, '6/9', NULL, NULL, '6/9', NULL, '7/9', 're desc', '8/9', 'le desc', '2022-10-21 23:13:07', 1, '2022-11-08 20:20:06'),
-(3, 5, '6/9', NULL, NULL, '6/9', NULL, '7/9', NULL, '7/9', NULL, '2022-11-07 22:35:42', 1, '2022-11-07 22:36:03');
+(1, 1, '6/9', NULL, NULL, '6/9', NULL, '7/9', NULL, '8/9', NULL, '2022-12-30 21:27:28', 2, '2022-12-30 21:27:45'),
+(2, 6, '6/7', NULL, NULL, '6/7', NULL, '7/7', NULL, '7/8', NULL, '2023-03-02 17:41:49', 1, '2023-03-02 17:42:03'),
+(3, 8, '6/6', NULL, NULL, '6/7', NULL, '7/7', NULL, '7/8', NULL, '2023-04-25 17:57:20', 1, '2023-04-25 17:57:33');
 
 -- --------------------------------------------------------
 
@@ -327,10 +327,9 @@ CREATE TABLE `departments` (
 --
 
 INSERT INTO `departments` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'IT', 'Watu wabaya', 'Active', '2022-11-03 22:47:40', '2022-11-03 22:47:40'),
-(2, 'Administration', NULL, 'Active', '2022-11-03 22:47:56', '2022-11-03 22:47:56'),
-(3, 'Finance', 'Deals with financial affairs', 'Active', '2022-11-03 22:48:24', '2022-11-03 22:48:24'),
-(4, 'Pharmacy', NULL, 'Active', '2022-11-03 22:48:42', '2022-11-03 22:48:52');
+(1, 'Administration', NULL, 'Active', '2022-12-30 17:49:42', '2022-12-30 23:53:00'),
+(2, 'Finance', NULL, 'Active', '2022-12-30 17:49:51', '2022-12-30 17:49:51'),
+(3, 'IT', NULL, 'Active', '2022-12-30 17:50:00', '2022-12-30 17:50:00');
 
 -- --------------------------------------------------------
 
@@ -352,10 +351,10 @@ CREATE TABLE `diseases` (
 --
 
 INSERT INTO `diseases` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Myopia', 'A0.0', 'Active', '2022-10-17 10:49:32', '2022-10-17 10:49:32'),
-(2, 'Glaucoma', 'A1.0', 'Active', '2022-10-17 10:50:18', '2022-10-17 10:50:18'),
-(3, 'Cataract', 'A1.2', 'Active', '2022-10-17 10:50:41', '2022-10-17 10:50:41'),
-(4, 'Diabetic Retinopathy', 'B1', 'Active', '2022-10-17 10:51:08', '2022-10-17 10:51:08');
+(1, 'Myopia', 'A01', 'Active', '2022-12-30 18:53:19', '2022-12-30 18:54:26'),
+(2, 'Cataract', 'A02', 'Active', '2022-12-30 18:53:28', '2022-12-30 18:54:18'),
+(3, 'Glaucoma', 'A03', 'Active', '2022-12-30 18:53:39', '2022-12-30 18:54:09'),
+(4, 'Diabetic Retinopathy', 'A04', 'Active', '2022-12-30 18:54:02', '2022-12-30 18:54:02');
 
 -- --------------------------------------------------------
 
@@ -377,9 +376,41 @@ CREATE TABLE `districts` (
 --
 
 INSERT INTO `districts` (`id`, `name`, `region_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Arumeru', 2, 'Active', '2022-10-07 21:12:08', '2022-10-07 21:12:08'),
-(2, 'Kinondoni', 1, 'Active', '2022-10-07 21:42:49', '2022-10-07 21:42:49'),
-(3, 'Ilala', 1, 'Active', '2022-10-07 21:51:04', '2022-10-07 21:51:04');
+(1, 'Kinondoni', 1, 'Active', '2022-12-30 19:34:34', '2022-12-30 19:34:34'),
+(2, 'Ilala', 1, 'Active', '2022-12-30 19:35:46', '2022-12-30 19:35:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employees`
+--
+
+CREATE TABLE `employees` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `middle_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `department_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `job_title_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `employee_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` enum('Male','Female') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `national_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `status` enum('Active','Inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `employees`
+--
+
+INSERT INTO `employees` (`id`, `first_name`, `middle_name`, `last_name`, `department_id`, `job_title_id`, `employee_number`, `date_of_birth`, `gender`, `national_id`, `phone`, `user_id`, `created_at`, `created_by`, `status`, `updated_at`) VALUES
+(1, 'Joseph', 'W', 'Mashauri', 1, 2, '1', '2003-12-04', 'Male', NULL, '0757206864', 2, '2022-12-30 17:51:30', 1, 'Active', '2022-12-30 17:51:54'),
+(2, 'Anna', NULL, 'Mnzava', 2, 1, '2', NULL, 'Female', NULL, NULL, 3, '2022-12-30 17:53:26', 1, 'Active', '2022-12-30 17:53:27');
 
 -- --------------------------------------------------------
 
@@ -391,9 +422,8 @@ CREATE TABLE `expenses` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `category_id` bigint(20) UNSIGNED NOT NULL,
   `total_amount` double UNSIGNED NOT NULL,
-  `paid_amount` double UNSIGNED NOT NULL DEFAULT 0,
   `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `expense_date` date DEFAULT NULL,
+  `expense_date` date NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -403,12 +433,9 @@ CREATE TABLE `expenses` (
 -- Dumping data for table `expenses`
 --
 
-INSERT INTO `expenses` (`id`, `category_id`, `total_amount`, `paid_amount`, `description`, `expense_date`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 1, 250000, 250000, 'Mishahara ya wafanyakazi wa ndani', '2022-11-03', '2022-11-03 21:33:09', 1, '2022-11-05 19:49:51'),
-(2, 3, 2000, 1500, 'Umeme', '2022-11-04', '2022-11-03 22:12:39', 1, '2022-11-05 19:49:30'),
-(3, 2, 1000, 1000, 'Kwenda site', '2022-11-05', '2022-11-05 19:51:42', 1, '2022-11-05 19:51:42'),
-(4, 2, 51000, 51000, 'Hela ya kwenda kununua vifaa', '2022-11-08', '2022-11-08 12:16:59', 1, '2022-11-08 12:44:29'),
-(5, 3, 50000, 50000, 'umeme', '2022-11-17', '2022-11-17 09:25:50', 1, '2022-11-17 09:25:50');
+INSERT INTO `expenses` (`id`, `category_id`, `total_amount`, `description`, `expense_date`, `created_at`, `created_by`, `updated_at`) VALUES
+(1, 2, 20000, 'Umeme na maji', '2022-12-31', '2022-12-30 22:59:21', 2, '2022-12-30 22:59:21'),
+(2, 1, 20000, 'Site visit', '2023-03-02', '2023-03-02 14:35:57', 1, '2023-03-02 14:35:57');
 
 -- --------------------------------------------------------
 
@@ -430,10 +457,33 @@ CREATE TABLE `expense_categories` (
 --
 
 INSERT INTO `expense_categories` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Employee Salaries', 'It\'s self explanatory here', 'Active', '2022-11-03 20:29:18', '2022-11-03 20:30:28'),
-(2, 'Transport', NULL, 'Active', '2022-11-03 20:30:42', '2022-11-03 20:30:42'),
-(3, 'Electricity Bill', NULL, 'Active', '2022-11-03 20:31:02', '2022-11-03 20:31:02'),
-(4, 'Employee Allowances', NULL, 'Active', '2022-11-15 09:08:09', '2022-11-15 09:08:09');
+(1, 'Transport', NULL, 'Active', '2022-12-30 18:45:04', '2022-12-30 18:45:04'),
+(2, 'Bills', NULL, 'Active', '2022-12-30 18:45:14', '2022-12-30 18:45:14'),
+(3, 'Employee Salaries', NULL, 'Active', '2022-12-30 18:45:28', '2022-12-30 18:45:28');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expense_payments`
+--
+
+CREATE TABLE `expense_payments` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `expense_id` bigint(20) UNSIGNED NOT NULL,
+  `amount` double UNSIGNED NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `expense_payments`
+--
+
+INSERT INTO `expense_payments` (`id`, `expense_id`, `amount`, `description`, `created_at`, `created_by`, `updated_at`) VALUES
+(1, 1, 15000, NULL, '2022-12-30 22:59:21', 2, '2023-03-02 13:40:08'),
+(2, 2, 1000, 'Advance', '2023-03-02 14:36:20', 1, '2023-03-02 14:36:20');
 
 -- --------------------------------------------------------
 
@@ -468,9 +518,7 @@ CREATE TABLE `items` (
   `is_consultation_item` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
   `is_stock_item` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
   `balance` double DEFAULT NULL,
-  `unit_buying_price` double DEFAULT NULL,
-  `manufacture_date` date DEFAULT NULL,
-  `expiry_date` date DEFAULT NULL,
+  `unit_buying_price` double UNSIGNED DEFAULT NULL,
   `status` enum('Active','Inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -480,18 +528,13 @@ CREATE TABLE `items` (
 -- Dumping data for table `items`
 --
 
-INSERT INTO `items` (`id`, `name`, `code`, `item_type_id`, `consultation_type_id`, `unit_of_measure_id`, `lens_type_id`, `is_consultation_item`, `is_stock_item`, `balance`, `unit_buying_price`, `manufacture_date`, `expiry_date`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Glasses', 'GL', 3, 2, 3, 1, 'No', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-05 13:09:59', '2022-10-06 09:24:43'),
-(2, 'General Consultation - New', 'C02', 1, 4, NULL, NULL, 'Yes', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-05 14:02:27', '2022-10-05 16:46:49'),
-(3, 'General Consultation - Return', 'C03', 1, 4, NULL, NULL, 'Yes', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-05 16:47:25', '2022-10-05 16:50:36'),
-(4, 'Aciclovir eye ointment', NULL, 2, 1, 5, NULL, 'No', 'Yes', 498, 1000, NULL, '2022-11-30', 'Active', '2022-10-06 09:20:00', '2022-11-30 14:52:10'),
-(5, 'Apraclonidine eye drops', NULL, 2, 1, 4, NULL, 'No', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-06 09:20:42', '2022-10-06 09:20:42'),
-(6, 'Fluorometholone eye drops for inflammation (FML)', NULL, 2, 1, 4, NULL, 'No', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-06 09:22:06', '2022-10-06 09:22:06'),
-(7, 'Ganciclovir eye gel (Virgan)', NULL, 2, 1, 5, NULL, 'No', 'Yes', 100, 300, NULL, NULL, 'Active', '2022-10-06 09:22:47', '2022-11-02 09:22:06'),
-(8, 'Eye Cleansing', NULL, 1, 3, NULL, NULL, 'No', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-06 09:23:56', '2022-10-06 09:23:56'),
-(9, 'Follow Up Consultation', 'C04', 1, 4, NULL, NULL, 'Yes', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-09 23:24:25', '2022-10-09 23:24:25'),
-(10, 'Glass Maintenance', 'C10', 1, 4, NULL, NULL, 'No', 'No', 0, NULL, NULL, NULL, 'Active', '2022-10-20 19:30:12', '2022-10-20 19:30:12'),
-(11, 'Fusidic acid eye drops', 'F02', 2, 1, 4, NULL, 'No', 'Yes', NULL, NULL, NULL, NULL, 'Active', '2022-11-01 15:58:18', '2022-11-01 16:01:03');
+INSERT INTO `items` (`id`, `name`, `code`, `item_type_id`, `consultation_type_id`, `unit_of_measure_id`, `lens_type_id`, `is_consultation_item`, `is_stock_item`, `balance`, `unit_buying_price`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'General Consultation - New', 'GC', 5, 4, NULL, NULL, 'Yes', 'No', NULL, NULL, 'Active', '2022-12-30 18:55:33', '2022-12-30 18:55:33'),
+(2, 'General Consultation - Return', 'GR', 5, 4, NULL, NULL, 'Yes', 'No', NULL, NULL, 'Active', '2022-12-30 19:00:25', '2022-12-30 19:00:25'),
+(3, 'Aciclovir eye ointment', NULL, 2, 1, 5, NULL, 'No', 'Yes', 57, 2000, 'Active', '2022-12-30 19:01:07', '2023-03-02 16:39:55'),
+(4, 'Fluorometholone eye drops for inflammation (FML)', NULL, 2, 1, 4, NULL, 'No', 'Yes', 148, 500, 'Active', '2022-12-30 19:01:36', '2022-12-30 19:53:19'),
+(5, 'Eye Cleansing', NULL, 1, 3, NULL, NULL, 'No', 'No', NULL, NULL, 'Active', '2022-12-30 19:02:06', '2022-12-30 19:02:06'),
+(6, 'RE CONV (02 - 06)', NULL, 3, 2, 3, 1, 'No', 'Yes', 32, 80000, 'Active', '2022-12-30 19:03:27', '2023-03-02 16:39:15');
 
 -- --------------------------------------------------------
 
@@ -513,18 +556,16 @@ CREATE TABLE `item_prices` (
 --
 
 INSERT INTO `item_prices` (`id`, `item_id`, `payment_mode_id`, `unit_price`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 5000, '2022-10-08 22:27:25', '2022-10-08 22:27:25'),
-(3, 1, 2, 1500, '2022-10-08 22:32:50', '2022-10-08 22:32:50'),
-(4, 2, 1, 4000, '2022-10-08 22:33:17', '2022-10-08 22:33:17'),
-(5, 9, 1, 2000, '2022-10-09 23:24:53', '2022-10-09 23:24:53'),
-(6, 4, 1, 2500, '2022-10-10 20:46:24', '2022-10-10 20:46:24'),
-(7, 5, 1, 1000, '2022-10-10 20:46:39', '2022-10-10 20:46:39'),
-(8, 8, 1, 3000, '2022-10-10 20:47:02', '2022-10-10 20:47:02'),
-(9, 6, 1, 1500, '2022-10-14 23:10:46', '2022-10-14 23:10:46'),
-(10, 10, 1, 2000, '2022-10-20 19:30:33', '2022-10-20 19:30:33'),
-(11, 2, 2, 3500, '2022-10-23 22:46:50', '2022-10-23 22:46:50'),
-(12, 4, 2, 2450, '2022-10-23 22:47:11', '2022-10-23 22:47:11'),
-(13, 8, 2, 3000, '2022-10-23 22:47:32', '2022-10-23 22:47:32');
+(1, 1, 1, 5000, '2022-12-30 18:55:47', '2022-12-30 18:55:47'),
+(2, 1, 2, 4500, '2022-12-30 18:56:00', '2022-12-30 18:56:00'),
+(3, 2, 1, 0, '2022-12-30 19:56:47', '2022-12-30 19:56:47'),
+(4, 2, 2, 0, '2022-12-30 19:56:52', '2022-12-30 19:56:52'),
+(5, 3, 1, 2500, '2022-12-30 19:57:08', '2022-12-30 19:57:08'),
+(6, 3, 2, 2500, '2022-12-30 19:57:13', '2022-12-30 19:57:13'),
+(7, 4, 1, 1000, '2022-12-30 19:57:33', '2022-12-30 19:57:33'),
+(8, 5, 1, 5000, '2022-12-30 19:57:49', '2022-12-30 19:57:49'),
+(9, 6, 1, 100000, '2022-12-30 19:58:07', '2022-12-30 19:58:07'),
+(10, 6, 2, 100000, '2022-12-30 19:58:16', '2022-12-30 19:58:16');
 
 -- --------------------------------------------------------
 
@@ -546,11 +587,11 @@ CREATE TABLE `item_types` (
 --
 
 INSERT INTO `item_types` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Service', 'Serviced Item', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(2, 'Pharmaceutical', 'Pharmaceutical and Consumable Item', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(3, 'Lens', 'Lens Item', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(4, 'Frame', 'Frame Item', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(5, 'Others', 'Other Item', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32');
+(1, 'Service', 'Serviced Item', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(2, 'Pharmaceutical', 'Pharmaceutical and Consumable Item', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(3, 'Lens', 'Lens Item', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(4, 'Frame', 'Frame Item', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(5, 'Others', 'Other Item', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09');
 
 -- --------------------------------------------------------
 
@@ -572,10 +613,10 @@ CREATE TABLE `job_titles` (
 --
 
 INSERT INTO `job_titles` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Receptionist', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(2, 'Doctor', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(3, 'Cashier', 'Mkusanya pesa', 'Active', '2022-10-04 15:18:32', '2022-11-03 22:50:46'),
-(4, 'Optician', 'Miwani moja', 'Active', '2022-11-03 22:50:32', '2022-11-03 22:50:32');
+(1, 'Receptionist', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(2, 'Doctor', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(3, 'Cashier', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(4, 'Director', NULL, 'Active', '2022-12-30 18:45:49', '2022-12-30 18:45:49');
 
 -- --------------------------------------------------------
 
@@ -597,10 +638,10 @@ CREATE TABLE `lens_types` (
 --
 
 INSERT INTO `lens_types` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'BLUECUT', NULL, 'Active', '2022-10-05 11:03:19', '2022-10-05 11:03:19'),
-(2, 'NONPP', NULL, 'Active', '2022-10-05 11:03:37', '2022-10-05 11:03:37'),
-(3, 'PGX', NULL, 'Active', '2022-10-05 11:03:45', '2022-10-05 11:03:45'),
-(4, 'Special Lens', NULL, 'Active', '2022-10-05 11:04:04', '2022-10-05 11:04:04');
+(1, 'BLUECUT', NULL, 'Active', '2022-12-30 18:46:29', '2022-12-30 18:46:29'),
+(2, 'NONPP', NULL, 'Active', '2022-12-30 18:46:43', '2022-12-30 18:46:43'),
+(3, 'PGX', NULL, 'Active', '2022-12-30 18:46:51', '2022-12-30 18:46:51'),
+(4, 'Special Lens', NULL, 'Active', '2022-12-30 18:47:04', '2022-12-30 18:47:04');
 
 -- --------------------------------------------------------
 
@@ -623,14 +664,8 @@ CREATE TABLE `messages` (
 --
 
 INSERT INTO `messages` (`id`, `message`, `phone`, `patient_id`, `api_response`, `created_at`, `updated_at`) VALUES
-(1, 'Habari Diana. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 2, '{\"successful\":true,\"request_id\":53676681,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-14 19:09:55', '2022-11-14 19:09:55'),
-(2, 'Habari Diana. Unakumbushwa kuhudhuria appointment yako ya tarehe Nov 15, 2022.', '0757206864', 2, '{\"successful\":true,\"request_id\":53678667,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-14 19:46:35', '2022-11-14 19:46:35'),
-(3, 'Habari Francis. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 7, '{\"successful\":true,\"request_id\":53996919,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-17 20:43:22', '2022-11-17 20:43:22'),
-(4, 'Habari Francis. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 7, '{\"successful\":true,\"request_id\":54085581,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-18 17:21:43', '2022-11-18 17:21:43'),
-(5, 'Habari Rukia. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 3, '{\"successful\":true,\"request_id\":54086010,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-18 17:27:38', '2022-11-18 17:27:38'),
-(6, 'Habari Rukia. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 3, '{\"successful\":true,\"request_id\":54086343,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-18 17:32:14', '2022-11-18 17:32:14'),
-(7, 'Habari Lameck. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 1, '{\"successful\":true,\"request_id\":54086394,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-18 17:33:05', '2022-11-18 17:33:05'),
-(8, 'Habari Diana. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 2, '{\"successful\":true,\"request_id\":54086408,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-11-18 17:34:24', '2022-11-18 17:34:24');
+(1, 'Habari Husna. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0678660192', 4, '{\"successful\":true,\"request_id\":58994516,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2022-12-30 21:35:15', '2022-12-30 21:35:15'),
+(2, 'Habari Eric. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.', '0757206864', 3, '{\"successful\":true,\"request_id\":66245910,\"code\":100,\"message\":\"Message Submitted Successfully\",\"valid\":1,\"invalid\":0,\"duplicates\":0}', '2023-03-02 17:48:15', '2023-03-02 17:48:15');
 
 -- --------------------------------------------------------
 
@@ -650,54 +685,49 @@ CREATE TABLE `migrations` (
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2019_08_19_000000_create_failed_jobs_table', 1),
-(2, '2019_12_14_000001_create_personal_access_tokens_table', 1),
-(3, '2022_10_03_214055_create_job_titles_table', 1),
-(4, '2022_10_04_004136_create_users_table', 1),
-(5, '2022_10_04_131748_create_consultation_types_table', 1),
-(6, '2022_10_04_131820_create_payment_modes_table', 1),
-(7, '2022_10_04_131904_create_units_of_measure_table', 1),
-(8, '2022_10_04_131939_create_item_types_table', 1),
-(9, '2022_10_04_131941_create_lens_types_table', 1),
-(10, '2022_10_04_132058_create_items_table', 1),
-(11, '2022_10_04_133517_create_item_prices_table', 1),
-(12, '2022_10_06_001959_create_regions_table', 2),
-(13, '2022_10_06_002041_create_districts_table', 2),
-(14, '2022_10_06_002056_create_wards_table', 2),
-(15, '2022_10_06_002141_create_patients_table', 2),
-(16, '2022_10_06_234840_create_patient_check_ins_table', 2),
-(24, '2022_10_04_131827_create_payment_channels_table', 7),
-(25, '2022_10_14_001956_create_patient_item_payments_table', 8),
-(26, '2022_10_06_234714_create_patient_payment_cache_table', 9),
-(27, '2022_10_06_234856_create_patient_payment_cache_items_table', 10),
-(29, '2022_10_15_233352_create_consultations_table', 11),
-(30, '2022_10_06_002114_create_diseases_table', 12),
-(31, '2022_10_19_233352_update_consultations_table', 13),
-(32, '2022_10_17_144145_create_consultation_diagnoses_table', 14),
-(37, '2022_10_19_123049_create_consultation_fundoscopies_table', 15),
-(39, '2022_10_19_122949_create_consultation_visual_acuities_table', 17),
-(40, '2022_10_19_121932_create_consultation_external_examinations_table', 18),
-(42, '2022_10_19_123031_create_consultation_refractions_table', 19),
-(43, '2022_10_15_233352_update_consultations_table', 20),
-(44, '2022_10_14_184035_create_patient_item_bills_table', 21),
-(46, '2022_10_14_185525_create_patient_item_bill_payments_table', 22),
-(47, '2022_11_04_132058_update_items_table', 23),
-(48, '2022_11_01_183546_create_stocktakes_table', 24),
-(49, '2022_11_01_183713_create_stocktake_items_table', 25),
-(50, '2022_11_03_213309_create_expense_categories_table', 26),
-(51, '2022_11_03_213354_create_expenses_table', 27),
-(52, '2022_10_03_011621_create_departments_table', 28),
-(53, '2023_10_04_004136_create_users_table', 29),
-(54, '2022_10_04_124022_create_user_privileges_table', 30),
-(55, '2022_10_02_164329_create_clinic_details_table', 31),
-(56, '2022_11_03_213354_createe_expenses_table', 32),
-(57, '2022_10_04_124022_update_user_privileges_table', 33),
-(58, '2022_10_19_122149_create_consultation_functional_tests_table', 34),
-(59, '2022_11_08_131857_update_expenses_table', 35),
-(60, '2022_11_19_122949_update_consultation_visual_acuities_table', 36),
-(61, '2022_10_04_132058_update_items_table', 37),
-(62, '2022_11_14_153812_create_preferences_table', 38),
-(64, '2022_11_14_155613_create_messages_table', 39),
-(65, '2022_11_16_164900_update_patients_table', 40);
+(2, '2019_12_13_011621_create_departments_table', 1),
+(3, '2019_12_13_214055_create_job_titles_table', 1),
+(4, '2019_12_14_000000_create_users_table', 1),
+(5, '2019_12_14_000001_create_personal_access_tokens_table', 1),
+(6, '2022_10_01_124022_create_user_privileges_table', 1),
+(7, '2022_10_01_225631_create_employees_table', 1),
+(8, '2022_10_02_164329_create_clinic_details_table', 1),
+(9, '2022_10_04_131748_create_consultation_types_table', 1),
+(10, '2022_10_04_131820_create_payment_modes_table', 1),
+(11, '2022_10_04_131827_create_payment_channels_table', 1),
+(12, '2022_10_04_131904_create_units_of_measure_table', 1),
+(13, '2022_10_04_131939_create_item_types_table', 1),
+(14, '2022_10_04_131941_create_lens_types_table', 1),
+(15, '2022_10_04_132058_create_items_table', 1),
+(16, '2022_10_04_133517_create_item_prices_table', 1),
+(17, '2022_10_06_001959_create_regions_table', 1),
+(18, '2022_10_06_002041_create_districts_table', 1),
+(19, '2022_10_06_002056_create_wards_table', 1),
+(20, '2022_10_06_002114_create_diseases_table', 1),
+(21, '2022_10_06_002141_create_patients_table', 1),
+(22, '2022_10_06_004840_create_patient_check_ins_table', 1),
+(23, '2022_10_06_234714_create_patient_payment_cache_table', 1),
+(24, '2022_10_06_234856_create_patient_payment_cache_items_table', 1),
+(25, '2022_10_14_001956_create_patient_item_payments_table', 1),
+(26, '2022_10_14_184035_create_patient_item_bills_table', 1),
+(27, '2022_10_14_185525_create_patient_item_bill_payments_table', 1),
+(28, '2022_10_15_233352_create_consultations_table', 1),
+(29, '2022_10_17_144145_create_consultation_diagnoses_table', 1),
+(30, '2022_10_19_121932_create_consultation_external_examinations_table', 1),
+(31, '2022_10_19_122149_create_consultation_functional_tests_table', 1),
+(32, '2022_10_19_122949_create_consultation_visual_acuities_table', 1),
+(33, '2022_10_19_123031_create_consultation_refractions_table', 1),
+(34, '2022_10_19_123049_create_consultation_fundoscopies_table', 1),
+(35, '2022_11_01_183546_create_stocktakes_table', 1),
+(36, '2022_11_01_183713_create_stocktake_items_table', 1),
+(37, '2022_11_03_213309_create_expense_categories_table', 1),
+(38, '2022_11_03_213354_create_expenses_table', 1),
+(39, '2022_11_14_153812_create_preferences_table', 1),
+(40, '2022_11_14_155613_create_messages_table', 1),
+(41, '2022_10_15_233356_update_consultations_table', 2),
+(42, '2022_11_10_231753_create_expense_payments_table', 2),
+(43, '2022_11_10_233356_update_expenses_table', 2),
+(44, '2023_04_30_000913_update_consultations_table', 3);
 
 -- --------------------------------------------------------
 
@@ -718,8 +748,7 @@ CREATE TABLE `patients` (
   `national_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `occupation` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `payment_mode_id` bigint(20) UNSIGNED DEFAULT 1,
-  `is_vip` enum('Yes','No') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'No',
+  `payment_mode_id` bigint(20) UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -729,14 +758,11 @@ CREATE TABLE `patients` (
 -- Dumping data for table `patients`
 --
 
-INSERT INTO `patients` (`id`, `first_name`, `middle_name`, `last_name`, `gender`, `date_of_birth`, `region_id`, `district_id`, `ward_id`, `national_id`, `phone`, `occupation`, `payment_mode_id`, `is_vip`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 'Lameck', 'Mwigulu', 'Nchemba', 'Male', '1989-10-03', 1, 2, 4, '1989973274762601', '0757206864', 'Mkulima', 1, 'No', '2022-10-07 22:53:18', 1, '2022-10-07 22:53:18'),
-(2, 'Diana', NULL, 'Mmari', 'Female', '2006-08-16', 1, 3, 5, NULL, '0757206864', 'Student', 1, 'No', '2022-10-07 23:06:09', 1, '2022-11-18 17:34:25'),
-(3, 'Rukia', 'S', 'Abdallah', 'Female', '2006-05-03', 1, 2, 2, NULL, '0757206864', 'Student', 1, 'No', '2022-10-07 23:11:50', 1, '2022-10-07 23:11:50'),
-(4, 'John', NULL, 'Lenon', 'Male', '1990-10-02', 2, 1, NULL, NULL, '0757206864', 'Musician', 1, 'No', '2022-10-07 23:20:24', 1, '2022-10-07 23:20:24'),
-(5, 'Narjis', 'Faizali', 'Hasham', 'Female', '1988-11-09', 1, 3, 7, NULL, '0757206864', 'Teacher', 1, 'No', '2022-10-08 00:08:22', 1, '2022-10-08 00:08:22'),
-(6, 'Nickson', 'B', 'Mungai', 'Male', '2001-07-18', 2, 1, 8, '2001071857676473', '0757206864', '0767546288', 2, 'No', '2022-10-11 22:03:05', 1, '2022-11-04 07:49:30'),
-(7, 'Francis', 'M', 'Kagwe', 'Male', '2005-11-01', 1, 3, 5, NULL, '0757206864', 'Model', 1, 'No', '2022-11-05 00:40:43', 1, '2022-11-18 19:06:23');
+INSERT INTO `patients` (`id`, `first_name`, `middle_name`, `last_name`, `gender`, `date_of_birth`, `region_id`, `district_id`, `ward_id`, `national_id`, `phone`, `occupation`, `payment_mode_id`, `created_at`, `created_by`, `updated_at`) VALUES
+(1, 'Paul', NULL, 'Rudiger', 'Male', '1996-12-30', 1, 2, 6, NULL, '0757206864', NULL, 1, '2022-12-30 19:38:29', 1, '2022-12-30 19:38:29'),
+(2, 'Amina', NULL, 'Shaaban', 'Female', '2003-12-30', 1, 1, 1, NULL, '0678660192', NULL, 2, '2022-12-30 19:39:29', 1, '2022-12-30 19:39:29'),
+(3, 'Eric', NULL, 'Msodoki', 'Male', NULL, 1, 1, 2, NULL, '0757206864', NULL, 1, '2022-12-30 19:40:37', 1, '2022-12-30 19:40:37'),
+(4, 'Husna', NULL, 'Abdul', 'Female', '1988-09-17', 1, 2, 7, NULL, '0678660192', NULL, 1, '2022-12-30 19:41:41', 1, '2022-12-30 19:41:41');
 
 -- --------------------------------------------------------
 
@@ -747,7 +773,7 @@ INSERT INTO `patients` (`id`, `first_name`, `middle_name`, `last_name`, `gender`
 CREATE TABLE `patient_check_ins` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `patient_id` bigint(20) UNSIGNED NOT NULL,
-  `payment_mode_id` bigint(20) UNSIGNED NOT NULL DEFAULT 1,
+  `payment_mode_id` bigint(20) UNSIGNED NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -758,17 +784,14 @@ CREATE TABLE `patient_check_ins` (
 --
 
 INSERT INTO `patient_check_ins` (`id`, `patient_id`, `payment_mode_id`, `created_at`, `created_by`, `updated_at`) VALUES
-(5, 3, 1, '2022-10-14 23:04:53', 1, '2022-10-14 23:04:53'),
-(6, 3, 1, '2022-10-14 23:05:54', 1, '2022-10-14 23:05:54'),
-(7, 1, 1, '2022-10-15 10:40:52', 1, '2022-10-15 10:40:52'),
-(8, 4, 1, '2022-10-21 23:47:20', 1, '2022-10-21 23:47:20'),
-(9, 6, 2, '2022-10-23 22:49:02', 1, '2022-10-23 22:49:02'),
-(10, 2, 1, '2022-10-27 21:05:20', 1, '2022-10-27 21:05:20'),
-(11, 4, 1, '2022-11-02 11:52:37', 1, '2022-11-02 11:52:37'),
-(12, 7, 1, '2022-11-05 00:42:34', 1, '2022-11-05 00:42:34'),
-(13, 7, 1, '2022-11-08 08:27:47', 1, '2022-11-08 08:27:47'),
-(14, 7, 1, '2022-11-30 10:00:51', 1, '2022-11-30 10:00:51'),
-(15, 7, 1, '2022-11-30 14:48:53', 1, '2022-11-30 14:48:53');
+(1, 4, 1, '2022-12-30 20:00:51', 1, '2022-12-30 20:00:51'),
+(2, 2, 2, '2022-12-30 20:16:34', 1, '2022-12-30 20:16:34'),
+(3, 2, 2, '2022-12-30 22:53:32', 2, '2022-12-30 22:53:32'),
+(4, 4, 1, '2023-01-18 17:39:33', 1, '2023-01-18 17:39:33'),
+(5, 3, 1, '2023-01-18 17:49:10', 1, '2023-01-18 17:49:10'),
+(6, 3, 1, '2023-03-02 16:31:42', 1, '2023-03-02 16:31:42'),
+(7, 2, 2, '2023-03-02 16:32:55', 1, '2023-03-02 16:32:55'),
+(8, 4, 1, '2023-04-25 17:55:39', 1, '2023-04-25 17:55:39');
 
 -- --------------------------------------------------------
 
@@ -788,14 +811,6 @@ CREATE TABLE `patient_item_bills` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `patient_item_bills`
---
-
-INSERT INTO `patient_item_bills` (`id`, `amount`, `discount`, `created_at`, `created_by`, `status`, `cleared_at`, `cleared_by`, `updated_at`) VALUES
-(1, 6000, 0, '2022-10-27 21:38:30', 1, 'Cleared', '2022-11-01 00:27:26', 1, '2022-10-31 21:27:26'),
-(2, 3500, 1000, '2022-11-02 11:53:05', 1, 'Cleared', '2022-11-05 03:23:34', 1, '2022-11-05 00:23:34');
-
 -- --------------------------------------------------------
 
 --
@@ -811,16 +826,6 @@ CREATE TABLE `patient_item_bill_payments` (
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `patient_item_bill_payments`
---
-
-INSERT INTO `patient_item_bill_payments` (`id`, `bill_id`, `channel_id`, `amount`, `created_at`, `created_by`, `updated_at`) VALUES
-(2, 1, 1, 2000, '2022-10-31 15:26:04', 1, '2022-10-31 15:26:04'),
-(3, 1, 2, 3500, '2022-10-31 21:17:21', 1, '2022-10-31 21:17:21'),
-(4, 2, 1, 1000, '2022-11-02 11:54:24', 1, '2022-11-02 11:54:24'),
-(5, 2, 3, 1500, '2022-11-05 00:21:26', 1, '2022-11-05 00:21:26');
 
 -- --------------------------------------------------------
 
@@ -843,24 +848,13 @@ CREATE TABLE `patient_item_payments` (
 --
 
 INSERT INTO `patient_item_payments` (`id`, `channel_id`, `amount`, `discount`, `created_at`, `created_by`, `updated_at`) VALUES
-(3, 1, 7000, 500, '2022-10-15 10:37:48', 1, '2022-10-15 10:37:49'),
-(4, 2, 4000, 100, '2022-10-15 10:41:27', 1, '2022-10-15 10:41:27'),
-(5, 1, 3000, 0, '2022-10-18 21:20:11', 1, '2022-10-18 21:20:11'),
-(6, 1, 2500, 5, '2022-10-20 12:10:13', 1, '2022-10-20 12:10:13'),
-(7, 1, 5000, 0, '2022-10-21 23:47:58', 1, '2022-10-21 23:47:58'),
-(8, 2, 1000, 0, '2022-10-23 17:48:38', 1, '2022-10-23 17:48:39'),
-(9, 2, 3000, 0, '2022-10-24 18:44:56', 1, '2022-10-24 18:44:57'),
-(10, 1, 4000, 0, '2022-11-05 00:46:04', 1, '2022-11-05 00:46:04'),
-(11, 2, 6500, 500, '2022-11-05 02:14:07', 1, '2022-11-05 02:14:07'),
-(12, 3, 3000, 0, '2022-11-05 22:39:05', 1, '2022-11-05 22:39:05'),
-(13, 1, 5000, 0, '2022-11-05 22:41:24', 1, '2022-11-05 22:41:24'),
-(14, 1, 5000, 0, '2022-11-08 08:28:10', 1, '2022-11-08 08:28:11'),
-(15, 4, 5000, 500, '2022-11-12 10:45:00', 1, '2022-11-12 10:45:01'),
-(16, 1, 6500, 400, '2022-11-30 10:05:23', 1, '2022-11-30 10:05:24'),
-(17, 4, 5000, 500, '2022-11-30 10:06:44', 1, '2022-11-30 10:06:45'),
-(18, 2, 2500, 300, '2022-11-30 10:08:21', 1, '2022-11-30 10:08:22'),
-(19, 1, 4000, 500, '2022-11-30 14:49:35', 1, '2022-11-30 14:49:36'),
-(20, 1, 2500, 0, '2022-11-30 14:51:53', 1, '2022-11-30 14:51:53');
+(1, 1, 10000, 1000, '2022-12-30 20:10:19', 1, '2022-12-30 20:10:19'),
+(2, 2, 102500, 0, '2022-12-30 21:41:06', 2, '2022-12-30 21:41:06'),
+(3, 1, 0, 0, '2023-01-18 17:39:56', 1, '2023-01-18 17:39:56'),
+(4, 1, 0, 0, '2023-01-18 17:46:49', 1, '2023-01-18 17:46:49'),
+(5, 2, 100000, 0, '2023-01-18 17:49:27', 1, '2023-01-18 17:49:27'),
+(6, 1, 5000, 0, '2023-03-02 16:33:28', 1, '2023-03-02 16:33:28'),
+(7, 2, 5000, 0, '2023-04-25 17:56:02', 1, '2023-04-25 17:56:03');
 
 -- --------------------------------------------------------
 
@@ -882,23 +876,16 @@ CREATE TABLE `patient_payment_cache` (
 --
 
 INSERT INTO `patient_payment_cache` (`id`, `check_in_id`, `consultation_id`, `created_at`, `created_by`, `updated_at`) VALUES
-(1, 5, NULL, '2022-10-14 23:04:53', 1, '2022-10-14 23:04:53'),
-(2, 6, NULL, '2022-10-14 23:05:55', 1, '2022-10-14 23:05:55'),
-(3, 7, NULL, '2022-10-15 10:40:52', 1, '2022-10-15 10:40:52'),
-(4, 7, 3, '2022-10-18 21:13:42', 1, '2022-10-18 21:13:42'),
-(5, 6, 1, '2022-10-20 12:09:15', 1, '2022-10-20 12:09:15'),
-(6, 8, NULL, '2022-10-21 23:47:21', 1, '2022-10-21 23:47:21'),
-(7, 9, NULL, '2022-10-23 22:49:02', 1, '2022-10-23 22:49:02'),
-(8, 10, NULL, '2022-10-27 21:05:20', 1, '2022-10-27 21:05:20'),
-(9, 11, NULL, '2022-11-02 11:52:37', 1, '2022-11-02 11:52:37'),
-(10, 12, NULL, '2022-11-05 00:42:35', 1, '2022-11-05 00:42:35'),
-(11, 10, 5, '2022-11-05 22:38:01', 1, '2022-11-05 22:38:01'),
-(12, 8, 4, '2022-11-05 22:40:53', 1, '2022-11-05 22:40:53'),
-(13, 13, NULL, '2022-11-08 08:27:48', 1, '2022-11-08 08:27:48'),
-(14, 12, 6, '2022-11-17 20:49:34', 1, '2022-11-17 20:49:34'),
-(15, 14, NULL, '2022-11-30 10:00:51', 1, '2022-11-30 10:00:51'),
-(16, 15, NULL, '2022-11-30 14:48:53', 1, '2022-11-30 14:48:53'),
-(17, 15, 9, '2022-11-30 14:50:34', 1, '2022-11-30 14:50:34');
+(1, 1, NULL, '2022-12-30 20:00:51', 1, '2022-12-30 20:00:51'),
+(2, 2, NULL, '2022-12-30 20:16:35', 1, '2022-12-30 20:16:35'),
+(3, 1, 1, '2022-12-30 21:34:13', 2, '2022-12-30 21:34:13'),
+(4, 3, NULL, '2022-12-30 22:53:32', 2, '2022-12-30 22:53:32'),
+(5, 4, NULL, '2023-01-18 17:39:33', 1, '2023-01-18 17:39:33'),
+(6, 5, 5, '2023-01-18 17:49:10', 1, '2023-01-18 17:49:27'),
+(7, 6, NULL, '2023-03-02 16:31:43', 1, '2023-03-02 16:31:43'),
+(8, 7, 7, '2023-03-02 16:32:55', 1, '2023-03-02 16:33:49'),
+(9, 6, 6, '2023-03-02 17:49:41', 1, '2023-03-02 17:49:41'),
+(10, 8, NULL, '2023-04-25 17:55:39', 1, '2023-04-25 17:55:39');
 
 -- --------------------------------------------------------
 
@@ -922,8 +909,8 @@ CREATE TABLE `patient_payment_cache_items` (
   `dosage` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `comments` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` enum('Pending','Paid','Billed','Served') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
-  `served_by` bigint(20) UNSIGNED DEFAULT NULL,
   `served_at` datetime DEFAULT NULL,
+  `served_by` bigint(20) UNSIGNED DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -931,35 +918,20 @@ CREATE TABLE `patient_payment_cache_items` (
 -- Dumping data for table `patient_payment_cache_items`
 --
 
-INSERT INTO `patient_payment_cache_items` (`id`, `payment_cache_id`, `item_id`, `consultation_type_id`, `consultant_id`, `payment_mode_id`, `unit_price`, `quantity`, `item_payment_id`, `bill_id`, `created_at`, `created_by`, `dosage`, `comments`, `status`, `served_by`, `served_at`, `updated_at`) VALUES
-(1, 2, 2, 4, 1, 1, 4000, 1, 3, NULL, '2022-10-14 23:05:55', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-10-15 10:37:48'),
-(2, 2, 8, 3, 1, 1, 3000, 1, 3, NULL, '2022-10-14 23:05:55', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-10-15 10:37:49'),
-(3, 3, 2, 4, 1, 1, 4000, 1, 4, NULL, '2022-10-15 10:40:52', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-10-15 10:41:27'),
-(4, 3, 6, 1, 1, 1, 1500, 1, NULL, NULL, '2022-10-15 10:40:52', 1, NULL, NULL, 'Pending', NULL, NULL, '2022-10-15 10:40:52'),
-(5, 4, 8, 3, 1, 1, 3000, 1, 5, NULL, '2022-10-18 21:13:42', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-10-18 21:20:11'),
-(6, 4, 1, 2, 1, 1, 5000, 1, 11, NULL, '2022-10-18 21:15:30', 1, NULL, 'Apewe miwani huyu', 'Paid', NULL, NULL, '2022-11-05 02:14:07'),
-(7, 4, 5, 1, 1, 1, 1000, 1, 8, NULL, '2022-10-18 21:17:26', 1, '1x3', 'Apewe dawa hizo', 'Served', 1, '2022-10-23 21:52:27', '2022-10-23 18:52:27'),
-(9, 4, 6, 1, 1, 1, 1500, 1, 11, NULL, '2022-10-18 21:50:32', 1, '2 /7 oral', 'good', 'Paid', NULL, NULL, '2022-11-05 02:14:07'),
-(10, 5, 4, 1, 1, 1, 2500, 1, 6, NULL, '2022-10-20 12:09:15', 1, 'tuut', 'tt', 'Paid', NULL, NULL, '2022-10-20 12:10:13'),
-(11, 5, 8, 3, 1, 1, 3000, 1, 9, NULL, '2022-10-20 12:09:31', 1, NULL, 'performed well', 'Served', 1, '2022-10-24 21:46:25', '2022-10-24 18:46:25'),
-(12, 6, 1, 2, 1, 1, 5000, 1, 7, NULL, '2022-10-21 23:47:21', 1, NULL, 'given all', 'Served', 1, '2022-11-07 12:14:55', '2022-11-07 09:14:55'),
-(13, 6, 4, 1, 1, 1, 2500, 1, 18, NULL, '2022-10-21 23:47:21', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-30 10:08:22'),
-(14, 7, 4, 1, 1, 2, 2450, 5, NULL, NULL, '2022-10-23 22:49:02', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-10-31 13:57:24'),
-(15, 7, 8, 3, 1, 2, 3000, 1, NULL, NULL, '2022-10-23 22:49:02', 1, NULL, 'went well', 'Paid', NULL, NULL, '2022-10-31 13:57:24'),
-(16, 8, 2, 4, 1, 1, 4000, 1, NULL, 1, '2022-10-27 21:05:20', 1, NULL, NULL, 'Billed', NULL, NULL, '2022-10-27 21:38:32'),
-(17, 8, 10, 4, 1, 1, 2000, 1, NULL, 1, '2022-10-27 21:05:20', 1, NULL, NULL, 'Billed', NULL, NULL, '2022-10-27 21:38:32'),
-(18, 9, 4, 1, 1, 1, 2500, 1, NULL, 2, '2022-11-02 11:52:37', 1, '2 x 3', 'well n good', 'Served', 1, '2022-11-02 17:23:36', '2022-11-02 14:23:36'),
-(19, 9, 5, 1, 1, 1, 1000, 1, NULL, 2, '2022-11-02 11:52:37', 1, NULL, 'given', 'Served', 1, '2022-11-07 12:35:18', '2022-11-07 09:35:18'),
-(20, 10, 2, 4, 1, 1, 4000, 1, 10, NULL, '2022-11-05 00:42:35', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-17 20:43:18'),
-(21, 11, 8, 3, 1, 1, 3000, 1, 12, NULL, '2022-11-05 22:38:01', 1, NULL, 'To be done today asap', 'Served', 1, '2022-11-07 12:40:16', '2022-11-07 09:40:16'),
-(22, 12, 1, 2, 1, 1, 5000, 1, 13, NULL, '2022-11-05 22:40:53', 1, NULL, 'test', 'Paid', NULL, NULL, '2022-11-05 22:41:24'),
-(23, 11, 1, 2, 1, 1, 5000, 1, 15, NULL, '2022-11-07 22:41:30', 1, NULL, 'Give bifocal for constant wear', 'Paid', NULL, NULL, '2022-11-12 10:45:01'),
-(24, 13, 1, 2, NULL, 1, 5000, 1, 14, NULL, '2022-11-08 08:27:48', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-08 08:28:10'),
-(25, 14, 1, 2, 1, 1, 5000, 1, 17, NULL, '2022-11-17 20:49:34', 1, NULL, 'gg', 'Paid', NULL, NULL, '2022-11-30 10:06:44'),
-(26, 15, 2, 4, 1, 1, 4000, 1, 16, NULL, '2022-11-30 10:00:51', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-30 10:05:23'),
-(27, 15, 4, 1, 1, 1, 2500, 1, 16, NULL, '2022-11-30 10:00:51', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-30 10:05:24'),
-(28, 16, 2, 4, 1, 1, 4000, 1, 19, NULL, '2022-11-30 14:48:53', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-11-30 14:49:36'),
-(29, 17, 4, 1, 1, 1, 2500, 1, 20, NULL, '2022-11-30 14:50:35', 1, '2x3', 'aa', 'Served', 1, '2022-11-30 17:52:10', '2022-11-30 14:52:10');
+INSERT INTO `patient_payment_cache_items` (`id`, `payment_cache_id`, `item_id`, `consultation_type_id`, `consultant_id`, `payment_mode_id`, `unit_price`, `quantity`, `item_payment_id`, `bill_id`, `created_at`, `created_by`, `dosage`, `comments`, `status`, `served_at`, `served_by`, `updated_at`) VALUES
+(1, 1, 1, 4, 1, 1, 5000, 1, 1, NULL, '2022-12-30 20:00:51', 1, NULL, NULL, 'Served', '2022-12-31 01:42:38', 1, '2022-12-30 22:42:38'),
+(2, 1, 5, 3, NULL, 1, 5000, 1, 1, NULL, '2022-12-30 20:00:51', 1, NULL, 'went well', 'Served', '2022-12-31 00:49:10', 2, '2022-12-30 21:49:10'),
+(3, 2, 1, 4, 1, 2, 4500, 1, NULL, NULL, '2022-12-30 20:16:35', 1, NULL, NULL, 'Paid', NULL, NULL, '2022-12-30 20:18:26'),
+(4, 3, 3, 1, 1, 1, 2500, 1, 2, NULL, '2022-12-30 21:34:13', 2, 'once immediately', 'mpe hizo', 'Served', '2022-12-31 00:47:11', 2, '2022-12-30 21:47:11'),
+(5, 3, 6, 2, 1, 1, 100000, 1, 2, NULL, '2022-12-30 21:38:37', 2, NULL, 'recommended lens', 'Served', '2022-12-31 00:46:25', 2, '2022-12-30 21:46:25'),
+(6, 4, 3, 1, NULL, 2, 2500, 1, NULL, NULL, '2022-12-30 22:53:32', 2, '1 per day', NULL, 'Served', '2022-12-31 01:56:01', 2, '2022-12-30 22:56:01'),
+(7, 4, 6, 2, NULL, 2, 100000, 1, NULL, NULL, '2022-12-30 22:53:32', 2, NULL, 'served', 'Served', '2022-12-31 01:54:26', 2, '2022-12-30 22:54:26'),
+(9, 6, 6, 2, NULL, 1, 100000, 1, 5, NULL, '2023-01-18 17:49:11', 1, NULL, 'mpe hiyo', 'Paid', NULL, NULL, '2023-01-18 17:49:27'),
+(10, 7, 1, 4, 1, 1, 5000, 1, 6, NULL, '2023-03-02 16:31:43', 1, NULL, 'test', 'Served', '2023-03-02 20:48:13', 1, '2023-03-02 17:48:13'),
+(11, 8, 3, 1, NULL, 2, 2500, 1, NULL, NULL, '2023-03-02 16:32:56', 1, 'tt', 'mpe abc', 'Served', '2023-03-02 19:39:55', 1, '2023-03-02 16:39:55'),
+(12, 8, 6, 2, 1, 2, 100000, 1, NULL, NULL, '2023-03-02 16:32:56', 1, NULL, 'pgx', 'Served', '2023-03-02 19:39:15', 1, '2023-03-02 16:39:15'),
+(13, 9, 6, 2, 1, 1, 100000, 1, NULL, NULL, '2023-03-02 17:49:42', 1, NULL, 'pgx', 'Pending', NULL, NULL, '2023-03-02 17:49:42'),
+(14, 10, 1, 4, NULL, 1, 5000, 1, 7, NULL, '2023-04-25 17:55:40', 1, NULL, 'asa', 'Served', '2023-04-25 21:01:07', 1, '2023-04-25 18:01:07');
 
 -- --------------------------------------------------------
 
@@ -981,10 +953,10 @@ CREATE TABLE `payment_channels` (
 --
 
 INSERT INTO `payment_channels` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Cash in Hand', NULL, 'Active', '2022-10-13 22:02:08', '2022-10-13 22:02:08'),
-(2, 'M-Pesa', NULL, 'Active', '2022-10-13 22:03:15', '2022-10-13 22:03:15'),
-(3, 'TigoPesa', NULL, 'Active', '2022-10-13 22:03:27', '2022-10-13 22:03:27'),
-(4, 'Airtel Money', NULL, 'Active', '2022-11-12 10:44:09', '2022-11-12 10:44:09');
+(1, 'Cash-on-hand', NULL, 'Active', '2022-12-30 18:44:13', '2022-12-30 18:44:13'),
+(2, 'M-Pesa', NULL, 'Active', '2022-12-30 18:44:23', '2022-12-30 18:44:23'),
+(3, 'TigoPesa', NULL, 'Active', '2022-12-30 18:44:32', '2022-12-30 18:44:32'),
+(4, 'Airtel Money', NULL, 'Active', '2022-12-30 18:44:45', '2022-12-30 18:44:45');
 
 -- --------------------------------------------------------
 
@@ -996,7 +968,7 @@ CREATE TABLE `payment_modes` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `payment_type` enum('Cash','Credit') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Cash',
+  `transaction_type` enum('Cash','Credit') COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` enum('Active','Inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -1006,11 +978,10 @@ CREATE TABLE `payment_modes` (
 -- Dumping data for table `payment_modes`
 --
 
-INSERT INTO `payment_modes` (`id`, `name`, `description`, `payment_type`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Cash', NULL, 'Cash', 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(2, 'NHIF', NULL, 'Credit', 'Active', '2022-10-05 13:07:02', '2022-10-11 21:55:34'),
-(3, 'Jubilee Insurance', NULL, 'Cash', 'Active', '2022-10-05 13:08:25', '2022-10-05 13:08:25'),
-(4, 'MJM Insurance', NULL, 'Credit', 'Active', '2022-10-11 21:56:02', '2022-10-13 22:04:54');
+INSERT INTO `payment_modes` (`id`, `name`, `description`, `transaction_type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Cash', NULL, 'Cash', 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(2, 'NHIF', NULL, 'Credit', 'Active', '2022-12-30 17:54:57', '2022-12-30 20:17:28'),
+(3, 'Jubilee Insurance', NULL, 'Cash', 'Active', '2022-12-30 17:55:19', '2022-12-30 17:55:19');
 
 -- --------------------------------------------------------
 
@@ -1036,8 +1007,31 @@ CREATE TABLE `personal_access_tokens` (
 --
 
 INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `name`, `token`, `abilities`, `last_used_at`, `expires_at`, `created_at`, `updated_at`) VALUES
-(1, 'App\\Models\\User', 1, 'MyApp', 'b198354fc6048e33d2cc81af48a1831f7637a70edb5ec95bf51e02bf4ae66616', '[\"*\"]', '2022-12-03 19:45:33', NULL, '2022-12-02 09:30:49', '2022-12-03 19:45:33'),
-(2, 'App\\Models\\User', 1, 'MyApp', 'bcf71aa06e5d3e3e5d40c2495a786315f65c49b7acff8ce722077e46fd948438', '[\"*\"]', '2022-12-04 11:10:24', NULL, '2022-12-04 11:10:20', '2022-12-04 11:10:24');
+(1, 'App\\Models\\User', 1, 'MyApp', 'b228bfab450c50d21a5915518ef81cd1592ca5c48bcbc9933296778b1ef957be', '[\"*\"]', '2022-12-30 18:47:10', NULL, '2022-12-30 17:47:28', '2022-12-30 18:47:10'),
+(2, 'App\\Models\\User', 1, 'MyApp', '906d6aae32f06aa46a15859e125c52a89c69a434b674b9bdaafd268dbbcfeddb', '[\"*\"]', '2022-12-30 19:41:45', NULL, '2022-12-30 18:47:19', '2022-12-30 19:41:45'),
+(3, 'App\\Models\\User', 1, 'MyApp', '9fb8173370cabd02eb3a0df1eed5d38914ceb1e6933fd9b8576844c329c15692', '[\"*\"]', '2022-12-30 20:18:36', NULL, '2022-12-30 19:49:21', '2022-12-30 20:18:36'),
+(4, 'App\\Models\\User', 1, 'MyApp', '83155b65388b49d99c89f1d5994f3bd001635a0c374b54050311bc3bf5b1e967', '[\"*\"]', '2022-12-30 21:01:21', NULL, '2022-12-30 20:22:54', '2022-12-30 21:01:21'),
+(5, 'App\\Models\\User', 2, 'MyApp', 'ed107605a4d6804d99767a565caee2e6f582467d2e5e1a344e748a50a3075114', '[\"*\"]', '2022-12-30 21:49:21', NULL, '2022-12-30 21:01:51', '2022-12-30 21:49:21'),
+(6, 'App\\Models\\User', 1, 'MyApp', '5c041bdc8669690e6ddb26269347f4973192e4b3b88929926d8fa4dcac49c7d5', '[\"*\"]', '2022-12-30 22:43:21', NULL, '2022-12-30 22:20:12', '2022-12-30 22:43:21'),
+(7, 'App\\Models\\User', 2, 'MyApp', '61485f71c770c1afc18e5d277789b32bd169f2c6447d07de75d2a34c6489a0e2', '[\"*\"]', '2022-12-30 23:18:44', NULL, '2022-12-30 22:52:12', '2022-12-30 23:18:44'),
+(8, 'App\\Models\\User', 3, 'MyApp', '1eaba3f833fd9accfd5419a731c153ba3648d6c92c472e9e10f9cd6905d7e0f8', '[\"*\"]', '2022-12-30 23:19:55', NULL, '2022-12-30 23:19:51', '2022-12-30 23:19:55'),
+(9, 'App\\Models\\User', 2, 'MyApp', '1d0a7cfca3921cacc293ee7b22635a00e29ef8815b08402f06d6918c5b6576fc', '[\"*\"]', '2022-12-31 00:12:57', NULL, '2022-12-30 23:20:43', '2022-12-31 00:12:57'),
+(10, 'App\\Models\\User', 1, 'MyApp', '3993311a62fd9eae4c122482502ea45a7c9a490661e232efe98a0d6b4a472f1e', '[\"*\"]', '2022-12-31 00:21:38', NULL, '2022-12-31 00:21:35', '2022-12-31 00:21:38'),
+(11, 'App\\Models\\User', 1, 'MyApp', '91bdc1d570f0bb91e1dec6bb9b9af57eb8bf6a1e26e35c5c7e3781ae74953a73', '[\"*\"]', '2023-01-18 17:50:06', NULL, '2023-01-18 17:36:30', '2023-01-18 17:50:06'),
+(12, 'App\\Models\\User', 1, 'MyApp', '2c6212c5de3739b54f0a4792e8399d8c9f7915718d714bfba7ef34125c17dc56', '[\"*\"]', '2023-01-18 18:37:59', NULL, '2023-01-18 18:35:35', '2023-01-18 18:37:59'),
+(13, 'App\\Models\\User', 1, 'MyApp', 'f2201dbad619f68ceb4965eef25b5532ccc6d096a69e6f5dc56663530dc35f6c', '[\"*\"]', '2023-01-19 08:15:27', NULL, '2023-01-19 08:15:24', '2023-01-19 08:15:27'),
+(14, 'App\\Models\\User', 1, 'MyApp', 'c18a4dec90e9427757ea9d4d9d90fb07a18ef8b158e050d831f2458e472c1b79', '[\"*\"]', '2023-01-19 10:34:06', NULL, '2023-01-19 10:33:52', '2023-01-19 10:34:06'),
+(15, 'App\\Models\\User', 1, 'MyApp', 'b726d66789a2244cc4189b3a18e77891e3f4d3c0724f77117b462a0be4e8d1d5', '[\"*\"]', '2023-01-19 10:45:22', NULL, '2023-01-19 10:45:09', '2023-01-19 10:45:22'),
+(16, 'App\\Models\\User', 1, 'MyApp', 'a639d0afc826ce49585c0234215fa231263cd45121f748cfc9e651abac9a5f00', '[\"*\"]', '2023-01-19 11:23:18', NULL, '2023-01-19 10:45:59', '2023-01-19 11:23:18'),
+(17, 'App\\Models\\User', 1, 'MyApp', 'f4228341c832a2e4f565bac36c1e173bdc609ceba7f84911f2e85c0c7702841c', '[\"*\"]', '2023-03-02 14:42:25', NULL, '2023-03-02 14:15:58', '2023-03-02 14:42:25'),
+(18, 'App\\Models\\User', 1, 'MyApp', '86bf47d9ca0f5f7fca762e6058a9d7d75ca6e38199535f0f54ab634a1c993f94', '[\"*\"]', '2023-03-02 16:43:15', NULL, '2023-03-02 16:30:42', '2023-03-02 16:43:15'),
+(19, 'App\\Models\\User', 1, 'MyApp', '6fd4e6699f4aa1430d586d4c598d5079064d73b7fbb391b0c095107ff6bf24dd', '[\"*\"]', '2023-03-02 18:27:05', NULL, '2023-03-02 17:34:36', '2023-03-02 18:27:05'),
+(20, 'App\\Models\\User', 1, 'MyApp', 'a4dd026e1a163bceab30e1df2723578f327535eef192f07e18763fe29a75b005', '[\"*\"]', '2023-03-02 18:34:57', NULL, '2023-03-02 18:34:49', '2023-03-02 18:34:57'),
+(21, 'App\\Models\\User', 1, 'MyApp', '81bf84e977a6d7cdddb0830d07283e9ae3de1eb3f3613bcd686f6379bb69d2b9', '[\"*\"]', '2023-03-02 20:07:09', NULL, '2023-03-02 20:07:05', '2023-03-02 20:07:09'),
+(22, 'App\\Models\\User', 1, 'MyApp', 'd856e14a72e1e61d8bc657a07dbe7a4cf06cd513c1f401a395ed537b46253d78', '[\"*\"]', '2023-04-25 18:01:11', NULL, '2023-04-25 17:55:01', '2023-04-25 18:01:11'),
+(23, 'App\\Models\\User', 1, 'MyApp', '2d79b7bab890c5e7a47b727f310bd7d48dd25463cd448c32d28008763f96d2ed', '[\"*\"]', '2023-04-29 19:39:51', NULL, '2023-04-29 19:39:28', '2023-04-29 19:39:51'),
+(24, 'App\\Models\\User', 1, 'MyApp', 'b437728cb7e3ff9272c8bc6decb02ac0de095b4dcc9d148eef091dc6b171bab4', '[\"*\"]', '2023-04-29 22:28:46', NULL, '2023-04-29 21:30:29', '2023-04-29 22:28:46'),
+(25, 'App\\Models\\User', 1, 'MyApp', 'e75792989ee0a2dc6ea873c55ddb1175e74eff43fe3d11f446f7b9e1dffe067d', '[\"*\"]', '2023-04-29 22:58:03', NULL, '2023-04-29 22:33:25', '2023-04-29 22:58:03');
 
 -- --------------------------------------------------------
 
@@ -1058,8 +1052,7 @@ INSERT INTO `preferences` (`key`, `value`) VALUES
 ('CONSULTATION_MESSAGE', 'Habari {name}. Tunakushukuru kwa kuja kupata huduma yetu. Ni matumaini yetu umefurahia huduma zetu. Asante na karibu tena.'),
 ('PATIENT_TO_RETURN_REMINDER_MESSAGE', 'Habari {name}. Unakumbushwa kuhudhuria appointment yako ya tarehe {date}.'),
 ('SEND_MESSAGES', 'Yes'),
-('SEND_REMINDER_MESSAGE_AT', NULL),
-('SEND_REMINDER_MESSAGES_AT', '12:00');
+('SEND_REMINDER_MESSAGES_AT', '11:00');
 
 -- --------------------------------------------------------
 
@@ -1080,8 +1073,7 @@ CREATE TABLE `regions` (
 --
 
 INSERT INTO `regions` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Dar es Salaam', 'Active', '2022-10-07 21:09:18', '2022-10-07 21:09:18'),
-(2, 'Arusha', 'Active', '2022-10-07 21:11:50', '2022-10-07 21:11:50');
+(1, 'Dar es Salaam', 'Active', '2022-12-30 19:34:21', '2022-12-30 19:34:21');
 
 -- --------------------------------------------------------
 
@@ -1102,8 +1094,7 @@ CREATE TABLE `stocktakes` (
 --
 
 INSERT INTO `stocktakes` (`id`, `created_at`, `created_by`, `reason`, `updated_at`) VALUES
-(1, '2022-11-02 09:22:05', 1, 'Monthly stocktaking', '2022-11-02 09:22:05'),
-(2, '2022-11-02 09:22:32', 1, 'Monthly stocktaking', '2022-11-02 09:22:32');
+(1, '2022-12-30 19:53:19', 1, 'Initial stocktake', '2022-12-30 19:53:19');
 
 -- --------------------------------------------------------
 
@@ -1117,8 +1108,6 @@ CREATE TABLE `stocktake_items` (
   `item_id` bigint(20) UNSIGNED NOT NULL,
   `quantity` double UNSIGNED NOT NULL,
   `unit_buying_price` double UNSIGNED DEFAULT NULL,
-  `manufacture_date` date DEFAULT NULL,
-  `expiry_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1127,11 +1116,10 @@ CREATE TABLE `stocktake_items` (
 -- Dumping data for table `stocktake_items`
 --
 
-INSERT INTO `stocktake_items` (`id`, `stocktake_id`, `item_id`, `quantity`, `unit_buying_price`, `manufacture_date`, `expiry_date`, `created_at`, `updated_at`) VALUES
-(1, 1, 4, 500, 1000, NULL, '2022-11-30', '2022-11-02 09:22:05', '2022-11-02 09:22:05'),
-(2, 1, 7, 100, 300, NULL, NULL, '2022-11-02 09:22:06', '2022-11-02 09:22:06'),
-(3, 2, 4, 500, 1000, NULL, '2022-11-30', '2022-11-02 09:22:33', '2022-11-02 09:22:33'),
-(4, 2, 7, 100, 300, NULL, NULL, '2022-11-02 09:22:33', '2022-11-02 09:22:33');
+INSERT INTO `stocktake_items` (`id`, `stocktake_id`, `item_id`, `quantity`, `unit_buying_price`, `created_at`, `updated_at`) VALUES
+(1, 1, 3, 60, 2000, '2022-12-30 19:53:19', '2022-12-30 19:53:19'),
+(2, 1, 4, 148, 500, '2022-12-30 19:53:19', '2022-12-30 19:53:19'),
+(3, 1, 6, 35, 80000, '2022-12-30 19:53:20', '2022-12-30 19:53:20');
 
 -- --------------------------------------------------------
 
@@ -1153,17 +1141,16 @@ CREATE TABLE `units_of_measure` (
 --
 
 INSERT INTO `units_of_measure` (`id`, `name`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'mg', 'Milligrams', 'Inactive', '2022-10-04 15:18:32', '2022-10-05 10:47:24'),
-(2, 'Btl', 'Bottles', 'Active', '2022-10-04 15:18:32', '2022-10-05 10:48:02'),
-(3, 'PC', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(4, 'Drops', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(5, 'Tube', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(6, 'Kit', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(7, 'Box', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(8, 'Ltr', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(9, 'Cap', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(10, 'Tin', NULL, 'Active', '2022-10-04 15:18:32', '2022-10-04 15:18:32'),
-(11, 'Tab', 'Tablets', 'Active', '2022-10-05 10:34:37', '2022-10-05 10:34:37');
+(1, 'mg', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(2, 'Btl', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(3, 'PC', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(4, 'Drops', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(5, 'Tube', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(6, 'Kit', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(7, 'Box', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(8, 'Ltr', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(9, 'Cap', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09'),
+(10, 'Tin', NULL, 'Active', '2022-12-30 17:43:09', '2022-12-30 17:43:09');
 
 -- --------------------------------------------------------
 
@@ -1173,19 +1160,9 @@ INSERT INTO `units_of_measure` (`id`, `name`, `description`, `status`, `created_
 
 CREATE TABLE `users` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `middle_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `department_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `job_title_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `employee_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `gender` enum('Male','Female') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `national_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `api_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `status` enum('Active','Inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
@@ -1196,9 +1173,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `username`, `department_id`, `job_title_id`, `employee_number`, `date_of_birth`, `gender`, `national_id`, `phone`, `password`, `api_token`, `created_at`, `created_by`, `status`, `updated_at`) VALUES
-(1, 'System', NULL, 'Administrator', 'admin', 1, 2, NULL, NULL, 'Male', NULL, NULL, '$2y$10$3A9a6o/mKvMCyZKFJZ3jYe8xuLLr1HJu9/L5FeuOJlHT5qKgAWBnC', 'J8vUvnZOzvdUzLW4pULD4kGUCowbXFCy', '2022-10-04 15:18:32', NULL, 'Active', '2022-12-02 09:17:33'),
-(2, 'Gerishon', 'B', 'Gway', 'gerishon', 1, 1, '89', '2006-11-02', 'Male', '1994656675777', '0756362329', '$2y$10$8W7E3Zv2IUPcnhE4rzlPSOt4sD6E9QDkrxSOKNrQbpjbyEQtH6OR6', NULL, '2022-11-04 11:39:30', 1, 'Active', '2022-11-04 15:48:49');
+INSERT INTO `users` (`id`, `username`, `password`, `remember_token`, `created_at`, `created_by`, `status`, `updated_at`) VALUES
+(1, 'admin', '$2y$10$dz9G17Rh8nEKx9EiU8/1TuGkroYStGjGqH9BBmZJYnc7.pOzFVTv2', NULL, '2022-12-30 17:43:09', NULL, 'Active', '2022-12-30 17:43:09'),
+(2, 'dev', '$2y$10$dz9G17Rh8nEKx9EiU8/1TuGkroYStGjGqH9BBmZJYnc7.pOzFVTv2', NULL, '2022-12-30 17:51:30', 1, 'Active', '2022-12-30 20:30:06'),
+(3, 'anna', '$2y$10$T2LfVNP2NIneYrT1Zf0mg.b36OOyaIA7JV9KKHWFVIaKkxEn4EOTq', NULL, '2022-12-30 17:53:26', 1, 'Active', '2022-12-30 17:53:26');
 
 -- --------------------------------------------------------
 
@@ -1208,26 +1186,41 @@ INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `username`,
 
 CREATE TABLE `user_privileges` (
   `user_id` bigint(20) UNSIGNED NOT NULL,
-  `dashboard` tinyint(1) NOT NULL DEFAULT 0,
-  `reception` tinyint(1) NOT NULL DEFAULT 0,
-  `payment_center` tinyint(1) NOT NULL DEFAULT 0,
-  `consultation_room` tinyint(1) NOT NULL DEFAULT 0,
-  `optician_center` tinyint(1) NOT NULL DEFAULT 0,
-  `medicine_center` tinyint(1) NOT NULL DEFAULT 0,
-  `procedure_room` tinyint(1) NOT NULL DEFAULT 0,
-  `inventory_management` tinyint(1) NOT NULL DEFAULT 0,
-  `financial_management` tinyint(1) NOT NULL DEFAULT 0,
-  `employee_management` tinyint(1) NOT NULL DEFAULT 0,
-  `settings` tinyint(1) NOT NULL DEFAULT 0
+  `privilege` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `user_privileges`
 --
 
-INSERT INTO `user_privileges` (`user_id`, `dashboard`, `reception`, `payment_center`, `consultation_room`, `optician_center`, `medicine_center`, `procedure_room`, `inventory_management`, `financial_management`, `employee_management`, `settings`) VALUES
-(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-(2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+INSERT INTO `user_privileges` (`user_id`, `privilege`) VALUES
+(1, 'dashboard'),
+(1, 'reception'),
+(1, 'payment_center'),
+(1, 'consultation_room'),
+(1, 'optician_center'),
+(1, 'medicine_center'),
+(1, 'procedure_room'),
+(1, 'inventory_management'),
+(1, 'financial_management'),
+(1, 'employee_management'),
+(1, 'settings'),
+(3, 'dashboard'),
+(3, 'reception'),
+(3, 'payment_center'),
+(3, 'optician_center'),
+(3, 'medicine_center'),
+(2, 'dashboard'),
+(2, 'reception'),
+(2, 'payment_center'),
+(2, 'consultation_room'),
+(2, 'optician_center'),
+(2, 'medicine_center'),
+(2, 'procedure_room'),
+(2, 'employee_management'),
+(2, 'financial_management'),
+(2, 'inventory_management'),
+(2, 'settings');
 
 -- --------------------------------------------------------
 
@@ -1249,14 +1242,13 @@ CREATE TABLE `wards` (
 --
 
 INSERT INTO `wards` (`id`, `name`, `district_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Sekei', 1, 'Active', '2022-10-07 21:13:32', '2022-10-07 21:13:32'),
-(2, 'Sinza', 2, 'Active', '2022-10-07 21:43:17', '2022-10-07 21:43:17'),
-(3, 'Msasani', 2, 'Active', '2022-10-07 21:43:36', '2022-10-07 21:43:36'),
-(4, 'Kawe', 2, 'Active', '2022-10-07 21:43:47', '2022-10-07 21:43:47'),
-(5, 'Magomeni', 3, 'Active', '2022-10-07 21:51:20', '2022-10-07 21:51:20'),
-(6, 'Tandale', 2, 'Active', '2022-10-07 21:53:16', '2022-10-07 21:53:16'),
-(7, 'Upanga', 3, 'Active', '2022-10-08 00:07:34', '2022-10-08 00:07:34'),
-(8, 'Ngarenaro', 1, 'Active', '2022-10-11 22:01:29', '2022-10-11 22:01:29');
+(1, 'Kijitonyama', 1, 'Active', '2022-12-30 19:34:52', '2022-12-30 19:34:52'),
+(2, 'Msasani', 1, 'Active', '2022-12-30 19:35:03', '2022-12-30 19:35:03'),
+(3, 'Kawe', 1, 'Active', '2022-12-30 19:35:11', '2022-12-30 19:35:11'),
+(4, 'Kunduchi', 1, 'Active', '2022-12-30 19:35:20', '2022-12-30 19:35:20'),
+(5, 'Bunju', 1, 'Active', '2022-12-30 19:35:29', '2022-12-30 19:35:29'),
+(6, 'Magomeni', 2, 'Active', '2022-12-30 19:35:56', '2022-12-30 19:35:56'),
+(7, 'Tabata Segerea', 2, 'Active', '2022-12-30 19:36:25', '2022-12-30 19:36:25');
 
 --
 -- Indexes for dumped tables
@@ -1357,6 +1349,16 @@ ALTER TABLE `districts`
   ADD KEY `districts_region_id_foreign` (`region_id`);
 
 --
+-- Indexes for table `employees`
+--
+ALTER TABLE `employees`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `employees_department_id_foreign` (`department_id`),
+  ADD KEY `employees_job_title_id_foreign` (`job_title_id`),
+  ADD KEY `employees_user_id_foreign` (`user_id`),
+  ADD KEY `employees_created_by_foreign` (`created_by`);
+
+--
 -- Indexes for table `expenses`
 --
 ALTER TABLE `expenses`
@@ -1370,6 +1372,14 @@ ALTER TABLE `expenses`
 ALTER TABLE `expense_categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `expense_categories_name_unique` (`name`);
+
+--
+-- Indexes for table `expense_payments`
+--
+ALTER TABLE `expense_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `expense_payments_expense_id_foreign` (`expense_id`),
+  ADD KEY `expense_payments_created_by_foreign` (`created_by`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -1439,8 +1449,8 @@ ALTER TABLE `patients`
   ADD KEY `patients_region_id_foreign` (`region_id`),
   ADD KEY `patients_district_id_foreign` (`district_id`),
   ADD KEY `patients_ward_id_foreign` (`ward_id`),
-  ADD KEY `patients_created_by_foreign` (`created_by`),
-  ADD KEY `patients_payment_mode_id_foreign` (`payment_mode_id`);
+  ADD KEY `patients_payment_mode_id_foreign` (`payment_mode_id`),
+  ADD KEY `patients_created_by_foreign` (`created_by`);
 
 --
 -- Indexes for table `patient_check_ins`
@@ -1448,8 +1458,8 @@ ALTER TABLE `patients`
 ALTER TABLE `patient_check_ins`
   ADD PRIMARY KEY (`id`),
   ADD KEY `patient_check_ins_patient_id_foreign` (`patient_id`),
-  ADD KEY `patient_check_ins_created_by_foreign` (`created_by`),
-  ADD KEY `patient_check_ins_payment_mode_id_foreign` (`payment_mode_id`);
+  ADD KEY `patient_check_ins_payment_mode_id_foreign` (`payment_mode_id`),
+  ADD KEY `patient_check_ins_created_by_foreign` (`created_by`);
 
 --
 -- Indexes for table `patient_item_bills`
@@ -1473,7 +1483,8 @@ ALTER TABLE `patient_item_bill_payments`
 --
 ALTER TABLE `patient_item_payments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `patient_item_payments_channel_id_foreign` (`channel_id`);
+  ADD KEY `patient_item_payments_channel_id_foreign` (`channel_id`),
+  ADD KEY `patient_item_payments_created_by_foreign` (`created_by`);
 
 --
 -- Indexes for table `patient_payment_cache`
@@ -1559,15 +1570,13 @@ ALTER TABLE `units_of_measure`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `users_username_unique` (`username`),
-  ADD KEY `users_job_title_id_foreign` (`job_title_id`),
-  ADD KEY `users_created_by_foreign` (`created_by`),
-  ADD KEY `users_department_id_foreign` (`department_id`);
+  ADD KEY `users_created_by_foreign` (`created_by`);
 
 --
 -- Indexes for table `user_privileges`
 --
 ALTER TABLE `user_privileges`
-  ADD PRIMARY KEY (`user_id`);
+  ADD KEY `user_privileges_user_id_foreign` (`user_id`);
 
 --
 -- Indexes for table `wards`
@@ -1591,13 +1600,13 @@ ALTER TABLE `clinic_details`
 -- AUTO_INCREMENT for table `consultations`
 --
 ALTER TABLE `consultations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `consultation_diagnoses`
 --
 ALTER TABLE `consultation_diagnoses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `consultation_external_examinations`
@@ -1609,19 +1618,19 @@ ALTER TABLE `consultation_external_examinations`
 -- AUTO_INCREMENT for table `consultation_functional_tests`
 --
 ALTER TABLE `consultation_functional_tests`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `consultation_fundoscopies`
 --
 ALTER TABLE `consultation_fundoscopies`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `consultation_refractions`
 --
 ALTER TABLE `consultation_refractions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `consultation_types`
@@ -1639,7 +1648,7 @@ ALTER TABLE `consultation_visual_acuities`
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `diseases`
@@ -1651,19 +1660,31 @@ ALTER TABLE `diseases`
 -- AUTO_INCREMENT for table `districts`
 --
 ALTER TABLE `districts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `employees`
+--
+ALTER TABLE `employees`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `expenses`
 --
 ALTER TABLE `expenses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `expense_categories`
 --
 ALTER TABLE `expense_categories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `expense_payments`
+--
+ALTER TABLE `expense_payments`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -1675,13 +1696,13 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `item_prices`
 --
 ALTER TABLE `item_prices`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `item_types`
@@ -1705,55 +1726,55 @@ ALTER TABLE `lens_types`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `patient_check_ins`
 --
 ALTER TABLE `patient_check_ins`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `patient_item_bills`
 --
 ALTER TABLE `patient_item_bills`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `patient_item_bill_payments`
 --
 ALTER TABLE `patient_item_bill_payments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `patient_item_payments`
 --
 ALTER TABLE `patient_item_payments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `patient_payment_cache`
 --
 ALTER TABLE `patient_payment_cache`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `patient_payment_cache_items`
 --
 ALTER TABLE `patient_payment_cache_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `payment_channels`
@@ -1765,49 +1786,49 @@ ALTER TABLE `payment_channels`
 -- AUTO_INCREMENT for table `payment_modes`
 --
 ALTER TABLE `payment_modes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `regions`
 --
 ALTER TABLE `regions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `stocktakes`
 --
 ALTER TABLE `stocktakes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `stocktake_items`
 --
 ALTER TABLE `stocktake_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `units_of_measure`
 --
 ALTER TABLE `units_of_measure`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `wards`
 --
 ALTER TABLE `wards`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -1871,11 +1892,27 @@ ALTER TABLE `districts`
   ADD CONSTRAINT `districts_region_id_foreign` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Constraints for table `employees`
+--
+ALTER TABLE `employees`
+  ADD CONSTRAINT `employees_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `employees_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `employees_job_title_id_foreign` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `employees_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `expenses`
 --
 ALTER TABLE `expenses`
   ADD CONSTRAINT `expenses_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `expense_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `expenses_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `expense_payments`
+--
+ALTER TABLE `expense_payments`
+  ADD CONSTRAINT `expense_payments_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `expense_payments_expense_id_foreign` FOREIGN KEY (`expense_id`) REFERENCES `expenses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `items`
@@ -1936,7 +1973,8 @@ ALTER TABLE `patient_item_bill_payments`
 -- Constraints for table `patient_item_payments`
 --
 ALTER TABLE `patient_item_payments`
-  ADD CONSTRAINT `patient_item_payments_channel_id_foreign` FOREIGN KEY (`channel_id`) REFERENCES `payment_channels` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `patient_item_payments_channel_id_foreign` FOREIGN KEY (`channel_id`) REFERENCES `payment_channels` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `patient_item_payments_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `patient_payment_cache`
@@ -1949,7 +1987,7 @@ ALTER TABLE `patient_payment_cache`
 -- Constraints for table `patient_payment_cache_items`
 --
 ALTER TABLE `patient_payment_cache_items`
-  ADD CONSTRAINT `patient_payment_cache_items_consultant_id_foreign` FOREIGN KEY (`consultant_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `patient_payment_cache_items_consultant_id_foreign` FOREIGN KEY (`consultant_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `patient_payment_cache_items_consultation_type_id_foreign` FOREIGN KEY (`consultation_type_id`) REFERENCES `consultation_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `patient_payment_cache_items_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `patient_payment_cache_items_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1974,9 +2012,7 @@ ALTER TABLE `stocktake_items`
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `users_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `users_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `users_job_title_id_foreign` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `users_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_privileges`
