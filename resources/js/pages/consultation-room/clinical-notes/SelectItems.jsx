@@ -194,7 +194,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
           >
             <Select
               ref={paymentModeRef}
-              disabled
               label="Payment Mode"
               fullWidth
               required

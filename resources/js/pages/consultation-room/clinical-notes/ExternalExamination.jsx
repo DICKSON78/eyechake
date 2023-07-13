@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import TextField from "../../../components/TextField";
@@ -23,6 +23,8 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
   const leLensRef = useRef();
   const leIopRef = useRef();
 
+  const [formData, setFormData] = useState(external_examination);
+
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
@@ -37,7 +39,8 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
-    }
+    },
+    getFormData: () => formData,
   }));
 
   return (
@@ -57,7 +60,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reLidRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_lid : null}
-              onChange={(value) => autoSave("re_lid", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_lid: value });
+                autoSave("re_lid", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -65,7 +71,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leLidRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_lid : null}
-              onChange={(value) => autoSave("le_lid", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_lid: value });
+                autoSave("le_lid", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -76,7 +85,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reScleraRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_sclera : null}
-              onChange={(value) => autoSave("re_sclera", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_sclera: value });
+                autoSave("re_sclera", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -84,7 +96,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leScleraRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_sclera : null}
-              onChange={(value) => autoSave("le_sclera", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_sclera: value });
+                autoSave("le_sclera", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -95,7 +110,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reCorneaRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_cornea : null}
-              onChange={(value) => autoSave("re_cornea", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_cornea: value });
+                autoSave("re_cornea", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -103,7 +121,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leCorneaRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_cornea : null}
-              onChange={(value) => autoSave("le_cornea", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_cornea: value });
+                autoSave("le_cornea", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -114,7 +135,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reConjuctivaRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_conjuctiva : null}
-              onChange={(value) => autoSave("re_conjuctiva", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_conjuctiva: value });
+                autoSave("re_conjuctiva", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -122,7 +146,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leConjuctivaRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_conjuctiva : null}
-              onChange={(value) => autoSave("le_conjuctiva", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_conjuctiva: value });
+                autoSave("le_conjuctiva", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -133,7 +160,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reIrisRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_iris : null}
-              onChange={(value) => autoSave("re_iris", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_iris: value });
+                autoSave("re_iris", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -141,7 +171,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leIrisRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_iris : null}
-              onChange={(value) => autoSave("le_iris", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_iris: value });
+                autoSave("le_iris", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -152,7 +185,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={rePupilRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_pupil : null}
-              onChange={(value) => autoSave("re_pupil", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_pupil: value });
+                autoSave("re_pupil", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -160,7 +196,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={lePupilRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_pupil : null}
-              onChange={(value) => autoSave("le_pupil", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_pupil: value });
+                autoSave("le_pupil", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -171,7 +210,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reLensRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_lens : null}
-              onChange={(value) => autoSave("re_lens", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_lens: value });
+                autoSave("re_lens", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -179,7 +221,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leLensRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_lens : null}
-              onChange={(value) => autoSave("le_lens", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_lens: value });
+                autoSave("le_lens", value);
+              }}
             />
           </TableCell>
         </TableRow>
@@ -190,7 +235,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={reIopRef}
               fullWidth
               defaultValue={external_examination ? external_examination.re_iop : null}
-              onChange={(value) => autoSave("re_iop", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, re_iop: value });
+                autoSave("re_iop", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -198,7 +246,10 @@ const ExternalExamination = ({ consultation: { id, external_examination, status 
               ref={leIopRef}
               fullWidth
               defaultValue={external_examination ? external_examination.le_iop : null}
-              onChange={(value) => autoSave("le_iop", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, le_iop: value });
+                autoSave("le_iop", value);
+              }}
             />
           </TableCell>
         </TableRow>

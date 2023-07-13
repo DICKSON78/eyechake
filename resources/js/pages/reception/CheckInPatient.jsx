@@ -242,7 +242,6 @@ const CheckInPatient = () => {
               >
                 <Select
                   ref={paymentModeRef}
-                  disabled={!!patient.payment_mode_id}
                   label="Payment Mode"
                   fullWidth
                   required

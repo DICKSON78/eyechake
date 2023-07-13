@@ -46,10 +46,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const modalRef = useRef();
   const formRef = useRef();
+  const refractionRef = useRef();
   const remarksRef = useRef();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
+  const [formData, setFormData] = useState(consultation);
 
   const {
     data: items,
@@ -145,6 +147,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
           modalRef.current.close();
           handleSendToOptician(`api/consultations/${consultation.id}`, {
             send_to_optician: "Yes",
+            ...formData,
+            refraction: refractionRef.current.getFormData(),
           });
         }}
       />
@@ -172,7 +176,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
               title="Refraction Details"
               sx={{ mt: 0 }}
             />
-            <Refraction consultation={consultation}/>
+            <Refraction
+              ref={refractionRef}
+              consultation={consultation}
+            />
 
             <Subheader title="Management"/>
             <Grid
@@ -230,7 +237,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   rows={3}
                   horizontal
                   defaultValue={consultation.remarks}
-                  onChange={(value) => autoSave("remarks", value)}
+                  onChange={(value) => {
+                    setFormData({ ...formData, remarks: value });
+                    autoSave("remarks", value);
+                  }}
                 />
               </Grid>
             </Grid>

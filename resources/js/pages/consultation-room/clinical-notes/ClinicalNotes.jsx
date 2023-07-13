@@ -77,11 +77,21 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const familyGeneralHistoryRef = useRef();
   const pupilsRef = useRef();
   const extraOcularMusclesRef = useRef();
+  const visualAcuityRef = useRef();
+  const externalExaminationRef = useRef();
+  const functionalTestsRef = useRef();
+  const refractionRef = useRef();
+  const fundoscopyRef = useRef();
   const patientToReturnDateRef = useRef();
   const remarksRef = useRef();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
+  const [formData, setFormData] = useState({
+    ...consultation,
+    to_return_date: consultation.to_return_date ? new Date(consultation.to_return_date) : null,
+    require_glass: "No",
+  });
 
   const {
     data: diagnoses,
@@ -101,11 +111,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     per_page: 500,
     consultation_id: consultation.id,
   }, false, [], (response) => response.data.data.data);
-
-  const [patientToReturn, setPatientToReturn] = useState(consultation.patient_to_return);
-  const [patientToReturnDate, setPatientToReturnDate] = useState(consultation.to_return_date ? new Date(consultation.to_return_date) : null);
-  const [remarks, setRemarks] = useState(consultation.remarks);
-  const [requireGlass, setSendToOptician] = useState("No");
 
   const { handlePatch: handleAutoSave } = usePatch();
   const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
@@ -199,10 +204,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
         onOk={() => {
           modalRef.current.close();
           handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
-            patient_to_return: patientToReturn,
-            to_return_date: patientToReturnDate ? formatDateForDb(patientToReturnDate) : undefined,
-            remarks,
-            require_glass: requireGlass,
+            ...formData,
+            visual_acuity: visualAcuityRef.current.getFormData(),
+            external_examination: externalExaminationRef.current.getFormData(),
+            functional_tests: functionalTestsRef.current.getFormData(),
+            refraction: refractionRef.current.getFormData(),
+            fundoscopy: fundoscopyRef.current.getFormData(),
+            to_return_date: formData.to_return_date ? formatDateForDb(formData.to_return_date) : undefined,
           });
         }}
       />
@@ -253,8 +261,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       multiline
                       rows={2}
                       required
-                      defaultValue={consultation.chief_complaint}
-                      onChange={(value) => autoSave("chief_complaint", value)}
+                      defaultValue={formData.chief_complaint}
+                      onChange={(value) => {
+                        setFormData({ ...formData, chief_complaint: value });
+                        autoSave("chief_complaint", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -263,8 +274,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.history_present_illness}
-                      onChange={(value) => autoSave("history_present_illness", value)}
+                      defaultValue={formData.history_present_illness}
+                      onChange={(value) => {
+                        setFormData({ ...formData, history_present_illness: value });
+                        autoSave("history_present_illness", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -273,8 +287,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.family_history}
-                      onChange={(value) => autoSave("family_history", value)}
+                      defaultValue={formData.family_history}
+                      onChange={(value) => {
+                        setFormData({ ...formData, family_history: value });
+                        autoSave("family_history", value);
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -290,8 +307,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.general_health}
-                      onChange={(value) => autoSave("general_health", value)}
+                      defaultValue={formData.general_health}
+                      onChange={(value) => {
+                        setFormData({ ...formData, general_health: value });
+                        autoSave("general_health", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -300,8 +320,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.family_ocular_history}
-                      onChange={(value) => autoSave("family_ocular_history", value)}
+                      defaultValue={formData.family_ocular_history}
+                      onChange={(value) => {
+                        setFormData({ ...formData, family_ocular_history: value });
+                        autoSave("family_ocular_history", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -310,8 +333,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.family_general_history}
-                      onChange={(value) => autoSave("family_general_history", value)}
+                      defaultValue={formData.family_general_history}
+                      onChange={(value) => {
+                        setFormData({ ...formData, family_general_history: value });
+                        autoSave("family_general_history", value);
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -327,8 +353,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.pupils}
-                      onChange={(value) => autoSave("pupils", value)}
+                      defaultValue={formData.pupils}
+                      onChange={(value) => {
+                        setFormData({ ...formData, pupils: value });
+                        autoSave("pupils", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -337,8 +366,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       fullWidth
                       multiline
                       rows={2}
-                      defaultValue={consultation.extra_ocular_muscles}
-                      onChange={(value) => autoSave("extra_ocular_muscles", value)}
+                      defaultValue={formData.extra_ocular_muscles}
+                      onChange={(value) => {
+                        setFormData({ ...formData, extra_ocular_muscles: value });
+                        autoSave("extra_ocular_muscles", value);
+                      }}
                     />
                   </TableCell>
                   <TableCell/>
@@ -347,19 +379,34 @@ const ClinicalNotes = ({ patient, consultation }) => {
             </Table>
 
             <Subheader title="Visual Acuity (VA)"/>
-            <VisualAcuity consultation={consultation}/>
+            <VisualAcuity
+              ref={visualAcuityRef}
+              consultation={consultation}
+            />
 
             <Subheader title="External Examination"/>
-            <ExternalExamination consultation={consultation}/>
+            <ExternalExamination
+              ref={externalExaminationRef}
+              consultation={consultation}
+            />
 
             <Subheader title="Functional Tests"/>
-            <FunctionalTests consultation={consultation}/>
+            <FunctionalTests
+              ref={functionalTestsRef}
+              consultation={consultation}
+            />
 
             <Subheader title="Refraction Details"/>
-            <Refraction consultation={consultation}/>
+            <Refraction
+              ref={refractionRef}
+              consultation={consultation}
+            />
 
             <Subheader title="Fundoscopy"/>
-            <Fundoscopy consultation={consultation}/>
+            <Fundoscopy
+              ref={fundoscopyRef}
+              consultation={consultation}
+            />
 
             <Subheader title="Diagnosis & Management"/>
             <Grid
@@ -457,17 +504,19 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <FormControlLabel
                   control={(
                     <Checkbox
-                      checked={patientToReturn === "Yes"}
+                      checked={formData.patient_to_return === "Yes"}
                       onChange={(event) => {
-                        if (consultation.status === "Consulted") {
-                          const value = event.target.checked ? "Yes" : "No";
-                          autoSave("patient_to_return", value);
-                          consultation.patient_to_return = value;
-                          if (value === "No") {
-                            autoSave("to_return_date", null);
-                          }
+                        const value = event.target.checked ? "Yes" : "No";
+                        setFormData({
+                          ...formData,
+                          patient_to_return: value,
+                          to_return_date: value === "Yes" ? (consultation.to_return_date ? new Date(consultation.to_return_date) : null) : null
+                        });
+                        autoSave("patient_to_return", value);
+
+                        if (value === "No") {
+                          autoSave("to_return_date", null);
                         }
-                        setPatientToReturn(event.target.checked ? "Yes" : "No");
                       }}
                     />
                   )}
@@ -480,20 +529,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 sm={12}
                 xs={12}
               >
-                {patientToReturn === "Yes" ?
+                {formData.patient_to_return === "Yes" ?
                   <DatePicker
                     ref={patientToReturnDateRef}
                     fullWidth
                     label="Return Date"
                     horizontal
-                    required={patientToReturn === "Yes"}
-                    value={patientToReturnDate}
+                    required={formData.patient_to_return === "Yes"}
+                    value={formData.to_return_date}
                     onChange={(value) => {
                       if (!isNaN(value)) {
-                        if (consultation.status === "Consulted") {
-                          autoSave("to_return_date", formatDateForDb(value));
-                        }
-                        setPatientToReturnDate(value);
+                        setFormData({ ...formData, to_return_date: value });
+                        autoSave("to_return_date", formatDateForDb(value));
                       }
                     }}
                   />
@@ -513,12 +560,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   multiline
                   rows={3}
                   horizontal
-                  defaultValue={remarks}
+                  defaultValue={formData.remarks}
                   onChange={(value) => {
-                    if (consultation.status === "Consulted") {
-                      autoSave("remarks", value);
-                    }
-                    setRemarks(value);
+                    setFormData({ ...formData, remarks: value });
+                    autoSave("remarks", value);
                   }}
                 />
               </Grid>
@@ -539,8 +584,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     <FormControlLabel
                       control={(
                         <Checkbox
-                          checked={requireGlass === "Yes"}
-                          onChange={(event) => setSendToOptician(event.target.checked ? "Yes" : "No")}
+                          checked={formData.require_glass === "Yes"}
+                          onChange={(event) => setFormData({
+                            ...formData,
+                            require_glass: event.target.checked ? "Yes" : "No",
+                          })}
                         />
                       )}
                       label="Require Glass"

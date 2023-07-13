@@ -284,6 +284,11 @@ class ConsultationsController extends Controller
                 'sent_to_optician_by' => $request->user()->id,
             ]);
         }
+
+        if ($request->refraction) {
+            $data->refraction->updateOrCreate($request->refraction);
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
@@ -379,6 +384,26 @@ class ConsultationsController extends Controller
         $input['status'] = 'Consulted';
 
         $data->update($input);
+
+        if ($request->visual_acuity) {
+            $data->visual_acuity->updateOrCreate($request->visual_acuity);
+        }
+
+        if ($request->external_examination) {
+            $data->external_examination->updateOrCreate($request->external_examination);
+        }
+
+        if ($request->functional_tests) {
+            $data->functional_tests->updateOrCreate($request->functional_tests);
+        }
+
+        if ($request->refraction) {
+            $data->refraction->updateOrCreate($request->refraction);
+        }
+
+        if ($request->fundoscopy) {
+            $data->fundoscopy->updateOrCreate($request->fundoscopy);
+        }
 
         // update item if it is not dispensable
         if ($data->payment_cache_item->item->is_stock_item == 'No') {

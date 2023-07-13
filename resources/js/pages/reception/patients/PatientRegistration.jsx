@@ -33,6 +33,7 @@ const PatientRegistration = () => {
   const regionRef = useRef();
   const districtRef = useRef();
   const wardRef = useRef();
+  const addressRef = useRef();
   const nationalIdRef = useRef();
   const phoneRef = useRef();
   const occupationRef = useRef();
@@ -59,6 +60,7 @@ const PatientRegistration = () => {
     region_id: undefined,
     district_id: undefined,
     ward_id: undefined,
+    address: undefined,
     national_id: undefined,
     phone: undefined,
     occupation: undefined,
@@ -279,92 +281,108 @@ const PatientRegistration = () => {
                   />
                 </Stack>
               </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={regionRef}
-                  label="Region"
-                  fullWidth
-                  required
-                  options={regions}
-                  optionsLabel="name"
-                  value={region || null}
-                  endAdornment={
-                    <InputAdornment
-                      position="end"
-                      sx={{ cursor: "pointer", mr: 2 }}
-                      onClick={openCreateRegionModal}
-                    >
-                      <AddIcon fontSize="small"/>
-                    </InputAdornment>
-                  }
-                  onChange={(value) => {
-                    setRegion(value);
-                    setFormData({ ...formData, region_id: value ? value.id : null });
-                  }}
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={districtRef}
-                  label="District"
-                  fullWidth
-                  required
-                  options={districts}
-                  optionsLabel="name"
-                  value={district || null}
-                  endAdornment={
-                    region ?
+              {false &&
+              <React.Fragment>
+                <Grid
+                  item
+                  md={4}
+                  sm={6}
+                  xs={12}
+                >
+                  <Select
+                    ref={regionRef}
+                    label="Region"
+                    fullWidth
+                    required
+                    options={regions}
+                    optionsLabel="name"
+                    value={region || null}
+                    endAdornment={
                       <InputAdornment
                         position="end"
                         sx={{ cursor: "pointer", mr: 2 }}
-                        onClick={openCreateDistrictModal}
+                        onClick={openCreateRegionModal}
                       >
                         <AddIcon fontSize="small"/>
                       </InputAdornment>
-                      : null
-                  }
-                  onChange={(value) => {
-                    setDistrict(value);
-                    setFormData({ ...formData, district_id: value ? value.id : null });
-                  }}
-                />
-              </Grid>
+                    }
+                    onChange={(value) => {
+                      setRegion(value);
+                      setFormData({ ...formData, region_id: value ? value.id : null });
+                    }}
+                  />
+                </Grid>
+                <Grid
+                  item
+                  md={4}
+                  sm={6}
+                  xs={12}
+                >
+                  <Select
+                    ref={districtRef}
+                    label="District"
+                    fullWidth
+                    required
+                    options={districts}
+                    optionsLabel="name"
+                    value={district || null}
+                    endAdornment={
+                      region ?
+                        <InputAdornment
+                          position="end"
+                          sx={{ cursor: "pointer", mr: 2 }}
+                          onClick={openCreateDistrictModal}
+                        >
+                          <AddIcon fontSize="small"/>
+                        </InputAdornment>
+                        : null
+                    }
+                    onChange={(value) => {
+                      setDistrict(value);
+                      setFormData({ ...formData, district_id: value ? value.id : null });
+                    }}
+                  />
+                </Grid>
+                <Grid
+                  item
+                  md={4}
+                  sm={6}
+                  xs={12}
+                >
+                  <Select
+                    ref={wardRef}
+                    label="Ward"
+                    fullWidth
+                    options={wards}
+                    optionsLabel="name"
+                    optionsValue="id"
+                    value={wards.find((e) => e.id === formData.ward_id) || null}
+                    endAdornment={
+                      district ?
+                        <InputAdornment
+                          position="end"
+                          sx={{ cursor: "pointer", mr: 2 }}
+                          onClick={openCreateWardModal}
+                        >
+                          <AddIcon fontSize="small"/>
+                        </InputAdornment>
+                        : null
+                    }
+                    onChange={(value) => setFormData({ ...formData, ward_id: value })}
+                  />
+                </Grid>
+              </React.Fragment>}
               <Grid
                 item
                 md={4}
                 sm={6}
                 xs={12}
               >
-                <Select
-                  ref={wardRef}
-                  label="Ward"
+                <TextField
+                  ref={addressRef}
+                  label="Address"
                   fullWidth
-                  options={wards}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  value={wards.find((e) => e.id === formData.ward_id) || null}
-                  endAdornment={
-                    district ?
-                      <InputAdornment
-                        position="end"
-                        sx={{ cursor: "pointer", mr: 2 }}
-                        onClick={openCreateWardModal}
-                      >
-                        <AddIcon fontSize="small"/>
-                      </InputAdornment>
-                      : null
-                  }
-                  onChange={(value) => setFormData({ ...formData, ward_id: value })}
+                  onChange={(value) => setFormData({ ...formData, address: value })}
                 />
               </Grid>
               <Grid
@@ -377,6 +395,7 @@ const PatientRegistration = () => {
                   ref={phoneRef}
                   label="Phone Number"
                   fullWidth
+                  required
                   rules={[validationRules.optionalPhone]}
                   onChange={(value) => setFormData({ ...formData, phone: value })}
                 />

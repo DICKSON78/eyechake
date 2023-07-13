@@ -1,6 +1,6 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
-import { Grid } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
@@ -8,6 +8,8 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
 
   const reRef = useRef();
   const leRef = useRef();
+
+  const [formData, setFormData] = useState(fundoscopy);
 
   const { handlePatch: handleAutoSave } = usePatch();
 
@@ -20,7 +22,8 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
-    }
+    },
+    getFormData: () => formData,
   }));
 
   return (
@@ -42,7 +45,10 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
           rows={2}
           horizontal
           defaultValue={fundoscopy ? fundoscopy.re : null}
-          onChange={(value) => autoSave("re", value)}
+          onChange={(value) => {
+            setFormData({ ...formData, re: value });
+            autoSave("re", value);
+          }}
         />
       </Grid>
       <Grid
@@ -59,7 +65,10 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
           rows={2}
           horizontal
           defaultValue={fundoscopy ? fundoscopy.le : null}
-          onChange={(value) => autoSave("le", value)}
+          onChange={(value) => {
+            setFormData({ ...formData, le: value });
+            autoSave("le", value);
+          }}
         />
       </Grid>
     </Grid>

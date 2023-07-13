@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import TextField from "../../../components/TextField";
@@ -27,6 +27,8 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
   const subLeAddRef = useRef();
   const subLeAddVaRef = useRef();
 
+  const [formData, setFormData] = useState(refraction);
+
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
@@ -38,7 +40,8 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
-    }
+    },
+    getFormData: () => formData,
   }));
 
   return (
@@ -70,7 +73,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obReSphRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_re_sph : null}
-                onChange={(value) => autoSave("ob_re_sph", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_re_sph: value });
+                  autoSave("ob_re_sph", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -78,7 +84,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obReCylRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_re_cyl : null}
-                onChange={(value) => autoSave("ob_re_cyl", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_re_cyl: value });
+                  autoSave("ob_re_cyl", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -86,7 +95,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obReAxisRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_re_axis : null}
-                onChange={(value) => autoSave("ob_re_axis", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_re_axis: value });
+                  autoSave("ob_re_axis", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -94,7 +106,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obReVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_re_va : null}
-                onChange={(value) => autoSave("ob_re_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_re_va: value });
+                  autoSave("ob_re_va", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -102,7 +117,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obLeSphRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_le_sph : null}
-                onChange={(value) => autoSave("ob_le_sph", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_le_sph: value });
+                  autoSave("ob_le_sph", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -110,7 +128,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obLeCylRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_le_cyl : null}
-                onChange={(value) => autoSave("ob_le_cyl", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_le_cyl: value });
+                  autoSave("ob_le_cyl", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -118,7 +139,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obLeAxisRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_le_axis : null}
-                onChange={(value) => autoSave("ob_le_axis", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_le_axis: value });
+                  autoSave("ob_le_axis", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -126,7 +150,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={obLeVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.ob_le_va : null}
-                onChange={(value) => autoSave("ob_le_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, ob_le_va: value });
+                  autoSave("ob_le_va", value);
+                }}
               />
             </TableCell>
           </TableRow>
@@ -159,7 +186,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReSphRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_sph : null}
-                onChange={(value) => autoSave("sub_re_sph", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_sph: value });
+                  autoSave("sub_re_sph", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -167,7 +197,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReCylRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_cyl : null}
-                onChange={(value) => autoSave("sub_re_cyl", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_cyl: value });
+                  autoSave("sub_re_cyl", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -175,7 +208,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReAxisRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_axis : null}
-                onChange={(value) => autoSave("sub_re_axis", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_axis: value });
+                  autoSave("sub_re_axis", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -183,7 +219,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_va : null}
-                onChange={(value) => autoSave("sub_re_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_va: value });
+                  autoSave("sub_re_va", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -191,7 +230,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeSphRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_sph : null}
-                onChange={(value) => autoSave("sub_le_sph", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_sph: value });
+                  autoSave("sub_le_sph", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -199,7 +241,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeCylRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_cyl : null}
-                onChange={(value) => autoSave("sub_le_cyl", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_cyl: value });
+                  autoSave("sub_le_cyl", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -207,7 +252,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeAxisRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_axis : null}
-                onChange={(value) => autoSave("sub_le_axis", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_axis: value });
+                  autoSave("sub_le_axis", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -215,7 +263,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_va : null}
-                onChange={(value) => autoSave("sub_le_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_va: value });
+                  autoSave("sub_le_va", value);
+                }}
               />
             </TableCell>
           </TableRow>
@@ -237,7 +288,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReAddRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_add : null}
-                onChange={(value) => autoSave("sub_re_add", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_add: value });
+                  autoSave("sub_re_add", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -245,7 +299,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subReAddVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_re_add_va : null}
-                onChange={(value) => autoSave("sub_re_add_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_re_add_va: value });
+                  autoSave("sub_re_add_va", value);
+                }}
               />
             </TableCell>
             <TableCell/>
@@ -255,7 +312,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeAddRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_add : null}
-                onChange={(value) => autoSave("sub_le_add", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_add: value });
+                  autoSave("sub_le_add", value);
+                }}
               />
             </TableCell>
             <TableCell>
@@ -263,7 +323,10 @@ const RefractionDetails = ({ consultation: { id, status, refraction } }, ref) =>
                 ref={subLeAddVaRef}
                 fullWidth
                 defaultValue={refraction ? refraction.sub_le_add_va : null}
-                onChange={(value) => autoSave("sub_le_add_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, sub_le_add_va: value });
+                  autoSave("sub_le_add_va", value);
+                }}
               />
             </TableCell>
             <TableCell/>

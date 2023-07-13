@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "../reception/patients/Filters";
 
 import { useFetch, useToast } from "../../hooks";
-import { formatError, getAddress, getNonNull } from "../../helpers";
+import { formatError, getNonNull } from "../../helpers";
 
 const Patients = () => {
 
@@ -88,7 +88,6 @@ const Patients = () => {
               {
                 field: "address",
                 headerName: "Address",
-                valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
               },
               {
                 field: "payment_mode_id",

@@ -37,7 +37,7 @@ class PatientsController extends Controller
         $payment_mode_id = $request->payment_mode_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator']);
+        $data = Patient::with(['payment_mode', 'creator']);
 
         if ($id) {
             $data->where('id', $id);
@@ -97,8 +97,8 @@ class PatientsController extends Controller
             'last_name' => 'required',
             'gender' => 'required|in:Male,Female',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
-            'region_id' => 'required|exists:regions,id',
-            'district_id' => 'required|exists:districts,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'district_id' => 'nullable|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
         ]);
@@ -117,7 +117,7 @@ class PatientsController extends Controller
      */
     public function show($id)
     {
-        $data = Patient::with(['region', 'district', 'ward', 'payment_mode', 'creator'])->findOrFail($id);
+        $data = Patient::with(['payment_mode', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -135,8 +135,8 @@ class PatientsController extends Controller
             'last_name' => 'sometimes|required',
             'gender' => 'sometimes|required|in:Male,Female',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
-            'region_id' => 'sometimes|required|exists:regions,id',
-            'district_id' => 'sometimes|required|exists:districts,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'district_id' => 'nullable|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
             'payment_mode_id' => 'sometimes|required|exists:payment_modes,id',
         ]);

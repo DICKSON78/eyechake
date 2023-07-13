@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import { Stack, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
 import TextField from "../../../components/TextField";
@@ -16,6 +16,8 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
   const aidedLeVaRef = useRef();
   const aidedLeVaDescriptionRef = useRef();
 
+  const [formData, setFormData] = useState(visual_acuity);
+
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
@@ -27,7 +29,8 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
-    }
+    },
+    getFormData: () => formData,
   }));
 
   return (
@@ -54,7 +57,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               ref={unaidedReVaRef}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_re_va : null}
-              onChange={(value) => autoSave("unaided_re_va", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, unaided_re_va: value });
+                autoSave("unaided_re_va", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -62,7 +68,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               ref={unaidedLeVaRef}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_le_va : null}
-              onChange={(value) => autoSave("unaided_le_va", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, unaided_le_va: value });
+                autoSave("unaided_le_va", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -74,7 +83,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 ref={aidedReVaRef}
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_re_va : null}
-                onChange={(value) => autoSave("aided_re_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, aided_re_va: value });
+                  autoSave("aided_re_va", value);
+                }}
                 containerProps={{
                   width: 72,
                 }}
@@ -84,7 +96,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 placeholder="Enter description"
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_re_va_description : null}
-                onChange={(value) => autoSave("aided_re_va_description", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, aided_re_va_description: value });
+                  autoSave("aided_re_va_description", value);
+                }}
               />
             </Stack>
           </TableCell>
@@ -97,7 +112,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 ref={aidedLeVaRef}
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_le_va : null}
-                onChange={(value) => autoSave("aided_le_va", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, aided_le_va: value });
+                  autoSave("aided_le_va", value);
+                }}
                 containerProps={{
                   width: 72,
                 }}
@@ -107,7 +125,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 placeholder="Enter description"
                 fullWidth
                 defaultValue={visual_acuity ? visual_acuity.aided_le_va_description : null}
-                onChange={(value) => autoSave("aided_le_va_description", value)}
+                onChange={(value) => {
+                  setFormData({ ...formData, aided_le_va_description: value });
+                  autoSave("aided_le_va_description", value);
+                }}
               />
             </Stack>
           </TableCell>
@@ -119,7 +140,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               ref={unaidedRePhRef}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_re_ph : null}
-              onChange={(value) => autoSave("unaided_re_ph", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, unaided_re_ph: value });
+                autoSave("unaided_re_ph", value);
+              }}
             />
           </TableCell>
           <TableCell>
@@ -127,7 +151,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               ref={unaidedLePhRef}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_le_ph : null}
-              onChange={(value) => autoSave("unaided_le_ph", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, unaided_le_ph: value });
+                autoSave("unaided_le_ph", value);
+              }}
             />
           </TableCell>
           <TableCell />
@@ -140,7 +167,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
               ref={unaidedIpdRef}
               fullWidth
               defaultValue={visual_acuity ? visual_acuity.unaided_ipd : null}
-              onChange={(value) => autoSave("unaided_ipd", value)}
+              onChange={(value) => {
+                setFormData({ ...formData, unaided_ipd: value });
+                autoSave("unaided_ipd", value);
+              }}
             />
           </TableCell>
           <TableCell />

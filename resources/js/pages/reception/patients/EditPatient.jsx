@@ -1,16 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import {
-  Box,
-  Button,
-  CardActions,
-  CardContent,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  Grid,
-  LinearProgress
-} from "@mui/material";
+import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
@@ -34,6 +24,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
   const regionRef = useRef();
   const districtRef = useRef();
   const wardRef = useRef();
+  const addressRef = useRef();
   const nationalIdRef = useRef();
   const phoneRef = useRef();
   const occupationRef = useRef();
@@ -53,6 +44,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     region_id: item.region_id,
     district_id: item.district_id,
     ward_id: item.ward_id,
+    address: item.address,
     national_id: item.national_id,
     phone: item.phone,
     occupation: item.occupation,
@@ -196,64 +188,81 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
               />
             </Grid>
+            {false &&
+            <React.Fragment>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={regionRef}
+                  label="Region"
+                  fullWidth
+                  required
+                  options={regions}
+                  optionsLabel="name"
+                  optionsValue="id"
+                  value={regions.find((e) => e.id === formData.region_id) || null}
+                  onChange={(value) => {
+                    setDistricts([]);
+                    setWards([]);
+                    setFormData({ ...formData, region_id: value, district_id: null, ward_id: null })
+                  }}
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={districtRef}
+                  label="District"
+                  fullWidth
+                  required
+                  options={districts}
+                  optionsLabel="name"
+                  optionsValue="id"
+                  value={districts.find((e) => e.id === formData.district_id) || null}
+                  onChange={(value) => {
+                    setWards([]);
+                    setFormData({ ...formData, district_id: value, ward_id: null })
+                  }}
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={wardRef}
+                  label="Ward"
+                  fullWidth
+                  options={wards}
+                  optionsLabel="name"
+                  optionsValue="id"
+                  value={wards.find((e) => e.id === formData.ward_id) || null}
+                  onChange={(value) => setFormData({ ...formData, ward_id: value })}
+                />
+              </Grid>
+            </React.Fragment>}
             <Grid
               item
               md={4}
               sm={6}
               xs={12}
             >
-              <Select
-                ref={regionRef}
-                label="Region"
+              <TextField
+                ref={addressRef}
+                label="Address"
                 fullWidth
-                required
-                options={regions}
-                optionsLabel="name"
-                optionsValue="id"
-                value={regions.find((e) => e.id === formData.region_id) || null}
-                onChange={(value) => {
-                  setDistricts([]);
-                  setWards([]);
-                  setFormData({ ...formData, region_id: value, district_id: null, ward_id: null })
-                }}
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Select
-                ref={districtRef}
-                label="District"
-                fullWidth
-                required
-                options={districts}
-                optionsLabel="name"
-                optionsValue="id"
-                value={districts.find((e) => e.id === formData.district_id) || null}
-                onChange={(value) => {
-                  setWards([]);
-                  setFormData({ ...formData, district_id: value, ward_id: null })
-                }}
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Select
-                ref={wardRef}
-                label="Ward"
-                fullWidth
-                options={wards}
-                optionsLabel="name"
-                optionsValue="id"
-                value={wards.find((e) => e.id === formData.ward_id) || null}
-                onChange={(value) => setFormData({ ...formData, ward_id: value })}
+                defaultValue={formData.address}
+                onChange={(value) => setFormData({ ...formData, address: value })}
               />
             </Grid>
             <Grid

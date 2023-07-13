@@ -10,7 +10,7 @@ import Filters from "./Filters";
 import EditPatient from "./EditPatient";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, getAddress, getAge, getNonNull } from "../../../helpers";
+import { formatError, getAge, getNonNull } from "../../../helpers";
 
 const Patients = () => {
 
@@ -132,7 +132,6 @@ const Patients = () => {
               {
                 field: "address",
                 headerName: "Address",
-                valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
               },
               {
                 field: "payment_mode_id",

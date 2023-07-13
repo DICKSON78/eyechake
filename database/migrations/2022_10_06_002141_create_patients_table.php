@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreignId('region_id')->nullable();
             $table->foreignId('district_id')->nullable();
             $table->foreignId('ward_id')->nullable();
+            $table->foreignId('address')->nullable();
             $table->string('national_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('occupation')->nullable();
