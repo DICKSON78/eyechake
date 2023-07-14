@@ -35,11 +35,11 @@ class ExpensesController extends Controller
         $data = Expense::with(['category', 'creator']);
 
         if ($status == 'Pending') {
-            $data->whereRaw('(select sum(amount) from expense_payments where expense_id = expenses.id) < total_amount');
+            $data->whereRaw('(select coalesce(sum(amount) from expense_payments where expense_id = expenses.id), 0) < total_amount');
         }
 
         if ($status == 'Cleared') {
-            $data->whereRaw('(select sum(amount) from expense_payments where expense_id = expenses.id) >= total_amount');
+            $data->whereRaw('(select coalesce(sum(amount) from expense_payments where expense_id = expenses.id), 0) >= total_amount');
         }
 
         if ($category_id) {
