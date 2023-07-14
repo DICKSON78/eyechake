@@ -39,7 +39,7 @@ class ExpensesController extends Controller
         }
 
         if ($status == 'Cleared') {
-            $data->whereRaw('coalesce((select sum(amount) from expense_payments where expense_id = expenses.id), 2) >= total_amount');
+            $data->whereRaw('coalesce((select sum(amount) from expense_payments where expense_id = expenses.id), 0) >= total_amount');
         }
 
         if ($category_id) {
