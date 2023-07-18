@@ -1,6 +1,6 @@
 {
   "resources/images/logo.png": {
-    "file": "assets/logo.6e1675b6.png",
+    "file": "assets/logo.d8ff4d2b.png",
     "src": "resources/images/logo.png"
   },
   "resources/images/loader.svg": {
@@ -11,20 +11,20 @@
     "file": "assets/Custom-Regular.707fdc5c.ttf",
     "src": "resources/fonts/Custom-Regular.ttf"
   },
-  "resources/fonts/Custom-Italic.ttf": {
-    "file": "assets/Custom-Italic.3225cec6.ttf",
-    "src": "resources/fonts/Custom-Italic.ttf"
-  },
   "resources/fonts/Custom-Bold.ttf": {
     "file": "assets/Custom-Bold.7219547e.ttf",
     "src": "resources/fonts/Custom-Bold.ttf"
   },
+  "resources/fonts/Custom-Italic.ttf": {
+    "file": "assets/Custom-Italic.3225cec6.ttf",
+    "src": "resources/fonts/Custom-Italic.ttf"
+  },
   "resources/js/app.jsx": {
-    "file": "assets/app.2e9abe14.js",
+    "file": "assets/app.abaa6c99.js",
     "src": "resources/js/app.jsx",
     "isEntry": true,
     "assets": [
-      "assets/logo.6e1675b6.png",
+      "assets/logo.d8ff4d2b.png",
       "assets/loader.2a755fad.svg",
       "assets/Custom-Regular.707fdc5c.ttf",
       "assets/Custom-Italic.3225cec6.ttf",
