@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('family_ocular_history')->nullable();
             $table->text('family_general_history')->nullable();
             $table->text('pupils')->nullable();
-            $table->text('extra_ocular_muscles')->nullable()->after('pupils');
+            $table->text('extra_ocular_muscles')->nullable();
             $table->enum('patient_to_return', ['Yes', 'No'])->default('No');
             $table->date('to_return_date')->nullable();
             $table->text('remarks')->nullable();
