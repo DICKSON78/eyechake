@@ -224,15 +224,16 @@ const CreateItem = ({ modal, fetchItems }) => {
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
+          sx={{ mr: 1 }}
           onClick={() => modal.close()}
         >
           Cancel
         </Button>
         <Button
-          disabled={loading}
-          variant="text"
+          variant="contained"
           size="large"
           onClick={handleSubmit}
         >

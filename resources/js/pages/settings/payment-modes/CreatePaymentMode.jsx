@@ -14,7 +14,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
   const formRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
-  const transactionTypeRef = useRef();
+  const paymentTypeRef = useRef();
 
   const [formData, setFormData] = useState({
     name: undefined,
@@ -90,7 +90,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
               xs={12}
             >
               <Select
-                ref={transactionTypeRef}
+                ref={paymentTypeRef}
                 label="Transaction Type"
                 fullWidth
                 required
@@ -104,15 +104,16 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
+          sx={{ mr: 1 }}
           onClick={() => modal.close()}
         >
           Cancel
         </Button>
         <Button
-          disabled={loading}
-          variant="text"
+          variant="contained"
           size="large"
           onClick={handleSubmit}
         >
