@@ -1,12 +1,15 @@
 import React from "react";
-import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import DatePicker from "../../components/DatePicker";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import useFetch from "../../hooks/useFetch";
 
-import { debounce } from "../../helpers";
+import { throttle } from "../../helpers";
 
 const PatientFilters = ({ params, setParams, ...rest }) => {
 
@@ -19,6 +22,10 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
     <Card
       variant="outlined"
       {...rest}
+      sx={{
+        bgcolor: "background.default",
+        ...(rest && rest.sx),
+      }}
     >
       <CardContent>
         <Grid
@@ -68,8 +75,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              defaultValue={params.name}
-              onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -89,8 +95,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              defaultValue={params.id}
-              onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
             />
           </Grid>
           <Grid

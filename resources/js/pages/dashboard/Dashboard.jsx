@@ -338,7 +338,7 @@ const Dashboard = () => {
         )}
         titleTypographyProps={{
           variant: "h4",
-          fontWeight: 500,
+          fontWeight: 700,
         }}
         sx={{
           p: 0,
@@ -409,7 +409,11 @@ const Dashboard = () => {
             <Card>
               <CardHeader
                 title="Sales Statistics"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -426,7 +430,11 @@ const Dashboard = () => {
             <Card>
               <CardHeader
                 title="Expense Statistics"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -443,7 +451,11 @@ const Dashboard = () => {
             <Card>
               <CardHeader
                 title="Payment Statistics"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>

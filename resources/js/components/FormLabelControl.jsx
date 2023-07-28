@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 
-const FormLabelControl = ({ containerProps, label, required, children }) => {
+const FormLabelControl = ({ containerProps, label, control, required, children }) => {
 
   return (
     <Box
@@ -10,6 +10,7 @@ const FormLabelControl = ({ containerProps, label, required, children }) => {
     >
       {label ?
         <Typography
+          fontWeight={500}
           sx={{
             ml: 0.5,
             mb: 0.5,
@@ -29,6 +30,7 @@ const FormLabelControl = ({ containerProps, label, required, children }) => {
         </Typography>
         : null
       }
+      {control}
       {children}
     </Box>
   );

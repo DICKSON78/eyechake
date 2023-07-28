@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
@@ -8,7 +11,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { debounce, formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat, throttle } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
 
@@ -52,13 +55,15 @@ const DailyCashCollection = ({ module }) => {
           <React.Fragment>
             <Card
               variant="outlined"
-              sx={{ mb: 2 }}
+              sx={{
+                bgcolor: "background.default",
+                mb: 2,
+              }}
             >
               <CardContent>
                 <Grid
                   container
-                  columnSpacing={2}
-                  rowSpacing={1}
+                  spacing={2}
                 >
                   <Grid
                     item
@@ -77,8 +82,7 @@ const DailyCashCollection = ({ module }) => {
                           </InputAdornment>
                         ),
                       }}
-                      defaultValue={params.name}
-                      onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -98,8 +102,7 @@ const DailyCashCollection = ({ module }) => {
                           </InputAdornment>
                         ),
                       }}
-                      defaultValue={params.id}
-                      onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
                     />
                   </Grid>
                   <Grid

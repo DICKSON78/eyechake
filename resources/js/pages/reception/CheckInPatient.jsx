@@ -29,11 +29,11 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
 import {
-  debounce,
   formatError,
   getValidationError,
   getValidationRules,
   numberFormat,
+  throttle,
   validateInteger
 } from "../../helpers";
 
@@ -282,16 +282,20 @@ const CheckInPatient = () => {
                 <Card variant="outlined">
                   <CardHeader
                     title="Select Item"
-                    titleTypographyProps={{ variant: "subtitle1" }}
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: 700,
+                      color: "text.secondary",
+                    }}
                     action={(
                       <SearchTextField
-                        onChange={(value) => debounce(() => setItemName(value), 1000)}
+                        onChange={(value) => throttle(() => setItemName(value), 1000)}
                       />
                     )}
                     className="no-action-margin-right"
                   />
                   <Divider />
-                  <CardContent>
+                  <CardContent sx={{ bgcolor: "background.default" }}>
                     <Select
                       placeholder="Item Type"
                       fullWidth
@@ -345,7 +349,11 @@ const CheckInPatient = () => {
                 >
                   <CardHeader
                     title="Added Items"
-                    titleTypographyProps={{ variant: "subtitle1" }}
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: 700,
+                      color: "text.secondary",
+                    }}
                   />
                   <Divider />
                   <CardContent>
@@ -440,7 +448,6 @@ const CheckInPatient = () => {
                           <Button
                             disabled={loading}
                             fullWidth
-                            disableElevation
                             variant="contained"
                             color="primary"
                             size="medium"
@@ -531,7 +538,6 @@ const CheckInPatient = () => {
             <Button
               disabled={loading}
               variant="contained"
-              disableElevation
               onClick={() => confirmSubmit(paymentMode && paymentMode.transaction_type === "Credit" ? "Confirm Send for Approval" : "Confirm Send to Cashier")}
             >
               {paymentMode && paymentMode.transaction_type === "Credit" ? "Send for Approval" : "Send to Cashier"}

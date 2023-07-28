@@ -104,7 +104,7 @@ const GlassPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? getNonNull(item.payment_cache_item.consultant).full_name : getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? getNonNull(item.payment_cache_item.server).full_name : getNonNull(item.creator).full_name,
               },
               {
                 field: "created_at",
@@ -123,7 +123,6 @@ const GlassPatients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/reception/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >

@@ -1,6 +1,9 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
-import Grid from "@mui/material/Grid";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
 import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
@@ -27,51 +30,42 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
   }));
 
   return (
-    <Grid
-      container
-      spacing={2}
-    >
-      <Grid
-        item
-        md={6}
-        sm={12}
-        xs={12}
-      >
-        <TextField
-          ref={reRef}
-          fullWidth
-          label="RE"
-          multiline
-          rows={2}
-          horizontal
-          defaultValue={fundoscopy ? fundoscopy.re : null}
-          onChange={(value) => {
-            setFormData({ ...formData, re: value });
-            autoSave("re", value);
-          }}
-        />
-      </Grid>
-      <Grid
-        item
-        md={6}
-        sm={12}
-        xs={12}
-      >
-        <TextField
-          ref={leRef}
-          fullWidth
-          label="LE"
-          multiline
-          rows={2}
-          horizontal
-          defaultValue={fundoscopy ? fundoscopy.le : null}
-          onChange={(value) => {
-            setFormData({ ...formData, le: value });
-            autoSave("le", value);
-          }}
-        />
-      </Grid>
-    </Grid>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <TableCell component="th">RE</TableCell>
+          <TableCell component="th">LE</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+            <TextField
+              ref={reRef}
+              fullWidth
+              multiline
+              rows={2}
+              defaultValue={fundoscopy ? fundoscopy.re : null}
+              onChange={(value) => {
+                setFormData({ ...formData, re: value });
+                autoSave("re", value);
+              }}
+            />
+          </TableCell>
+          <TableCell>
+            <TextField
+              ref={leRef}
+              fullWidth
+              multiline
+              rows={2}
+              defaultValue={fundoscopy ? fundoscopy.le : null}
+              onChange={(value) => {
+                setFormData({ ...formData, le: value });
+                autoSave("le", value);
+              }}
+            />
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   );
 };
 

@@ -21,7 +21,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { debounce, formatError, getNonNull, getValidationRules, numberFormat, validateInteger } from "../../../helpers";
+import { formatError, getNonNull, getValidationRules, numberFormat, throttle, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -180,7 +180,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         <LinearProgress />
         : null
       }
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Grid
           container
           spacing={2}
@@ -236,10 +236,14 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
             <Card variant="outlined">
               <CardHeader
                 title="Select Item"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
                 action={(
                   <SearchTextField
-                    onChange={(value) => debounce(() => setItemName(value), 1000)}
+                    onChange={(value) => throttle(() => setItemName(value), 1000)}
                     sx={{ width: 116 }}
                   />
                 )}
@@ -249,7 +253,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               {loadingItems && <LinearProgress />}
               {consultationType === "Glass" ?
                 <React.Fragment>
-                  <CardContent>
+                  <CardContent sx={{ bgcolor: "background.default" }}>
                     <Select
                       placeholder="Item Type"
                       fullWidth
@@ -307,7 +311,11 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
             <Card variant="outlined">
               <CardHeader
                 title="Selected Items"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -423,7 +431,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                       <Button
                         disabled={loadingPost}
                         fullWidth
-                        disableElevation
                         variant="contained"
                         color="primary"
                         size="medium"
@@ -488,12 +495,12 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
           onClick={() => modal.close()}
         >
           Close

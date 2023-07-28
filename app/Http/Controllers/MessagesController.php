@@ -22,6 +22,7 @@ class MessagesController extends Controller
 
         $per_page = $request->per_page ?? 25;
         $patient_name = $request->patient_name;
+        $patient_phone = $request->patient_phone;
         $patient_id = $request->patient_id;
         $phone = $request->phone;
         $start_date = $request->start_date;
@@ -32,6 +33,12 @@ class MessagesController extends Controller
         if ($patient_name) {
             $data->whereHas('patient', function ($query) use ($patient_name) {
                 $query->fullName('%' . $patient_name . '%');
+            });
+        }
+
+        if ($patient_phone) {
+            $data->whereHas('patient', function ($query) use ($patient_phone) {
+                $query->where('phone', $patient_phone);
             });
         }
 

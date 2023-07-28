@@ -41,7 +41,6 @@ const SpreadsheetReport = ({ title, format, columns, items }) => {
       disabled={loading}
       variant="contained"
       color="info"
-      disableElevation
       onClick={generate}
     >
       {loading ? "Generating Document..." : format === "csv" ? "CSV" : "Excel"}

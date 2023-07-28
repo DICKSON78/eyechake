@@ -18,7 +18,7 @@ const Report = ({ title, subtitle, uri, params, columns, pdfOrientation, onFetch
   const { data, loading, error, handleFetch } = useFetch(uri, {
     per_page: perPage,
     page,
-    ...(params || {})
+    ...params
   }, true, { total: 0, data: [], }, (response) => response.data.data);
 
   useEffect(() => {

@@ -9,7 +9,7 @@ import CreateDisease from "./CreateDisease";
 import EditDisease from "./EditDisease";
 
 import { useFetch, useToast } from "../../../hooks";
-import { debounce, formatError } from "../../../helpers";
+import { formatError, throttle } from "../../../helpers";
 
 const Diseases = () => {
 
@@ -90,10 +90,9 @@ const Diseases = () => {
           title="Diseases"
           trailing={(
             <React.Fragment>
-              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreateDiseaseModal}
               >
                 New Disease

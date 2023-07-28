@@ -1,7 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import PatientItems from "../reports/PatientItems";
-import ItemBalance from "../inventory-management/reports/ItemBalance";
 
 const ReportsRoutes = () => {
   return (

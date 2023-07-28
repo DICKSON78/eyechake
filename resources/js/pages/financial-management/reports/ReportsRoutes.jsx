@@ -12,11 +12,11 @@ const ReportsRoutes = () => {
     <Routes>
       <Route
         path="/cash-collection"
-        element={<CashCollection module="Financial Management" />}
+        element={<CashCollection module="Financial Management"/>}
       />
       <Route
         path="/credit-collection"
-        element={<CreditCollection module="Financial Management" />}
+        element={<CreditCollection module="Financial Management"/>}
       />
       <Route
         path="/pending-patient-bills"
@@ -38,7 +38,7 @@ const ReportsRoutes = () => {
       />
       <Route
         path="/patient-bill-payments"
-        element={<BillPayments module="Financial Management" />}
+        element={<BillPayments module="Financial Management"/>}
       />
       <Route
         path="/expenses"

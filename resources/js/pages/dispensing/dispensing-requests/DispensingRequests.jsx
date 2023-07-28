@@ -122,7 +122,6 @@ const DispensingRequests = ({ consultationType }) => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/${consultationType === "Glass" ? "optician" : "medicine"}-center/dispensing-requests/${item.check_in.patient_id}/${item.id}`)}
                     >

@@ -90,7 +90,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [formData, setFormData] = useState({
     ...consultation,
     to_return_date: consultation.to_return_date ? new Date(consultation.to_return_date) : null,
-    require_glass: "No",
   });
 
   const {
@@ -501,6 +500,32 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 sm={12}
                 xs={12}
               >
+                <TextField
+                  ref={remarksRef}
+                  fullWidth
+                  placeholder="Type remarks..."
+                  multiline
+                  rows={3}
+                  horizontal
+                  defaultValue={formData.remarks}
+                  onChange={(value) => {
+                    setFormData({ ...formData, remarks: value });
+                    autoSave("remarks", value);
+                  }}
+                />
+              </Grid>
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              />
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
                 <FormControlLabel
                   control={(
                     <Checkbox
@@ -547,34 +572,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   : null
                 }
               </Grid>
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <TextField
-                  ref={remarksRef}
-                  fullWidth
-                  placeholder="Type remarks..."
-                  multiline
-                  rows={3}
-                  horizontal
-                  defaultValue={formData.remarks}
-                  onChange={(value) => {
-                    setFormData({ ...formData, remarks: value });
-                    autoSave("remarks", value);
-                  }}
-                />
-              </Grid>
               {consultation.status === "Pending" ?
                 <React.Fragment>
-                  <Grid
-                    item
-                    md={6}
-                    sm={12}
-                    xs={12}
-                  />
                   <Grid
                     item
                     md={6}
@@ -615,7 +614,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Button
                 disabled={loadingComplete}
                 variant="contained"
-                disableElevation
                 onClick={confirmComplete}
               >
                 Save Notes

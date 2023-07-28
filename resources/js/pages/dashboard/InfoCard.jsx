@@ -12,10 +12,11 @@ const InfoCard = ({ title, count, icon, color }) => {
     >
       <Card
         variant="elevation"
+        elevation={0}
         sx={{
           p: 3,
-          backgroundColor: (theme) => theme.palette.mode === "light"
-            ? alpha(color, 0.24)
+          background: (theme) => theme.palette.mode === "light"
+            ? `linear-gradient(to bottom right, ${alpha(color, 0.8)}, ${alpha(color, 0.18)})`
             : theme.palette.background.paper,
         }}
       >
@@ -26,17 +27,13 @@ const InfoCard = ({ title, count, icon, color }) => {
           spacing={2}
         >
           <Box flexGrow={1}>
+            <Typography color="text.secondary">{title}</Typography>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="500"
-            >
-              {count}
-            </Typography>
-            <Typography
-              color="text.secondary"
               mt="4px"
             >
-              {title}
+              {count}
             </Typography>
           </Box>
           <Avatar

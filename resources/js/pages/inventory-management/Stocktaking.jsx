@@ -26,12 +26,12 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
 import {
-  debounce,
   formatError,
   getNonNull,
   getValidationError,
   getValidationRules,
   numberFormat,
+  throttle,
   validateInteger
 } from "../../helpers";
 
@@ -205,16 +205,20 @@ const Stocktaking = () => {
               <Card variant="outlined">
                 <CardHeader
                   title="Select Item"
-                  titleTypographyProps={{ variant: "subtitle1" }}
+                  titleTypographyProps={{
+                    variant: "subtitle1",
+                    fontWeight: 700,
+                    color: "text.secondary",
+                  }}
                   action={(
                     <SearchTextField
-                      onChange={(value) => debounce(() => setItemName(value), 1000)}
+                      onChange={(value) => throttle(() => setItemName(value), 1000)}
                     />
                   )}
                   className="no-action-margin-right"
                 />
                 <Divider />
-                <CardContent>
+                <CardContent sx={{ bgcolor: "background.default" }}>
                   <Select
                     placeholder="Item Type"
                     fullWidth
@@ -268,7 +272,11 @@ const Stocktaking = () => {
               >
                 <CardHeader
                   title="Added Items"
-                  titleTypographyProps={{ variant: "subtitle1" }}
+                  titleTypographyProps={{
+                    variant: "subtitle1",
+                    fontWeight: 700,
+                    color: "text.secondary",
+                  }}
                 />
                 <Divider />
                 <CardContent>
@@ -366,7 +374,6 @@ const Stocktaking = () => {
                         <Button
                           disabled={loading}
                           fullWidth
-                          disableElevation
                           variant="contained"
                           color="primary"
                           size="medium"
@@ -439,7 +446,6 @@ const Stocktaking = () => {
           <Button
             disabled={loading || !!data}
             variant="contained"
-            disableElevation
             onClick={confirmSubmit}
           >
             Save

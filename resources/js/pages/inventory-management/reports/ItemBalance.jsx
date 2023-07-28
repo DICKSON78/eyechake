@@ -4,7 +4,7 @@ import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import { SearchTextField } from "../../../components/Table";
 
-import { debounce, getNonNull, numberFormat } from "../../../helpers";
+import { getNonNull, numberFormat, throttle } from "../../../helpers";
 
 const ItemBalance = ({ module, consultationType }) => {
 
@@ -40,7 +40,7 @@ const ItemBalance = ({ module, consultationType }) => {
           <React.Fragment>
             <SearchTextField
               placeholder="Search Item"
-              onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
               sx={{ width: 200 }}
             />
           </React.Fragment>

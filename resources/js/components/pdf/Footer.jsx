@@ -13,13 +13,13 @@ const Footer = ({ textStyle, ...rest }) => {
       }}
     >
       <Text
-        {...(rest || {})}
+        {...rest}
         style={{
           fontSize: 7,
           fontFamily: "Custom",
           textAlign: "center",
           color: "grey",
-          ...(textStyle || {})
+          ...textStyle
         }}
       />
     </View>

@@ -121,7 +121,6 @@ const PendingCreditPatients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/payment-center/pending-credit-patients/${item.check_in.patient_id}/${item.id}`)}
                     >

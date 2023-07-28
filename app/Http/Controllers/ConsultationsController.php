@@ -62,12 +62,9 @@ class ConsultationsController extends Controller
 
         if ($status) {
             if ($status === 'Awaiting Glass') {
-                $data->where('require_glass', 'Yes')
-                    ->where('status', 'Consulted')
-                    ->whereNull('sent_to_optician_at');
+                $data->where('require_glass', 'Yes')->whereNull('sent_to_optician_at');
             } else if ($status === 'Sent to Optician') {
                 $data->where('require_glass', 'Yes')
-                    ->where('status', 'Consulted')
                     ->whereNotNull('sent_to_optician_at')
                     ->whereHas('payment_cache.items', function ($query) {
                         $query->whereHas('consultation_type', function ($query2) {
@@ -142,11 +139,63 @@ class ConsultationsController extends Controller
         }
 
         if ($start_date) {
-            $data->whereDate('created_at', '>=', $start_date);
+            if ($status === 'Awaiting Glass') {
+                $data->where(function ($query) use ($start_date) {
+                    $query->where(function ($query2) use ($start_date) {
+                        $query2->where('patient_direction', 'Direct to Optician');
+                        $query2->whereDate('created_at', '>=', $start_date);
+                    });
+                    $query->orWhere(function ($query2) use ($start_date) {
+                        $query2->where('patient_direction', 'Direct to Doctor');
+                        $query2->whereHas('payment_cache_item', function ($query3) use ($start_date) {
+                            $query3->whereNotNull('served_at');
+                            $query3->whereDate('served_at', '>=', $start_date);
+                        });
+                    });
+                });
+            } elseif ($status === 'Sent to Optician') {
+                $data->where(function ($query) use ($start_date) {
+                    $query->whereNotNull('sent_to_optician_at');
+                    $query->whereDate('sent_to_optician_at', '>=', $start_date);
+                });
+            } elseif ($status === 'Consulted') {
+                $data->whereHas('payment_cache_item', function ($query) use ($start_date) {
+                    $query->whereNotNull('served_at');
+                    $query->whereDate('served_at', '>=', $start_date);
+                });
+            } else {
+                $data->whereDate('created_at', '>=', $start_date);
+            }
         }
 
         if ($end_date) {
-            $data->whereDate('created_at', '<=', $end_date);
+            if ($status === 'Awaiting Glass') {
+                $data->where(function ($query) use ($end_date) {
+                    $query->where(function ($query2) use ($end_date) {
+                        $query2->where('patient_direction', 'Direct to Optician');
+                        $query2->whereDate('created_at', '<=', $end_date);
+                    });
+                    $query->orWhere(function ($query2) use ($end_date) {
+                        $query2->where('patient_direction', 'Direct to Doctor');
+                        $query2->whereHas('payment_cache_item', function ($query3) use ($end_date) {
+                            $query3->whereNotNull('served_at');
+                            $query3->whereDate('served_at', '<=', $end_date);
+                        });
+                    });
+                });
+            } elseif ($status === 'Sent to Optician') {
+                $data->where(function ($query) use ($end_date) {
+                    $query->whereNotNull('sent_to_optician_at');
+                    $query->whereDate('sent_to_optician_at', '<=', $end_date);
+                });
+            } elseif ($status === 'Consulted') {
+                $data->whereHas('payment_cache_item', function ($query) use ($end_date) {
+                    $query->whereNotNull('served_at');
+                    $query->whereDate('served_at', '<=', $end_date);
+                });
+            } else {
+                $data->whereDate('created_at', '<=', $end_date);
+            }
         }
 
         $data->orderBy('created_at', 'desc');
@@ -201,6 +250,8 @@ class ConsultationsController extends Controller
                     'consultation_id' => $request->consultation_id,
                     'created_by' => $user->id,
                 ]);
+            } else {
+                $payment_cache->update(['created_at' => Carbon::now()]);
             }
 
             $data = PatientPaymentCacheItem::create([
@@ -238,7 +289,7 @@ class ConsultationsController extends Controller
                 $query2->with(['region', 'district', 'ward']);
             }]);
 
-            $query->with(['payment_mode', 'consultant']);
+            $query->with(['payment_mode', 'consultant', 'server']);
         }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
             'to_optician_sender',
         ]);
@@ -270,7 +321,7 @@ class ConsultationsController extends Controller
     {
         $request->validate([
             'patient_to_return' => 'sometimes|required|in:Yes,No',
-            'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
+            'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
             'status' => 'sometimes|required|in:Pending,Consulted',
             'require_glass' => 'sometimes|required|in:Yes,No',
         ]);
@@ -374,13 +425,13 @@ class ConsultationsController extends Controller
     {
         $request->validate([
             'patient_to_return' => 'sometimes|required|in:Yes,No',
-            'to_return_date' => 'required_if:patient_to_return,Yes|date_format:Y-m-d',
+            'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
             'require_glass' => 'sometimes|required|in:Yes,No',
         ]);
 
         $user = $request->user();
         $data = Consultation::findOrFail($id);
-        $input = $request->only('patient_to_return', 'to_return_date', 'remarks', 'require_glass');
+        $input = $request->only('chief_complaint', 'history_present_illness', 'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils', 'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'remarks', 'require_glass');
         $input['status'] = 'Consulted';
 
         $data->update($input);

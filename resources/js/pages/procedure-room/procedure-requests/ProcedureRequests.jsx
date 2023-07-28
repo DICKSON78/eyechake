@@ -122,7 +122,6 @@ const ProcedureRequests = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/procedure-room/procedure-requests/${item.check_in.patient_id}/${item.id}`)}
                     >

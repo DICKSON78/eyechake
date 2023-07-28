@@ -66,12 +66,12 @@ export const formatDateForDb = (date) => {
  * @param fn {Function}
  * @param delay {int}
  */
-export const debounce = (fn, delay) => {
-  if (window.debounceTimeoutID) {
-    window.clearTimeout(window.debounceTimeoutID);
+export const throttle = (fn, delay) => {
+  if (window.throttleTimeoutID) {
+    window.clearTimeout(window.throttleTimeoutID);
   }
 
-  window.debounceTimeoutID = window.setTimeout(fn, delay);
+  window.throttleTimeoutID = window.setTimeout(fn, delay);
 };
 
 /**

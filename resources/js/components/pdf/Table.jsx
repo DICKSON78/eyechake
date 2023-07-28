@@ -17,7 +17,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
               {
                 fontWeight: "bold",
                 flex: col.flex || 1,
-                ...(col.style || {}),
+                ...col.style,
               },
             ]}
           >
@@ -29,7 +29,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
   };
 
   return (
-    <View style={[styles.table, { ...(containerStyle || {}) }]}>
+    <View style={[styles.table, { ...containerStyle }]}>
       {caption ?
         <View style={styles.tableRow}>
           <Text style={[styles.text, styles.tableCell, { fontWeight: "bold" }]}>
@@ -50,7 +50,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
                   styles.tableCell,
                   {
                     flex: col.flex || 1,
-                    ...(col.style || {}),
+                    ...col.style,
                   },
                 ]}
               >
@@ -106,7 +106,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
                     styles.tableCell,
                     {
                       fontWeight: "bold",
-                      ...(col.style || {}),
+                      ...col.style,
                     }
                   ]}
                 >

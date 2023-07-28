@@ -206,7 +206,6 @@ const Preferences = () => {
           <Button
             disabled={loading}
             variant="contained"
-            disableElevation
             onClick={handleSubmit}
           >
             Save

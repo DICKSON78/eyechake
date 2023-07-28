@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { debounce, formatError, getNonNull } from "../../../helpers";
+import { formatError, getNonNull, throttle } from "../../../helpers";
 
 const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fetchDiagnoses, modal }) => {
 
@@ -103,7 +103,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
         <LinearProgress />
         : null
       }
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Grid
           container
           spacing={2}
@@ -117,10 +117,14 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
             <Card variant="outlined">
               <CardHeader
                 title="Select Disease"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
                 action={(
                   <SearchTextField
-                    onChange={(value) => debounce(() => setDiseaseName(value), 1000)}
+                    onChange={(value) => throttle(() => setDiseaseName(value), 1000)}
                   />
                 )}
                 className="no-action-margin-right"
@@ -164,7 +168,11 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
             <Card variant="outlined">
               <CardHeader
                 title="Selected Diseases"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -211,12 +219,12 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
           onClick={() => modal.close()}
         >
           Close

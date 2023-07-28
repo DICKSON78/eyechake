@@ -231,8 +231,10 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>VA</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_re_va}</Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.unaided_le_va}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_re_va}{" "}{consultation.visual_acuity.aided_re_va_description}</Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_le_va}{" "}{consultation.visual_acuity.aided_le_va_description}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_re_va}{" "}{consultation.visual_acuity.aided_re_va_description}</Text>
+                <Text
+                  style={[styles.text, tableStyles.tableCell]}>{consultation.visual_acuity.aided_le_va}{" "}{consultation.visual_acuity.aided_le_va_description}</Text>
               </View>
               <View style={tableStyles.tableRow}>
                 <Text style={[styles.text, tableStyles.tableCellNoFlex, { width: 64 }]}>PH</Text>
@@ -593,7 +595,6 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
       disabled={loading}
       variant="contained"
       color="secondary"
-      disableElevation
       onClick={handleFetch}
       {...rest}
     >

@@ -1,11 +1,14 @@
 import React from "react";
-import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import useFetch from "../../../hooks/useFetch";
 
-import { debounce } from "../../../helpers";
+import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -22,6 +25,10 @@ const Filters = ({ params, setParams, ...rest }) => {
     <Card
       variant="outlined"
       {...rest}
+      sx={{
+        bgcolor: "background.default",
+        ...(rest && rest.sx),
+      }}
     >
       <CardContent>
         <Grid
@@ -45,7 +52,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => debounce(() => setParams({ ...params, name: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, name: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -65,7 +72,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => debounce(() => setParams({ ...params, employee_number: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, employee_number: value }), 1000)}
             />
           </Grid>
           <Grid

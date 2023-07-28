@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, CardContent, Divider } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -19,6 +21,7 @@ const Messages = () => {
     per_page: 25,
     patient_id: undefined,
     patient_name: undefined,
+    patient_phone: undefined,
     start_date: null,
     end_date: null,
   });

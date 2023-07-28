@@ -27,6 +27,7 @@ const Patients = () => {
     per_page: 25,
     id: undefined,
     name: undefined,
+    phone: undefined,
     gender: undefined,
     payment_mode_id: undefined,
   });
@@ -85,7 +86,6 @@ const Patients = () => {
             <React.Fragment>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={() => navigate("/reception/patients/new")}
               >
                 New Patient
@@ -154,7 +154,6 @@ const Patients = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
                     <Tooltip title="Edit">
@@ -167,7 +166,6 @@ const Patients = () => {
                     </Tooltip>
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
                     >

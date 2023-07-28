@@ -111,7 +111,6 @@ const Items = () => {
             <React.Fragment>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreateItemModal}
               >
                 New Item

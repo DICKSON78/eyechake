@@ -46,7 +46,7 @@ const CreateJobTitle = ({ modal, fetchJobTitles }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Form ref={formRef}>
           <Grid
             container

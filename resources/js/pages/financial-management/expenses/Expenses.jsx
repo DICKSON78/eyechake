@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -134,7 +134,6 @@ const Expenses = ({ module, createdBy }) => {
             <React.Fragment>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreateExpenseModal}
               >
                 New Expense
@@ -212,7 +211,6 @@ const Expenses = ({ module, createdBy }) => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
                     spacing={1}
                   >
                     {item.paid_amount < item.total_amount ?
@@ -228,7 +226,6 @@ const Expenses = ({ module, createdBy }) => {
                     }
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => openExpensePaymentsModal(item)}
                     >

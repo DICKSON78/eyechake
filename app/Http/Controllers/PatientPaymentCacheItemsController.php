@@ -205,7 +205,6 @@ class PatientPaymentCacheItemsController extends Controller
                                     'patient_direction' => 'Direct to Optician',
                                     'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
-                                    'status' => 'Consulted',
                                     'require_glass' => 'Yes',
                                 ]);
 
@@ -264,10 +263,9 @@ class PatientPaymentCacheItemsController extends Controller
                         if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                             $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
-                                'patient_direction' => 'Optician',
+                                'patient_direction' => 'Direct to Optician',
                                 'consultant_id' => $item->consultant_id,
                                 'created_by' => $user->id,
-                                'status' => 'Consulted',
                                 'require_glass' => 'Yes',
                             ]);
 
@@ -325,7 +323,7 @@ class PatientPaymentCacheItemsController extends Controller
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                                 $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
-                                    'patient_direction' => 'Optician',
+                                    'patient_direction' => 'Direct to Optician',
                                     'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
                                     'status' => 'Consulted',
@@ -350,7 +348,7 @@ class PatientPaymentCacheItemsController extends Controller
             'An error occurred. Bill could not be created.');
     }
 
-    private function updateStatus(Request $request, $status, $message)
+    private function updateStatus(Request $request, $status, $message, $callback)
     {
         $request->validate([
             'payment_cache_id' => 'required|exists:patient_payment_cache,id',
@@ -358,6 +356,7 @@ class PatientPaymentCacheItemsController extends Controller
             'items.*' => 'required|integer',
         ]);
 
+        $payment_cache = PatientPaymentCache::find($request->payment_cache_id);
         $data = [];
         $user = $request->user();
         $items = $request->json('items');
@@ -383,12 +382,28 @@ class PatientPaymentCacheItemsController extends Controller
             }
         }
 
+        if ($callback) {
+            $callback($payment_cache);
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, $message);
     }
 
     public function dispense(Request $request)
     {
-        return $this->updateStatus($request, 'Served', 'Dispensed successfully.');
+        return $this->updateStatus($request, 'Served', 'Dispensed successfully.', function ($payment_cache) use ($request) {
+            $user = $request->user();
+
+            // check if dispensing a glass item and change its consultation status
+            $consultation = Consultation::find($request->consultation_id);
+            if ($consultation && $consultation->patient_direction == 'Direct to Optician') {
+                $consultation->update(['status' => 'Consulted']);
+
+                // update consultant
+                $consultation->payment_cache_item->consultant_id = $user->id;
+                $consultation->payment_cache_item->save();
+            }
+        });
     }
 
     public function complete(Request $request)

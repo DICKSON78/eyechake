@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, Grid } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
 import Page from "../../../components/Page";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
@@ -53,7 +55,10 @@ const ExpensePayments = ({ module, createdBy }) => {
         prependInner={(
           <Card
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{
+              bgcolor: "background.default",
+              mb: 2,
+            }}
           >
             <CardContent>
               <Grid

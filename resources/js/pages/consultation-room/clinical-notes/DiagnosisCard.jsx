@@ -12,8 +12,9 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
       <CardHeader
         title={title}
         titleTypographyProps={{
-          variant: "subtitle2",
-          fontWeight: 500,
+          variant: "subtitle1",
+          fontWeight: 700,
+          color: "text.secondary",
         }}
       />
       <Divider />
@@ -51,7 +52,6 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
                   <Button
                     variant="contained"
                     color="secondary"
-                    disableElevation
                     size="small"
                     onClick={() => onClickAdd(title, diagnosisType)}
                   >

@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import { Alert, Box, Button, InputAdornment, LinearProgress } from "@mui/material";
 import {
-  Lock as LockIcon,
-  Person2 as UsernameIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  LockRounded as LockIcon,
+  Person2Rounded as UsernameIcon,
+  VisibilityOffRounded as VisibilityOffIcon,
+  VisibilityRounded as VisibilityIcon
 } from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
@@ -120,7 +120,6 @@ const LogIn = () => {
           <Button
             disabled={loading}
             fullWidth
-            disableElevation
             variant="contained"
             color="primary"
             size="large"

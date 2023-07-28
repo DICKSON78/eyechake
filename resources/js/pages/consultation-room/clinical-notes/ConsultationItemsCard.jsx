@@ -39,8 +39,9 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
       <CardHeader
         title={title}
         titleTypographyProps={{
-          variant: "subtitle2",
-          fontWeight: 500,
+          variant: "subtitle1",
+          fontWeight: 700,
+          color: "text.secondary",
         }}
       />
       <Divider />
@@ -94,7 +95,6 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
                   <Button
                     variant="contained"
                     color="secondary"
-                    disableElevation
                     size="small"
                     onClick={() => onClickAdd(title, consultationType)}
                   >

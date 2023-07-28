@@ -296,7 +296,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
           <Button
             disabled={loadingDispense}
             variant="contained"
-            disableElevation
             onClick={confirmDispense}
           >
             Dispense

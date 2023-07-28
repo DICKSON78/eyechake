@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardHeader, Container, Divider, IconButton, Modal as MuiModal, Slide, Tooltip } from "@mui/material";
+import { Card, CardHeader, Container, Grow, IconButton, Modal as MuiModal, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/CloseRounded";
 
 class Modal extends React.Component {
@@ -46,10 +46,21 @@ class Modal extends React.Component {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          "& .MuiContainer-root > .MuiModalContent-root": {
+            "& > .MuiCardContent-root": {
+              maxHeight: "calc(100vh - 180px)",
+              overflowY: "auto",
+              px: { xs: 2, sm: 2, md: 4 },
+            },
+            "& > .MuiCardActions-root": {
+              px: { xs: 2, sm: 2, md: 4 },
+              pt: 2,
+              pb: 3,
+            }
+          }
         }}
       >
-        <Slide
-          direction="down"
+        <Grow
           in={this.state.open}
           mountOnEnter
           unmountOnExit
@@ -57,15 +68,15 @@ class Modal extends React.Component {
           <Container
             component="div"
             maxWidth={this.state.size}
-            py={2}
+            sx={{ py: 2 }}
           >
-            <Card variant="elevation">
+            <Card className="MuiModalContent-root">
               <CardHeader
                 title={this.state.title}
                 subheader={this.state.subtitle}
                 titleTypographyProps={{
-                  variant: "h6",
-                  fontWeight: 400
+                  variant: "h5",
+                  fontWeight: 700
                 }}
                 subheaderTypographyProps={{
                   variant: "subtitle2"
@@ -77,12 +88,15 @@ class Modal extends React.Component {
                     </IconButton>
                   </Tooltip>
                 )}
+                sx={{
+                  px: { xs: 2, sm: 2, md: 4 },
+                  pt: 3,
+                }}
               />
-              <Divider />
               {this.state.component}
             </Card>
           </Container>
-        </Slide>
+        </Grow>
       </MuiModal>
     );
   }

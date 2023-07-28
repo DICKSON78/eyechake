@@ -249,7 +249,6 @@ const DispensingRequestItems = ({ consultationType }) => {
             <Button
               disabled={loading}
               variant="contained"
-              disableElevation
               onClick={() => confirmSubmitDispense("Dispense Items")}
             >
               Dispense Items

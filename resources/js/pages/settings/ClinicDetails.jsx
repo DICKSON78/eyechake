@@ -141,7 +141,6 @@ const ClinicDetails = () => {
           <Button
             disabled={loading}
             variant="contained"
-            disableElevation
             onClick={handleSubmit}
           >
             Save

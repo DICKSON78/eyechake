@@ -1,5 +1,7 @@
 import React from "react";
-import { Card, CardContent, Grid } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 import useFetch from "../../../hooks/useFetch";
@@ -15,6 +17,10 @@ const Filters = ({ params, setParams, ...rest }) => {
     <Card
       variant="outlined"
       {...rest}
+      sx={{
+        bgcolor: "background.default",
+        ...(rest && rest.sx),
+      }}
     >
       <CardContent>
         <Grid

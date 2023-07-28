@@ -9,7 +9,7 @@ import CreateLensType from "./CreateLensType";
 import EditLensType from "./EditLensType";
 
 import { useFetch, useToast } from "../../../../hooks";
-import { debounce, formatError } from "../../../../helpers";
+import { formatError, throttle } from "../../../../helpers";
 
 const LensTypes = () => {
 
@@ -91,10 +91,9 @@ const LensTypes = () => {
           title="Lens Types"
           trailing={(
             <React.Fragment>
-              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreateLensTypeModal}
               >
                 New Lens Type

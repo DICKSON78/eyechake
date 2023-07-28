@@ -51,13 +51,13 @@ const theme = createTheme({
       fontSize: 22,
     },
     h5: {
-      fontSize: 18,
+      fontSize: 20,
     },
     h6: {
-      fontSize: 16,
+      fontSize: 18,
     },
     subtitle1: {
-      fontSize: 14,
+      fontSize: 15,
     },
     subtitle2: {
       fontSize: 13,
@@ -73,7 +73,7 @@ const theme = createTheme({
     }
   },
   shape: {
-    borderRadius: 5,
+    borderRadius: 6,
   },
   components: {
     MuiDrawer: {
@@ -99,7 +99,7 @@ const theme = createTheme({
       },
       variants: [
         {
-          props: { variant: "outlined-elevated" },
+          props: { variant: "outlined-elevation" },
           style: {
             boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
             border: "1px solid #e5e5e5",
@@ -107,7 +107,7 @@ const theme = createTheme({
         }
       ],
       defaultProps: {
-        variant: "outlined-elevated",
+        variant: "outlined-elevation",
       }
     },
     MuiCardHeader: {
@@ -157,6 +157,9 @@ const theme = createTheme({
         sizeLarge: {
           fontSize: "0.8rem",
         }
+      },
+      defaultProps: {
+        disableElevation: true,
       }
     },
     MuiOutlinedInput: {
@@ -249,7 +252,7 @@ const theme = createTheme({
     MuiSkeleton: {
       styleOverrides: {
         rounded: {
-          borderRadius: 5,
+          borderRadius: 6,
         }
       }
     }

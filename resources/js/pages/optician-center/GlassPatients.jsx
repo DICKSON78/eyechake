@@ -138,7 +138,6 @@ const ConsultationPatients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/optician-center/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >

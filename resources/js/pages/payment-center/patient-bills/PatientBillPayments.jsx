@@ -127,7 +127,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
         <LinearProgress />
         : null
       }
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Grid
           container
           spacing={2}
@@ -142,7 +142,11 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
               <Card variant="outlined">
                 <CardHeader
                   title="Add Bill Payment"
-                  titleTypographyProps={{ variant: "subtitle1" }}
+                  titleTypographyProps={{
+                    variant: "subtitle1",
+                    fontWeight: 700,
+                    color: "text.secondary",
+                  }}
                 />
                 <Divider />
                 <CardContent>
@@ -173,7 +177,6 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                   <Button
                     disabled={loadingPost}
                     fullWidth
-                    disableElevation
                     variant="contained"
                     color="primary"
                     size="large"
@@ -197,7 +200,11 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                 <React.Fragment>
                   <CardHeader
                     title="Bill Payments"
-                    titleTypographyProps={{ variant: "subtitle1" }}
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: 700,
+                      color: "text.secondary",
+                    }}
                   />
                   <Divider />
                 </React.Fragment>
@@ -263,12 +270,12 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
           onClick={() => modal.close()}
         >
           Close

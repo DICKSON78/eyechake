@@ -5,7 +5,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import useFetch from "../../../hooks/useFetch";
 
-import { debounce } from "../../../helpers";
+import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -18,6 +18,10 @@ const Filters = ({ params, setParams, ...rest }) => {
     <Card
       variant="outlined"
       {...rest}
+      sx={{
+        bgcolor: "background.default",
+        ...(rest && rest.sx),
+      }}
     >
       <CardContent>
         <Grid
@@ -41,8 +45,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              defaultValue={params.name}
-              onChange={(value) => debounce(() => setParams({ ...params, name: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, name: value }), 1000)}
             />
           </Grid>
           <Grid
@@ -62,8 +65,27 @@ const Filters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              defaultValue={params.id}
-              onChange={(value) => debounce(() => setParams({ ...params, id: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, id: value }), 1000)}
+            />
+          </Grid>
+          <Grid
+            item
+            md
+            sm={6}
+            xs={12}
+          >
+            <TextField
+              fullWidth
+              label="Phone Number"
+              placeholder="Search"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small"/>
+                  </InputAdornment>
+                ),
+              }}
+              onChange={(value) => throttle(() => setParams({ ...params, phone: value }), 1000)}
             />
           </Grid>
           <Grid

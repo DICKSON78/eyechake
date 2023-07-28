@@ -121,7 +121,6 @@ const PendingCashPatients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/payment-center/pending-cash-patients/${item.check_in.patient_id}/${item.id}`)}
                     >

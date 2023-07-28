@@ -9,7 +9,7 @@ import CreateUnitOfMeasure from "./CreateUnitOfMeasure";
 import EditUnitOfMeasure from "./EditUnitOfMeasure";
 
 import { useFetch, useToast } from "../../../../hooks";
-import { debounce, formatError } from "../../../../helpers";
+import { formatError, throttle } from "../../../../helpers";
 
 const UnitsOfMeasure = () => {
 
@@ -91,10 +91,9 @@ const UnitsOfMeasure = () => {
           title="Units of Measure"
           trailing={(
             <React.Fragment>
-              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreateUnitOfMeasureModal}
               >
                 New Unit of Measure

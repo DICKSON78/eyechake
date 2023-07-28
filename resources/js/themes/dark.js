@@ -48,13 +48,13 @@ const theme = createTheme({
       fontSize: 22,
     },
     h5: {
-      fontSize: 18,
+      fontSize: 20,
     },
     h6: {
-      fontSize: 16,
+      fontSize: 18,
     },
     subtitle1: {
-      fontSize: 14,
+      fontSize: 15,
     },
     subtitle2: {
       fontSize: 13,
@@ -70,7 +70,7 @@ const theme = createTheme({
     }
   },
   shape: {
-    borderRadius: 5,
+    borderRadius: 6,
   },
   components: {
     MuiAppBar: {
@@ -107,7 +107,7 @@ const theme = createTheme({
       },
       variants: [
         {
-          props: { variant: "outlined-elevated" },
+          props: { variant: "outlined-elevation" },
           style: {
             boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -265,7 +265,7 @@ const theme = createTheme({
     MuiSkeleton: {
       styleOverrides: {
         rounded: {
-          borderRadius: 5,
+          borderRadius: 6,
         }
       }
     }

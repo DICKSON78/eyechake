@@ -37,16 +37,6 @@ const App = () => {
         <CssBaseline />
         <GlobalStyles
           styles={{
-            ".MuiDrawer-paper": {
-              scrollbarWidth: "thin",
-            },
-            ".MuiDrawer-paper::-webkit-scrollbar": {
-              width: 8,
-              height: 8,
-            },
-            ".MuiDrawer-paper::-webkit-scrollbar-thumb": {
-              borderRadius: 8,
-            },
             "*::selection": {
               backgroundColor: theme.palette.primary.main,
               color: "#fff",

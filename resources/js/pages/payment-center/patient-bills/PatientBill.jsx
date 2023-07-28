@@ -183,7 +183,11 @@ const PatientBill = () => {
             <Card variant="outlined">
               <CardHeader
                 title="Bill Items"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -246,7 +250,6 @@ const PatientBill = () => {
             <Button
               variant="contained"
               color="success"
-              disableElevation
               onClick={showBillPaymentsModal}
             >
               Bill Payments
@@ -256,7 +259,6 @@ const PatientBill = () => {
                 disabled={loading || getAmountRemaining() > 0}
                 variant="contained"
                 color="primary"
-                disableElevation
                 onClick={confirmClearBill}
               >
                 Clear Bill

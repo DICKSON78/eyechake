@@ -459,7 +459,6 @@ const PatientRegistration = () => {
           <Button
             disabled={loading}
             variant="contained"
-            disableElevation
             onClick={handleSubmit}
           >
             Save

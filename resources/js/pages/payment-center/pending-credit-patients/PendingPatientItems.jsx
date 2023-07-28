@@ -179,7 +179,6 @@ const PendingPatientItems = () => {
               disabled={loading}
               variant="contained"
               color="secondary"
-              disableElevation
               onClick={() => console.log(true)}
             >
               Print Receipt
@@ -187,7 +186,6 @@ const PendingPatientItems = () => {
             <Button
               disabled={loading}
               variant="contained"
-              disableElevation
               onClick={() => confirmSubmitApprove()}
             >
               Approve Items

@@ -130,7 +130,6 @@ const PDFReport = ({ title, columns, items, ...rest }) => {
       disabled={loading}
       variant="contained"
       color="secondary"
-      disableElevation
       onClick={generatePdfDocument}
     >
       {loading ? "Generating PDF..." : "PDF"}

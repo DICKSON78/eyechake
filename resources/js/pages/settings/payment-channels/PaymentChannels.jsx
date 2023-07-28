@@ -9,7 +9,7 @@ import CreatePaymentChannel from "./CreatePaymentChannel";
 import EditPaymentChannel from "./EditPaymentChannel";
 
 import { useFetch, useToast } from "../../../hooks";
-import { debounce, formatError } from "../../../helpers";
+import { formatError, throttle } from "../../../helpers";
 
 const PaymentChannels = () => {
 
@@ -90,10 +90,9 @@ const PaymentChannels = () => {
           title="Payment Channels"
           trailing={(
             <React.Fragment>
-              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreatePaymentChannelModal}
               >
                 New Payment Channel

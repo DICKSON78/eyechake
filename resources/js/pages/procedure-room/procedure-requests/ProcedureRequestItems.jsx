@@ -239,7 +239,6 @@ const ProcedureRequestItems = () => {
             <Button
               disabled={loading}
               variant="contained"
-              disableElevation
               onClick={() => confirmSubmitComplete("Complete Procedures")}
             >
               Complete Procedures

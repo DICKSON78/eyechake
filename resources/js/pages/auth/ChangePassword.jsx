@@ -1,15 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  CardActions,
-  CardContent,
-  Divider,
-  Grid,
-  InputAdornment,
-  LinearProgress
-} from "@mui/material";
+import { Alert, Box, Button, CardActions, CardContent, Grid, InputAdornment, LinearProgress } from "@mui/material";
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
@@ -63,7 +53,7 @@ const ChangePassword = ({ modal }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         {handleFeedback()}
         <Form ref={formRef}>
           <Grid
@@ -125,19 +115,19 @@ const ChangePassword = ({ modal }) => {
           </Grid>
         </Form>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
+          sx={{ mr: 1 }}
           onClick={() => modal.close()}
         >
           Cancel
         </Button>
         <Button
-          disabled={loading}
-          variant="text"
+          variant="contained"
           size="large"
           onClick={handleSubmit}
         >

@@ -121,7 +121,7 @@ const ManageItemPrices = ({ item, modal }) => {
         <LinearProgress />
         : null
       }
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Grid
           container
           spacing={2}
@@ -135,7 +135,11 @@ const ManageItemPrices = ({ item, modal }) => {
             <Card variant="outlined">
               <CardHeader
                 title="Add Item Price"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -166,7 +170,6 @@ const ManageItemPrices = ({ item, modal }) => {
                 <Button
                   disabled={loadingPost}
                   fullWidth
-                  disableElevation
                   variant="contained"
                   color="primary"
                   size="large"
@@ -186,7 +189,11 @@ const ManageItemPrices = ({ item, modal }) => {
             <Card variant="outlined">
               <CardHeader
                 title="Item Prices"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -234,12 +241,12 @@ const ManageItemPrices = ({ item, modal }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
           onClick={() => modal.close()}
         >
           Close

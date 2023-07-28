@@ -232,10 +232,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <TextField
                   ref={remarksRef}
                   fullWidth
-                  placeholder="Type remarks..."
                   multiline
                   rows={3}
-                  horizontal
                   defaultValue={consultation.remarks}
                   onChange={(value) => {
                     setFormData({ ...formData, remarks: value });
@@ -259,7 +257,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
           <Button
             disabled={loadingSendToOptician}
             variant="contained"
-            disableElevation
             onClick={confirmSendToOptician}
           >
             Send to Optician

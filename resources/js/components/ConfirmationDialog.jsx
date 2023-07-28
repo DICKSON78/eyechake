@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Box, Button, CardActions, CardContent, Divider, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Button, CardActions, CardContent, Stack, Typography } from "@mui/material";
 import { QuestionMarkRounded as QuestionMarkIcon } from "@mui/icons-material";
 
 const ConfirmationDialog = ({ message, onCancel, onOk }) => {
@@ -20,18 +20,19 @@ const ConfirmationDialog = ({ message, onCancel, onOk }) => {
           </Typography>
         </Stack>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
-          variant="text"
+          variant="outlined"
           size="large"
+          color="secondary"
+          sx={{ mr: 1 }}
           onClick={onCancel}
         >
           Cancel
         </Button>
         <Button
-          variant="text"
+          variant="contained"
           size="large"
           onClick={onOk}
         >

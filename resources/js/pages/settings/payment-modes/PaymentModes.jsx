@@ -9,7 +9,7 @@ import CreatePaymentMode from "./CreatePaymentMode";
 import EditPaymentMode from "./EditPaymentMode";
 
 import { useFetch, useToast } from "../../../hooks";
-import { debounce, formatError } from "../../../helpers";
+import { formatError, throttle } from "../../../helpers";
 
 const PaymentModes = () => {
 
@@ -90,10 +90,9 @@ const PaymentModes = () => {
           title="Payment Modes"
           trailing={(
             <React.Fragment>
-              <SearchTextField onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={openCreatePaymentModeModal}
               >
                 New Payment Mode

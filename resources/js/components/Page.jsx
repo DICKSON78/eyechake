@@ -12,7 +12,7 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
       px={2}
       py={1.5}
       borderRadius={(theme) => `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`}
-      {...(containerProps || {})}
+      {...containerProps}
     >
       {leading}
       {title ?
@@ -20,8 +20,8 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
           <Box flexGrow={1}>
             <Typography
               variant="h6"
-              fontWeight="400"
-              {...(titleProps || {})}
+              fontWeight={700}
+              {...titleProps}
             >
               {title}
             </Typography>

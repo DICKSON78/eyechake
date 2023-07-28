@@ -5,7 +5,7 @@ import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 import useFetch from "../../../../hooks/useFetch";
 
-import { debounce } from "../../../../helpers";
+import { throttle } from "../../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
 
@@ -22,6 +22,10 @@ const Filters = ({ params, setParams, ...rest }) => {
     <Card
       variant="outlined"
       {...rest}
+      sx={{
+        bgcolor: "background.default",
+        ...(rest && rest.sx),
+      }}
     >
       <CardContent>
         <Grid
@@ -45,7 +49,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
+              onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
             />
           </Grid>
           <Grid

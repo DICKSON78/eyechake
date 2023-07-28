@@ -157,7 +157,6 @@ const ConsultationPatients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/consultation-room/consultation-patients/${status}/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
                     >

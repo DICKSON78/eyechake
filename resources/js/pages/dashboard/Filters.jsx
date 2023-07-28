@@ -14,7 +14,7 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
 
   return (
     <React.Fragment>
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Grid
           container
           spacing={2}

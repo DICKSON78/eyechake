@@ -30,7 +30,7 @@ import {
   ExpandMoreRounded as ChevronDownIcon,
   LightModeOutlined as LightModeIcon,
   MoreVert as MoreIcon,
-  PersonRounded as UserIcon
+  Person2Rounded as UserIcon
 } from "@mui/icons-material";
 import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
 
@@ -43,7 +43,7 @@ import loader from "../../images/loader.svg";
 import { useFetch } from "../hooks";
 import { getNonNull } from "../helpers";
 
-const drawerWidth = 240;
+const drawerWidth = 256;
 
 const drawerOpenedMixin = (theme) => ({
   width: drawerWidth,
@@ -183,7 +183,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   </Typography>
                 </Typography>
 
-                <Box flexGrow={1}/>
+                <Box sx={{ flexGrow: 1 }}/>
 
                 <Tooltip title={theme.palette.mode === "light" ? "Enable dark mode" : "Disable dark mode"}>
                   <IconButton
@@ -196,10 +196,8 @@ const Default = ({ setThemeMode, setUser }) => {
                 </Tooltip>
 
                 <Chip
-                  sx={{
-                    bgcolor: "rgba(0, 0, 0, 0.32)",
-                    display: { xs: "none", sm: "none", md: "inline-flex" },
-                  }}
+                  variant="outlined"
+                  sx={{ display: { xs: "none", sm: "none", md: "inline-flex" } }}
                   color="primary"
                   avatar={
                     <Avatar>
@@ -211,7 +209,10 @@ const Default = ({ setThemeMode, setUser }) => {
                       direction="row"
                       alignItems="center"
                     >
-                      <Typography variant="body2">
+                      <Typography
+                        variant="body2"
+                        color="primary.contrastText"
+                      >
                         {user.full_name}
                       </Typography>
                       <ChevronDownIcon sx={{ ml: 0.5 }}/>
@@ -333,7 +334,7 @@ const Default = ({ setThemeMode, setUser }) => {
             >
               <CardHeader
                 title={user.full_name}
-                subheader={getNonNull(getNonNull(user.employee).job_title).name}
+                subheader={getNonNull(user.job_title).name}
                 titleTypographyProps={{
                   variant: "subtitle1",
                   fontWeight: "500",

@@ -294,7 +294,6 @@ const PendingPatientItems = () => {
                 disabled={loadingReceipt}
                 variant="contained"
                 color="purple"
-                disableElevation
                 onClick={generatePaymentReceipt}
               >
                 Print Receipt
@@ -305,7 +304,6 @@ const PendingPatientItems = () => {
               disabled={loading}
               variant="contained"
               color="secondary"
-              disableElevation
               onClick={() => confirmSubmit("Create Bill", "create_bill")}
             >
               Create Bill
@@ -313,7 +311,6 @@ const PendingPatientItems = () => {
             <Button
               disabled={loading}
               variant="contained"
-              disableElevation
               onClick={() => confirmSubmit("Make Payment", "make_payment")}
             >
               Make Payment

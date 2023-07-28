@@ -123,7 +123,6 @@ const PatientBills = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/payment-center/patient-bills/${status}/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`)}
                     >

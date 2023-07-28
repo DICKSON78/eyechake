@@ -57,6 +57,7 @@ class FileInput extends React.Component {
       >
         {label ?
           <Typography
+            fontWeight={500}
             sx={{
               ...(horizontal && {
                 mr: 1,

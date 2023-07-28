@@ -57,7 +57,7 @@ const EditExpenseCategory = ({ item, modal, fetchExpenseCategories }) => {
   return (
     <React.Fragment>
       {loading ? <LinearProgress /> : null}
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Form ref={formRef}>
           <Grid
             container

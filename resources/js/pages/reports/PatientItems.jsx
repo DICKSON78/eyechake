@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-import { Card, CardContent, Chip, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../components/Page";
 import Report from "../../components/reports/Report";
@@ -9,7 +13,7 @@ import Select from "../../components/Select";
 import TextField from "../../components/TextField";
 
 import useFetch from "../../hooks/useFetch";
-import { debounce, formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../helpers";
+import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat, throttle } from "../../helpers";
 
 const PatientItems = ({ module, title, consultationType, paymentModeType, status }) => {
 
@@ -21,7 +25,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   const [params, setParams] = useState({
     with_patient: true,
     consultation_type: consultationType,
-    transaction_type: paymentModeType,
+    payment_mode_type: paymentModeType,
     status,
     patient_id: undefined,
     patient_name: undefined,
@@ -39,7 +43,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   }, [title]);
 
   useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType, transaction_type: paymentModeType, status });
+    setParams({ ...params, consultation_type: consultationType, payment_mode_type: paymentModeType, status });
   }, [consultationType, paymentModeType, status]);
 
   const getStatusColor = (status) => {
@@ -93,13 +97,15 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
           <React.Fragment>
             <Card
               variant="outlined"
-              sx={{ mb: 2 }}
+              sx={{
+                bgcolor: "background.default",
+                mb: 2,
+              }}
             >
               <CardContent>
                 <Grid
                   container
-                  columnSpacing={2}
-                  rowSpacing={1}
+                  spacing={2}
                 >
                   <Grid
                     item
@@ -144,8 +150,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                           </InputAdornment>
                         ),
                       }}
-                      defaultValue={params.name}
-                      onChange={(value) => debounce(() => setParams({ ...params, patient_name: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -165,7 +170,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => debounce(() => setParams({ ...params, patient_id: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -215,7 +220,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => debounce(() => setParams({ ...params, q: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
                     />
                   </Grid>
                 </Grid>

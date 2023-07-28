@@ -134,7 +134,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent sx={{ maxHeight: "calc(100vh - 160px)", overflowY: "auto" }}>
+      <CardContent>
         <Form ref={formRef}>
           <Grid
             container
@@ -189,7 +189,11 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
           >
             <CardHeader
               title="Access Privileges"
-              titleTypographyProps={{ variant: "subtitle1" }}
+              titleTypographyProps={{
+                variant: "subtitle1",
+                fontWeight: 700,
+                color: "text.secondary",
+              }}
             />
             <Divider />
             <CardContent>

@@ -35,7 +35,7 @@ const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, va
                     flex: 1,
                   }),
                   fontWeight: "bold",
-                  ...(labelStyle || {}),
+                  ...labelStyle,
                 }]}
               >
                 {f.label}
@@ -47,7 +47,7 @@ const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, va
                   ...(vertical && {
                     width: "100%",
                   }),
-                  ...(valueStyle || {}),
+                  ...valueStyle,
                 }]}
               >
                 {!vertical ? ": " : ""}{f.value}

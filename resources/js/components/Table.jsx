@@ -141,8 +141,8 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
           </InputAdornment>
         ),
       }}
-      inputProps={{ sx: { py: "6px" } }}
-      sx={{ width: 128, ...(sx || {}) }}
+      inputProps={{ sx: { py: "8px" } }}
+      sx={{ width: 144, ...sx }}
       onChange={onChange}
     />
   );
@@ -186,7 +186,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
 
   const [state, setState] = useState({
     items,
-    ...(initialState || {})
+    ...initialState
   });
 
   useEffect(() => {
@@ -234,7 +234,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
           <TableCell
             key={index}
             component="th"
-            {...(col.tableCellProps || {})}
+            {...col.tableCellProps}
           >
             <ColumnHeaderContainer>
               <ColumnHeaderTitleContainer>
@@ -289,7 +289,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                     {columns.map((col, colIndex) => (
                       <TableCell
                         key={colIndex}
-                        {...(col.tableCellProps || {})}
+                        {...col.tableCellProps}
                       >
                         {typeof col.renderCell === "function"
                           ? col.renderCell(item, index, array) : typeof col.valueGetter === "function"
@@ -337,7 +337,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                   <TableCell
                     key={colIndex}
                     component="th"
-                    {...(col.tableCellProps || {})}
+                    {...col.tableCellProps}
                   >
                     {col.value}
                   </TableCell>

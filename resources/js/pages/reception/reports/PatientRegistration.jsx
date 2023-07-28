@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
@@ -9,7 +12,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { debounce, formatDateForDb, getAge, getDateRangeTitle, getNonNull } from "../../../helpers";
+import { formatDateForDb, getAddress, getAge, getDateRangeTitle, getNonNull, throttle } from "../../../helpers";
 
 const PatientRegistration = () => {
 
@@ -77,13 +80,15 @@ const PatientRegistration = () => {
           <React.Fragment>
             <Card
               variant="outlined"
-              sx={{ mb: 2 }}
+              sx={{
+                bgcolor: "background.default",
+                mb: 2,
+              }}
             >
               <CardContent>
                 <Grid
                   container
-                  columnSpacing={2}
-                  rowSpacing={1}
+                  spacing={2}
                 >
                   <Grid
                     item
@@ -128,8 +133,7 @@ const PatientRegistration = () => {
                           </InputAdornment>
                         ),
                       }}
-                      defaultValue={params.name}
-                      onChange={(value) => debounce(() => setParams({ ...params, name: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, name: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -149,8 +153,7 @@ const PatientRegistration = () => {
                           </InputAdornment>
                         ),
                       }}
-                      defaultValue={params.id}
-                      onChange={(value) => debounce(() => setParams({ ...params, id: value }), 1000)}
+                      onChange={(value) => throttle(() => setParams({ ...params, id: value }), 1000)}
                     />
                   </Grid>
                   <Grid
@@ -183,6 +186,40 @@ const PatientRegistration = () => {
                       onChange={(value) => setParams({ ...params, payment_mode_id: value })}
                     />
                   </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      label="Region"
+                      fullWidth
+                      options={regions}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      clearable
+                      onChange={(value) => setParams({ ...params, region_id: value })}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      ref={districtRef}
+                      label="District"
+                      fullWidth
+                      options={districts}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      clearable
+                      value={districts.find((e) => e.id === params.district_id) || null}
+                      onChange={(value) => setParams({ ...params, district_id: value })}
+                    />
+                  </Grid>
                 </Grid>
               </CardContent>
             </Card>
@@ -213,6 +250,7 @@ const PatientRegistration = () => {
           {
             field: "address",
             headerName: "Address",
+            valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
           },
           {
             field: "payment_mode_id",

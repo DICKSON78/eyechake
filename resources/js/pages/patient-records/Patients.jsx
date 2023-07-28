@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "../reception/patients/Filters";
 
 import { useFetch, useToast } from "../../hooks";
-import { formatError, getNonNull } from "../../helpers";
+import { formatError, getAge, getNonNull } from "../../helpers";
 
 const Patients = () => {
 
@@ -21,6 +21,7 @@ const Patients = () => {
     per_page: 25,
     id: undefined,
     name: undefined,
+    phone: undefined,
     gender: undefined,
     payment_mode_id: undefined,
   });
@@ -75,7 +76,8 @@ const Patients = () => {
               },
               {
                 field: "date_of_birth",
-                headerName: "Date of Birth",
+                headerName: "Age",
+                valueGetter: (item) => getAge(item.date_of_birth),
               },
               {
                 field: "gender",
@@ -115,7 +117,6 @@ const Patients = () => {
                   >
                     <Button
                       variant="contained"
-                      disableElevation
                       size="small"
                       onClick={() => navigate(`/patient-records/patients/${item.id}/patient-file`)}
                     >

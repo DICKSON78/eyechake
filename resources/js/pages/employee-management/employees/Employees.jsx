@@ -108,7 +108,6 @@ const Employees = () => {
             <React.Fragment>
               <Button
                 variant="contained"
-                disableElevation
                 onClick={() => navigate("/employee-management/employees/new")}
               >
                 New Employee

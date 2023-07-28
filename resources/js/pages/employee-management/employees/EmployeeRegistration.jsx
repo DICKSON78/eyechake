@@ -379,7 +379,11 @@ const EmployeeRegistration = () => {
             >
               <CardHeader
                 title="Access Privileges"
-                titleTypographyProps={{ variant: "subtitle1" }}
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
               />
               <Divider />
               <CardContent>
@@ -401,7 +405,6 @@ const EmployeeRegistration = () => {
           <Button
             disabled={loading}
             variant="contained"
-            disableElevation
             onClick={handleSubmit}
           >
             Save
