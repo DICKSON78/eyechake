@@ -13,7 +13,7 @@ import Select from "../../components/Select";
 import TextField from "../../components/TextField";
 
 import useFetch from "../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat, throttle } from "../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../helpers";
 
 const PatientItems = ({ module, title, consultationType, paymentModeType, status }) => {
 
@@ -252,7 +252,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
           {
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
-            valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+            valueGetter: (item, index) => item.item.unit_of_measure?.name,
             show: consultationType === "Pharmacy" || consultationType === "Glass",
           },
           {
@@ -273,7 +273,7 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
+            valueGetter: (item) => item.creator?.full_name
           },
           {
             field: "created_at",

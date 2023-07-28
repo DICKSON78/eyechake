@@ -171,6 +171,37 @@ const theme = createTheme({
         }
       }
     },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          minHeight: "auto",
+        },
+        flexContainerVertical: {
+          "& > .MuiTab-root": {
+            borderBottomWidth: 1,
+            borderRadius: "5px 0 0 5px",
+            marginBottom: "8px",
+
+            "&:last-child": {
+              marginBottom: 0,
+            }
+          }
+        }
+      }
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderBottomWidth: 0,
+          borderRadius: "5px 5px 0 0",
+          marginRight: "8px",
+          backgroundColor: "#2c2f3e",
+          minHeight: "auto",
+        }
+      }
+    },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {

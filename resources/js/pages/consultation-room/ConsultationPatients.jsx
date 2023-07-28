@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "./PatientFilters";
 
 import { useFetch, useToast } from "../../hooks";
-import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
+import { capitalize, formatDateForDb, formatError, getAge } from "../../helpers";
 
 const ConsultationPatients = () => {
 
@@ -81,7 +81,7 @@ const ConsultationPatients = () => {
                     checked={!!params.consultant_id}
                     onChange={(event) => setParams({
                       ...params,
-                      consultant_id: event.target.checked ? getNonNull(window.user.employee).id : undefined
+                      consultant_id: event.target.checked ? window.user.employee?.id : undefined
                     })}
                   />
                 )}
@@ -133,13 +133,13 @@ const ConsultationPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
                 show: status === "pending"
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name,
+                valueGetter: (item, index) => item.payment_cache_item.consultant?.full_name,
               },
               {
                 field: "created_at",

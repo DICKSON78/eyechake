@@ -11,7 +11,7 @@ import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
+import { formatError, getValidationError, numberFormat } from "../../../helpers";
 
 const DispensingRequestItems = ({ consultationType }) => {
 
@@ -163,7 +163,7 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "unit_of_measure_id",
                   headerName: "UoM",
-                  valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+                  valueGetter: (item, index) => item.item.unit_of_measure?.name,
                 },
                 {
                   field: "balance",

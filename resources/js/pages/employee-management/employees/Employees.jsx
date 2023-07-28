@@ -11,7 +11,7 @@ import EditEmployee from "./EditEmployee";
 import EditEmployeeAccessDetails from "./EditEmployeeAccessDetails";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { formatError } from "../../../helpers";
 
 const Employees = () => {
 
@@ -149,17 +149,17 @@ const Employees = () => {
               {
                 field: "department_id",
                 headerName: "Department",
-                valueGetter: (item, index) => getNonNull(item.department).name,
+                valueGetter: (item, index) => item.department?.name,
               },
               {
                 field: "job_title_id",
                 headerName: "Job Title",
-                valueGetter: (item, index) => getNonNull(item.job_title).name,
+                valueGetter: (item, index) => item.job_title?.name,
               },
               {
                 field: "created_by",
                 headerName: "Registered By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",

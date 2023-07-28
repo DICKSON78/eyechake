@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, throttle } from "../../../helpers";
+import { formatError, throttle } from "../../../helpers";
 
 const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fetchDiagnoses, modal }) => {
 
@@ -186,12 +186,12 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                     {
                       field: "disease_name",
                       headerName: "Disease Name",
-                      valueGetter: (item, index) => getNonNull(item.disease).name,
+                      valueGetter: (item, index) => item.disease?.name,
                     },
                     {
                       field: "disease_code",
                       headerName: "Disease Code",
-                      valueGetter: (item, index) => getNonNull(item.disease).code,
+                      valueGetter: (item, index) => item.disease?.code,
                     },
                     {
                       field: "actions",

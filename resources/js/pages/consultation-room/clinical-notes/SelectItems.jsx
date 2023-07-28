@@ -21,7 +21,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, getValidationRules, numberFormat, throttle, validateInteger } from "../../../helpers";
+import { formatError, getValidationRules, numberFormat, throttle, validateInteger } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -453,7 +453,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                     {
                       field: "item_name",
                       headerName: "Item Name",
-                      valueGetter: (item, index) => getNonNull(item.item).name,
+                      valueGetter: (item, index) => item.item?.name,
                     },
                     {
                       field: "quantity",

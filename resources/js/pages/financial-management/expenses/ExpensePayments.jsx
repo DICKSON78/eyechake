@@ -18,7 +18,7 @@ import TextField from "../../../components/TextField";
 import Table from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, getValidationRules, numberFormat } from "../../../helpers";
+import { formatError, getValidationRules, numberFormat } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -224,7 +224,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                     {
                       field: "created_by",
                       headerName: "Created By",
-                      valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                      valueGetter: (item, index) => item.creator?.full_name,
                     },
                     {
                       field: "created_at",

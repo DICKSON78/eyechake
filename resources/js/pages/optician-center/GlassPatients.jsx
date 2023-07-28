@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "../consultation-room/PatientFilters";
 
 import { useFetch, useToast } from "../../hooks";
-import { formatDateForDb, formatError, getAge, getNonNull } from "../../helpers";
+import { formatDateForDb, formatError, getAge } from "../../helpers";
 
 const ConsultationPatients = () => {
 
@@ -120,7 +120,7 @@ const ConsultationPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.to_optician_sender).full_name,
+                valueGetter: (item, index) => item.to_optician_sender?.full_name,
               },
               {
                 field: "sent_to_optician_at",

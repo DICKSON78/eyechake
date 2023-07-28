@@ -10,7 +10,7 @@ import Header from "../../../components/pdf/Header";
 import Footer from "../../../components/pdf/Footer";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table from "../../../components/pdf/Table";
-import { getNonNull, numberFormat } from "../../../helpers";
+import { numberFormat } from "../../../helpers";
 
 Font.register({
   family: "Custom",
@@ -57,10 +57,10 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             { label: "Discount", value: numberFormat(bill.discount) },
             { label: "Amount Paid", value: numberFormat(bill.amount_paid || 0) },
             { label: "Amount Remaining", value: numberFormat(bill.amount - bill.discount - (bill.amount_paid || 0)) },
-            { label: "Created By", value: getNonNull(bill.creator).full_name },
+            { label: "Created By", value: bill.creator?.full_name },
             { label: "Date Created", value: bill.created_at },
             { label: "Bill Status", value: bill.status },
-            { label: "Cleared By", value: getNonNull(bill.clearer).full_name },
+            { label: "Cleared By", value: bill.clearer?.full_name },
             { label: "Date Cleared", value: bill.cleared_at },
           ]}
           containerStyle={{

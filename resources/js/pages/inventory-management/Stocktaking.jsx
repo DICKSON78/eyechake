@@ -27,7 +27,6 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useFetch, usePost, useToast } from "../../hooks";
 import {
   formatError,
-  getNonNull,
   getValidationError,
   getValidationRules,
   numberFormat,
@@ -313,7 +312,7 @@ const Stocktaking = () => {
                           label="Unit of Measure"
                           fullWidth
                           required
-                          value={getNonNull(selectedItem.unit_of_measure).name || ""}
+                          value={selectedItem.unit_of_measure?.name || ""}
                         />
                       </Grid>
                       <Grid

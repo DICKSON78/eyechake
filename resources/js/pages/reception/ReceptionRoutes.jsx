@@ -22,7 +22,7 @@ const ReceptionRoutes = () => {
         element={<CheckInPatient />}
       />
       <Route
-        path="/patients/:patientId/records"
+        path="/patients/:patientId/records/*"
         element={<PatientRecords />}
       />
       <Route

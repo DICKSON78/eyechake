@@ -41,7 +41,6 @@ import ChangePassword from "../pages/auth/ChangePassword";
 import loader from "../../images/loader.svg";
 
 import { useFetch } from "../hooks";
-import { getNonNull } from "../helpers";
 
 const drawerWidth = 256;
 
@@ -334,7 +333,7 @@ const Default = ({ setThemeMode, setUser }) => {
             >
               <CardHeader
                 title={user.full_name}
-                subheader={getNonNull(user.job_title).name}
+                subheader={user.job_title?.name}
                 titleTypographyProps={{
                   variant: "subtitle1",
                   fontWeight: "500",

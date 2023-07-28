@@ -11,7 +11,7 @@ import Footer from "../../../components/pdf/Footer";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table, { styles as tableStyles } from "../../../components/pdf/Table";
 
-import { getAge, getNonNull } from "../../../helpers";
+import { getAge } from "../../../helpers";
 import useFetch from "../../../hooks/useFetch";
 
 Font.register({
@@ -57,12 +57,12 @@ const DiagnosisCard = ({ title, diagnosisType, items }) => {
         {
           field: "disease_name",
           headerName: "Disease Name",
-          valueGetter: (item, index) => getNonNull(item.disease).name,
+          valueGetter: (item, index) => item.disease?.name,
         },
         {
           field: "disease_code",
           headerName: "Disease Code",
-          valueGetter: (item, index) => getNonNull(item.disease).code,
+          valueGetter: (item, index) => item.disease?.code,
         },
       ]}
       items={items.filter((e) => e.diagnosis_type === diagnosisType)}
@@ -156,7 +156,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
             { label: "Phone Number", value: patient.phone },
             { label: "Address", value: patient.address },
             { label: "Payment Mode", value: consultation.payment_cache_item.payment_mode.name },
-            { label: "Consultant", value: getNonNull(consultation.payment_cache_item.consultant).full_name },
+            { label: "Consultant", value: consultation.payment_cache_item.consultant?.full_name },
             { label: "Consultation Date", value: consultation.created_at },
           ]}
           containerStyle={{

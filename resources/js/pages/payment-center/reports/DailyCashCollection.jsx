@@ -11,7 +11,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getFullName, getNonNull, numberFormat, throttle } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, getFullName, numberFormat, throttle } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
 
@@ -152,6 +152,10 @@ const DailyCashCollection = ({ module }) => {
             valueGetter: (item, index) => item.patient_id,
           },
           {
+            field: "items",
+            headerName: "Items",
+          },
+          {
             field: "amount",
             headerName: "Amount",
             valueGetter: (item, index) => numberFormat(item.amount),
@@ -169,12 +173,12 @@ const DailyCashCollection = ({ module }) => {
           {
             field: "channel",
             headerName: "Payment Channel",
-            valueGetter: (item, index) => getNonNull(item.channel).name,
+            valueGetter: (item, index) => item.channel?.name,
           },
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
+            valueGetter: (item) => item.creator?.full_name
           },
           {
             field: "created_at",
@@ -186,10 +190,10 @@ const DailyCashCollection = ({ module }) => {
           },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 3, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 3 },
-          { reducer: (acc, item, index) => acc + item.discount, index: 4 },
-          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 5 },
+          { value: "TOTAL", span: 4, index: 1 },
+          { reducer: (acc, item, index) => acc + item.amount, index: 4 },
+          { reducer: (acc, item, index) => acc + item.discount, index: 5 },
+          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 6 },
         ]}
       />
     </Page>

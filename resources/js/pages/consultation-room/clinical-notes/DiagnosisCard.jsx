@@ -3,8 +3,6 @@ import React from "react";
 import { Button, Card, CardContent, CardHeader, Divider } from "@mui/material";
 import Table from "../../../components/Table";
 
-import { getNonNull } from "../../../helpers";
-
 const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onClickAdd }) => {
 
   return (
@@ -30,12 +28,12 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
             {
               field: "disease_name",
               headerName: "Disease Name",
-              valueGetter: (item, index) => getNonNull(item.disease).name,
+              valueGetter: (item, index) => item.disease?.name,
             },
             {
               field: "disease_code",
               headerName: "Disease Code",
-              valueGetter: (item, index) => getNonNull(item.disease).code,
+              valueGetter: (item, index) => item.disease?.code,
             },
           ]}
           items={items.filter((e) => e.diagnosis_type === diagnosisType)}

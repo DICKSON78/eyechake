@@ -9,7 +9,7 @@ import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getNonNull } from "../../../helpers";
+import { formatDateForDb, formatError } from "../../../helpers";
 
 const Messages = () => {
 
@@ -82,7 +82,7 @@ const Messages = () => {
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => getNonNull(item.patient).full_name,
+                valueGetter: (item, index) => item.patient?.full_name,
               },
               {
                 field: "patient_id",

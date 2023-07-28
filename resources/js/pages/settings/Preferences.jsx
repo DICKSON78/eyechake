@@ -20,7 +20,7 @@ import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
 import { useFetch, usePost, useToast } from "../../hooks";
-import { formatError, getNonNull, getValidationRules } from "../../helpers";
+import { formatError, getValidationRules } from "../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -58,10 +58,10 @@ const Preferences = () => {
 
   const { data: preferences, loading: loadingPreferences } = useFetch("api/preferences", null, true, null, (response) => {
     const data = response.data.data;
-    setPreference(0, getNonNull(data.find((e) => e.key === "SEND_MESSAGES")).value || "No");
-    setPreference(1, getNonNull(data.find((e) => e.key === "CONSULTATION_MESSAGE")).value || "");
-    setPreference(2, getNonNull(data.find((e) => e.key === "PATIENT_TO_RETURN_REMINDER_MESSAGE")).value || "");
-    setPreference(3, getNonNull(data.find((e) => e.key === "SEND_REMINDER_MESSAGES_AT")).value || "11:00");
+    setPreference(0, data.find((e) => e.key === "SEND_MESSAGES")?.value || "No");
+    setPreference(1, data.find((e) => e.key === "CONSULTATION_MESSAGE")?.value || "");
+    setPreference(2, data.find((e) => e.key === "PATIENT_TO_RETURN_REMINDER_MESSAGE")?.value || "");
+    setPreference(3, data.find((e) => e.key === "SEND_REMINDER_MESSAGES_AT")?.value || "11:00");
     return data;
   });
   const { data, loading, error, handlePost } = usePost("api/preferences", formData);

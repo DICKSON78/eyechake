@@ -8,7 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { capitalize, formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
+import { capitalize, formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const PatientBills = () => {
 
@@ -105,7 +105,7 @@ const PatientBills = () => {
               {
                 field: "created_by",
                 headerName: "Created By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",

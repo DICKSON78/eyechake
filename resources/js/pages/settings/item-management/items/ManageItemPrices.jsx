@@ -19,7 +19,7 @@ import Select from "../../../../components/Select";
 import Table from "../../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../../hooks";
-import { formatError, getNonNull, getValidationRules, numberFormat } from "../../../../helpers";
+import { formatError, getValidationRules, numberFormat } from "../../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -208,7 +208,7 @@ const ManageItemPrices = ({ item, modal }) => {
                     {
                       field: "payment_mode_id",
                       headerName: "Payment Mode",
-                      valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                      valueGetter: (item, index) => item.payment_mode?.name,
                     },
                     {
                       field: "unit_price",

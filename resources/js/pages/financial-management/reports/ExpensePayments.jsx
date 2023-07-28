@@ -8,7 +8,7 @@ import Select from "../../../components/Select";
 import Report from "../../../components/reports/Report";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat } from "../../../helpers";
 
 const ExpensePayments = ({ module, createdBy }) => {
 
@@ -139,7 +139,7 @@ const ExpensePayments = ({ module, createdBy }) => {
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item, index) => getNonNull(item.creator).full_name,
+            valueGetter: (item, index) => item.creator?.full_name,
           },
           {
             field: "created_at",

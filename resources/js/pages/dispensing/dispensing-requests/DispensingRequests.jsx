@@ -8,7 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
+import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const DispensingRequests = ({ consultationType }) => {
 
@@ -104,7 +104,7 @@ const DispensingRequests = ({ consultationType }) => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",

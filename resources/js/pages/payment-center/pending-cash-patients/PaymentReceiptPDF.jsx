@@ -8,7 +8,7 @@ import fontBold from "../../../../fonts/Custom-Bold.ttf";
 import Header from "../../../components/pdf/Header";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table from "../../../components/pdf/Table";
-import { getNonNull, numberFormat } from "../../../helpers";
+import { numberFormat } from "../../../helpers";
 
 Font.register({
   family: "Custom",
@@ -55,7 +55,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             { label: "Receipt Number", value: receipt.id },
             { label: "Receipt Amount", value: numberFormat(receipt.amount) },
             { label: "Discount", value: numberFormat(receipt.discount) },
-            { label: "Created By", value: getNonNull(receipt.creator).full_name },
+            { label: "Created By", value: receipt.creator?.full_name },
             { label: "Date Created", value: receipt.created_at },
           ]}
           containerStyle={{ marginBottom: 8 }}

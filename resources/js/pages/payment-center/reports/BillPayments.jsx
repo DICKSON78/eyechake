@@ -12,7 +12,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat, throttle } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../../helpers";
 
 const BillPayments = ({ module }) => {
 
@@ -214,12 +214,12 @@ const BillPayments = ({ module }) => {
           {
             field: "channel",
             headerName: "Payment Channel",
-            valueGetter: (item, index) => getNonNull(item.channel).name,
+            valueGetter: (item, index) => item.channel?.name,
           },
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
+            valueGetter: (item) => item.creator?.full_name
           },
           {
             field: "created_at",

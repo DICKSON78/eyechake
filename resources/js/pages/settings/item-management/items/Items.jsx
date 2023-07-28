@@ -11,7 +11,7 @@ import EditItem from "./EditItem";
 import ManageItemPrices from "./ManageItemPrices";
 
 import { useFetch, useToast } from "../../../../hooks";
-import { formatError, getNonNull } from "../../../../helpers";
+import { formatError } from "../../../../helpers";
 
 const Items = () => {
 
@@ -144,22 +144,22 @@ const Items = () => {
               {
                 field: "item_type_id",
                 headerName: "Item Type",
-                valueGetter: (item, index) => getNonNull(item.item_type).name,
+                valueGetter: (item, index) => item.item_type?.name,
               },
               {
                 field: "consultation_type_id",
                 headerName: "Consultation Type",
-                valueGetter: (item, index) => getNonNull(item.consultation_type).name,
+                valueGetter: (item, index) => item.consultation_type?.name,
               },
               {
                 field: "unit_of_measure_id",
                 headerName: "Unit of Measure",
-                valueGetter: (item, index) => getNonNull(item.unit_of_measure).name,
+                valueGetter: (item, index) => item.unit_of_measure?.name,
               },
               {
                 field: "lens_type_id",
                 headerName: "Lens Type",
-                valueGetter: (item, index) => getNonNull(item.lens_type).name,
+                valueGetter: (item, index) => item.lens_type?.name,
               },
               {
                 field: "prices",

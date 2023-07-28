@@ -10,7 +10,7 @@ import Report from "../../../components/reports/Report";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat, throttle } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../../helpers";
 
 const PatientBills = ({ module, status }) => {
 
@@ -205,7 +205,7 @@ const PatientBills = ({ module, status }) => {
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
+            valueGetter: (item) => item.creator?.full_name
           },
           {
             field: "created_at",

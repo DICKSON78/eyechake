@@ -4,7 +4,7 @@ import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import { SearchTextField } from "../../../components/Table";
 
-import { getNonNull, numberFormat, throttle } from "../../../helpers";
+import { numberFormat, throttle } from "../../../helpers";
 
 const ItemBalance = ({ module, consultationType }) => {
 
@@ -57,24 +57,24 @@ const ItemBalance = ({ module, consultationType }) => {
           {
             field: "item_type_id",
             headerName: "Item Type",
-            valueGetter: (item, index) => getNonNull(item.item_type).name,
+            valueGetter: (item, index) => item.item_type?.name,
           },
           {
             field: "lens_type_id",
             headerName: "Lens Type",
-            valueGetter: (item, index) => getNonNull(item.lens_type).name,
+            valueGetter: (item, index) => item.lens_type?.name,
             show: !module || module === "Optician Center",
           },
           {
             field: "consultation_type_id",
             headerName: "Consultation Type",
-            valueGetter: (item, index) => getNonNull(item.consultation_type).name,
+            valueGetter: (item, index) => item.consultation_type?.name,
             show: !module,
           },
           {
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
-            valueGetter: (item, index) => getNonNull(item.unit_of_measure).name,
+            valueGetter: (item, index) => item.unit_of_measure?.name,
           },
           {
             field: "balance",

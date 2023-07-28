@@ -19,7 +19,7 @@ import Select from "../../../components/Select";
 import Table from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, getValidationRules, numberFormat } from "../../../helpers";
+import { formatError, getValidationRules, numberFormat } from "../../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -222,7 +222,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                     {
                       field: "channel_id",
                       headerName: "Payment Channel",
-                      valueGetter: (item, index) => getNonNull(item.channel).name,
+                      valueGetter: (item, index) => item.channel?.name,
                     },
                     {
                       field: "amount",
@@ -232,7 +232,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                     {
                       field: "created_by",
                       headerName: "Created By",
-                      valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                      valueGetter: (item, index) => item.creator?.full_name,
                     },
                     {
                       field: "created_at",

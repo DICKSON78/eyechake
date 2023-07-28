@@ -3,7 +3,7 @@ import { Chip } from "@mui/material";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../expenses/Filters";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat } from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
 
@@ -101,7 +101,7 @@ const Expenses = ({ module, createdBy }) => {
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item, index) => getNonNull(item.creator).full_name,
+            valueGetter: (item, index) => item.creator?.full_name,
           },
           {
             field: "created_at",

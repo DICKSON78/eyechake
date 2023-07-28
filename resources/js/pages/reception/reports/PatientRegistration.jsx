@@ -12,7 +12,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getAddress, getAge, getDateRangeTitle, getNonNull, throttle } from "../../../helpers";
+import { formatDateForDb, getAddress, getAge, getDateRangeTitle, throttle } from "../../../helpers";
 
 const PatientRegistration = () => {
 
@@ -255,12 +255,12 @@ const PatientRegistration = () => {
           {
             field: "payment_mode_id",
             headerName: "Payment Mode",
-            valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+            valueGetter: (item, index) => item.payment_mode?.name,
           },
           {
             field: "created_by",
             headerName: "Registered By",
-            valueGetter: (item, index) => getNonNull(item.creator).full_name,
+            valueGetter: (item, index) => item.creator?.full_name,
           },
           {
             field: "created_at",

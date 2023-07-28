@@ -11,7 +11,7 @@ import EditExpense from "./EditExpense";
 import ExpensePayments from "./ExpensePayments";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getNonNull, numberFormat } from "../../../helpers";
+import { formatDateForDb, formatError, numberFormat } from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
 
@@ -187,7 +187,7 @@ const Expenses = ({ module, createdBy }) => {
               {
                 field: "created_by",
                 headerName: "Created By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",

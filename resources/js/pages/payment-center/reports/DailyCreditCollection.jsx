@@ -11,7 +11,7 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getNonNull, numberFormat, throttle } from "../../../helpers";
+import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../../helpers";
 
 const DailyCreditCollection = ({ module }) => {
 
@@ -190,7 +190,7 @@ const DailyCreditCollection = ({ module }) => {
           {
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
-            valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+            valueGetter: (item, index) => item.item.unit_of_measure?.name,
           },
           {
             field: "quantity",
@@ -205,7 +205,7 @@ const DailyCreditCollection = ({ module }) => {
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => getNonNull(item.creator).full_name
+            valueGetter: (item) => item.creator?.full_name
           },
           {
             field: "created_at",

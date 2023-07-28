@@ -3,7 +3,7 @@ import { Alert, Skeleton } from "@mui/material";
 import Descriptions from "../../../components/Descriptions";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, getAge, getNonNull } from "../../../helpers";
+import { formatError, getAge } from "../../../helpers";
 
 const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
 
@@ -66,7 +66,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
             { label: "Phone Number", value: data.phone },
             { label: "Address", value: data.address },
             { label: "Occupation", value: data.occupation },
-            { label: "Payment Mode", value: getNonNull(data.payment_mode).name },
+            { label: "Payment Mode", value: data.payment_mode?.name },
           ]}
           containerProps={{
             variant: "elevation",

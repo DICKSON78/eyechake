@@ -75,13 +75,6 @@ export const throttle = (fn, delay) => {
 };
 
 /**
- * Returns an empty object if the argument is null.
- * @param object
- * @returns {Object}
- */
-export const getNonNull = (object) => (object ? object : {});
-
-/**
  * Get common validation rules.
  * @returns {Object}
  */

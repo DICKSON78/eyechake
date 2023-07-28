@@ -8,7 +8,7 @@ import Modal from "../../components/Modal";
 import Filters from "../reception/patients/Filters";
 
 import { useFetch, useToast } from "../../hooks";
-import { formatError, getAge, getNonNull } from "../../helpers";
+import { formatError, getAge } from "../../helpers";
 
 const Patients = () => {
 
@@ -94,12 +94,12 @@ const Patients = () => {
               {
                 field: "payment_mode_id",
                 headerName: "Payment Mode",
-                valueGetter: (item, index) => getNonNull(item.payment_mode).name,
+                valueGetter: (item, index) => item.payment_mode?.name,
               },
               {
                 field: "created_by",
                 headerName: "Registered By",
-                valueGetter: (item, index) => getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",

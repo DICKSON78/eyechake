@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { Card, CardContent, Chip, Divider, Stack } from "@mui/material";
-import { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import PatientFilePDF from "./PatientFilePDF";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, getNonNull } from "../../../helpers";
+import { formatError } from "../../../helpers";
 
 const PatientFile = ({ patient }) => {
 
@@ -47,9 +46,7 @@ const PatientFile = ({ patient }) => {
 
   return (
     <React.Fragment>
-      <Card>
-        <PageHeader title="Patient File"/>
-        <Divider />
+      <Card sx={{ borderTopLeftRadius: 0 }}>
         <CardContent>
           <Table
             loading={loading}
@@ -66,7 +63,7 @@ const PatientFile = ({ patient }) => {
               {
                 field: "consultant",
                 headerName: "Consultant",
-                valueGetter: (item, index) => getNonNull(item.payment_cache_item.consultant).full_name
+                valueGetter: (item, index) => item.payment_cache_item.consultant?.full_name
               },
               {
                 field: "status",

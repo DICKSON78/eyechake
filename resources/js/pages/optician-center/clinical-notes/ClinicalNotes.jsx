@@ -24,7 +24,7 @@ import Refraction from "./Refraction";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
-import { formatError, getNonNull, getValidationError, numberFormat } from "../../../helpers";
+import { formatError, getValidationError, numberFormat } from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
@@ -217,7 +217,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 {
                   field: "unit_of_measure_id",
                   headerName: "UoM",
-                  valueGetter: (item, index) => getNonNull(item.item.unit_of_measure).name,
+                  valueGetter: (item, index) => item.item.unit_of_measure?.name,
                 },
                 {
                   field: "balance",

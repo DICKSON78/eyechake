@@ -8,7 +8,7 @@ import Modal from "../../../components/Modal";
 import Filters from "../../consultation-room/PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getAge, getNonNull } from "../../../helpers";
+import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const GlassPatients = () => {
 
@@ -104,7 +104,7 @@ const GlassPatients = () => {
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? getNonNull(item.payment_cache_item.server).full_name : getNonNull(item.creator).full_name,
+                valueGetter: (item, index) => item.patient_direction === "Direct to Doctor" ? item.payment_cache_item.server?.full_name : item.creator?.full_name,
               },
               {
                 field: "created_at",

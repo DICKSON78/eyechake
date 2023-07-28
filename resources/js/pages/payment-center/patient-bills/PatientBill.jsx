@@ -12,7 +12,7 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import PatientBillPayments from "./PatientBillPayments";
 import BillPDF from "./BillPDF";
 
-import { capitalize, formatError, getNonNull, numberFormat } from "../../../helpers";
+import { capitalize, formatError, numberFormat } from "../../../helpers";
 import { useFetch, usePatch, useToast } from "../../../hooks";
 
 
@@ -165,10 +165,10 @@ const PatientBill = () => {
                 { label: "Discount", value: numberFormat(bill.discount) },
                 { label: "Amount Paid", value: numberFormat(bill.amount_paid || 0) },
                 { label: "Amount Remaining", value: numberFormat(getAmountRemaining()) },
-                { label: "Created By", value: getNonNull(bill.creator).full_name },
+                { label: "Created By", value: bill.creator?.full_name },
                 { label: "Date Created", value: bill.created_at },
                 { label: "Bill Status", value: bill.status },
-                { label: "Cleared By", value: getNonNull(bill.clearer).full_name },
+                { label: "Cleared By", value: bill.clearer?.full_name },
                 { label: "Date Cleared", value: bill.cleared_at },
               ]}
               containerProps={{
