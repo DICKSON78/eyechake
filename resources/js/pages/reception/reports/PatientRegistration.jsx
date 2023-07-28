@@ -12,7 +12,7 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getAddress, getAge, getDateRangeTitle, throttle } from "../../../helpers";
+import { formatDateForDb, getAge, getDateRangeTitle, throttle } from "../../../helpers";
 
 const PatientRegistration = () => {
 
@@ -186,40 +186,6 @@ const PatientRegistration = () => {
                       onChange={(value) => setParams({ ...params, payment_mode_id: value })}
                     />
                   </Grid>
-                  <Grid
-                    item
-                    md={3}
-                    sm={6}
-                    xs={12}
-                  >
-                    <Select
-                      label="Region"
-                      fullWidth
-                      options={regions}
-                      optionsLabel="name"
-                      optionsValue="id"
-                      clearable
-                      onChange={(value) => setParams({ ...params, region_id: value })}
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={3}
-                    sm={6}
-                    xs={12}
-                  >
-                    <Select
-                      ref={districtRef}
-                      label="District"
-                      fullWidth
-                      options={districts}
-                      optionsLabel="name"
-                      optionsValue="id"
-                      clearable
-                      value={districts.find((e) => e.id === params.district_id) || null}
-                      onChange={(value) => setParams({ ...params, district_id: value })}
-                    />
-                  </Grid>
                 </Grid>
               </CardContent>
             </Card>
@@ -250,7 +216,6 @@ const PatientRegistration = () => {
           {
             field: "address",
             headerName: "Address",
-            valueGetter: (item, index) => getAddress(item.region, item.district, item.ward),
           },
           {
             field: "payment_mode_id",
