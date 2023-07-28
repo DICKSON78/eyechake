@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\PatientItemBill;
 use App\Models\PatientItemPayment;
+use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -326,7 +327,6 @@ class PatientPaymentCacheItemsController extends Controller
                                     'patient_direction' => 'Direct to Optician',
                                     'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
-                                    'status' => 'Consulted',
                                     'require_glass' => 'Yes',
                                 ]);
 
@@ -408,7 +408,7 @@ class PatientPaymentCacheItemsController extends Controller
 
     public function complete(Request $request)
     {
-        return $this->updateStatus($request, 'Served', 'Completed successfully.');
+        return $this->updateStatus($request, 'Served', 'Completed successfully.', null);
     }
 
     /**
