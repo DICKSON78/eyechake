@@ -1,15 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Box,
-  Button,
-  CardActions,
-  CardContent,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  Grid,
-  LinearProgress
-} from "@mui/material";
+import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 
@@ -113,7 +103,6 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
           </Grid>
         </Form>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Box, Button, CardActions, CardContent, Divider, Grid, LinearProgress } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
@@ -238,7 +238,6 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
           </Grid>
         </Form>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button

@@ -217,7 +217,6 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
           </Box>
         </Form>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button

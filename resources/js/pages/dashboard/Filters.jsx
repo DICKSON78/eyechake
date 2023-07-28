@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Box, Button, CardActions, CardContent, Divider, Grid } from "@mui/material";
+import { Box, Button, CardActions, CardContent, Grid } from "@mui/material";
 import DatePicker from "../../components/DatePicker";
 
 const Filters = ({ params: initial, setParams: updateParams, modal }) => {
@@ -47,7 +47,6 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
       <CardActions>
         <Box flexGrow={1}/>
         <Button
@@ -58,11 +57,12 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
           Cancel
         </Button>
         <Button
+          disabled={loading}
           variant="text"
           size="large"
           onClick={handleSubmit}
         >
-          OK
+          Save
         </Button>
       </CardActions>
     </React.Fragment>
