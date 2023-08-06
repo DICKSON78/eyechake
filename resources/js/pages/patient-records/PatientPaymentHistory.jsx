@@ -5,7 +5,7 @@ import CardContent from "@mui/material/CardContent";
 import Table from "../../components/Table";
 
 import { useFetch, useToast } from "../../hooks";
-import { numberFormat } from "../../helpers";
+import { formatError, numberFormat } from "../../helpers";
 
 const PatientPaymentHistory = ({ patient }) => {
 

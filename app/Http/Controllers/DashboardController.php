@@ -38,24 +38,24 @@ class DashboardController extends Controller
                 'consulted_patients' => 0,
                 'glass' => 0,
                 'pharmacy' => 0,
+                'procedure' => 0,
+                'others' => 0,
                 'consultation' => 0,
             ],
             'statistics' => [
                 'expenses_by_category' => [],
                 'payments_by_channel' => [],
             ],
+            'yearly_statistics' => [],
         ];
 
-        $data['counts']['total_sales'] = PatientPaymentCacheItem::query()
-            ->whereIn('status', ['Paid', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-        $data['counts']['total_sales'] += PatientItemBillPayment::query()
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum('amount');
+        $data['counts']['total_sales'] = PatientItemPayment::query()
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->sum('amount') + PatientItemBillPayment::query()
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->sum('amount');
 
         $data['counts']['discount'] = PatientItemPayment::query()
             ->whereDate('created_at', '>=', $start_date)
@@ -75,6 +75,26 @@ class DashboardController extends Controller
         $data['counts']['pharmacy'] = PatientPaymentCacheItem::query()
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Pharmacy');
+            })
+            ->whereIn('status', ['Paid', 'Served'])
+            ->whereNull('bill_id')
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum(DB::raw('unit_price * quantity'));
+
+        $data['counts']['procedure'] = PatientPaymentCacheItem::query()
+            ->whereHas('consultation_type', function ($query) {
+                $query->where('name', 'Procedure');
+            })
+            ->whereIn('status', ['Paid', 'Served'])
+            ->whereNull('bill_id')
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum(DB::raw('unit_price * quantity'));
+
+        $data['counts']['others'] = PatientPaymentCacheItem::query()
+            ->whereHas('consultation_type', function ($query) {
+                $query->where('name', 'Others');
             })
             ->whereIn('status', ['Paid', 'Served'])
             ->whereNull('bill_id')
@@ -109,6 +129,55 @@ class DashboardController extends Controller
 
         $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount FROM expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
         $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
+
+        $date = Carbon::today()->subMonths(11);
+
+        for ($i = 0; $i < 12; $i++) {
+            $start_date = $date->copy()->startOfMonth()->format('Y-m-d');
+            $end_date = $date->copy()->endOfMonth()->format('Y-m-d');
+
+            $data['yearly_statistics'][] = [
+                'month' => $date->format('M'),
+                'statistics' => [
+                    [
+                        'name' => 'total_sales',
+                        'amount' => PatientItemPayment::query()
+                                ->whereDate('created_at', '>=', $start_date)
+                                ->whereDate('created_at', '<=', $end_date)
+                                ->sum('amount') + PatientItemBillPayment::query()
+                                ->whereDate('created_at', '>=', $start_date)
+                                ->whereDate('created_at', '<=', $end_date)
+                                ->sum('amount'),
+                    ],
+                    [
+                        'name' => 'expenses',
+                        'amount' => ExpensePayment::query()
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->sum('amount'),
+                    ],
+                    [
+                        'name' => 'new_patients_male',
+                        'amount' => Patient::query()
+                            ->where('gender', 'Male')
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->count(),
+                    ],
+                    [
+                        'name' => 'new_patients_female',
+                        'amount' => Patient::query()
+                            ->where('gender', 'Female')
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->count(),
+                    ]
+                ],
+            ];
+
+            $date->addMonth();
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 }

@@ -14,6 +14,7 @@ import {
   IconButton,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
   MenuList,
   Modal as MuiModal,
@@ -29,6 +30,8 @@ import {
   DarkModeRounded as DarkModeIcon,
   ExpandMoreRounded as ChevronDownIcon,
   LightModeOutlined as LightModeIcon,
+  LockRounded as LockIcon,
+  LogoutRounded as LogoutIcon,
   MoreVert as MoreIcon,
   Person2Rounded as UserIcon
 } from "@mui/icons-material";
@@ -329,7 +332,7 @@ const Default = ({ setThemeMode, setUser }) => {
           >
             <Card
               variant="elevation"
-              sx={{ width: 250 }}
+              sx={{ width: 300 }}
             >
               <CardHeader
                 title={user.full_name}
@@ -354,6 +357,9 @@ const Default = ({ setThemeMode, setUser }) => {
                       openChangePasswordModal();
                     }}
                   >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <LockIcon />
+                    </ListItemIcon>
                     <ListItemText>Change Password</ListItemText>
                   </ListItemButton>
                 </ListItem>
@@ -365,6 +371,9 @@ const Default = ({ setThemeMode, setUser }) => {
                       handleLogout();
                     }}
                   >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <LogoutIcon />
+                    </ListItemIcon>
                     <ListItemText>Logout</ListItemText>
                   </ListItemButton>
                 </ListItem>

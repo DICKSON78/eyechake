@@ -33,7 +33,7 @@ const Subheader = ({ title, sx }) => {
       sx={{
         bgcolor: "info.main",
         my: 2,
-        ...(sx || {}),
+        ...sx,
       }}
     >
       <Typography

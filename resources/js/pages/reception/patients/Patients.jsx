@@ -176,7 +176,7 @@ const Patients = () => {
                         size="small"
                         onClick={(event) => handleMenuOpen(event, item)}
                       >
-                        <MoreIcon fontSize="small"/>
+                        <MoreIcon/>
                       </IconButton>
                     </Tooltip>
                   </Stack>

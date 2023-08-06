@@ -10,14 +10,14 @@
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.9.2",
     "@mui/x-date-pickers": "^5.0.0-beta.6",
-    "@react-pdf/renderer": "^3.0.0",
-    "chart.js": "^3.5.1",
+    "@react-pdf/renderer": "^3.1.12",
     "date-fns": "^2.29.2",
     "moment": "^2.29.4",
     "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.18.9/xlsx-0.18.9.tgz"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "axios": "^0.27",

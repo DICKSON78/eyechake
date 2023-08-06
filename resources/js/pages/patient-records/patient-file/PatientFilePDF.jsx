@@ -34,7 +34,7 @@ const Subheader = ({ title, style }) => {
           color: "#fff",
           backgroundColor: "#039be5",
           borderRadius: 5,
-          ...(style || {})
+          ...style,
         }
       ]}
     >
