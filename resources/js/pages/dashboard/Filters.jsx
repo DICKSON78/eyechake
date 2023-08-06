@@ -63,7 +63,7 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
           size="large"
           onClick={handleSubmit}
         >
-          Save
+          Filter
         </Button>
       </CardActions>
     </React.Fragment>
