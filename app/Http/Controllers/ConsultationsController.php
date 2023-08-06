@@ -116,7 +116,7 @@ class ConsultationsController extends Controller
 
         if ($patient_phone) {
             $data->whereHas('payment_cache_item.payment_cache.check_in.patient', function ($query) use ($patient_phone) {
-                $query->where('phone', $patient_phone);
+                $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
         }
 

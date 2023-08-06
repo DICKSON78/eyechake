@@ -38,7 +38,7 @@ class MessagesController extends Controller
 
         if ($patient_phone) {
             $data->whereHas('patient', function ($query) use ($patient_phone) {
-                $query->where('phone', $patient_phone);
+                $query->where('phone', 'like', '%' . $patient_phone . '%');
             });
         }
 

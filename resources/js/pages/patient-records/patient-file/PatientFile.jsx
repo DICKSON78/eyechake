@@ -59,6 +59,7 @@ const PatientFile = ({ patient }) => {
               {
                 field: "created_at",
                 headerName: "Date",
+                valueGetter: (item) => item.payment_cache_item.served_at || item.created_at,
               },
               {
                 field: "consultant",

@@ -179,6 +179,26 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                     sm={6}
                     xs={12}
                   >
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      placeholder="Search"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small"/>
+                          </InputAdornment>
+                        ),
+                      }}
+                      onChange={(value) => throttle(() => setParams({ ...params, patient_phone: value }), 1000)}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
                     <Select
                       label="Gender"
                       fullWidth
@@ -273,10 +293,17 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => item.creator?.full_name
+            valueGetter: (item) => item.creator?.full_name,
+            show: status !== "Served",
           },
           {
-            field: "created_at",
+            field: "served_by",
+            headerName: consultationType === "Pharmacy" ? "Dispensed By" : "Served By",
+            valueGetter: (item) => item.server?.full_name,
+            show: status === "Served",
+          },
+          {
+            field: status !== "Served" ? "created_at" : "served_at",
             headerName: "Date",
           },
           {

@@ -400,8 +400,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                           ref={dosageRef}
                           label="Dosage"
                           fullWidth
-                          multiline
-                          rows={3}
                           onChange={(value) => setDosage(value)}
                         />
                       </Grid>
@@ -417,8 +415,6 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         ref={commentsRef}
                         label="Comments"
                         fullWidth
-                        multiline
-                        rows={3}
                         onChange={(value) => setComments(value)}
                       />
                     </Grid>

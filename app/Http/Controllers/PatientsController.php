@@ -52,7 +52,7 @@ class PatientsController extends Controller
         }
 
         if ($phone) {
-            $data->where('phone', $phone);
+            $data->where('phone', 'like', '%' . $phone . '%');
         }
 
         if ($region_id) {

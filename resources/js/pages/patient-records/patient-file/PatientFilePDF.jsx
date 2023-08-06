@@ -157,7 +157,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
             { label: "Address", value: patient.address },
             { label: "Payment Mode", value: consultation.payment_cache_item.payment_mode.name },
             { label: "Consultant", value: consultation.payment_cache_item.consultant?.full_name },
-            { label: "Consultation Date", value: consultation.created_at },
+            { label: "Consultation Date", value: consultation.payment_cache_item.served_at || consultation.created_at },
           ]}
           containerStyle={{
             marginBottom: 4

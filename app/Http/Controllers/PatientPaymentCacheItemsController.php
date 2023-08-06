@@ -54,7 +54,7 @@ class PatientPaymentCacheItemsController extends Controller
             'sort_direction' => 'nullable|in:asc,desc',
         ]);
 
-        $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator']);
+        $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server']);
 
         if ($status) {
             $statuses = explode(',', $status);
@@ -135,11 +135,29 @@ class PatientPaymentCacheItemsController extends Controller
         }
 
         if ($start_date) {
-            $data->whereDate('created_at', '>=', $start_date);
+            if ($status) {
+                $statuses = explode(',', $status);
+                if (in_array('Served', $statuses)) {
+                    $data->whereDate('served_at', '>=', $start_date);
+                } else {
+                    $data->whereDate('created_at', '>=', $start_date);
+                }
+            } else {
+                $data->whereDate('created_at', '>=', $start_date);
+            }
         }
 
         if ($end_date) {
-            $data->whereDate('created_at', '<=', $end_date);
+            if ($status) {
+                $statuses = explode(',', $status);
+                if (in_array('Served', $statuses)) {
+                    $data->whereDate('served_at', '<=', $end_date);
+                } else {
+                    $data->whereDate('created_at', '<=', $end_date);
+                }
+            } else {
+                $data->whereDate('created_at', '<=', $end_date);
+            }
         }
 
         $data->orderBy('created_at', $sort_direction);
