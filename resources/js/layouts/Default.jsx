@@ -314,7 +314,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   textAlign="center"
                   flexGrow={1}
                 >
-                  &copy; {new Date().getFullYear()}. Developed with <HeartIcon /> by SmartSoft.
+                  &copy; {new Date().getFullYear()}. Developed with <HeartIcon /> by SysTech.
                 </Typography>
               </Toolbar>
             </Box>

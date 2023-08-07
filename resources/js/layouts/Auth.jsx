@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-import { Box, Container, Paper, Typography } from "@mui/material";
+import { Box, Card, Container, Typography } from "@mui/material";
 
 import logo from "../../images/logo.png";
 
@@ -19,7 +19,7 @@ const Auth = () => {
         justifyContent="center"
         minHeight="100vh"
       >
-        <Paper>
+        <Card>
           <Box
             component="img"
             display="block"
@@ -30,8 +30,8 @@ const Auth = () => {
             src={logo}
           />
           <Outlet />
-        </Paper>
-        <Paper sx={{ mt: 1 }}>
+        </Card>
+        <Card sx={{ mt: 1 }}>
           <Typography
             variant="body2"
             color="text.secondary"
@@ -39,9 +39,9 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()} SmartSoft
+            {new Date().getFullYear()} SysTech
           </Typography>
-        </Paper>
+        </Card>
       </Box>
     </Container>
   );
