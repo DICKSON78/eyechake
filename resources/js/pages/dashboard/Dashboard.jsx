@@ -522,7 +522,7 @@ const Dashboard = () => {
                     name: "Sales",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: e.statistics.find((f) => f.name === "total_sales")?.amount || 0,
+                      y: (e.statistics.find((f) => f.name === "total_sales")?.amount || 0) - (e.statistics.find((f) => f.name === "discount")?.amount || 0),
                     })),
                   },
                   {

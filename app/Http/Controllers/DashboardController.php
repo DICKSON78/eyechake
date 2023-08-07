@@ -150,6 +150,13 @@ class DashboardController extends Controller
                                 ->sum('amount'),
                     ],
                     [
+                        'name' => 'discount',
+                        'amount' => PatientItemPayment::query()
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->sum('discount')
+                    ],
+                    [
                         'name' => 'expenses',
                         'amount' => ExpensePayment::query()
                             ->whereDate('created_at', '>=', $start_date)
