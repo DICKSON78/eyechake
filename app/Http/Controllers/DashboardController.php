@@ -182,7 +182,7 @@ class DashboardController extends Controller
                 ],
             ];
 
-            $date->addMonth();
+            $date->addMonthNoOverflow();
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
