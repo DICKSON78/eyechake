@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Log;
 class SmsService
 {
 
-    private $secretKey = 't02t86j99hg4d174s0wdim6461d4xi9pj3828cfaft59lw07u0dzvh23gfyrl498';
     private $sendMessageUrl = 'http://157.230.98.141:8010/sms/send';
     private $deliveryReportUrl = 'http://157.230.98.141:8010/sms/delivery-report';
     private $clientUrl = 'http://157.230.98.141:8010/sms/client';
@@ -56,7 +55,7 @@ class SmsService
         ];
 
         $headers = [
-            'x-access-token' => $this->secretKey,
+            'x-access-token' => env('SMS_KEY'),
         ];
 
         try {
@@ -85,7 +84,7 @@ class SmsService
     public function getMessageDeliveryReport($request_id, $recipient = null)
     {
         $headers = [
-            'x-access-token' => $this->secretKey,
+            'x-access-token' => env('SMS_KEY'),
         ];
 
         try {
@@ -116,7 +115,7 @@ class SmsService
     public function getClient()
     {
         $headers = [
-            'x-access-token' => $this->secretKey,
+            'x-access-token' => env('SMS_KEY'),
         ];
 
         try {

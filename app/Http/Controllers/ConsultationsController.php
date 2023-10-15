@@ -473,7 +473,7 @@ class ConsultationsController extends Controller
 
         // send message to patient
         if ($data->patient_direction == 'Direct to Doctor') {
-            //SendConsultationMessageJob::dispatch($data);
+            SendConsultationMessageJob::dispatch($data);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
