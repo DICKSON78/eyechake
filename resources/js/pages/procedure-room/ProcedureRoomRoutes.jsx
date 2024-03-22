@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ProcedureRequests from "./procedure-requests/ProcedureRequests";
-import ProcedureRequestItems from "./procedure-requests/ProcedureRequestItems";
+import ProcedureRequestRoutes from "./procedure-requests/ProcedureRequestRoutes";
 import ReportsRoutes from "./ReportsRoutes";
 
 const ProcedureRoomRoutes = () => {
@@ -13,8 +13,8 @@ const ProcedureRoomRoutes = () => {
         element={<ProcedureRequests />}
       />
       <Route
-        path="/procedure-requests/:patientId/:paymentCacheId"
-        element={<ProcedureRequestItems />}
+        path="/procedure-requests/:patientId/:paymentCacheId/*"
+        element={<ProcedureRequestRoutes />}
       />
       <Route
         path="/reports/*"

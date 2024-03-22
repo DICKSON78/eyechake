@@ -1,8 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+} from "@mui/material";
+import {
+  EditRounded as EditIcon,
+  MoreVert as MoreIcon,
+} from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -13,7 +26,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatError, getAge } from "../../../helpers";
 
 const Patients = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -32,11 +44,17 @@ const Patients = () => {
     payment_mode_id: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/patients",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Patients - ${window.APP_NAME}`;
@@ -82,7 +100,7 @@ const Patients = () => {
       <Card>
         <PageHeader
           title="Registered Patients"
-          trailing={(
+          trailing={
             <React.Fragment>
               <Button
                 variant="contained"
@@ -91,7 +109,7 @@ const Patients = () => {
                 New Patient
               </Button>
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -106,7 +124,8 @@ const Patients = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
@@ -119,7 +138,7 @@ const Patients = () => {
               {
                 field: "date_of_birth",
                 headerName: "Age",
-                valueGetter: (item, index) => getAge(item.date_of_birth)
+                valueGetter: (item, index) => getAge(item.date_of_birth),
               },
               {
                 field: "gender",
@@ -161,13 +180,15 @@ const Patients = () => {
                         size="small"
                         onClick={() => openEditPatientModal(item)}
                       >
-                        <EditIcon fontSize="small"/>
+                        <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => navigate(`/reception/patients/${item.id}/check-in`)}
+                      onClick={() =>
+                        navigate(`/reception/patients/${item.id}/check-in`)
+                      }
                     >
                       Check-In
                     </Button>
@@ -176,23 +197,25 @@ const Patients = () => {
                         size="small"
                         onClick={(event) => handleMenuOpen(event, item)}
                       >
-                        <MoreIcon/>
+                        <MoreIcon />
                       </IconButton>
                     </Tooltip>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      {item ?
+      {item ? (
         <Menu
           anchorEl={anchorEl}
           anchorOrigin={{
@@ -212,9 +235,8 @@ const Patients = () => {
             View Records
           </MenuItem>
         </Menu>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

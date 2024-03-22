@@ -1,7 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+} from "@mui/material";
+import {
+  EditRounded as EditIcon,
+  Settings as SettingsIcon,
+} from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../../components/Page";
 import Table from "../../../../components/Table";
 import Modal from "../../../../components/Modal";
@@ -14,7 +26,6 @@ import { useFetch, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
 
 const Items = () => {
-
   const addToast = useToast();
 
   const modalRef = useRef();
@@ -29,11 +40,17 @@ const Items = () => {
     is_consultation_item: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/items", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/items",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Items - ${window.APP_NAME}`;
@@ -107,7 +124,7 @@ const Items = () => {
       <Card>
         <PageHeader
           title="Items"
-          trailing={(
+          trailing={
             <React.Fragment>
               <Button
                 variant="contained"
@@ -116,7 +133,7 @@ const Items = () => {
                 New Item
               </Button>
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -131,7 +148,8 @@ const Items = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "name",
@@ -170,7 +188,7 @@ const Items = () => {
                       size="small"
                       onClick={() => openManageItemPricesModal(item)}
                     >
-                      <SettingsIcon fontSize="small"/>
+                      <SettingsIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 ),
@@ -193,7 +211,12 @@ const Items = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Tooltip title="Edit">
@@ -201,23 +224,25 @@ const Items = () => {
                         size="small"
                         onClick={() => openEditItemModal(item)}
                       >
-                        <EditIcon fontSize="small"/>
+                        <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

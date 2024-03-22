@@ -13,9 +13,12 @@ import {
   Grid,
   InputAdornment,
   LinearProgress,
-  Paper
+  Paper,
 } from "@mui/material";
-import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
+import {
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+} from "@mui/icons-material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -24,7 +27,6 @@ import { formatError } from "../../../helpers";
 import { PRIVILEGES } from "../../../constants";
 
 const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -40,7 +42,10 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
     status: item.status,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/employees/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/employees/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -67,66 +72,69 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   const getPrivilegesTree = (items) => {
     if (!items) return null;
 
-    return items.map(e => {
+    return items.map((e) => {
       const hasChildren = e.children && e.children.length;
-      return (
-        hasChildren ?
-          <Paper
-            key={e.value}
-            variant="outlined"
-            sx={{ my: 1, px: 2, py: 1 }}
+      return hasChildren ? (
+        <Paper
+          key={e.value}
+          variant="outlined"
+          sx={{ my: 1, px: 2, py: 1 }}
+        >
+          <Grid
+            container
+            spacing={2}
           >
             <Grid
-              container
-              spacing={2}
+              item
+              md={3}
+              sm={6}
+              xs={12}
             >
-              <Grid
-                item
-                md={3}
-                sm={6}
-                xs={12}
-              >
-                <FormControlLabel
-                  control={(
-                    <Checkbox
-                      checked={formData.privileges.indexOf(e.value) !== -1}
-                      onChange={(event) => setFormData({
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.privileges.indexOf(e.value) !== -1}
+                    onChange={(event) =>
+                      setFormData({
                         ...formData,
-                        privileges: event.target.checked ?
-                          [...formData.privileges, e.value] :
-                          formData.privileges.filter((f) => f !== e.value),
-                      })}
-                    />
-                  )}
-                  label={e.label}
-                />
-              </Grid>
-              <Grid
-                item
-                md={9}
-                sm={12}
-                xs={12}
-              >
-                {getPrivilegesTree(e.children)}
-              </Grid>
-            </Grid>
-          </Paper>
-          :
-          <FormControlLabel
-            key={e.value}
-            control={(
-              <Checkbox
-                checked={formData.privileges.indexOf(e.value) !== -1}
-                onChange={(event) => setFormData({
-                  ...formData,
-                  privileges: event.target.checked ?
-                    [...formData.privileges, e.value] :
-                    formData.privileges.filter((f) => f !== e.value),
-                })}
+                        privileges: event.target.checked
+                          ? [...formData.privileges, e.value]
+                          : formData.privileges.filter((f) => f !== e.value),
+                      })
+                    }
+                  />
+                }
+                label={e.label}
               />
-            )}
-            label={e.label}
-          />
+            </Grid>
+            <Grid
+              item
+              md={9}
+              sm={12}
+              xs={12}
+            >
+              {getPrivilegesTree(e.children)}
+            </Grid>
+          </Grid>
+        </Paper>
+      ) : (
+        <FormControlLabel
+          key={e.value}
+          control={
+            <Checkbox
+              checked={formData.privileges.indexOf(e.value) !== -1}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  privileges: event.target.checked
+                    ? [...formData.privileges, e.value]
+                    : formData.privileges.filter((f) => f !== e.value),
+                })
+              }
+            />
+          }
+          label={e.label}
+        />
       );
     });
   };
@@ -152,7 +160,9 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
                 fullWidth
                 required
                 defaultValue={formData.username}
-                onChange={(value) => setFormData({ ...formData, username: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, username: value })
+                }
               />
             </Grid>
             <Grid
@@ -174,11 +184,17 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      {showPassword ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
                     </InputAdornment>
                   ),
                 }}
-                onChange={(value) => setFormData({ ...formData, password: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, password: value })
+                }
               />
             </Grid>
           </Grid>
@@ -196,29 +212,29 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
               }}
             />
             <Divider />
-            <CardContent>
-              {getPrivilegesTree(PRIVILEGES)}
-            </CardContent>
+            <CardContent>{getPrivilegesTree(PRIVILEGES)}</CardContent>
           </Card>
 
           <Box mt={2}>
             <FormControlLabel
-              control={(
+              control={
                 <Checkbox
                   defaultChecked={item.status === "Active"}
-                  onChange={(event) => setFormData({
-                    ...formData,
-                    status: event.target.checked ? "Active" : "Inactive"
-                  })}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      status: event.target.checked ? "Active" : "Inactive",
+                    })
+                  }
                 />
-              )}
+              }
               label="Active"
             />
           </Box>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

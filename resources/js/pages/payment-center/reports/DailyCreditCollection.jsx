@@ -11,15 +11,25 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  numberFormat,
+  throttle,
+} from "../../../helpers";
 
 const DailyCreditCollection = ({ module }) => {
-
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    transaction_type: "Credit",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      transaction_type: "Credit",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     with_patient: true,
@@ -54,10 +64,14 @@ const DailyCreditCollection = ({ module }) => {
         uri="api/patient-payment-cache-items"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <React.Fragment>
             <Card
               variant="outlined"
@@ -84,11 +98,16 @@ const DailyCreditCollection = ({ module }) => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_name: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -104,11 +123,16 @@ const DailyCreditCollection = ({ module }) => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_id: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -122,7 +146,9 @@ const DailyCreditCollection = ({ module }) => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      onChange={(value) => setParams({ ...params, patient_gender: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, patient_gender: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -138,7 +164,9 @@ const DailyCreditCollection = ({ module }) => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, payment_mode_id: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -154,28 +182,32 @@ const DailyCreditCollection = ({ module }) => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(() => setParams({ ...params, q: value }), 1000)
+                      }
                     />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient.full_name,
+            valueGetter: (item, index) =>
+              item.payment_cache.check_in.patient.full_name,
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient_id,
+            valueGetter: (item, index) =>
+              item.payment_cache.check_in.patient_id,
           },
           {
             field: "name",
@@ -200,12 +232,13 @@ const DailyCreditCollection = ({ module }) => {
           {
             field: "subtotal",
             headerName: "Subtotal",
-            valueGetter: (item, index) => numberFormat(item.unit_price * item.quantity),
+            valueGetter: (item, index) =>
+              numberFormat(item.unit_price * item.quantity),
           },
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => item.creator?.full_name
+            valueGetter: (item) => item.creator?.full_name,
           },
           {
             field: "created_at",
@@ -214,7 +247,11 @@ const DailyCreditCollection = ({ module }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 7, index: 1 },
-          { reducer: (acc, item, index) => acc + (item.unit_price * item.quantity), index: 7 },
+          {
+            reducer: (acc, item, index) =>
+              acc + item.unit_price * item.quantity,
+            index: 7,
+          },
         ]}
       />
     </Page>

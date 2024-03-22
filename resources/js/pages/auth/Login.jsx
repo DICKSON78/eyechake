@@ -1,12 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Alert, Box, Button, InputAdornment, LinearProgress } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  InputAdornment,
+  LinearProgress,
+} from "@mui/material";
 import {
   LockRounded as LockIcon,
   Person2Rounded as UsernameIcon,
   VisibilityOffRounded as VisibilityOffIcon,
-  VisibilityRounded as VisibilityIcon
+  VisibilityRounded as VisibilityIcon,
 } from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
@@ -23,9 +29,12 @@ const LogIn = () => {
 
   const [formData, setFormData] = useState({
     username: undefined,
-    password: undefined
+    password: undefined,
   });
-  const { data, loading, error, handlePost } = usePost("api/auth/login", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/auth/login",
+    formData
+  );
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -130,13 +139,14 @@ const LogIn = () => {
           </Button>
         </Form>
       </Box>
-      {loading &&
-      <LinearProgress
-        sx={{
-          borderBottomLeftRadius: (theme) => theme.shape.borderRadius,
-          borderBottomRightRadius: (theme) => theme.shape.borderRadius
-        }}
-      />}
+      {loading && (
+        <LinearProgress
+          sx={{
+            borderBottomLeftRadius: (theme) => theme.shape.borderRadius,
+            borderBottomRightRadius: (theme) => theme.shape.borderRadius,
+          }}
+        />
+      )}
     </React.Fragment>
   );
 };

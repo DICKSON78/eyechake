@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { Button, Card, CardContent, Chip, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  LinearProgress,
+  Skeleton,
+  Stack,
+} from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -11,10 +20,13 @@ import TextField from "../../../components/TextField";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationError, numberFormat } from "../../../helpers";
+import {
+  formatError,
+  getValidationError,
+  numberFormat,
+} from "../../../helpers";
 
 const DispensingRequestItems = ({ consultationType }) => {
-
   const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
@@ -29,18 +41,27 @@ const DispensingRequestItems = ({ consultationType }) => {
     data: items,
     setData: setItems,
     loading: loadingItems,
-    handleFetch: fetchItems
-  } = useFetch("api/patient-payment-cache-items", {
-    per_page: 500,
-    payment_cache_id: paymentCacheId,
-    consultation_type: consultationType
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    {
+      per_page: 500,
+      payment_cache_id: paymentCacheId,
+      consultation_type: consultationType,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { handlePatch: handleAutoSave } = usePatch();
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/dispense", {
-    payment_cache_id: paymentCacheId,
-    items: selectedItems.map((e) => e.id),
-  });
+  const { data, loading, error, handlePost, setError } = usePost(
+    "api/patient-payment-cache-items/dispense",
+    {
+      payment_cache_id: paymentCacheId,
+      items: selectedItems.map((e) => e.id),
+    }
+  );
 
   useEffect(() => {
     document.title = `Dispensing Request Items - ${window.APP_NAME}`;
@@ -69,7 +90,7 @@ const DispensingRequestItems = ({ consultationType }) => {
   const autoSave = (item, field, value) => {
     if (value !== item[field]) {
       handleAutoSave(`api/patient-payment-cache-items/${item.id}`, {
-        [field]: value
+        [field]: value,
       });
     }
   };
@@ -123,7 +144,12 @@ const DispensingRequestItems = ({ consultationType }) => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: consultationType === "Glass" ? "Optician Center" : "Medicine Center" },
+        {
+          title:
+            consultationType === "Glass"
+              ? "Optician Center"
+              : "Medicine Center",
+        },
         { title: "Dispensing Requests" },
         { title: patientId },
       ]}
@@ -134,17 +160,16 @@ const DispensingRequestItems = ({ consultationType }) => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ?
+      {loadingPatient ? (
         <Skeleton
           variant="rounded"
           height={256}
         />
-        : null
-      }
+      ) : null}
 
-      {patient ?
+      {patient ? (
         <Card>
-          <PageHeader title="Dispensing Request Items"/>
+          <PageHeader title="Dispensing Request Items" />
           <Divider />
           <CardContent>
             <Table
@@ -153,7 +178,7 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "index",
                   headerName: "S/N",
-                  valueGetter: (item, index) => (index + 1),
+                  valueGetter: (item, index) => index + 1,
                 },
                 {
                   field: "item_id",
@@ -168,7 +193,8 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "balance",
                   headerName: "Item Balance",
-                  valueGetter: (item, index) => numberFormat(item.item.balance || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.item.balance || 0),
                 },
                 {
                   field: "payment_mode_id",
@@ -178,7 +204,8 @@ const DispensingRequestItems = ({ consultationType }) => {
                 {
                   field: "quantity",
                   headerName: "Quantity",
-                  valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.quantity || 0),
                 },
                 {
                   field: "dosage",
@@ -192,7 +219,9 @@ const DispensingRequestItems = ({ consultationType }) => {
                         let tmp = items;
                         tmp[index] = { ...item, dosage: value };
                         setItems(tmp);
-                        setSelectedItems(selectedItems.filter((e,) => e.id !== item.id));
+                        setSelectedItems(
+                          selectedItems.filter((e) => e.id !== item.id)
+                        );
                         autoSave(item, "dosage", value);
                       }}
                     />
@@ -211,7 +240,9 @@ const DispensingRequestItems = ({ consultationType }) => {
                         let tmp = items;
                         tmp[index] = { ...item, comments: value };
                         setItems(tmp);
-                        setSelectedItems(selectedItems.filter((e,) => e.id !== item.id));
+                        setSelectedItems(
+                          selectedItems.filter((e) => e.id !== item.id)
+                        );
                         autoSave(item, "comments", value);
                       }}
                     />
@@ -227,11 +258,13 @@ const DispensingRequestItems = ({ consultationType }) => {
                       label={getStatusLabel(item.status)}
                     />
                   ),
-                }
+                },
               ]}
               items={items}
               hidePaginationFooter
-              checkboxSelection={(item, index) => item.status === "Paid" || item.status === "Billed"}
+              checkboxSelection={(item, index) =>
+                item.status === "Paid" || item.status === "Billed"
+              }
               checked={selectedItems}
               setChecked={setSelectedItems}
             />
@@ -255,9 +288,8 @@ const DispensingRequestItems = ({ consultationType }) => {
             </Button>
           </Stack>
         </Card>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

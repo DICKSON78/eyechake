@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Checkbox, Divider, FormControlLabel, Stack } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Stack,
+} from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
@@ -11,7 +19,6 @@ import { useFetch, useToast } from "../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../helpers";
 
 const ConsultationPatients = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -29,15 +36,23 @@ const ConsultationPatients = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/consultations", {
-    ...params,
-    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-  }, true, {
-    data: [],
-    total: 0,
-    page: 1,
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/consultations",
+    {
+      ...params,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
+      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    },
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Patients Sent to Optician - ${window.APP_NAME}`;
@@ -60,22 +75,26 @@ const ConsultationPatients = () => {
       <Card>
         <PageHeader
           title="Patients Sent to Optician"
-          trailing={(
+          trailing={
             <React.Fragment>
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     checked={!!params.consultant_id}
-                    onChange={(event) => setParams({
-                      ...params,
-                      consultant_id: event.target.checked ? window.user.id : undefined
-                    })}
+                    onChange={(event) =>
+                      setParams({
+                        ...params,
+                        consultant_id: event.target.checked
+                          ? window.user.id
+                          : undefined,
+                      })
+                    }
                   />
-                )}
+                }
                 label="My Patients Only"
               />
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -90,37 +109,48 @@ const ConsultationPatients = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.full_name,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient
+                    .full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient_id,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Age",
-                valueGetter: (item, index) => getAge(item.payment_cache_item.payment_cache.check_in.patient.date_of_birth),
+                valueGetter: (item, index) =>
+                  getAge(
+                    item.payment_cache_item.payment_cache.check_in.patient
+                      .date_of_birth
+                  ),
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.gender,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.phone,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "created_by",
                 headerName: "Sent By",
-                valueGetter: (item, index) => item.to_optician_sender?.full_name,
+                valueGetter: (item, index) =>
+                  item.to_optician_sender?.full_name,
               },
               {
                 field: "sent_to_optician_at",
@@ -133,30 +163,41 @@ const ConsultationPatients = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => navigate(`/optician-center/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`)}
+                      onClick={() =>
+                        navigate(
+                          `/optician-center/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`
+                        )
+                      }
                     >
                       Manage
                     </Button>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, callback = null) => {
-
+const useFetch = (
+  uri,
+  params = null,
+  fetchOnMount = true,
+  initialData = null,
+  callback = null
+) => {
   const ignore = useRef(false);
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
@@ -13,7 +18,8 @@ const useFetch = (uri, params = null, fetchOnMount = true, initialData = null, c
     setLoading(true);
     setError(null);
 
-    window.axios.get("/" + uri, { params })
+    window.axios
+      .get("/" + uri, { params })
       .then((response) => {
         if (!ignore.current) {
           setData(callback ? callback(response) : response.data);

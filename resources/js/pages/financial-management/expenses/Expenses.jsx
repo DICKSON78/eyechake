@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -14,14 +23,19 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
-
   const addToast = useToast();
   const modalRef = useRef();
 
-  const { data: categories } = useFetch("api/expense-categories", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: categories } = useFetch(
+    "api/expense-categories",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     page: 1,
@@ -33,15 +47,23 @@ const Expenses = ({ module, createdBy }) => {
     created_by: createdBy,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/expenses", {
-    ...params,
-    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-  }, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/expenses",
+    {
+      ...params,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
+      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    },
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Expenses - ${window.APP_NAME}`;
@@ -130,7 +152,7 @@ const Expenses = ({ module, createdBy }) => {
       <Card>
         <PageHeader
           title="Expenses"
-          trailing={(
+          trailing={
             <React.Fragment>
               <Button
                 variant="contained"
@@ -139,7 +161,7 @@ const Expenses = ({ module, createdBy }) => {
                 New Expense
               </Button>
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -154,7 +176,8 @@ const Expenses = ({ module, createdBy }) => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "category_id",
@@ -164,17 +187,18 @@ const Expenses = ({ module, createdBy }) => {
               {
                 field: "total_amount",
                 headerName: "Total Amount",
-                valueGetter: (item, index) => numberFormat(item.total_amount)
+                valueGetter: (item, index) => numberFormat(item.total_amount),
               },
               {
                 field: "paid_amount",
                 headerName: "Paid Amount",
-                valueGetter: (item, index) => numberFormat(item.paid_amount)
+                valueGetter: (item, index) => numberFormat(item.paid_amount),
               },
               {
                 field: "remaining_amount",
                 headerName: "Remaining Amount",
-                valueGetter: (item, index) => numberFormat(item.total_amount - item.paid_amount)
+                valueGetter: (item, index) =>
+                  numberFormat(item.total_amount - item.paid_amount),
               },
               {
                 field: "description",
@@ -213,17 +237,16 @@ const Expenses = ({ module, createdBy }) => {
                     alignItems="center"
                     spacing={1}
                   >
-                    {item.paid_amount < item.total_amount ?
+                    {item.paid_amount < item.total_amount ? (
                       <Tooltip title="Edit">
                         <IconButton
                           size="small"
                           onClick={() => openEditExpenseModal(item)}
                         >
-                          <EditIcon fontSize="small"/>
+                          <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      : null
-                    }
+                    ) : null}
                     <Button
                       variant="contained"
                       size="small"
@@ -233,26 +256,44 @@ const Expenses = ({ module, createdBy }) => {
                     </Button>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
             footerItems={[
               [
                 { value: "TOTAL", tableCellProps: { colSpan: 2 } },
-                { value: numberFormat(data.data.reduce((acc, item) => acc + item.total_amount, 0)) },
-                { value: numberFormat(data.data.reduce((acc, item) => acc + item.paid_amount, 0)) },
-                { value: numberFormat(data.data.reduce((acc, item) => acc + (item.total_amount - item.paid_amount), 0)) },
-              ]
+                {
+                  value: numberFormat(
+                    data.data.reduce((acc, item) => acc + item.total_amount, 0)
+                  ),
+                },
+                {
+                  value: numberFormat(
+                    data.data.reduce((acc, item) => acc + item.paid_amount, 0)
+                  ),
+                },
+                {
+                  value: numberFormat(
+                    data.data.reduce(
+                      (acc, item) =>
+                        acc + (item.total_amount - item.paid_amount),
+                      0
+                    )
+                  ),
+                },
+              ],
             ]}
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -12,9 +12,12 @@ import {
   InputAdornment,
   LinearProgress,
   Paper,
-  Stack
+  Stack,
 } from "@mui/material";
-import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
+import {
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+} from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import Form from "../../../components/Form";
@@ -27,7 +30,6 @@ import { formatDateForDb, formatError } from "../../../helpers";
 import { PRIVILEGES } from "../../../constants";
 
 const EmployeeRegistration = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -46,14 +48,26 @@ const EmployeeRegistration = () => {
   const phoneRef = useRef();
   const passwordRef = useRef();
 
-  const { data: departments } = useFetch("api/departments", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: jobTitles } = useFetch("api/job-titles", {
-    status: "Active",
-    per_page: 500,
-  }, true, [], (response) => response.data.data.data);
+  const { data: departments } = useFetch(
+    "api/departments",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: jobTitles } = useFetch(
+    "api/job-titles",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,7 +89,9 @@ const EmployeeRegistration = () => {
 
   const { data, loading, error, handlePost } = usePost("api/employees", {
     ...formData,
-    date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
+    date_of_birth: formData.date_of_birth
+      ? formatDateForDb(formData.date_of_birth)
+      : null,
   });
 
   useEffect(() => {
@@ -107,66 +123,69 @@ const EmployeeRegistration = () => {
   const getPrivilegesTree = (items) => {
     if (!items) return null;
 
-    return items.map(e => {
+    return items.map((e) => {
       const hasChildren = e.children && e.children.length;
-      return (
-        hasChildren ?
-          <Paper
-            key={e.value}
-            variant="outlined"
-            sx={{ my: 1, px: 2, py: 1 }}
+      return hasChildren ? (
+        <Paper
+          key={e.value}
+          variant="outlined"
+          sx={{ my: 1, px: 2, py: 1 }}
+        >
+          <Grid
+            container
+            spacing={2}
           >
             <Grid
-              container
-              spacing={2}
+              item
+              md={3}
+              sm={6}
+              xs={12}
             >
-              <Grid
-                item
-                md={3}
-                sm={6}
-                xs={12}
-              >
-                <FormControlLabel
-                  control={(
-                    <Checkbox
-                      checked={formData.privileges.indexOf(e.value) !== -1}
-                      onChange={(event) => setFormData({
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.privileges.indexOf(e.value) !== -1}
+                    onChange={(event) =>
+                      setFormData({
                         ...formData,
-                        privileges: event.target.checked ?
-                          [...formData.privileges, e.value] :
-                          formData.privileges.filter((f) => f !== e.value),
-                      })}
-                    />
-                  )}
-                  label={e.label}
-                />
-              </Grid>
-              <Grid
-                item
-                md={9}
-                sm={12}
-                xs={12}
-              >
-                {getPrivilegesTree(e.children)}
-              </Grid>
-            </Grid>
-          </Paper>
-          :
-          <FormControlLabel
-            key={e.value}
-            control={(
-              <Checkbox
-                checked={formData.privileges.indexOf(e.value) !== -1}
-                onChange={(event) => setFormData({
-                  ...formData,
-                  privileges: event.target.checked ?
-                    [...formData.privileges, e.value] :
-                    formData.privileges.filter((f) => f !== e.value),
-                })}
+                        privileges: event.target.checked
+                          ? [...formData.privileges, e.value]
+                          : formData.privileges.filter((f) => f !== e.value),
+                      })
+                    }
+                  />
+                }
+                label={e.label}
               />
-            )}
-            label={e.label}
-          />
+            </Grid>
+            <Grid
+              item
+              md={9}
+              sm={12}
+              xs={12}
+            >
+              {getPrivilegesTree(e.children)}
+            </Grid>
+          </Grid>
+        </Paper>
+      ) : (
+        <FormControlLabel
+          key={e.value}
+          control={
+            <Checkbox
+              checked={formData.privileges.indexOf(e.value) !== -1}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  privileges: event.target.checked
+                    ? [...formData.privileges, e.value]
+                    : formData.privileges.filter((f) => f !== e.value),
+                })
+              }
+            />
+          }
+          label={e.label}
+        />
       );
     });
   };
@@ -180,7 +199,7 @@ const EmployeeRegistration = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Employee Registration"/>
+        <PageHeader title="Employee Registration" />
         <Divider />
         <CardContent>
           <Form ref={formRef}>
@@ -199,7 +218,9 @@ const EmployeeRegistration = () => {
                   label="First Name"
                   fullWidth
                   required
-                  onChange={(value) => setFormData({ ...formData, first_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, first_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -212,7 +233,9 @@ const EmployeeRegistration = () => {
                   ref={middleNameRef}
                   label="Middle Name"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, middle_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, middle_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -226,7 +249,9 @@ const EmployeeRegistration = () => {
                   label="Last Name"
                   fullWidth
                   required
-                  onChange={(value) => setFormData({ ...formData, last_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, last_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -239,7 +264,9 @@ const EmployeeRegistration = () => {
                   ref={employeeNumberRef}
                   label="Employee Number"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, employee_number: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, employee_number: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -254,7 +281,9 @@ const EmployeeRegistration = () => {
                   fullWidth
                   required
                   options={["Male", "Female"]}
-                  onChange={(value) => setFormData({ ...formData, gender: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, gender: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -268,7 +297,12 @@ const EmployeeRegistration = () => {
                   label="Date of Birth"
                   fullWidth
                   value={formData.date_of_birth}
-                  onChange={(value) => setFormData({ ...formData, date_of_birth: !isNaN(value) ? value : null })}
+                  onChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      date_of_birth: !isNaN(value) ? value : null,
+                    })
+                  }
                 />
               </Grid>
               <Grid
@@ -285,7 +319,9 @@ const EmployeeRegistration = () => {
                   options={departments}
                   optionsLabel="name"
                   optionsValue="id"
-                  onChange={(value) => setFormData({ ...formData, department_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, department_id: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -302,7 +338,9 @@ const EmployeeRegistration = () => {
                   options={jobTitles}
                   optionsLabel="name"
                   optionsValue="id"
-                  onChange={(value) => setFormData({ ...formData, job_title_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, job_title_id: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -315,7 +353,9 @@ const EmployeeRegistration = () => {
                   ref={phoneRef}
                   label="Phone Number"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, phone: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, phone: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -328,7 +368,9 @@ const EmployeeRegistration = () => {
                   ref={nationalIdRef}
                   label="National ID"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, national_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, national_id: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -342,7 +384,9 @@ const EmployeeRegistration = () => {
                   label="Username"
                   fullWidth
                   required
-                  onChange={(value) => setFormData({ ...formData, username: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, username: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -364,11 +408,17 @@ const EmployeeRegistration = () => {
                         sx={{ cursor: "pointer" }}
                         onClick={() => setShowPassword(!showPassword)}
                       >
-                        {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                        {showPassword ? (
+                          <VisibilityIcon />
+                        ) : (
+                          <VisibilityOffIcon />
+                        )}
                       </InputAdornment>
                     ),
                   }}
-                  onChange={(value) => setFormData({ ...formData, password: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, password: value })
+                  }
                 />
               </Grid>
             </Grid>
@@ -386,9 +436,7 @@ const EmployeeRegistration = () => {
                 }}
               />
               <Divider />
-              <CardContent>
-                {getPrivilegesTree(PRIVILEGES)}
-              </CardContent>
+              <CardContent>{getPrivilegesTree(PRIVILEGES)}</CardContent>
             </Card>
           </Form>
         </CardContent>
@@ -411,7 +459,7 @@ const EmployeeRegistration = () => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -11,15 +11,26 @@ import useFetch from "../../../hooks/useFetch";
 import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
-
-  const { data: departments } = useFetch("api/departments", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: jobTitles } = useFetch("api/job-titles", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: departments } = useFetch(
+    "api/departments",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: jobTitles } = useFetch(
+    "api/job-titles",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   return (
     <Card
@@ -48,11 +59,13 @@ const Filters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, name: value }), 1000)}
+              onChange={(value) =>
+                throttle(() => setParams({ ...params, name: value }), 1000)
+              }
             />
           </Grid>
           <Grid
@@ -68,11 +81,16 @@ const Filters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, employee_number: value }), 1000)}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, employee_number: value }),
+                  1000
+                )
+              }
             />
           </Grid>
           <Grid
@@ -102,7 +120,9 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              onChange={(value) => setParams({ ...params, department_id: value })}
+              onChange={(value) =>
+                setParams({ ...params, department_id: value })
+              }
             />
           </Grid>
           <Grid
@@ -118,7 +138,9 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              onChange={(value) => setParams({ ...params, job_title_id: value })}
+              onChange={(value) =>
+                setParams({ ...params, job_title_id: value })
+              }
             />
           </Grid>
         </Grid>

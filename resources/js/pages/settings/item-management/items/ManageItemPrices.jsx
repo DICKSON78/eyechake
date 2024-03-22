@@ -10,7 +10,7 @@ import {
   Grid,
   IconButton,
   LinearProgress,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Form from "../../../../components/Form";
@@ -19,12 +19,15 @@ import Select from "../../../../components/Select";
 import Table from "../../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../../hooks";
-import { formatError, getValidationRules, numberFormat } from "../../../../helpers";
+import {
+  formatError,
+  getValidationRules,
+  numberFormat,
+} from "../../../../helpers";
 
 const validationRules = getValidationRules();
 
 const ManageItemPrices = ({ item, modal }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -34,19 +37,31 @@ const ManageItemPrices = ({ item, modal }) => {
   const [data, setData] = useState();
   const [error, setError] = useState();
 
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
   const {
     data: itemPrices,
     loading: loadingFetchItemPrices,
     error: errorFetchItemPrices,
-    handleFetch: fetchItemPrices
-  } = useFetch("api/item-prices", {
-    item_id: item.id,
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+    handleFetch: fetchItemPrices,
+  } = useFetch(
+    "api/item-prices",
+    {
+      item_id: item.id,
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     item_id: item.id,
@@ -54,8 +69,18 @@ const ManageItemPrices = ({ item, modal }) => {
     unit_price: undefined,
   });
 
-  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost("api/item-prices", formData);
-  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+  const {
+    data: dataPost,
+    loading: loadingPost,
+    error: errorPost,
+    handlePost,
+  } = usePost("api/item-prices", formData);
+  const {
+    data: dataDelete,
+    loading: loadingDelete,
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
 
   useEffect(() => {
     if (dataPost) {
@@ -117,10 +142,9 @@ const ManageItemPrices = ({ item, modal }) => {
 
   return (
     <React.Fragment>
-      {(loadingFetchItemPrices || loadingPost || loadingDelete) ?
+      {loadingFetchItemPrices || loadingPost || loadingDelete ? (
         <LinearProgress />
-        : null
-      }
+      ) : null}
       <CardContent>
         <Grid
           container
@@ -152,7 +176,9 @@ const ManageItemPrices = ({ item, modal }) => {
                     options={paymentModes}
                     optionsLabel="name"
                     optionsValue="id"
-                    onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, payment_mode_id: value })
+                    }
                     containerProps={{ sx: { mb: 2 } }}
                   />
                   <TextField
@@ -161,7 +187,9 @@ const ManageItemPrices = ({ item, modal }) => {
                     fullWidth
                     required
                     rules={[validationRules.number]}
-                    onChange={(value) => setFormData({ ...formData, unit_price: value })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, unit_price: value })
+                    }
                   />
                 </Form>
               </CardContent>
@@ -203,7 +231,7 @@ const ManageItemPrices = ({ item, modal }) => {
                     {
                       field: "index",
                       headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
+                      valueGetter: (item, index) => index + 1,
                     },
                     {
                       field: "payment_mode_id",
@@ -213,7 +241,8 @@ const ManageItemPrices = ({ item, modal }) => {
                     {
                       field: "unit_price",
                       headerName: "Unit Price",
-                      valueGetter: (item, index) => numberFormat(item.unit_price || 0),
+                      valueGetter: (item, index) =>
+                        numberFormat(item.unit_price || 0),
                     },
                     {
                       field: "actions",
@@ -226,12 +255,12 @@ const ManageItemPrices = ({ item, modal }) => {
                               disabled={loadingDelete}
                               onClick={() => handleSubmitDelete(item)}
                             >
-                              <DeleteIcon fontSize="small"/>
+                              <DeleteIcon fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
                       ),
-                    }
+                    },
                   ]}
                   items={itemPrices}
                   hidePaginationFooter
@@ -242,7 +271,7 @@ const ManageItemPrices = ({ item, modal }) => {
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

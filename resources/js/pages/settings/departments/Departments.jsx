@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Button, Card, CardContent, Chip, Divider, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import { EditRounded as EditIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table, { SearchTextField } from "../../../components/Table";
@@ -12,7 +21,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatError, throttle } from "../../../helpers";
 
 const Departments = () => {
-
   const addToast = useToast();
 
   const modalRef = useRef();
@@ -23,11 +31,17 @@ const Departments = () => {
     q: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/departments", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/departments",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Departments - ${window.APP_NAME}`;
@@ -88,9 +102,13 @@ const Departments = () => {
       <Card>
         <PageHeader
           title="Departments"
-          trailing={(
+          trailing={
             <React.Fragment>
-              <SearchTextField onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}/>
+              <SearchTextField
+                onChange={(value) =>
+                  throttle(() => setParams({ ...params, q: value }), 1000)
+                }
+              />
               <Button
                 variant="contained"
                 onClick={openCreateDepartmentModal}
@@ -98,7 +116,7 @@ const Departments = () => {
                 New Department
               </Button>
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -108,7 +126,8 @@ const Departments = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "name",
@@ -136,7 +155,12 @@ const Departments = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Tooltip title="Edit">
@@ -144,23 +168,25 @@ const Departments = () => {
                         size="small"
                         onClick={() => openEditDepartmentModal(item)}
                       >
-                        <EditIcon fontSize="small"/>
+                        <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

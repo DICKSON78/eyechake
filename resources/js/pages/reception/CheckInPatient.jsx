@@ -15,7 +15,7 @@ import {
   Skeleton,
   Stack,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/CloseRounded";
 
@@ -34,13 +34,12 @@ import {
   getValidationRules,
   numberFormat,
   throttle,
-  validateInteger
+  validateInteger,
 } from "../../helpers";
 
 const validationRules = getValidationRules();
 
 const CheckInPatient = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const { patientId } = useParams();
@@ -54,18 +53,36 @@ const CheckInPatient = () => {
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
 
-  const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
-  const { data: employees, handleFetch: fetchEmployees } = useFetch("api/employees", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
-  const { data: itemTypes, handleFetch: fetchItemTypes } = useFetch("api/item-types", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data.map((e) => e.name));
+  const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: employees, handleFetch: fetchEmployees } = useFetch(
+    "api/employees",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: itemTypes, handleFetch: fetchItemTypes } = useFetch(
+    "api/item-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data.map((e) => e.name)
+  );
 
   const [paymentMode, setPaymentMode] = useState();
   const [consultant, setConsultant] = useState();
@@ -77,25 +94,44 @@ const CheckInPatient = () => {
   const [comments, setComments] = useState(1);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
+    "api/lens-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
-    status: "Active",
-    per_page: 5000,
-    payment_mode_id: paymentMode ? paymentMode.id : undefined,
-    q: itemName,
-    item_type: itemType,
-    lens_type_id: lensTypeId
-  }, false, [], (response) => response.data.data.data);
+  const {
+    data: items,
+    setData: setItems,
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/items",
+    {
+      status: "Active",
+      per_page: 5000,
+      payment_mode_id: paymentMode ? paymentMode.id : undefined,
+      q: itemName,
+      item_type: itemType,
+      lens_type_id: lensTypeId,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-check-ins", {
-    patient_id: patientId,
-    payment_mode_id: paymentMode ? paymentMode.id : undefined,
-    items: selectedItems,
-  });
+  const { data, loading, error, handlePost, setError } = usePost(
+    "api/patient-check-ins",
+    {
+      patient_id: patientId,
+      payment_mode_id: paymentMode ? paymentMode.id : undefined,
+      items: selectedItems,
+    }
+  );
 
   useEffect(() => {
     document.title = `Check-In Patient - ${window.APP_NAME}`;
@@ -152,18 +188,21 @@ const CheckInPatient = () => {
 
   const handleAddItem = () => {
     if (consultantRef.current.validate() && quantityRef.current.validate()) {
-      setSelectedItems([...selectedItems, {
-        payment_mode_id: paymentMode.id,
-        payment_mode_name: paymentMode.name,
-        item_id: selectedItem.id,
-        item_name: selectedItem.name,
-        consultation_type_id: selectedItem.consultation_type_id,
-        unit_price: selectedItem.prices[0].unit_price,
-        quantity,
-        comments,
-        consultant_id: consultant ? consultant.id : null,
-        consultant_name: consultant ? consultant.full_name : null,
-      }]);
+      setSelectedItems([
+        ...selectedItems,
+        {
+          payment_mode_id: paymentMode.id,
+          payment_mode_name: paymentMode.name,
+          item_id: selectedItem.id,
+          item_name: selectedItem.name,
+          consultation_type_id: selectedItem.consultation_type_id,
+          unit_price: selectedItem.prices[0].unit_price,
+          quantity,
+          comments,
+          consultant_id: consultant ? consultant.id : null,
+          consultant_name: consultant ? consultant.full_name : null,
+        },
+      ]);
 
       setSelectedItem(null);
       setQuantity(1);
@@ -197,7 +236,10 @@ const CheckInPatient = () => {
   };
 
   const getTotalAmount = () => {
-    return selectedItems.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return selectedItems.reduce(
+      (acc, e) => acc + (e.unit_price || 0) * (e.quantity || 0),
+      0
+    );
   };
 
   return (
@@ -216,17 +258,16 @@ const CheckInPatient = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ?
+      {loadingPatient ? (
         <Skeleton
           variant="rounded"
           height={256}
         />
-        : null
-      }
+      ) : null}
 
-      {patient ?
+      {patient ? (
         <Card>
-          <PageHeader title="Check-In Patient"/>
+          <PageHeader title="Check-In Patient" />
           <Divider />
           <CardContent>
             <Grid
@@ -247,7 +288,9 @@ const CheckInPatient = () => {
                   required
                   options={paymentModes}
                   optionsLabel="name"
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
                   value={paymentMode || null}
                   onChange={(value) => setPaymentMode(value)}
                 />
@@ -287,11 +330,13 @@ const CheckInPatient = () => {
                       fontWeight: 700,
                       color: "text.secondary",
                     }}
-                    action={(
+                    action={
                       <SearchTextField
-                        onChange={(value) => throttle(() => setItemName(value), 1000)}
+                        onChange={(value) =>
+                          throttle(() => setItemName(value), 1000)
+                        }
                       />
-                    )}
+                    }
                     className="no-action-margin-right"
                   />
                   <Divider />
@@ -303,7 +348,7 @@ const CheckInPatient = () => {
                       options={itemTypes}
                       onChange={(value) => setItemType(value)}
                     />
-                    {itemType === "Lens" ?
+                    {itemType === "Lens" ? (
                       <Select
                         placeholder="Lens Type"
                         fullWidth
@@ -314,22 +359,23 @@ const CheckInPatient = () => {
                         onChange={(value) => setLensTypeId(value)}
                         containerProps={{ mt: 2 }}
                       />
-                      : null
-                    }
+                    ) : null}
                   </CardContent>
                   <Divider />
                   <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
                     {items.map((e) => (
                       <FormControlLabel
                         key={e.id}
-                        control={(
+                        control={
                           <Radio
                             size="small"
                             checked={selectedItem === e}
                             onChange={(event) => setSelectedItem(e)}
                           />
-                        )}
-                        label={<Typography variant="body2">{e.name}</Typography>}
+                        }
+                        label={
+                          <Typography variant="body2">{e.name}</Typography>
+                        }
                         sx={{ display: "flex" }}
                       />
                     ))}
@@ -357,7 +403,7 @@ const CheckInPatient = () => {
                   />
                   <Divider />
                   <CardContent>
-                    {selectedItem ?
+                    {selectedItem ? (
                       <Grid
                         container
                         spacing={1}
@@ -389,7 +435,13 @@ const CheckInPatient = () => {
                             disabled={true}
                             label="Unit Price"
                             fullWidth
-                            value={selectedItem.prices.length ? numberFormat(selectedItem.prices[0].unit_price || 0) : ""}
+                            value={
+                              selectedItem.prices.length
+                                ? numberFormat(
+                                    selectedItem.prices[0].unit_price || 0
+                                  )
+                                : ""
+                            }
                           />
                         </Grid>
                         <Grid
@@ -406,7 +458,9 @@ const CheckInPatient = () => {
                             defaultValue={quantity}
                             rules={[
                               validationRules.number,
-                              (value) => value > 0 || "Quantity has to be greater than 0."
+                              (value) =>
+                                value > 0 ||
+                                "Quantity has to be greater than 0.",
                             ]}
                             onChange={(value) => {
                               value = validateInteger(value);
@@ -436,7 +490,12 @@ const CheckInPatient = () => {
                             disabled={true}
                             label="Total Price"
                             fullWidth
-                            value={numberFormat((selectedItem.prices[0].unit_price || 0) * (quantity || 0)) || ""}
+                            value={
+                              numberFormat(
+                                (selectedItem.prices[0].unit_price || 0) *
+                                  (quantity || 0)
+                              ) || ""
+                            }
                           />
                         </Grid>
                         <Grid
@@ -457,15 +516,14 @@ const CheckInPatient = () => {
                           </Button>
                         </Grid>
                       </Grid>
-                      : null
-                    }
+                    ) : null}
 
                     <Table
                       columns={[
                         {
                           field: "index",
                           headerName: "S/N",
-                          valueGetter: (item, index) => (index + 1),
+                          valueGetter: (item, index) => index + 1,
                         },
                         {
                           field: "item_name",
@@ -478,17 +536,22 @@ const CheckInPatient = () => {
                         {
                           field: "unit_price",
                           headerName: "Unit Price",
-                          valueGetter: (item, index) => numberFormat(item.unit_price || 0),
+                          valueGetter: (item, index) =>
+                            numberFormat(item.unit_price || 0),
                         },
                         {
                           field: "quantity",
                           headerName: "Quantity",
-                          valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                          valueGetter: (item, index) =>
+                            numberFormat(item.quantity || 0),
                         },
                         {
                           field: "total_price",
                           headerName: "Subtotal",
-                          valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                          valueGetter: (item, index) =>
+                            numberFormat(
+                              (item.unit_price || 0) * (item.quantity || 0)
+                            ),
                         },
                         {
                           field: "comments",
@@ -499,25 +562,25 @@ const CheckInPatient = () => {
                           headerName: "Actions",
                           renderCell: (item, index) => (
                             <Tooltip title="Remove">
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleRemoveItem(index)}
-                              >
-                                <DeleteIcon fontSize="small"/>
-                              </IconButton>
-                            </span>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleRemoveItem(index)}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           ),
-                        }
+                        },
                       ]}
                       items={selectedItems}
                       hidePaginationFooter
                       footerItems={[
                         [
-                          { value: "TOTAL", tableCellProps: { colSpan: 5 }, },
-                          { value: numberFormat(getTotalAmount() || 0), }
-                        ]
+                          { value: "TOTAL", tableCellProps: { colSpan: 5 } },
+                          { value: numberFormat(getTotalAmount() || 0) },
+                        ],
                       ]}
                     />
                   </CardContent>
@@ -538,15 +601,22 @@ const CheckInPatient = () => {
             <Button
               disabled={loading}
               variant="contained"
-              onClick={() => confirmSubmit(paymentMode && paymentMode.transaction_type === "Credit" ? "Confirm Send for Approval" : "Confirm Send to Cashier")}
+              onClick={() =>
+                confirmSubmit(
+                  paymentMode && paymentMode.transaction_type === "Credit"
+                    ? "Confirm Send for Approval"
+                    : "Confirm Send to Cashier"
+                )
+              }
             >
-              {paymentMode && paymentMode.transaction_type === "Credit" ? "Send for Approval" : "Send to Cashier"}
+              {paymentMode && paymentMode.transaction_type === "Credit"
+                ? "Send for Approval"
+                : "Send to Cashier"}
             </Button>
           </Stack>
         </Card>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

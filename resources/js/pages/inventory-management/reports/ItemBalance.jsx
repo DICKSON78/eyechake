@@ -7,7 +7,6 @@ import { SearchTextField } from "../../../components/Table";
 import { numberFormat, throttle } from "../../../helpers";
 
 const ItemBalance = ({ module, consultationType }) => {
-
   const [params, setParams] = useState({
     consultation_type: consultationType,
     status: "Active",
@@ -36,15 +35,17 @@ const ItemBalance = ({ module, consultationType }) => {
         title="Item Balance Report"
         uri="api/items"
         params={params}
-        headerTrailingContent={(
+        headerTrailingContent={
           <React.Fragment>
             <SearchTextField
               placeholder="Search Item"
-              onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
+              onChange={(value) =>
+                throttle(() => setParams({ ...params, q: value }), 1000)
+              }
               sx={{ width: 200 }}
             />
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "name",

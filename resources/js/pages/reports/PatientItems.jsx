@@ -13,14 +13,30 @@ import Select from "../../components/Select";
 import TextField from "../../components/TextField";
 
 import useFetch from "../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  numberFormat,
+  throttle,
+} from "../../helpers";
 
-const PatientItems = ({ module, title, consultationType, paymentModeType, status }) => {
-
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+const PatientItems = ({
+  module,
+  title,
+  consultationType,
+  paymentModeType,
+  status,
+}) => {
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     with_patient: true,
@@ -43,7 +59,12 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
   }, [title]);
 
   useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType, payment_mode_type: paymentModeType, status });
+    setParams({
+      ...params,
+      consultation_type: consultationType,
+      payment_mode_type: paymentModeType,
+      status,
+    });
   }, [consultationType, paymentModeType, status]);
 
   const getStatusColor = (status) => {
@@ -90,10 +111,14 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
         uri="api/patient-payment-cache-items"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <React.Fragment>
             <Card
               variant="outlined"
@@ -117,7 +142,12 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       fullWidth
                       label="Start Date"
                       value={params.start_date || null}
-                      onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -130,7 +160,12 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       fullWidth
                       label="End Date"
                       value={params.end_date || null}
-                      onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -146,11 +181,16 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_name: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -166,11 +206,16 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_id: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -186,11 +231,16 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_phone: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_phone: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -204,7 +254,9 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      onChange={(value) => setParams({ ...params, patient_gender: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, patient_gender: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -220,7 +272,9 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, payment_mode_id: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -236,28 +290,32 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(() => setParams({ ...params, q: value }), 1000)
+                      }
                     />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient.full_name,
+            valueGetter: (item, index) =>
+              item.payment_cache.check_in.patient.full_name,
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) => item.payment_cache.check_in.patient_id,
+            valueGetter: (item, index) =>
+              item.payment_cache.check_in.patient_id,
           },
           {
             field: "name",
@@ -273,7 +331,8 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
             field: "unit_of_measure_id",
             headerName: "Unit of Measure",
             valueGetter: (item, index) => item.item.unit_of_measure?.name,
-            show: consultationType === "Pharmacy" || consultationType === "Glass",
+            show:
+              consultationType === "Pharmacy" || consultationType === "Glass",
           },
           {
             field: "quantity",
@@ -298,7 +357,8 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
           },
           {
             field: "served_by",
-            headerName: consultationType === "Pharmacy" ? "Dispensed By" : "Served By",
+            headerName:
+              consultationType === "Pharmacy" ? "Dispensed By" : "Served By",
             valueGetter: (item) => item.server?.full_name,
             show: status === "Served",
           },
@@ -316,8 +376,8 @@ const PatientItems = ({ module, title, consultationType, paymentModeType, status
                 label={getStatusLabel(item.status)}
               />
             ),
-            valueGetter: (item) => getStatusLabel(item.status)
-          }
+            valueGetter: (item) => getStatusLabel(item.status),
+          },
         ]}
       />
     </Page>

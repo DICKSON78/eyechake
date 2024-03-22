@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const usePost = (uri, payload = null) => {
-
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -19,7 +18,8 @@ const usePost = (uri, payload = null) => {
     setLoading(true);
     setError(null);
 
-    window.axios.post("/" + uri, payload)
+    window.axios
+      .post("/" + uri, payload)
       .then((response) => {
         setData(response.data);
         setLoading(false);

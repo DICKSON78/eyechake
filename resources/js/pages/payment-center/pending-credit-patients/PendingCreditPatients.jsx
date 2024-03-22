@@ -11,7 +11,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const PendingCreditPatients = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -29,16 +28,23 @@ const PendingCreditPatients = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patient-payment-cache",
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/patient-payment-cache",
     {
       ...params,
-      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-    }, true, {
+    },
+    true,
+    {
       data: [],
       total: 0,
       page: 1,
-    }, (response) => response.data.data);
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Credit Patients Approval - ${window.APP_NAME}`;
@@ -59,7 +65,7 @@ const PendingCreditPatients = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Credit Patients Approval"/>
+        <PageHeader title="Credit Patients Approval" />
         <Divider />
         <CardContent>
           <Filters
@@ -73,7 +79,8 @@ const PendingCreditPatients = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
@@ -88,7 +95,8 @@ const PendingCreditPatients = () => {
               {
                 field: "date_of_birth",
                 headerName: "Age",
-                valueGetter: (item, index) => getAge(item.check_in.patient.date_of_birth),
+                valueGetter: (item, index) =>
+                  getAge(item.check_in.patient.date_of_birth),
               },
               {
                 field: "gender",
@@ -116,30 +124,41 @@ const PendingCreditPatients = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => navigate(`/payment-center/pending-credit-patients/${item.check_in.patient_id}/${item.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/payment-center/pending-credit-patients/${item.check_in.patient_id}/${item.id}`
+                        )
+                      }
                     >
                       Manage
                     </Button>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

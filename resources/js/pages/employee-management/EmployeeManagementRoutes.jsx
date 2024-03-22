@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import EmployeeRegistration from "./employees/EmployeeRegistration";
 import Employees from "./employees/Employees";
 
-
 const EmployeeManagementRoutes = () => {
   return (
     <Routes>

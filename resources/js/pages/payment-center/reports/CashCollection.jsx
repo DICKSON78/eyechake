@@ -12,14 +12,25 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, getFullName, numberFormat, throttle } from "../../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  getFullName,
+  numberFormat,
+  throttle,
+} from "../../../helpers";
 
 const CashCollection = ({ module }) => {
-
-  const { data: paymentChannels } = useFetch("api/payment-channels", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentChannels } = useFetch(
+    "api/payment-channels",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     patient_id: undefined,
@@ -50,10 +61,14 @@ const CashCollection = ({ module }) => {
         uri="api/reports/payment-center/cash-collection"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <React.Fragment>
             <Card
               variant="outlined"
@@ -77,7 +92,12 @@ const CashCollection = ({ module }) => {
                       fullWidth
                       label="Start Date"
                       value={params.start_date || null}
-                      onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -90,7 +110,12 @@ const CashCollection = ({ module }) => {
                       fullWidth
                       label="End Date"
                       value={params.end_date || null}
-                      onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -106,11 +131,16 @@ const CashCollection = ({ module }) => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_name: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -126,11 +156,16 @@ const CashCollection = ({ module }) => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, patient_id: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -144,7 +179,9 @@ const CashCollection = ({ module }) => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      onChange={(value) => setParams({ ...params, patient_gender: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, patient_gender: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -160,19 +197,22 @@ const CashCollection = ({ module }) => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_channel_id: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, payment_channel_id: value })
+                      }
                     />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "patient_name",
             headerName: "Patient Name",
-            valueGetter: (item, index) => getFullName(item.first_name, item.middle_name, item.last_name),
+            valueGetter: (item, index) =>
+              getFullName(item.first_name, item.middle_name, item.last_name),
           },
           {
             field: "patient_id",
@@ -196,7 +236,8 @@ const CashCollection = ({ module }) => {
           {
             field: "subtotal",
             headerName: "Subtotal",
-            valueGetter: (item, index) => numberFormat(item.amount - item.discount),
+            valueGetter: (item, index) =>
+              numberFormat(item.amount - item.discount),
           },
           {
             field: "channel",
@@ -206,7 +247,7 @@ const CashCollection = ({ module }) => {
           {
             field: "created_by",
             headerName: "Created By",
-            valueGetter: (item) => item.creator?.full_name
+            valueGetter: (item) => item.creator?.full_name,
           },
           {
             field: "created_at",
@@ -221,7 +262,10 @@ const CashCollection = ({ module }) => {
           { value: "TOTAL", span: 4, index: 1 },
           { reducer: (acc, item, index) => acc + item.amount, index: 4 },
           { reducer: (acc, item, index) => acc + item.discount, index: 5 },
-          { reducer: (acc, item, index) => acc + (item.amount - item.discount), index: 6 },
+          {
+            reducer: (acc, item, index) => acc + (item.amount - item.discount),
+            index: 6,
+          },
         ]}
       />
     </Page>

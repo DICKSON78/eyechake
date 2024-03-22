@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, CardContent, Divider, Grid, InputAdornment, LinearProgress, Stack } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+  Stack,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/AddRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -14,12 +23,16 @@ import CreateWard from "../../settings/subdivisions/CreateWard";
 
 import moment from "moment";
 import { useFetch, usePost, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getValidationRules, validateInteger } from "../../../helpers";
+import {
+  formatDateForDb,
+  formatError,
+  getValidationRules,
+  validateInteger,
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const PatientRegistration = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -39,14 +52,26 @@ const PatientRegistration = () => {
   const occupationRef = useRef();
   const paymentModeRef = useRef();
 
-  const { data: regions, setData: setRegions } = useFetch("api/regions", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: regions, setData: setRegions } = useFetch(
+    "api/regions",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [region, setRegion] = useState();
   const [district, setDistrict] = useState();
@@ -67,20 +92,42 @@ const PatientRegistration = () => {
     payment_mode_id: undefined,
   });
 
-  const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {
-    status: "Active",
-    per_page: 500,
-    region_id: formData.region_id
-  }, false, [], (response) => response.data.data.data);
-  const { data: wards, setData: setWards, handleFetch: fetchWards } = useFetch("api/wards", {
-    status: "Active",
-    per_page: 500,
-    district_id: formData.district_id
-  }, false, [], (response) => response.data.data.data);
+  const {
+    data: districts,
+    setData: setDistricts,
+    handleFetch: fetchDistricts,
+  } = useFetch(
+    "api/districts",
+    {
+      status: "Active",
+      per_page: 500,
+      region_id: formData.region_id,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
+  const {
+    data: wards,
+    setData: setWards,
+    handleFetch: fetchWards,
+  } = useFetch(
+    "api/wards",
+    {
+      status: "Active",
+      per_page: 500,
+      district_id: formData.district_id,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { data, loading, error, handlePost } = usePost("api/patients", {
     ...formData,
-    date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
+    date_of_birth: formData.date_of_birth
+      ? formatDateForDb(formData.date_of_birth)
+      : null,
   });
 
   useEffect(() => {
@@ -182,7 +229,7 @@ const PatientRegistration = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Patient Registration"/>
+        <PageHeader title="Patient Registration" />
         <Divider />
         <CardContent>
           <Form ref={formRef}>
@@ -201,7 +248,9 @@ const PatientRegistration = () => {
                   label="First Name"
                   fullWidth
                   required
-                  onChange={(value) => setFormData({ ...formData, first_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, first_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -214,7 +263,9 @@ const PatientRegistration = () => {
                   ref={middleNameRef}
                   label="Middle Name"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, middle_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, middle_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -228,7 +279,9 @@ const PatientRegistration = () => {
                   label="Last Name"
                   fullWidth
                   required
-                  onChange={(value) => setFormData({ ...formData, last_name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, last_name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -243,7 +296,9 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   options={["Male", "Female"]}
-                  onChange={(value) => setFormData({ ...formData, gender: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, gender: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -262,7 +317,12 @@ const PatientRegistration = () => {
                     label="Date of Birth"
                     fullWidth
                     value={formData.date_of_birth}
-                    onChange={(value) => setFormData({ ...formData, date_of_birth: !isNaN(value) ? value : null })}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        date_of_birth: !isNaN(value) ? value : null,
+                      })
+                    }
                   />
                   <TextField
                     label="Age"
@@ -273,105 +333,118 @@ const PatientRegistration = () => {
                       if (age) {
                         setFormData({
                           ...formData,
-                          date_of_birth: moment().subtract(age, "years").format("YYYY-MM-DD")
-                        })
+                          date_of_birth: moment()
+                            .subtract(age, "years")
+                            .format("YYYY-MM-DD"),
+                        });
                       }
                     }}
                     containerProps={{ sx: { width: 80 } }}
                   />
                 </Stack>
               </Grid>
-              {false &&
-              <React.Fragment>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={regionRef}
-                    label="Region"
-                    fullWidth
-                    required
-                    options={regions}
-                    optionsLabel="name"
-                    value={region || null}
-                    endAdornment={
-                      <InputAdornment
-                        position="end"
-                        sx={{ cursor: "pointer", mr: 2 }}
-                        onClick={openCreateRegionModal}
-                      >
-                        <AddIcon fontSize="small"/>
-                      </InputAdornment>
-                    }
-                    onChange={(value) => {
-                      setRegion(value);
-                      setFormData({ ...formData, region_id: value ? value.id : null });
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={districtRef}
-                    label="District"
-                    fullWidth
-                    required
-                    options={districts}
-                    optionsLabel="name"
-                    value={district || null}
-                    endAdornment={
-                      region ?
+              {false && (
+                <React.Fragment>
+                  <Grid
+                    item
+                    md={4}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      ref={regionRef}
+                      label="Region"
+                      fullWidth
+                      required
+                      options={regions}
+                      optionsLabel="name"
+                      value={region || null}
+                      endAdornment={
                         <InputAdornment
                           position="end"
                           sx={{ cursor: "pointer", mr: 2 }}
-                          onClick={openCreateDistrictModal}
+                          onClick={openCreateRegionModal}
                         >
-                          <AddIcon fontSize="small"/>
+                          <AddIcon fontSize="small" />
                         </InputAdornment>
-                        : null
-                    }
-                    onChange={(value) => {
-                      setDistrict(value);
-                      setFormData({ ...formData, district_id: value ? value.id : null });
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={wardRef}
-                    label="Ward"
-                    fullWidth
-                    options={wards}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={wards.find((e) => e.id === formData.ward_id) || null}
-                    endAdornment={
-                      district ?
-                        <InputAdornment
-                          position="end"
-                          sx={{ cursor: "pointer", mr: 2 }}
-                          onClick={openCreateWardModal}
-                        >
-                          <AddIcon fontSize="small"/>
-                        </InputAdornment>
-                        : null
-                    }
-                    onChange={(value) => setFormData({ ...formData, ward_id: value })}
-                  />
-                </Grid>
-              </React.Fragment>}
+                      }
+                      onChange={(value) => {
+                        setRegion(value);
+                        setFormData({
+                          ...formData,
+                          region_id: value ? value.id : null,
+                        });
+                      }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={4}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      ref={districtRef}
+                      label="District"
+                      fullWidth
+                      required
+                      options={districts}
+                      optionsLabel="name"
+                      value={district || null}
+                      endAdornment={
+                        region ? (
+                          <InputAdornment
+                            position="end"
+                            sx={{ cursor: "pointer", mr: 2 }}
+                            onClick={openCreateDistrictModal}
+                          >
+                            <AddIcon fontSize="small" />
+                          </InputAdornment>
+                        ) : null
+                      }
+                      onChange={(value) => {
+                        setDistrict(value);
+                        setFormData({
+                          ...formData,
+                          district_id: value ? value.id : null,
+                        });
+                      }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={4}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      ref={wardRef}
+                      label="Ward"
+                      fullWidth
+                      options={wards}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      value={
+                        wards.find((e) => e.id === formData.ward_id) || null
+                      }
+                      endAdornment={
+                        district ? (
+                          <InputAdornment
+                            position="end"
+                            sx={{ cursor: "pointer", mr: 2 }}
+                            onClick={openCreateWardModal}
+                          >
+                            <AddIcon fontSize="small" />
+                          </InputAdornment>
+                        ) : null
+                      }
+                      onChange={(value) =>
+                        setFormData({ ...formData, ward_id: value })
+                      }
+                    />
+                  </Grid>
+                </React.Fragment>
+              )}
               <Grid
                 item
                 md={4}
@@ -382,7 +455,9 @@ const PatientRegistration = () => {
                   ref={addressRef}
                   label="Address"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, address: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, address: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -397,7 +472,9 @@ const PatientRegistration = () => {
                   fullWidth
                   required
                   rules={[validationRules.optionalPhone]}
-                  onChange={(value) => setFormData({ ...formData, phone: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, phone: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -410,7 +487,9 @@ const PatientRegistration = () => {
                   ref={nationalIdRef}
                   label="National ID"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, national_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, national_id: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -423,7 +502,9 @@ const PatientRegistration = () => {
                   ref={occupationRef}
                   label="Occupation"
                   fullWidth
-                  onChange={(value) => setFormData({ ...formData, occupation: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, occupation: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -440,7 +521,9 @@ const PatientRegistration = () => {
                   options={paymentModes}
                   optionsLabel="name"
                   optionsValue="id"
-                  onChange={(value) => setFormData({ ...formData, payment_mode_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, payment_mode_id: value })
+                  }
                 />
               </Grid>
             </Grid>
@@ -465,7 +548,7 @@ const PatientRegistration = () => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

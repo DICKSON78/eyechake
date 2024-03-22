@@ -15,9 +15,10 @@ const InfoCard = ({ title, count, icon, color }) => {
         elevation={0}
         sx={{
           p: 3,
-          background: (theme) => theme.palette.mode === "light"
-            ? `linear-gradient(to bottom right, ${alpha(color, 0.8)}, ${alpha(color, 0.18)})`
-            : theme.palette.background.paper,
+          background: (theme) =>
+            theme.palette.mode === "light"
+              ? `linear-gradient(to bottom right, ${alpha(color, 0.8)}, ${alpha(color, 0.18)})`
+              : theme.palette.background.paper,
         }}
       >
         <Stack
@@ -66,7 +67,7 @@ const InfoCard = ({ title, count, icon, color }) => {
                 right: "50%",
                 backgroundColor: "rgba(255, 255, 255, 0.135)",
                 transform: "rotate(35deg)",
-              }
+              },
             }}
           >
             {icon}

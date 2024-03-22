@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
@@ -10,7 +17,6 @@ import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError } from "../../../helpers";
 
 const EditEmployee = ({ item, modal, fetchEmployees }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -25,14 +31,26 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
   const nationalIdRef = useRef();
   const phoneRef = useRef();
 
-  const { data: departments } = useFetch("api/departments", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: jobTitles } = useFetch("api/job-titles", {
-    status: "Active",
-    per_page: 500,
-  }, true, [], (response) => response.data.data.data);
+  const { data: departments } = useFetch(
+    "api/departments",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: jobTitles } = useFetch(
+    "api/job-titles",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     first_name: item.first_name,
@@ -47,10 +65,15 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     phone: item.phone,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/employees/${item.id}`, {
-    ...formData,
-    date_of_birth: formData.date_of_birth ? formatDateForDb(formData.date_of_birth) : null
-  });
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/employees/${item.id}`,
+    {
+      ...formData,
+      date_of_birth: formData.date_of_birth
+        ? formatDateForDb(formData.date_of_birth)
+        : null,
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -95,7 +118,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 fullWidth
                 required
                 defaultValue={formData.first_name}
-                onChange={(value) => setFormData({ ...formData, first_name: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, first_name: value })
+                }
               />
             </Grid>
             <Grid
@@ -109,7 +134,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 label="Middle Name"
                 fullWidth
                 defaultValue={formData.middle_name}
-                onChange={(value) => setFormData({ ...formData, middle_name: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, middle_name: value })
+                }
               />
             </Grid>
             <Grid
@@ -124,7 +151,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 fullWidth
                 required
                 defaultValue={formData.last_name}
-                onChange={(value) => setFormData({ ...formData, last_name: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, last_name: value })
+                }
               />
             </Grid>
             <Grid
@@ -138,7 +167,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 label="Employee Number"
                 fullWidth
                 defaultValue={formData.employee_number}
-                onChange={(value) => setFormData({ ...formData, employee_number: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, employee_number: value })
+                }
               />
             </Grid>
             <Grid
@@ -154,7 +185,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 required
                 options={["Male", "Female"]}
                 value={formData.gender || null}
-                onChange={(value) => setFormData({ ...formData, gender: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, gender: value })
+                }
               />
             </Grid>
             <Grid
@@ -168,7 +201,9 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 label="Date of Birth"
                 fullWidth
                 value={formData.date_of_birth}
-                onChange={(value) => setFormData({ ...formData, date_of_birth: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, date_of_birth: value })
+                }
               />
             </Grid>
             <Grid
@@ -185,8 +220,13 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 options={departments}
                 optionsLabel="name"
                 optionsValue="id"
-                value={departments.find((e) => e.id === formData.department_id) || null}
-                onChange={(value) => setFormData({ ...formData, department_id: value })}
+                value={
+                  departments.find((e) => e.id === formData.department_id) ||
+                  null
+                }
+                onChange={(value) =>
+                  setFormData({ ...formData, department_id: value })
+                }
               />
             </Grid>
             <Grid
@@ -203,8 +243,12 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 options={jobTitles}
                 optionsLabel="name"
                 optionsValue="id"
-                value={jobTitles.find((e) => e.id === formData.job_title_id) || null}
-                onChange={(value) => setFormData({ ...formData, job_title_id: value })}
+                value={
+                  jobTitles.find((e) => e.id === formData.job_title_id) || null
+                }
+                onChange={(value) =>
+                  setFormData({ ...formData, job_title_id: value })
+                }
               />
             </Grid>
             <Grid
@@ -232,14 +276,16 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 label="National ID"
                 fullWidth
                 defaultValue={formData.national_id}
-                onChange={(value) => setFormData({ ...formData, national_id: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, national_id: value })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

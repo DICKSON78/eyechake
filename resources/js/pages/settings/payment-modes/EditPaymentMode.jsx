@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
@@ -8,7 +17,6 @@ import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -23,7 +31,10 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
     status: item.status,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/payment-modes/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/payment-modes/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -82,7 +93,9 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
                 label="Description"
                 fullWidth
                 defaultValue={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
             <Grid
@@ -98,7 +111,9 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
                 required
                 options={["Cash", "Credit"]}
                 value={formData.transaction_type || null}
-                onChange={(value) => setFormData({ ...formData, transaction_type: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, transaction_type: value })
+                }
               />
             </Grid>
             <Grid
@@ -114,15 +129,17 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     defaultChecked={item.status === "Active"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      status: event.target.checked ? "Active" : "Inactive"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        status: event.target.checked ? "Active" : "Inactive",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Active"
               />
             </Grid>
@@ -130,7 +147,7 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

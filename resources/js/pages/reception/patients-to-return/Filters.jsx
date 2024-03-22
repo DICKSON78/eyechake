@@ -11,7 +11,6 @@ import Select from "../../../components/Select";
 import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
-
   return (
     <Card
       variant="outlined"
@@ -36,7 +35,12 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               label="Return Date"
               value={params.to_return_date || null}
-              onChange={(value) => setParams({ ...params, to_return_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({
+                  ...params,
+                  to_return_date: !isNaN(value) ? value : null,
+                })
+              }
             />
           </Grid>
           <Grid
@@ -52,11 +56,16 @@ const Filters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, patient_name: value }),
+                  1000
+                )
+              }
             />
           </Grid>
           <Grid
@@ -72,11 +81,16 @@ const Filters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, patient_id: value }),
+                  1000
+                )
+              }
             />
           </Grid>
           <Grid
@@ -90,7 +104,9 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Male", "Female"]}
               clearable
-              onChange={(value) => setParams({ ...params, patient_gender: value })}
+              onChange={(value) =>
+                setParams({ ...params, patient_gender: value })
+              }
             />
           </Grid>
         </Grid>

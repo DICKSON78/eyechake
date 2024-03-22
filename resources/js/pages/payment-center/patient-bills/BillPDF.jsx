@@ -22,9 +22,11 @@ Font.register({
 });
 
 const PDFReportDocument = ({ bill, items, patient }) => {
-
   const getTotalAmount = () => {
-    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce(
+      (acc, e) => acc + (e.unit_price || 0) * (e.quantity || 0),
+      0
+    );
   };
 
   return (
@@ -55,8 +57,16 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             { label: "Bill Number", value: bill.id },
             { label: "Bill Amount", value: numberFormat(bill.amount) },
             { label: "Discount", value: numberFormat(bill.discount) },
-            { label: "Amount Paid", value: numberFormat(bill.amount_paid || 0) },
-            { label: "Amount Remaining", value: numberFormat(bill.amount - bill.discount - (bill.amount_paid || 0)) },
+            {
+              label: "Amount Paid",
+              value: numberFormat(bill.amount_paid || 0),
+            },
+            {
+              label: "Amount Remaining",
+              value: numberFormat(
+                bill.amount - bill.discount - (bill.amount_paid || 0)
+              ),
+            },
             { label: "Created By", value: bill.creator?.full_name },
             { label: "Date Created", value: bill.created_at },
             { label: "Bill Status", value: bill.status },
@@ -64,7 +74,7 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             { label: "Date Cleared", value: bill.cleared_at },
           ]}
           containerStyle={{
-            marginBottom: 16
+            marginBottom: 16,
           }}
         />
 
@@ -74,7 +84,7 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             {
               field: "index",
               headerName: "S/N",
-              valueGetter: (item, index) => (index + 1),
+              valueGetter: (item, index) => index + 1,
             },
             {
               field: "item_id",
@@ -99,19 +109,27 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             {
               field: "total_price",
               headerName: "Subtotal",
-              valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
-            }
+              valueGetter: (item, index) =>
+                numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+            },
           ]}
           items={items}
           footerItems={[
             [
-              { value: "TOTAL", style: { flex: 0.8445 }, },
-              { value: numberFormat(getTotalAmount() || 0), style: { flex: 0.1555 }, }
-            ]
+              { value: "TOTAL", style: { flex: 0.8445 } },
+              {
+                value: numberFormat(getTotalAmount() || 0),
+                style: { flex: 0.1555 },
+              },
+            ],
           ]}
         />
 
-        <Footer render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}/>
+        <Footer
+          render={({ pageNumber, totalPages }) =>
+            `${pageNumber} / ${totalPages}`
+          }
+        />
       </Page>
     </Document>
   );

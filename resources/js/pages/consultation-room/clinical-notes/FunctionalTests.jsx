@@ -1,11 +1,24 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
-const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref) => {
-
+const FunctionalTests = (
+  { consultation: { id, functional_tests, status } },
+  ref
+) => {
   const reNpcRef = useRef();
   const reNpaRef = useRef();
   const reConfrontationRef = useRef();
@@ -20,10 +33,13 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
   const { handlePatch: handleAutoSave } = usePatch();
 
   const autoSave = (field, value) => {
-    if (!functional_tests || (functional_tests && value !== functional_tests[field])) {
+    if (
+      !functional_tests ||
+      (functional_tests && value !== functional_tests[field])
+    ) {
       handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, {
         what: "Functional Test",
-        [field]: value
+        [field]: value,
       });
     }
   };
@@ -39,7 +55,7 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell/>
+          <TableCell />
           <TableCell>RE</TableCell>
           <TableCell>LE</TableCell>
         </TableRow>
@@ -101,7 +117,9 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
             <TextField
               ref={reConfrontationRef}
               fullWidth
-              defaultValue={functional_tests ? functional_tests.re_confrontation : null}
+              defaultValue={
+                functional_tests ? functional_tests.re_confrontation : null
+              }
               onChange={(value) => {
                 setFormData({ ...formData, re_confrontation: value });
                 autoSave("re_confrontation", value);
@@ -112,7 +130,9 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
             <TextField
               ref={leConfrontationRef}
               fullWidth
-              defaultValue={functional_tests ? functional_tests.le_confrontation : null}
+              defaultValue={
+                functional_tests ? functional_tests.le_confrontation : null
+              }
               onChange={(value) => {
                 setFormData({ ...formData, le_confrontation: value });
                 autoSave("le_confrontation", value);
@@ -126,7 +146,9 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
             <TextField
               ref={reCoverTestRef}
               fullWidth
-              defaultValue={functional_tests ? functional_tests.re_cover_test : null}
+              defaultValue={
+                functional_tests ? functional_tests.re_cover_test : null
+              }
               onChange={(value) => {
                 setFormData({ ...formData, re_cover_test: value });
                 autoSave("re_cover_test", value);
@@ -137,7 +159,9 @@ const FunctionalTests = ({ consultation: { id, functional_tests, status } }, ref
             <TextField
               ref={leCoverTestRef}
               fullWidth
-              defaultValue={functional_tests ? functional_tests.le_cover_test : null}
+              defaultValue={
+                functional_tests ? functional_tests.le_cover_test : null
+              }
               onChange={(value) => {
                 setFormData({ ...formData, le_cover_test: value });
                 autoSave("le_cover_test", value);

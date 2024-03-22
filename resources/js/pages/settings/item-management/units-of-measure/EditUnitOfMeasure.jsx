@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 
@@ -7,7 +16,6 @@ import { usePatch, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
 
 const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -19,7 +27,10 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
     description: item.description,
     status: item.status,
   });
-  const { data, loading, error, handlePatch } = usePatch(`api/units-of-measure/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/units-of-measure/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -78,7 +89,9 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
                 label="Description"
                 fullWidth
                 defaultValue={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
             <Grid
@@ -88,15 +101,17 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     defaultChecked={item.status === "Active"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      status: event.target.checked ? "Active" : "Inactive"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        status: event.target.checked ? "Active" : "Inactive",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Active"
               />
             </Grid>
@@ -104,7 +119,7 @@ const EditUnitOfMeasure = ({ item, modal, fetchUnitsOfMeasure }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

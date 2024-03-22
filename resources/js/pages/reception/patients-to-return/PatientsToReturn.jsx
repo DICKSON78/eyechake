@@ -10,7 +10,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
 const PatientsToReturn = () => {
-
   const addToast = useToast();
   const modalRef = useRef();
 
@@ -26,14 +25,22 @@ const PatientsToReturn = () => {
     to_return_date: null,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/consultations", {
-    ...params,
-    to_return_date: params.to_return_date ? formatDateForDb(params.to_return_date) : undefined,
-  }, true, {
-    data: [],
-    total: 0,
-    page: 1,
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/consultations",
+    {
+      ...params,
+      to_return_date: params.to_return_date
+        ? formatDateForDb(params.to_return_date)
+        : undefined,
+    },
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Patients to Return - ${window.APP_NAME}`;
@@ -54,7 +61,7 @@ const PatientsToReturn = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Patients to Return"/>
+        <PageHeader title="Patients to Return" />
         <Divider />
         <CardContent>
           <Filters
@@ -68,37 +75,48 @@ const PatientsToReturn = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.full_name,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient
+                    .full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient_id,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Age",
-                valueGetter: (item, index) => getAge(item.payment_cache_item.payment_cache.check_in.patient.date_of_birth),
+                valueGetter: (item, index) =>
+                  getAge(
+                    item.payment_cache_item.payment_cache.check_in.patient
+                      .date_of_birth
+                  ),
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.gender,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => item.payment_cache_item.payment_cache.check_in.patient.phone,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
-                valueGetter: (item, index) => item.payment_cache_item.consultant?.full_name,
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.consultant?.full_name,
               },
               {
                 field: "to_return_date",
@@ -110,11 +128,13 @@ const PatientsToReturn = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

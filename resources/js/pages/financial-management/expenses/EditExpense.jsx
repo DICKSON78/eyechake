@@ -1,17 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import DatePicker from "../../../components/DatePicker";
 
 import { useFetch, usePatch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getValidationRules } from "../../../helpers";
+import {
+  formatDateForDb,
+  formatError,
+  getValidationRules,
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const EditExpense = ({ item, modal, fetchExpenses }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -20,10 +30,16 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
   const descriptionRef = useRef();
   const dateRef = useRef();
 
-  const { data: categories } = useFetch("api/expense-categories", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: categories } = useFetch(
+    "api/expense-categories",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     category_id: item.category_id,
@@ -32,10 +48,13 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
     expense_date: new Date(item.expense_date),
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/expenses/${item.id}`, {
-    ...formData,
-    expense_date: formatDateForDb(formData.expense_date),
-  });
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/expenses/${item.id}`,
+    {
+      ...formData,
+      expense_date: formatDateForDb(formData.expense_date),
+    }
+  );
 
   useEffect(() => {
     if (data) {
@@ -82,8 +101,12 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 options={categories}
                 optionsLabel="name"
                 optionsValue="id"
-                value={categories.find((e) => e.id === formData.category_id) || null}
-                onChange={(value) => setFormData({ ...formData, category_id: value })}
+                value={
+                  categories.find((e) => e.id === formData.category_id) || null
+                }
+                onChange={(value) =>
+                  setFormData({ ...formData, category_id: value })
+                }
               />
             </Grid>
             <Grid
@@ -100,9 +123,11 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 defaultValue={formData.total_amount}
                 rules={[
                   validationRules.number,
-                  (value) => value >= 0 || "Amount cannot be negative."
+                  (value) => value >= 0 || "Amount cannot be negative.",
                 ]}
-                onChange={(value) => setFormData({ ...formData, total_amount: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, total_amount: value })
+                }
               />
             </Grid>
             <Grid
@@ -119,7 +144,9 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 rows={3}
                 required
                 defaultValue={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
             <Grid
@@ -134,14 +161,19 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 fullWidth
                 required
                 value={formData.expense_date}
-                onChange={(value) => setFormData({ ...formData, expense_date: !isNaN(value) ? value : null })}
+                onChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    expense_date: !isNaN(value) ? value : null,
+                  })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

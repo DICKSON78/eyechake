@@ -8,14 +8,23 @@ import Select from "../../../components/Select";
 import Report from "../../../components/reports/Report";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getDateRangeTitle, numberFormat } from "../../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  numberFormat,
+} from "../../../helpers";
 
 const ExpensePayments = ({ module, createdBy }) => {
-
-  const { data: categories } = useFetch("api/expense-categories", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: categories } = useFetch(
+    "api/expense-categories",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     with_expense: true,
@@ -49,10 +58,14 @@ const ExpensePayments = ({ module, createdBy }) => {
         uri="api/expense-payments"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <Card
             variant="outlined"
             sx={{
@@ -75,7 +88,12 @@ const ExpensePayments = ({ module, createdBy }) => {
                     fullWidth
                     label="Start Date"
                     value={params.start_date || null}
-                    onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+                    onChange={(value) =>
+                      setParams({
+                        ...params,
+                        start_date: !isNaN(value) ? value : null,
+                      })
+                    }
                   />
                 </Grid>
                 <Grid
@@ -88,7 +106,12 @@ const ExpensePayments = ({ module, createdBy }) => {
                     fullWidth
                     label="End Date"
                     value={params.end_date || null}
-                    onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+                    onChange={(value) =>
+                      setParams({
+                        ...params,
+                        end_date: !isNaN(value) ? value : null,
+                      })
+                    }
                   />
                 </Grid>
                 <Grid
@@ -104,13 +127,15 @@ const ExpensePayments = ({ module, createdBy }) => {
                     optionsLabel="name"
                     optionsValue="id"
                     clearable
-                    onChange={(value) => setParams({ ...params, category_id: value })}
+                    onChange={(value) =>
+                      setParams({ ...params, category_id: value })
+                    }
                   />
                 </Grid>
               </Grid>
             </CardContent>
           </Card>
-        )}
+        }
         columns={[
           {
             field: "category_id",
@@ -120,7 +145,8 @@ const ExpensePayments = ({ module, createdBy }) => {
           {
             field: "total_amount",
             headerName: "Total Amount",
-            valueGetter: (item, index) => numberFormat(item.expense.total_amount),
+            valueGetter: (item, index) =>
+              numberFormat(item.expense.total_amount),
           },
           {
             field: "expense_date",

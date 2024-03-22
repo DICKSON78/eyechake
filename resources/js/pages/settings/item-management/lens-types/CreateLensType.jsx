@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 
@@ -7,7 +14,6 @@ import { usePost, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
 
 const CreateLensType = ({ modal, fetchLensTypes }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -19,7 +25,10 @@ const CreateLensType = ({ modal, fetchLensTypes }) => {
     description: undefined,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/lens-types", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/lens-types",
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -76,14 +85,16 @@ const CreateLensType = ({ modal, fetchLensTypes }) => {
                 ref={descriptionRef}
                 label="Description"
                 fullWidth
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

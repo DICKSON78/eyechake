@@ -87,7 +87,7 @@ export const getValidationRules = () => {
     },
     optionalInteger: (value) => {
       const pattern = /^-?\d+$/;
-      return !value ? true : (pattern.test(value) || "Invalid integer.");
+      return !value ? true : pattern.test(value) || "Invalid integer.";
     },
     number: (value) => {
       const pattern = /^-?\d*\.?\d+$/;
@@ -99,7 +99,7 @@ export const getValidationRules = () => {
     },
     optionalPhone: (value) => {
       const pattern = /^0\d{9}$/;
-      return !value ? true : (pattern.test(value) || "Invalid phone number.");
+      return !value ? true : pattern.test(value) || "Invalid phone number.";
     },
     time: (value) => {
       const pattern = /^(\d{2}):(\d{2})$/;
@@ -111,7 +111,7 @@ export const getValidationRules = () => {
       }
 
       return "Invalid time.";
-    }
+    },
   };
 };
 
@@ -136,29 +136,33 @@ export const formatError = (errorBody) => {
     const statusCode = parseInt(errorBody.response.status);
     switch (statusCode) {
       case 401:
-      case 403: {
-        let data = errorBody.response.data;
-        if (data.message) {
-          message = data.message;
+      case 403:
+        {
+          let data = errorBody.response.data;
+          if (data.message) {
+            message = data.message;
+          }
         }
-      }
         break;
       case 404:
         message = "The requested resource was not found.";
         break;
-      case 422: {
-        // validation errors
-        let data = errorBody.response.data;
-        if (data.message) {
-          message = data.message;
-        }
+      case 422:
+        {
+          // validation errors
+          let data = errorBody.response.data;
+          if (data.message) {
+            message = data.message;
+          }
 
-        if (data.errors) {
-          let errors = [];
-          Object.keys(data.errors).forEach((e, i) => errors.push(data.errors[e][0]));
-          message = errors.join("\n");
+          if (data.errors) {
+            let errors = [];
+            Object.keys(data.errors).forEach((e, i) =>
+              errors.push(data.errors[e][0])
+            );
+            message = errors.join("\n");
+          }
         }
-      }
         break;
     }
   } else if (errorBody.request) {

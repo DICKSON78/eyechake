@@ -12,7 +12,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError } from "../../../helpers";
 
 const Messages = () => {
-
   const addToast = useToast();
   const modalRef = useRef();
 
@@ -26,15 +25,23 @@ const Messages = () => {
     end_date: null,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/messages", {
-    ...params,
-    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-  }, true, {
-    data: [],
-    total: 0,
-    page: 1,
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/messages",
+    {
+      ...params,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
+      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    },
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Sent Messages - ${window.APP_NAME}`;
@@ -55,7 +62,7 @@ const Messages = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Sent Messages"/>
+        <PageHeader title="Sent Messages" />
         <Divider />
         <CardContent>
           <Filters
@@ -69,7 +76,8 @@ const Messages = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "message",
@@ -100,11 +108,13 @@ const Messages = () => {
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

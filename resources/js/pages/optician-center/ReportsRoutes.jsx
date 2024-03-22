@@ -8,34 +8,34 @@ const ReportsRoutes = () => {
     <Routes>
       <Route
         path="/items-dispensed"
-        element={(
+        element={
           <PatientItems
             module="Optician Center"
             title="Items Dispensed Report"
             consultationType="Glass"
             status="Served"
           />
-        )}
+        }
       />
       <Route
         path="/items-not-dispensed"
-        element={(
+        element={
           <PatientItems
             module="Optician Center"
             title="Items Not Dispensed Report"
             consultationType="Glass"
             status="Pending,Paid,Billed"
           />
-        )}
+        }
       />
       <Route
         path="/item-balance"
-        element={(
+        element={
           <ItemBalance
             module="Optician Center"
             consultationType="Glass"
           />
-        )}
+        }
       />
     </Routes>
   );

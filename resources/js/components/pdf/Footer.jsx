@@ -19,7 +19,7 @@ const Footer = ({ textStyle, ...rest }) => {
           fontFamily: "Custom",
           textAlign: "center",
           color: "grey",
-          ...textStyle
+          ...textStyle,
         }}
       />
     </View>

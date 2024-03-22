@@ -1,5 +1,13 @@
 import React from "react";
-import { Card, CardHeader, Container, Grow, IconButton, Modal as MuiModal, Tooltip } from "@mui/material";
+import {
+  Card,
+  CardHeader,
+  Container,
+  Grow,
+  IconButton,
+  Modal as MuiModal,
+  Tooltip,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/CloseRounded";
 
 class Modal extends React.Component {
@@ -56,8 +64,8 @@ class Modal extends React.Component {
               px: { xs: 2, sm: 2, md: 4 },
               pt: 2,
               pb: 3,
-            }
-          }
+            },
+          },
         }}
       >
         <Grow
@@ -76,18 +84,18 @@ class Modal extends React.Component {
                 subheader={this.state.subtitle}
                 titleTypographyProps={{
                   variant: "h5",
-                  fontWeight: 700
+                  fontWeight: 700,
                 }}
                 subheaderTypographyProps={{
-                  variant: "subtitle2"
+                  variant: "subtitle2",
                 }}
-                action={(
+                action={
                   <Tooltip title="Close">
                     <IconButton onClick={() => this.close()}>
                       <CloseIcon />
                     </IconButton>
                   </Tooltip>
-                )}
+                }
                 sx={{
                   px: { xs: 2, sm: 2, md: 4 },
                   pt: 3,

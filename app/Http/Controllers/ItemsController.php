@@ -113,7 +113,8 @@ class ItemsController extends Controller
 
         $data = Item::create($request->only(
             'name', 'code', 'item_type_id', 'consultation_type_id',
-            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item', 'is_stock_item'
+            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item', 'is_stock_item',
+            'templates',
         ));
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }

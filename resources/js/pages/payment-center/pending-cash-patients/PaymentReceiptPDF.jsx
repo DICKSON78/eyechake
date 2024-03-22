@@ -20,9 +20,11 @@ Font.register({
 });
 
 const PDFReportDocument = ({ receipt, items, patient }) => {
-
   const getTotalAmount = () => {
-    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce(
+      (acc, e) => acc + (e.unit_price || 0) * (e.quantity || 0),
+      0
+    );
   };
 
   return (
@@ -67,14 +69,14 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             {
               field: "index",
               headerName: "S/N",
-              valueGetter: (item, index) => (index + 1),
-              style: { flex: 0.35 }
+              valueGetter: (item, index) => index + 1,
+              style: { flex: 0.35 },
             },
             {
               field: "item_id",
               headerName: "Item Name",
               valueGetter: (item, index) => item.item.name,
-              style: { flex: 2 }
+              style: { flex: 2 },
             },
             {
               field: "quantity",
@@ -84,22 +86,26 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
             {
               field: "total_price",
               headerName: "Subtotal",
-              valueGetter: (item, index) => numberFormat((item.unit_price || 0) * item.quantity),
-            }
+              valueGetter: (item, index) =>
+                numberFormat((item.unit_price || 0) * item.quantity),
+            },
           ]}
           items={items}
           footerItems={[
             [
-              { value: "TOTAL", style: { flex: 0.786 }, },
-              { value: numberFormat(getTotalAmount()), style: { flex: 0.214 }, }
-            ]
+              { value: "TOTAL", style: { flex: 0.786 } },
+              { value: numberFormat(getTotalAmount()), style: { flex: 0.214 } },
+            ],
           ]}
         />
 
         <Descriptions
           columns={2}
           items={[
-            { label: "GRAND TOTAL", value: numberFormat((getTotalAmount()) - receipt.discount) },
+            {
+              label: "GRAND TOTAL",
+              value: numberFormat(getTotalAmount() - receipt.discount),
+            },
           ]}
           valueStyle={{ fontWeight: "bold" }}
         />

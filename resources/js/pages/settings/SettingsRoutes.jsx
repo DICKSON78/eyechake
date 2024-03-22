@@ -14,15 +14,42 @@ import Preferences from "./Preferences";
 const SettingsRoutes = () => {
   return (
     <Routes>
-      <Route path="/item-management/*" element={<ItemManagementRoutes />}/>
-      <Route path="/payment-modes" element={<PaymentModes />}/>
-      <Route path="/payment-channels" element={<PaymentChannels />}/>
-      <Route path="/diseases" element={<Diseases />}/>
-      <Route path="/expense-categories" element={<ExpenseCategories />}/>
-      <Route path="/departments" element={<Departments />}/>
-      <Route path="/job-titles" element={<JobTitles />}/>
-      <Route path="/clinic-details" element={<ClinicDetails />}/>
-      <Route path="/preferences" element={<Preferences />}/>
+      <Route
+        path="/item-management/*"
+        element={<ItemManagementRoutes />}
+      />
+      <Route
+        path="/payment-modes"
+        element={<PaymentModes />}
+      />
+      <Route
+        path="/payment-channels"
+        element={<PaymentChannels />}
+      />
+      <Route
+        path="/diseases"
+        element={<Diseases />}
+      />
+      <Route
+        path="/expense-categories"
+        element={<ExpenseCategories />}
+      />
+      <Route
+        path="/departments"
+        element={<Departments />}
+      />
+      <Route
+        path="/job-titles"
+        element={<JobTitles />}
+      />
+      <Route
+        path="/clinic-details"
+        element={<ClinicDetails />}
+      />
+      <Route
+        path="/preferences"
+        element={<Preferences />}
+      />
     </Routes>
   );
 };

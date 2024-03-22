@@ -8,7 +8,10 @@ const ToastContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (toasts.length) {
-      const timer = window.setTimeout(() => setToasts(toasts => toasts.slice(1)), 5000);
+      const timer = window.setTimeout(
+        () => setToasts((toasts) => toasts.slice(1)),
+        5000
+      );
       return () => window.clearTimeout(timer);
     }
   }, [toasts]);
@@ -17,9 +20,12 @@ const ToastContextProvider = ({ children }) => {
     setToasts([...toasts, toast]);
   };
 
-  const removeToast = useCallback((index) => {
-    setToasts(toasts.filter((e, i) => i !== index));
-  }, [toasts]);
+  const removeToast = useCallback(
+    (index) => {
+      setToasts(toasts.filter((e, i) => i !== index));
+    },
+    [toasts]
+  );
 
   return (
     <ToastContext.Provider value={addToast}>

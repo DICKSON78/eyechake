@@ -1,15 +1,21 @@
 import React, { useEffect } from "react";
-import { Alert, Skeleton } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Skeleton from "@mui/material/Skeleton";
 import Descriptions from "../../../components/Descriptions";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, getAge } from "../../../helpers";
 
 const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
-
   const addToast = useToast();
 
-  const { data, loading, error } = useFetch(`api/patients/${patientId}`, null, true, null, (response) => response.data.data);
+  const { data, loading, error } = useFetch(
+    `api/patients/${patientId}`,
+    null,
+    true,
+    null,
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     if (typeof setLoading === "function") {
@@ -18,7 +24,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
   }, [loading]);
 
   useEffect(() => {
-    if (data && (typeof onLoadSuccess === "function")) {
+    if (data && typeof onLoadSuccess === "function") {
       onLoadSuccess(data);
     }
   }, [data]);
@@ -47,15 +53,14 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
   return (
     <React.Fragment>
       {handleFeedback()}
-      {loading ?
+      {loading ? (
         <Skeleton
           variant="rounded"
           height={128}
           sx={{ mb: 2 }}
         />
-        : null
-      }
-      {data ?
+      ) : null}
+      {data ? (
         <Descriptions
           columns={4}
           items={[
@@ -74,19 +79,18 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
               mb: 2,
               p: 2,
               bgcolor: "primary.main",
-            }
+            },
           }}
           itemSpacing={1}
           itemProps={{
             sx: {
               "& .MuiTypography-root": {
                 color: "primary.contrastText",
-              }
-            }
+              },
+            },
           }}
         />
-        : null
-      }
+      ) : null}
     </React.Fragment>
   );
 };

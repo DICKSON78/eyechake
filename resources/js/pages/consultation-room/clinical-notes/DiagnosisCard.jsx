@@ -3,8 +3,14 @@ import React from "react";
 import { Button, Card, CardContent, CardHeader, Divider } from "@mui/material";
 import Table from "../../../components/Table";
 
-const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onClickAdd }) => {
-
+const DiagnosisCard = ({
+  title,
+  diagnosisType,
+  loading,
+  items,
+  consultation,
+  onClickAdd,
+}) => {
   return (
     <Card variant="outlined">
       <CardHeader
@@ -23,7 +29,7 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
             {
               field: "index",
               headerName: "S/N",
-              valueGetter: (item, index) => (index + 1),
+              valueGetter: (item, index) => index + 1,
             },
             {
               field: "disease_name",
@@ -56,8 +62,8 @@ const DiagnosisCard = ({ title, diagnosisType, loading, items, consultation, onC
                     Add
                   </Button>
                 ),
-              }
-            ]
+              },
+            ],
           ]}
         />
       </CardContent>

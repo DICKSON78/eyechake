@@ -10,7 +10,7 @@ import {
   Grid,
   IconButton,
   LinearProgress,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Form from "../../../components/Form";
@@ -18,12 +18,15 @@ import TextField from "../../../components/TextField";
 import Table from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationRules, numberFormat } from "../../../helpers";
+import {
+  formatError,
+  getValidationRules,
+  numberFormat,
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -37,20 +40,36 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
     data: expensePayments,
     loading: loadingFetchExpensePayments,
     error: errorFetchExpensePayments,
-    handleFetch: fetchExpensePayments
-  } = useFetch("api/expense-payments", {
-    expense_id: expense.id,
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+    handleFetch: fetchExpensePayments,
+  } = useFetch(
+    "api/expense-payments",
+    {
+      expense_id: expense.id,
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     expense_id: expense.id,
     amount: undefined,
-    description: undefined
+    description: undefined,
   });
 
-  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost("api/expense-payments", formData);
-  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+  const {
+    data: dataPost,
+    loading: loadingPost,
+    error: errorPost,
+    handlePost,
+  } = usePost("api/expense-payments", formData);
+  const {
+    data: dataDelete,
+    loading: loadingDelete,
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
 
   useEffect(() => {
     if (dataPost) {
@@ -118,16 +137,13 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
 
   return (
     <React.Fragment>
-      {(loadingPost || loadingDelete) ?
-        <LinearProgress />
-        : null
-      }
+      {loadingPost || loadingDelete ? <LinearProgress /> : null}
       <CardContent>
         <Grid
           container
           spacing={2}
         >
-          {expense.paid_amount < expense.total_amount ?
+          {expense.paid_amount < expense.total_amount ? (
             <Grid
               item
               md={4}
@@ -152,7 +168,9 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                       fullWidth
                       required
                       rules={[validationRules.number]}
-                      onChange={(value) => setFormData({ ...formData, amount: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, amount: value })
+                      }
                       containerProps={{ mb: 2 }}
                     />
                     <TextField
@@ -161,7 +179,9 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                       fullWidth
                       multiline
                       rows={3}
-                      onChange={(value) => setFormData({ ...formData, description: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, description: value })
+                      }
                     />
                   </Form>
                 </CardContent>
@@ -180,8 +200,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                 </Box>
               </Card>
             </Grid>
-            : null
-          }
+          ) : null}
           <Grid
             item
             md={expense.paid_amount < expense.total_amount ? 8 : 12}
@@ -189,7 +208,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
             xs={12}
           >
             <Card variant="outlined">
-              {expense.status === "Pending" ?
+              {expense.status === "Pending" ? (
                 <React.Fragment>
                   <CardHeader
                     title="Expense Payments"
@@ -201,8 +220,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                   />
                   <Divider />
                 </React.Fragment>
-                : null
-              }
+              ) : null}
               <CardContent>
                 <Table
                   loading={loadingFetchExpensePayments}
@@ -210,12 +228,13 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                     {
                       field: "index",
                       headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
+                      valueGetter: (item, index) => index + 1,
                     },
                     {
                       field: "amount",
                       headerName: "Amount",
-                      valueGetter: (item, index) => numberFormat(item.amount || 0),
+                      valueGetter: (item, index) =>
+                        numberFormat(item.amount || 0),
                     },
                     {
                       field: "description",
@@ -238,10 +257,13 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                           <span>
                             <IconButton
                               size="small"
-                              disabled={loadingDelete || (expense.paid_amount >= expense.total_amount)}
+                              disabled={
+                                loadingDelete ||
+                                expense.paid_amount >= expense.total_amount
+                              }
                               onClick={() => handleSubmitDelete(item)}
                             >
-                              <DeleteIcon fontSize="small"/>
+                              <DeleteIcon fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
@@ -252,9 +274,9 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                   hidePaginationFooter
                   footerItems={[
                     [
-                      { value: "TOTAL", },
-                      { value: numberFormat(getTotalAmount() || 0), }
-                    ]
+                      { value: "TOTAL" },
+                      { value: numberFormat(getTotalAmount() || 0) },
+                    ],
                   ]}
                 />
               </CardContent>
@@ -263,7 +285,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

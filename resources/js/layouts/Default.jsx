@@ -24,7 +24,7 @@ import {
   Toolbar,
   Tooltip,
   Typography,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import {
   DarkModeRounded as DarkModeIcon,
@@ -33,7 +33,7 @@ import {
   LockRounded as LockIcon,
   LogoutRounded as LogoutIcon,
   MoreVert as MoreIcon,
-  Person2Rounded as UserIcon
+  Person2Rounded as UserIcon,
 } from "@mui/icons-material";
 import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
 
@@ -67,7 +67,6 @@ const drawerClosedMixin = (theme) => ({
 });
 
 const Default = ({ setThemeMode, setUser }) => {
-
   const modalRef = useRef();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -77,7 +76,13 @@ const Default = ({ setThemeMode, setUser }) => {
   const [loading, setLoading] = useState(false);
 
   const { data: user, loading: loadingUser } = useFetch("api/user");
-  const { data: clinic, loading: loadingClinic } = useFetch("api/clinic-details", null, true, null, (response) => response.data.data);
+  const { data: clinic, loading: loadingClinic } = useFetch(
+    "api/clinic-details",
+    null,
+    true,
+    null,
+    (response) => response.data.data
+  );
 
   const [appReady, setAppReady] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -123,9 +128,7 @@ const Default = ({ setThemeMode, setUser }) => {
   };
 
   const openChangePasswordModal = () => {
-    let component = (
-      <ChangePassword modal={modalRef.current}/>
-    );
+    let component = <ChangePassword modal={modalRef.current} />;
 
     modalRef.current.open("Change Password", component);
   };
@@ -137,7 +140,7 @@ const Default = ({ setThemeMode, setUser }) => {
 
   return (
     <React.Fragment>
-      {appReady ?
+      {appReady ? (
         <React.Fragment>
           <ThemeProvider theme={darkTheme}>
             <AppBar
@@ -146,7 +149,10 @@ const Default = ({ setThemeMode, setUser }) => {
               elevation={1}
               sx={{
                 zIndex: theme.zIndex.drawer + 1,
-                bgcolor: theme.palette.mode === "light" ? theme.palette.primary.main : "background.paper",
+                bgcolor:
+                  theme.palette.mode === "light"
+                    ? theme.palette.primary.main
+                    : "background.paper",
               }}
             >
               <Toolbar>
@@ -185,25 +191,37 @@ const Default = ({ setThemeMode, setUser }) => {
                   </Typography>
                 </Typography>
 
-                <Box sx={{ flexGrow: 1 }}/>
+                <Box sx={{ flexGrow: 1 }} />
 
-                <Tooltip title={theme.palette.mode === "light" ? "Enable dark mode" : "Disable dark mode"}>
+                <Tooltip
+                  title={
+                    theme.palette.mode === "light"
+                      ? "Enable dark mode"
+                      : "Disable dark mode"
+                  }
+                >
                   <IconButton
                     color="inherit"
                     sx={{ mr: { xs: 2, sm: 2, md: 1 } }}
                     onClick={toggleTheme}
                   >
-                    {theme.palette.mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+                    {theme.palette.mode === "light" ? (
+                      <DarkModeIcon />
+                    ) : (
+                      <LightModeIcon />
+                    )}
                   </IconButton>
                 </Tooltip>
 
                 <Chip
                   variant="outlined"
-                  sx={{ display: { xs: "none", sm: "none", md: "inline-flex" } }}
+                  sx={{
+                    display: { xs: "none", sm: "none", md: "inline-flex" },
+                  }}
                   color="primary"
                   avatar={
                     <Avatar>
-                      <UserIcon fontSize="small"/>
+                      <UserIcon fontSize="small" />
                     </Avatar>
                   }
                   label={
@@ -217,16 +235,21 @@ const Default = ({ setThemeMode, setUser }) => {
                       >
                         {user.full_name}
                       </Typography>
-                      <ChevronDownIcon sx={{ ml: 0.5 }}/>
+                      <ChevronDownIcon sx={{ ml: 0.5 }} />
                     </Stack>
                   }
                   onClick={handleAccountMenuOpen}
-                >
-                </Chip>
+                ></Chip>
 
                 <IconButton
                   color="inherit"
-                  sx={{ display: { xs: "inline-flex", sm: "inline-flex", md: "none" } }}
+                  sx={{
+                    display: {
+                      xs: "inline-flex",
+                      sm: "inline-flex",
+                      md: "none",
+                    },
+                  }}
                   onClick={handleAccountMenuOpen}
                 >
                   <MoreIcon />
@@ -237,7 +260,7 @@ const Default = ({ setThemeMode, setUser }) => {
           </ThemeProvider>
 
           {/* Drawer for small screens */}
-          {breakpointDownMedium ?
+          {breakpointDownMedium ? (
             <Drawer
               container={() => window.document.body}
               variant="temporary"
@@ -250,7 +273,7 @@ const Default = ({ setThemeMode, setUser }) => {
                 "& .MuiDrawer-paper": {
                   boxSizing: "border-box",
                   width: drawerWidth,
-                }
+                },
               }}
               onClose={toggleDrawer}
             >
@@ -261,13 +284,12 @@ const Default = ({ setThemeMode, setUser }) => {
                 user={user}
               />
             </Drawer>
-            : null
-          }
+          ) : null}
           {/*****/}
 
           <Box sx={{ display: "flex" }}>
             {/* Drawer for large screens */}
-            {breakpointUpMedium ?
+            {breakpointUpMedium ? (
               <Drawer
                 variant="permanent"
                 ModalProps={{ disableScrollLock: true }}
@@ -281,7 +303,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   ...(!isDrawerOpen && {
                     ...drawerClosedMixin(theme),
                     "& .MuiDrawer-paper": drawerClosedMixin(theme),
-                  })
+                  }),
                 }}
               >
                 <Toolbar />
@@ -290,8 +312,7 @@ const Default = ({ setThemeMode, setUser }) => {
                   user={user}
                 />
               </Drawer>
-              : null
-            }
+            ) : null}
             {/*****/}
 
             <Box
@@ -308,13 +329,14 @@ const Default = ({ setThemeMode, setUser }) => {
               <Box flexGrow={1}>
                 <Outlet />
               </Box>
-              <Divider/>
+              <Divider />
               <Toolbar sx={{ bgcolor: "background.paper" }}>
                 <Typography
                   textAlign="center"
                   flexGrow={1}
                 >
-                  &copy; {new Date().getFullYear()}. Developed with <HeartIcon /> by SysTech.
+                  &copy; {new Date().getFullYear()}. Developed with{" "}
+                  <HeartIcon /> by SysTech.
                 </Typography>
               </Toolbar>
             </Box>
@@ -341,11 +363,11 @@ const Default = ({ setThemeMode, setUser }) => {
                   variant: "subtitle1",
                   fontWeight: "500",
                 }}
-                avatar={(
+                avatar={
                   <Avatar>
                     <UserIcon />
                   </Avatar>
-                )}
+                }
               />
               <Divider />
               <MenuList dense>
@@ -381,10 +403,9 @@ const Default = ({ setThemeMode, setUser }) => {
             </Card>
           </Popover>
         </React.Fragment>
-        : null
-      }
+      ) : null}
 
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
       <MuiModal
         open={loading}
         hideBackdrop

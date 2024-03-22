@@ -9,11 +9,11 @@ const DispensingRoutes = ({ consultationType }) => {
       <Route
         path="/"
         exact
-        element={<DispensingRequests consultationType={consultationType}/>}
+        element={<DispensingRequests consultationType={consultationType} />}
       />
       <Route
         path="/:patientId/:paymentCacheId"
-        element={<DispensingRequestItems consultationType={consultationType}/>}
+        element={<DispensingRequestItems consultationType={consultationType} />}
       />
     </Routes>
   );

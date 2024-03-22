@@ -1,9 +1,16 @@
 import React from "react";
-import { Avatar, Box, Button, CardActions, CardContent, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { QuestionMarkRounded as QuestionMarkIcon } from "@mui/icons-material";
 
 const ConfirmationDialog = ({ message, onCancel, onOk }) => {
-
   return (
     <React.Fragment>
       <CardContent>
@@ -15,13 +22,11 @@ const ConfirmationDialog = ({ message, onCancel, onOk }) => {
           <Avatar>
             <QuestionMarkIcon />
           </Avatar>
-          <Typography>
-            {message}
-          </Typography>
+          <Typography>{message}</Typography>
         </Stack>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

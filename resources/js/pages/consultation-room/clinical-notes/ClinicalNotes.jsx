@@ -16,7 +16,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 
 import { Header as PageHeader } from "../../../components/Page";
@@ -37,7 +37,11 @@ import SelectItems from "./SelectItems";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
 import { useFetch, usePatch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getValidationError } from "../../../helpers";
+import {
+  formatDateForDb,
+  formatError,
+  getValidationError,
+} from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
@@ -63,7 +67,6 @@ const Subheader = ({ title, sx }) => {
 };
 
 const ClinicalNotes = ({ patient, consultation }) => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -89,30 +92,49 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [error, setError] = useState();
   const [formData, setFormData] = useState({
     ...consultation,
-    to_return_date: consultation.to_return_date ? new Date(consultation.to_return_date) : null,
+    to_return_date: consultation.to_return_date
+      ? new Date(consultation.to_return_date)
+      : null,
   });
 
   const {
     data: diagnoses,
     setData: setDiagnoses,
     loading: loadingDiagnoses,
-    handleFetch: fetchDiagnoses
-  } = useFetch("api/consultation-diagnoses", {
-    per_page: 500,
-    consultation_id: consultation.id,
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchDiagnoses,
+  } = useFetch(
+    "api/consultation-diagnoses",
+    {
+      per_page: 500,
+      consultation_id: consultation.id,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
   const {
     data: items,
     setData: setItems,
     loading: loadingItems,
-    handleFetch: fetchItems
-  } = useFetch("api/patient-payment-cache-items", {
-    per_page: 500,
-    consultation_id: consultation.id,
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    {
+      per_page: 500,
+      consultation_id: consultation.id,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { handlePatch: handleAutoSave } = usePatch();
-  const { data: dataComplete, loading: loadingComplete, error: errorComplete, handlePatch: handleComplete } = usePatch();
+  const {
+    data: dataComplete,
+    loading: loadingComplete,
+    error: errorComplete,
+    handlePatch: handleComplete,
+  } = usePatch();
 
   useEffect(() => {
     document.title = `Clinical Notes - ${window.APP_NAME}`;
@@ -153,10 +175,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const autoSave = (field, value) => {
     if (value !== consultation[field]) {
-      handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
-        what: "Consultation",
-        [field]: value
-      });
+      handleAutoSave(
+        `api/consultations/${consultation.id}/auto-save-clinical-notes`,
+        {
+          what: "Consultation",
+          [field]: value,
+        }
+      );
     }
   };
 
@@ -193,7 +218,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
     setError(null);
 
     if (!formRef.current.validate()) {
-      return setError(getValidationError("Please complete all the required fields."));
+      return setError(
+        getValidationError("Please complete all the required fields.")
+      );
     }
 
     let component = (
@@ -202,15 +229,21 @@ const ClinicalNotes = ({ patient, consultation }) => {
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
-          handleComplete(`api/consultations/${consultation.id}/complete-clinical-notes`, {
-            ...formData,
-            visual_acuity: visualAcuityRef.current.getFormData(),
-            external_examination: externalExaminationRef.current.getFormData(),
-            functional_tests: functionalTestsRef.current.getFormData(),
-            refraction: refractionRef.current.getFormData(),
-            fundoscopy: fundoscopyRef.current.getFormData(),
-            to_return_date: formData.to_return_date ? formatDateForDb(formData.to_return_date) : undefined,
-          });
+          handleComplete(
+            `api/consultations/${consultation.id}/complete-clinical-notes`,
+            {
+              ...formData,
+              visual_acuity: visualAcuityRef.current.getFormData(),
+              external_examination:
+                externalExaminationRef.current.getFormData(),
+              functional_tests: functionalTestsRef.current.getFormData(),
+              refraction: refractionRef.current.getFormData(),
+              fundoscopy: fundoscopyRef.current.getFormData(),
+              to_return_date: formData.to_return_date
+                ? formatDateForDb(formData.to_return_date)
+                : undefined,
+            }
+          );
         }}
       />
     );
@@ -223,12 +256,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
       <Card>
         <PageHeader
           title="Clinical Notes"
-          trailing={(
+          trailing={
             <PatientFilePDF
               consultationId={consultation.id}
               patient={patient}
             />
-          )}
+          }
         />
         <Divider />
         <Form ref={formRef}>
@@ -247,7 +280,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       component="span"
                       color="error.main"
                       fontWeight="700"
-                    >*</Typography>
+                    >
+                      *
+                    </Typography>
                   </TableCell>
                   <TableCell component="th">HI</TableCell>
                   <TableCell component="th">FH</TableCell>
@@ -275,7 +310,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       rows={2}
                       defaultValue={formData.history_present_illness}
                       onChange={(value) => {
-                        setFormData({ ...formData, history_present_illness: value });
+                        setFormData({
+                          ...formData,
+                          history_present_illness: value,
+                        });
                         autoSave("history_present_illness", value);
                       }}
                     />
@@ -321,7 +359,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       rows={2}
                       defaultValue={formData.family_ocular_history}
                       onChange={(value) => {
-                        setFormData({ ...formData, family_ocular_history: value });
+                        setFormData({
+                          ...formData,
+                          family_ocular_history: value,
+                        });
                         autoSave("family_ocular_history", value);
                       }}
                     />
@@ -334,7 +375,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       rows={2}
                       defaultValue={formData.family_general_history}
                       onChange={(value) => {
-                        setFormData({ ...formData, family_general_history: value });
+                        setFormData({
+                          ...formData,
+                          family_general_history: value,
+                        });
                         autoSave("family_general_history", value);
                       }}
                     />
@@ -343,7 +387,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <TableRow>
                   <TableCell component="th">Pupils</TableCell>
                   <TableCell component="th">EOM</TableCell>
-                  <TableCell component="th"/>
+                  <TableCell component="th" />
                 </TableRow>
                 <TableRow>
                   <TableCell>
@@ -367,47 +411,50 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       rows={2}
                       defaultValue={formData.extra_ocular_muscles}
                       onChange={(value) => {
-                        setFormData({ ...formData, extra_ocular_muscles: value });
+                        setFormData({
+                          ...formData,
+                          extra_ocular_muscles: value,
+                        });
                         autoSave("extra_ocular_muscles", value);
                       }}
                     />
                   </TableCell>
-                  <TableCell/>
+                  <TableCell />
                 </TableRow>
               </TableBody>
             </Table>
 
-            <Subheader title="Visual Acuity (VA)"/>
+            <Subheader title="Visual Acuity (VA)" />
             <VisualAcuity
               ref={visualAcuityRef}
               consultation={consultation}
             />
 
-            <Subheader title="External Examination"/>
+            <Subheader title="External Examination" />
             <ExternalExamination
               ref={externalExaminationRef}
               consultation={consultation}
             />
 
-            <Subheader title="Functional Tests"/>
+            <Subheader title="Functional Tests" />
             <FunctionalTests
               ref={functionalTestsRef}
               consultation={consultation}
             />
 
-            <Subheader title="Refraction Details"/>
+            <Subheader title="Refraction Details" />
             <Refraction
               ref={refractionRef}
               consultation={consultation}
             />
 
-            <Subheader title="Fundoscopy"/>
+            <Subheader title="Fundoscopy" />
             <Fundoscopy
               ref={fundoscopyRef}
               consultation={consultation}
             />
 
-            <Subheader title="Diagnosis & Management"/>
+            <Subheader title="Diagnosis & Management" />
             <Grid
               container
               spacing={2}
@@ -424,7 +471,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   loading={loadingDiagnoses}
                   items={diagnoses}
                   consultation={consultation}
-                  onClickAdd={(title, diagnosisType) => openSelectDiagnosesModal(title, diagnosisType)}
+                  onClickAdd={(title, diagnosisType) =>
+                    openSelectDiagnosesModal(title, diagnosisType)
+                  }
                 />
               </Grid>
               <Grid
@@ -439,7 +488,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   loading={loadingItems}
                   items={items}
                   consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                  onClickAdd={(title, consultationType) =>
+                    openSelectItemsModal(title, consultationType)
+                  }
                 />
               </Grid>
               <Grid
@@ -454,7 +505,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   loading={loadingItems}
                   items={items}
                   consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                  onClickAdd={(title, consultationType) =>
+                    openSelectItemsModal(title, consultationType)
+                  }
                 />
               </Grid>
               {/*<Grid*/}
@@ -489,7 +542,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               {/*</Grid>*/}
             </Grid>
 
-            <Subheader title="Remarks"/>
+            <Subheader title="Remarks" />
             <Grid
               container
               spacing={2}
@@ -527,7 +580,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 xs={12}
               >
                 <FormControlLabel
-                  control={(
+                  control={
                     <Checkbox
                       checked={formData.patient_to_return === "Yes"}
                       onChange={(event) => {
@@ -535,7 +588,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         setFormData({
                           ...formData,
                           patient_to_return: value,
-                          to_return_date: value === "Yes" ? (consultation.to_return_date ? new Date(consultation.to_return_date) : null) : null
+                          to_return_date:
+                            value === "Yes"
+                              ? consultation.to_return_date
+                                ? new Date(consultation.to_return_date)
+                                : null
+                              : null,
                         });
                         autoSave("patient_to_return", value);
 
@@ -544,7 +602,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         }
                       }}
                     />
-                  )}
+                  }
                   label="Patient to Return"
                 />
               </Grid>
@@ -554,7 +612,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 sm={12}
                 xs={12}
               >
-                {formData.patient_to_return === "Yes" ?
+                {formData.patient_to_return === "Yes" ? (
                   <DatePicker
                     ref={patientToReturnDateRef}
                     fullWidth
@@ -569,10 +627,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       }
                     }}
                   />
-                  : null
-                }
+                ) : null}
               </Grid>
-              {consultation.status === "Pending" ?
+              {consultation.status === "Pending" ? (
                 <React.Fragment>
                   <Grid
                     item
@@ -581,25 +638,28 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     xs={12}
                   >
                     <FormControlLabel
-                      control={(
+                      control={
                         <Checkbox
                           checked={formData.require_glass === "Yes"}
-                          onChange={(event) => setFormData({
-                            ...formData,
-                            require_glass: event.target.checked ? "Yes" : "No",
-                          })}
+                          onChange={(event) =>
+                            setFormData({
+                              ...formData,
+                              require_glass: event.target.checked
+                                ? "Yes"
+                                : "No",
+                            })
+                          }
                         />
-                      )}
+                      }
                       label="Require Glass"
                     />
                   </Grid>
                 </React.Fragment>
-                : null
-              }
+              ) : null}
             </Grid>
           </CardContent>
         </Form>
-        {consultation.status === "Pending" ?
+        {consultation.status === "Pending" ? (
           <React.Fragment>
             <Divider />
             {loadingComplete && <LinearProgress />}
@@ -620,10 +680,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Button>
             </Stack>
           </React.Fragment>
-          : null
-        }
+        ) : null}
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </React.Fragment>
   );
 };

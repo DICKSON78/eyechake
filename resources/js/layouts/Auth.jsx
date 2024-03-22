@@ -6,7 +6,6 @@ import { Box, Card, Container, Typography } from "@mui/material";
 import logo from "../../images/logo.png";
 
 const Auth = () => {
-
   return (
     <Container
       component="main"

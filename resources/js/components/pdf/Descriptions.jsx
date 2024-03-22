@@ -1,10 +1,23 @@
 import React from "react";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
-const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, valueStyle }) => {
-
-  items = (items || []).filter((e) => !!e.value)
-    .reduce((a, e, i) => (i % columns ? a[a.length - 1].push(e) : a.push([e]), a), []);
+const Descriptions = ({
+  columns,
+  items,
+  vertical,
+  containerStyle,
+  itemStyle,
+  labelStyle,
+  valueStyle,
+  hideColons,
+  showFalsyValues,
+}) => {
+  items = (items || [])
+    .filter((e) => (showFalsyValues ? true : !!e.value))
+    .reduce(
+      (a, e, i) => (i % columns ? a[a.length - 1].push(e) : a.push([e]), a),
+      []
+    );
   columns = columns || 3;
 
   return (
@@ -26,31 +39,40 @@ const Descriptions = ({ columns, items, containerStyle, vertical, labelStyle, va
                 ...(vertical && {
                   flexDirection: "column",
                 }),
+                ...itemStyle,
+                ...f.itemStyle,
               }}
             >
-              <Text style={[
-                styles.text,
-                {
-                  ...(!vertical && {
-                    flex: 1,
-                  }),
-                  fontWeight: "bold",
-                  ...labelStyle,
-                }]}
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    ...(!vertical && {
+                      flex: 1,
+                    }),
+                    fontWeight: "bold",
+                    ...labelStyle,
+                    ...f.labelStyle,
+                  },
+                ]}
               >
                 {f.label}
               </Text>
-              <Text style={[
-                styles.text,
-                {
-                  width: "60%",
-                  ...(vertical && {
-                    width: "100%",
-                  }),
-                  ...valueStyle,
-                }]}
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    width: "60%",
+                    ...(vertical && {
+                      width: "100%",
+                    }),
+                    ...valueStyle,
+                    ...f.valueStyle,
+                  },
+                ]}
               >
-                {!vertical ? ": " : ""}{f.value}
+                {!vertical ? (!hideColons ? ": " : "") : ""}
+                {f.value}
               </Text>
             </View>
           ))}

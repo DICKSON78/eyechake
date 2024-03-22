@@ -8,10 +8,14 @@ import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { capitalize, formatDateForDb, formatError, getAge } from "../../../helpers";
+import {
+  capitalize,
+  formatDateForDb,
+  formatError,
+  getAge,
+} from "../../../helpers";
 
 const PatientBills = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -30,16 +34,23 @@ const PatientBills = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patient-item-bills",
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/patient-item-bills",
     {
       ...params,
-      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-    }, true, {
+    },
+    true,
+    {
       data: [],
       total: 0,
       page: 1,
-    }, (response) => response.data.data);
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `${capitalize(status)} Patient Bills - ${window.APP_NAME}`;
@@ -61,7 +72,7 @@ const PatientBills = () => {
       ]}
     >
       <Card>
-        <PageHeader title={`${capitalize(status)} Patient Bills`}/>
+        <PageHeader title={`${capitalize(status)} Patient Bills`} />
         <Divider />
         <CardContent>
           <Filters
@@ -75,32 +86,40 @@ const PatientBills = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
                 headerName: "Patient Name",
-                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.full_name,
+                valueGetter: (item, index) =>
+                  item.first_item.payment_cache.check_in.patient.full_name,
               },
               {
                 field: "patient_id",
                 headerName: "Patient Number",
-                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient_id,
+                valueGetter: (item, index) =>
+                  item.first_item.payment_cache.check_in.patient_id,
               },
               {
                 field: "date_of_birth",
                 headerName: "Age",
-                valueGetter: (item, index) => getAge(item.first_item.payment_cache.check_in.patient.date_of_birth),
+                valueGetter: (item, index) =>
+                  getAge(
+                    item.first_item.payment_cache.check_in.patient.date_of_birth
+                  ),
               },
               {
                 field: "gender",
                 headerName: "Gender",
-                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.gender,
+                valueGetter: (item, index) =>
+                  item.first_item.payment_cache.check_in.patient.gender,
               },
               {
                 field: "phone",
                 headerName: "Phone Number",
-                valueGetter: (item, index) => item.first_item.payment_cache.check_in.patient.phone,
+                valueGetter: (item, index) =>
+                  item.first_item.payment_cache.check_in.patient.phone,
               },
               {
                 field: "created_by",
@@ -118,30 +137,41 @@ const PatientBills = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => navigate(`/payment-center/patient-bills/${status}/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/payment-center/patient-bills/${status}/${item.first_item.payment_cache.check_in.patient_id}/${item.id}`
+                        )
+                      }
                     >
                       {status === "pending" ? "Manage" : "View"}
                     </Button>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -3,10 +3,13 @@ import { Chip } from "@mui/material";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../expenses/Filters";
-import { formatDateForDb, getDateRangeTitle, numberFormat } from "../../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  numberFormat,
+} from "../../../helpers";
 
 const Expenses = ({ module, createdBy }) => {
-
   const [params, setParams] = useState({
     status: undefined,
     category_id: undefined,
@@ -59,16 +62,20 @@ const Expenses = ({ module, createdBy }) => {
         uri="api/expenses"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <Filters
             params={params}
             setParams={setParams}
             sx={{ mb: 2 }}
           />
-        )}
+        }
         columns={[
           {
             field: "category_id",
@@ -78,17 +85,18 @@ const Expenses = ({ module, createdBy }) => {
           {
             field: "total_amount",
             headerName: "Total Amount",
-            valueGetter: (item, index) => numberFormat(item.total_amount)
+            valueGetter: (item, index) => numberFormat(item.total_amount),
           },
           {
             field: "paid_amount",
             headerName: "Paid Amount",
-            valueGetter: (item, index) => numberFormat(item.paid_amount)
+            valueGetter: (item, index) => numberFormat(item.paid_amount),
           },
           {
             field: "remaining_amount",
             headerName: "Remaining Amount",
-            valueGetter: (item, index) => numberFormat(item.total_amount - item.paid_amount)
+            valueGetter: (item, index) =>
+              numberFormat(item.total_amount - item.paid_amount),
           },
           {
             field: "description",
@@ -124,7 +132,11 @@ const Expenses = ({ module, createdBy }) => {
           { value: "TOTAL", span: 2, index: 1 },
           { reducer: (acc, item, index) => acc + item.total_amount, index: 2 },
           { reducer: (acc, item, index) => acc + item.paid_amount, index: 3 },
-          { reducer: (acc, item, index) => acc + (item.total_amount - item.paid_amount), index: 4 },
+          {
+            reducer: (acc, item, index) =>
+              acc + (item.total_amount - item.paid_amount),
+            index: 4,
+          },
         ]}
       />
     </Page>

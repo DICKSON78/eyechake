@@ -1,8 +1,23 @@
 import React from "react";
-import { Box, Breadcrumbs, Divider, Link, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Breadcrumbs,
+  Divider,
+  Link,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { ChevronRightRounded as ChevronRightIcon } from "@mui/icons-material";
 
-const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps }) => {
+const Header = ({
+  title,
+  subtitle,
+  leading,
+  trailing,
+  containerProps,
+  titleProps,
+}) => {
   return (
     <Stack
       direction="row"
@@ -11,11 +26,13 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
       flexWrap="wrap"
       px={2}
       py={1.5}
-      borderRadius={(theme) => `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`}
+      borderRadius={(theme) =>
+        `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`
+      }
       {...containerProps}
     >
       {leading}
-      {title ?
+      {title ? (
         <React.Fragment>
           <Box flexGrow={1}>
             <Typography
@@ -25,31 +42,28 @@ const Header = ({ title, subtitle, leading, trailing, containerProps, titleProps
             >
               {title}
             </Typography>
-            {subtitle ?
+            {subtitle ? (
               <Typography
                 variant="subtitle2"
                 color="textSecondary"
               >
                 {subtitle}
               </Typography>
-              : null
-            }
+            ) : null}
           </Box>
         </React.Fragment>
-        : null
-      }
+      ) : null}
       {trailing}
     </Stack>
   );
 };
 
 const Page = ({ breadcrumbs, children }) => {
-
   breadcrumbs = breadcrumbs || [];
 
   const getBreadcrumbs = () => {
     return (
-      <Breadcrumbs separator={<ChevronRightIcon fontSize="small"/>}>
+      <Breadcrumbs separator={<ChevronRightIcon fontSize="small" />}>
         {breadcrumbs.map((e, i, a) => {
           if (e.to) {
             return (
@@ -80,7 +94,7 @@ const Page = ({ breadcrumbs, children }) => {
 
   return (
     <React.Fragment>
-      {breadcrumbs.length ?
+      {breadcrumbs.length ? (
         <React.Fragment>
           <Paper
             square
@@ -92,11 +106,8 @@ const Page = ({ breadcrumbs, children }) => {
           </Paper>
           <Divider />
         </React.Fragment>
-        : null
-      }
-      <Box m={{ xs: 2, sm: 2, md: 3 }}>
-        {children}
-      </Box>
+      ) : null}
+      <Box m={{ xs: 2, sm: 2, md: 3 }}>{children}</Box>
     </React.Fragment>
   );
 };

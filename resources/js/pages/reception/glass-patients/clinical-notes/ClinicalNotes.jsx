@@ -1,7 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Grid, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 import { Header as PageHeader } from "../../../../components/Page";
 import Modal from "../../../../components/Modal";
@@ -40,7 +50,6 @@ const Subheader = ({ title, sx }) => {
 };
 
 const ClinicalNotes = ({ patient, consultation }) => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -57,18 +66,24 @@ const ClinicalNotes = ({ patient, consultation }) => {
     data: items,
     setData: setItems,
     loading: loadingItems,
-    handleFetch: fetchItems
-  } = useFetch("api/patient-payment-cache-items", {
-    per_page: 500,
-    consultation_id: consultation.id,
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    {
+      per_page: 500,
+      consultation_id: consultation.id,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { handlePatch: handleAutoSave } = usePatch();
   const {
     data: dataSendToOptician,
     loading: loadingSendToOptician,
     error: errorSendToOptician,
-    handlePatch: handleSendToOptician
+    handlePatch: handleSendToOptician,
   } = usePatch();
 
   useEffect(() => {
@@ -95,7 +110,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   }, [errorSendToOptician]);
 
-
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
@@ -110,10 +124,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const autoSave = (field, value) => {
     if (value !== consultation[field]) {
-      handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
-        what: "Consultation",
-        [field]: value
-      });
+      handleAutoSave(
+        `api/consultations/${consultation.id}/auto-save-clinical-notes`,
+        {
+          what: "Consultation",
+          [field]: value,
+        }
+      );
     }
   };
 
@@ -136,7 +153,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
     setError(null);
 
     if (!formRef.current.validate()) {
-      return setError(getValidationError("Please complete all the required fields."));
+      return setError(
+        getValidationError("Please complete all the required fields.")
+      );
     }
 
     let component = (
@@ -162,12 +181,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
       <Card>
         <PageHeader
           title="Clinical Notes"
-          trailing={(
+          trailing={
             <PatientFilePDF
               consultationId={consultation.id}
               patient={patient}
             />
-          )}
+          }
         />
         <Divider />
         <Form ref={formRef}>
@@ -181,7 +200,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               consultation={consultation}
             />
 
-            <Subheader title="Management"/>
+            <Subheader title="Management" />
             <Grid
               container
               spacing={2}
@@ -198,7 +217,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   loading={loadingItems}
                   items={items}
                   consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                  onClickAdd={(title, consultationType) =>
+                    openSelectItemsModal(title, consultationType)
+                  }
                 />
               </Grid>
               <Grid
@@ -213,12 +234,14 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   loading={loadingItems}
                   items={items}
                   consultation={consultation}
-                  onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                  onClickAdd={(title, consultationType) =>
+                    openSelectItemsModal(title, consultationType)
+                  }
                 />
               </Grid>
             </Grid>
 
-            <Subheader title="Remarks"/>
+            <Subheader title="Remarks" />
             <Grid
               container
               spacing={2}
@@ -263,7 +286,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </React.Fragment>
   );
 };

@@ -11,7 +11,7 @@ const OpticianCenterRoutes = () => {
       <Route
         path="/glass-patients"
         exact
-        element={<ConsultationPatients/>}
+        element={<ConsultationPatients />}
       />
       <Route
         path="/glass-patients/:patientId/:consultationId/*"
@@ -19,7 +19,7 @@ const OpticianCenterRoutes = () => {
       />
       <Route
         path="dispensing-requests/*"
-        element={<DispensingRoutes consultationType="Glass"/>}
+        element={<DispensingRoutes consultationType="Glass" />}
       />
       <Route
         path="reports/*"

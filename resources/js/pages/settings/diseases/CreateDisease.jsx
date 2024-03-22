@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -7,7 +14,6 @@ import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreateDisease = ({ modal, fetchDiseases }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -19,7 +25,10 @@ const CreateDisease = ({ modal, fetchDiseases }) => {
     code: undefined,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/diseases", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/diseases",
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -83,7 +92,7 @@ const CreateDisease = ({ modal, fetchDiseases }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

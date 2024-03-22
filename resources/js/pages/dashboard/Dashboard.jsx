@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, Divider, Grid, IconButton, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Grid,
+  IconButton,
+  Tooltip as MuiTooltip,
+} from "@mui/material";
 import {
   AccountBalanceRounded as SalesIcon,
   CenterFocusStrongRounded as GlassIcon,
@@ -9,7 +17,7 @@ import {
   MedicalInformationRounded as PharmacyIcon,
   MeetingRoomRounded as ConsultationsIcon,
   MoneyRounded as NetProfitIcon,
-  TrendingDownRounded as ExpensesIcon
+  TrendingDownRounded as ExpensesIcon,
 } from "@mui/icons-material";
 
 import Page from "../../components/Page";
@@ -33,13 +41,12 @@ import {
   purple,
   red,
   teal,
-  yellow
+  yellow,
 } from "@mui/material/colors";
 import { useFetch, useToast } from "../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../helpers";
 
 const Dashboard = () => {
-
   const theme = useTheme();
   const addToast = useToast();
 
@@ -50,11 +57,19 @@ const Dashboard = () => {
     end_date: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/dashboard", {
-    ...params,
-    start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-    end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-  }, true, null, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/dashboard",
+    {
+      ...params,
+      start_date: params.start_date
+        ? formatDateForDb(params.start_date)
+        : undefined,
+      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    },
+    true,
+    null,
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Dashboard - ${window.APP_NAME}`;
@@ -81,20 +96,17 @@ const Dashboard = () => {
   return (
     <Page
       title="Dashboard"
-      breadcrumbs={[
-        { title: "Home" },
-        { title: "Dashboard" },
-      ]}
+      breadcrumbs={[{ title: "Home" }, { title: "Dashboard" }]}
     >
       <CardHeader
         title="Dashboard"
-        action={(
+        action={
           <MuiTooltip title="Show filters">
             <IconButton onClick={openFiltersModal}>
               <FilterIcon />
             </IconButton>
           </MuiTooltip>
-        )}
+        }
         titleTypographyProps={{
           variant: "h4",
           fontWeight: 700,
@@ -105,7 +117,7 @@ const Dashboard = () => {
         }}
       />
       {loading && <LoadingSkeleton />}
-      {!loading && data ?
+      {!loading && data ? (
         <Grid
           container
           spacing={{ xs: 2, sm: 2, md: 3 }}
@@ -148,7 +160,11 @@ const Dashboard = () => {
           />
           <InfoCard
             title="Net Profit"
-            count={numberFormat(data.counts.total_sales - data.counts.discount - data.counts.expenses)}
+            count={numberFormat(
+              data.counts.total_sales -
+                data.counts.discount -
+                data.counts.expenses
+            )}
             icon={<NetProfitIcon />}
             color={blue[300]}
           />
@@ -228,7 +244,7 @@ const Dashboard = () => {
                       show: true,
                       color: theme.palette.divider,
                       height: 6,
-                    }
+                    },
                   },
                   yaxis: {
                     axisBorder: {
@@ -242,7 +258,7 @@ const Dashboard = () => {
                     },
                     labels: {
                       formatter: (val, index) => numberFormat(val),
-                    }
+                    },
                   },
                   tooltip: {
                     theme: "dark",
@@ -255,7 +271,7 @@ const Dashboard = () => {
                       height: 8,
                       radius: 4,
                     },
-                  }
+                  },
                 }}
                 series={[
                   {
@@ -265,8 +281,8 @@ const Dashboard = () => {
                       { x: "Pharmacy", y: data.counts.pharmacy },
                       { x: "Consultation", y: data.counts.consultation },
                       { x: "Procedure", y: data.counts.procedure },
-                    ]
-                  }
+                    ],
+                  },
                 ]}
                 type="bar"
                 height="272"
@@ -292,7 +308,9 @@ const Dashboard = () => {
               <CardContent>
                 <Chart
                   options={{
-                    labels: data.statistics.expenses_by_category.map((e) => e.name),
+                    labels: data.statistics.expenses_by_category.map(
+                      (e) => e.name
+                    ),
                     chart: {
                       fontFamily: theme.typography.fontFamily,
                       background: "transparent",
@@ -326,13 +344,18 @@ const Dashboard = () => {
                     },
                     tooltip: {
                       y: {
-                        formatter: (val, { series, seriesIndex, dataPointIndex, w }) => numberFormat(val),
-                      }
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
+                      },
                     },
                     legend: {
                       position: "bottom",
                       labels: {
-                        colors: data.statistics.expenses_by_category.map((e) => theme.palette.text.secondary),
+                        colors: data.statistics.expenses_by_category.map(
+                          (e) => theme.palette.text.secondary
+                        ),
                         useSeriesColors: false,
                       },
                       markers: {
@@ -340,11 +363,15 @@ const Dashboard = () => {
                         height: 8,
                         radius: 4,
                       },
-                    }
+                    },
                   }}
-                  series={data.statistics.expenses_by_category.map((e) => e.amount)}
+                  series={data.statistics.expenses_by_category.map(
+                    (e) => e.amount
+                  )}
                   type="pie"
-                  height={data.statistics.expenses_by_category.length ? 288 : 256}
+                  height={
+                    data.statistics.expenses_by_category.length ? 288 : 256
+                  }
                 />
               </CardContent>
             </Card>
@@ -368,7 +395,9 @@ const Dashboard = () => {
               <CardContent>
                 <Chart
                   options={{
-                    labels: data.statistics.payments_by_channel.map((e) => e.name),
+                    labels: data.statistics.payments_by_channel.map(
+                      (e) => e.name
+                    ),
                     chart: {
                       fontFamily: theme.typography.fontFamily,
                       background: "transparent",
@@ -402,13 +431,18 @@ const Dashboard = () => {
                     },
                     tooltip: {
                       y: {
-                        formatter: (val, { series, seriesIndex, dataPointIndex, w }) => numberFormat(val),
-                      }
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
+                      },
                     },
                     legend: {
                       position: "bottom",
                       labels: {
-                        colors: data.statistics.payments_by_channel.map((e) => theme.palette.text.secondary),
+                        colors: data.statistics.payments_by_channel.map(
+                          (e) => theme.palette.text.secondary
+                        ),
                         useSeriesColors: false,
                       },
                       markers: {
@@ -416,11 +450,15 @@ const Dashboard = () => {
                         height: 8,
                         radius: 4,
                       },
-                    }
+                    },
                   }}
-                  series={data.statistics.payments_by_channel.map((e) => e.amount)}
+                  series={data.statistics.payments_by_channel.map(
+                    (e) => e.amount
+                  )}
                   type="pie"
-                  height={data.statistics.payments_by_channel.length ? 288 : 256}
+                  height={
+                    data.statistics.payments_by_channel.length ? 288 : 256
+                  }
                 />
               </CardContent>
             </Card>
@@ -489,7 +527,7 @@ const Dashboard = () => {
                       show: true,
                       color: theme.palette.divider,
                       height: 6,
-                    }
+                    },
                   },
                   yaxis: {
                     axisBorder: {
@@ -503,7 +541,7 @@ const Dashboard = () => {
                     },
                     labels: {
                       formatter: (val, index) => numberFormat(val),
-                    }
+                    },
                   },
                   tooltip: {
                     theme: "dark",
@@ -515,21 +553,27 @@ const Dashboard = () => {
                       height: 8,
                       radius: 4,
                     },
-                  }
+                  },
                 }}
                 series={[
                   {
                     name: "Sales",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: (e.statistics.find((f) => f.name === "total_sales")?.amount || 0) - (e.statistics.find((f) => f.name === "discount")?.amount || 0),
+                      y:
+                        (e.statistics.find((f) => f.name === "total_sales")
+                          ?.amount || 0) -
+                        (e.statistics.find((f) => f.name === "discount")
+                          ?.amount || 0),
                     })),
                   },
                   {
                     name: "Expenses",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: e.statistics.find((f) => f.name === "expenses")?.amount || 0,
+                      y:
+                        e.statistics.find((f) => f.name === "expenses")
+                          ?.amount || 0,
                     })),
                   },
                 ]}
@@ -571,11 +615,7 @@ const Dashboard = () => {
                       borderRadiusWhenStacked: "last",
                     },
                   },
-                  colors: [
-                    teal[400],
-                    pink[300],
-                    theme.palette.info.main,
-                  ],
+                  colors: [teal[400], pink[300], theme.palette.info.main],
                   stroke: {
                     show: true,
                     width: [4, 4, 4],
@@ -604,7 +644,7 @@ const Dashboard = () => {
                       show: true,
                       color: theme.palette.divider,
                       height: 6,
-                    }
+                    },
                   },
                   yaxis: {
                     axisBorder: {
@@ -618,7 +658,7 @@ const Dashboard = () => {
                     },
                     labels: {
                       formatter: (val, index) => numberFormat(val),
-                    }
+                    },
                   },
                   tooltip: {
                     theme: "dark",
@@ -630,28 +670,39 @@ const Dashboard = () => {
                       height: 8,
                       radius: 4,
                     },
-                  }
+                  },
                 }}
                 series={[
                   {
                     name: "Male",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: e.statistics.find((f) => f.name === "new_patients_male")?.amount || 0,
+                      y:
+                        e.statistics.find((f) => f.name === "new_patients_male")
+                          ?.amount || 0,
                     })),
                   },
                   {
                     name: "Female",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: e.statistics.find((f) => f.name === "new_patients_female")?.amount || 0,
+                      y:
+                        e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0,
                     })),
                   },
                   {
                     name: "Total",
                     data: data.yearly_statistics.map((e) => ({
                       x: e.month,
-                      y: (e.statistics.find((f) => f.name === "new_patients_male")?.amount || 0) + (e.statistics.find((f) => f.name === "new_patients_female")?.amount || 0),
+                      y:
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_male"
+                        )?.amount || 0) +
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0),
                     })),
                   },
                 ]}
@@ -661,9 +712,8 @@ const Dashboard = () => {
             </Card>
           </Grid>
         </Grid>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

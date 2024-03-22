@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Card, CardContent, Divider, Grid, LinearProgress, Stack } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  LinearProgress,
+  Stack,
+} from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
 import Form from "../../components/Form";
@@ -9,7 +17,6 @@ import { usePost, useToast } from "../../hooks";
 import { formatError } from "../../helpers";
 
 const ClinicDetails = () => {
-
   const addToast = useToast();
 
   const modalRef = useRef();
@@ -26,7 +33,10 @@ const ClinicDetails = () => {
     address: window.clinic.address,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/clinic-details", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/clinic-details",
+    formData
+  );
 
   useEffect(() => {
     document.title = `Clinic Details - ${window.APP_NAME}`;
@@ -59,7 +69,7 @@ const ClinicDetails = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Clinic Details"/>
+        <PageHeader title="Clinic Details" />
         <Divider />
         <CardContent>
           <Form ref={formRef}>
@@ -79,7 +89,9 @@ const ClinicDetails = () => {
                   fullWidth
                   required
                   defaultValue={formData.name}
-                  onChange={(value) => setFormData({ ...formData, name: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, name: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -94,7 +106,9 @@ const ClinicDetails = () => {
                   fullWidth
                   required
                   defaultValue={formData.phone}
-                  onChange={(value) => setFormData({ ...formData, phone: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, phone: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -108,7 +122,9 @@ const ClinicDetails = () => {
                   label="Email"
                   fullWidth
                   defaultValue={formData.email}
-                  onChange={(value) => setFormData({ ...formData, email: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, email: value })
+                  }
                 />
               </Grid>
               <Grid
@@ -122,7 +138,9 @@ const ClinicDetails = () => {
                   label="Address"
                   fullWidth
                   defaultValue={formData.address}
-                  onChange={(value) => setFormData({ ...formData, address: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, address: value })
+                  }
                 />
               </Grid>
             </Grid>
@@ -147,7 +165,7 @@ const ClinicDetails = () => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

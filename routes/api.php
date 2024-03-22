@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CataractSurgeryRecordsController;
 use App\Http\Controllers\ClinicDetailsController;
 use App\Http\Controllers\ConsultationDiagnosesController;
 use App\Http\Controllers\ConsultationsController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\RegionsController;
 use App\Http\Controllers\Reports\InventoryManagementReportsController;
 use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\StocktakesController;
+use App\Http\Controllers\SurgeryRecordReportsController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\WardsController;
 use App\Models\Employee;
@@ -114,6 +116,8 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
         $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
         $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');
     });
+    $router->apiResource('/surgery-record-reports', SurgeryRecordReportsController::class);
+    $router->apiResource('/cataract-surgery-records', CataractSurgeryRecordsController::class);
 
     $router->apiResource('/consultation-diagnoses', ConsultationDiagnosesController::class);
     $router->apiResource('/stocktakes', StocktakesController::class);

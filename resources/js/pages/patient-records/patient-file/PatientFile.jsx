@@ -9,7 +9,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const PatientFile = ({ patient }) => {
-
   const addToast = useToast();
   const modalRef = useRef();
 
@@ -19,11 +18,17 @@ const PatientFile = ({ patient }) => {
     patient_id: patient.id,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/consultations", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/consultations",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Patient File - ${window.APP_NAME}`;
@@ -54,17 +59,20 @@ const PatientFile = ({ patient }) => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "created_at",
                 headerName: "Date",
-                valueGetter: (item) => item.payment_cache_item.served_at || item.created_at,
+                valueGetter: (item) =>
+                  item.payment_cache_item.served_at || item.created_at,
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
-                valueGetter: (item, index) => item.payment_cache_item.consultant?.full_name
+                valueGetter: (item, index) =>
+                  item.payment_cache_item.consultant?.full_name,
               },
               {
                 field: "status",
@@ -84,7 +92,12 @@ const PatientFile = ({ patient }) => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <PatientFilePDF
@@ -94,18 +107,20 @@ const PatientFile = ({ patient }) => {
                     />
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </React.Fragment>
   );
 };

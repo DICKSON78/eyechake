@@ -41,12 +41,12 @@ const PaymentCenterRoutes = () => {
       />
       <Route
         path="/expenses"
-        element={(
+        element={
           <Expenses
             module="Payment Center"
             createdBy={window.user.id}
           />
-        )}
+        }
       />
       <Route
         path="/reports/*"

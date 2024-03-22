@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from "@mui/material";
+import {
+  Collapse,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+} from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
 import {
@@ -22,7 +29,7 @@ import {
   ScheduleRounded as PatientsToReturnIcon,
   SettingsRounded as SettingsIcon,
   TrendingDownRounded as ExpensesIcon,
-  WindowRounded as DepartmentsIcon
+  WindowRounded as DepartmentsIcon,
 } from "@mui/icons-material";
 import GlassPatientsIcon from "./icons/AddLens";
 
@@ -88,7 +95,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
               to: "/patient-registration",
               show: user.privileges.reception,
             },
-          ]
+          ],
         },
         {
           title: "PAYMENT CENTER",
@@ -455,96 +462,123 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
   return (
     <List
       component="nav"
-      subheader={drawerOpen ?
-        <ListSubheader sx={{ px: { xs: 2, sm: 2, md: 3 } }}>MENU</ListSubheader>
-        : null
+      subheader={
+        drawerOpen ? (
+          <ListSubheader sx={{ px: { xs: 2, sm: 2, md: 3 } }}>
+            MENU
+          </ListSubheader>
+        ) : null
       }
       dense
     >
-      {items.filter((e) => (typeof e.show === "boolean") && e.show).map((e) => (
-        !e.to ?
-          <ListSubheader
-            key={e.title}
-            sx={{ px: { xs: 2, sm: 2, md: 3 } }}
-          >
-            {e.title}
-          </ListSubheader>
-          :
-          <React.Fragment key={e.to}>
-            <ListItemButton
-              selected={location.pathname.indexOf(e.to) !== -1}
-              onClick={() => {
-                if (e.items && e.items.filter((f) => (typeof f.show === "boolean") && f.show).length) {
-                  setOpen(open === e.to ? null : e.to);
-                } else {
-                  if (typeof setDrawerOpen === "function") {
-                    setDrawerOpen(false);
-                  }
-
-                  navigate(e.to);
-                }
-              }}
-              sx={{
-                "&.Mui-selected": {
-                  color: (theme) => theme.palette.primary.main,
-                  borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
-                  backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
-
-                  "& .MuiListItemIcon-root": {
-                    color: "inherit",
-                  }
-                },
-                px: { xs: 2, sm: 2, md: 3 },
-              }}
+      {items
+        .filter((e) => typeof e.show === "boolean" && e.show)
+        .map((e) =>
+          !e.to ? (
+            <ListSubheader
+              key={e.title}
+              sx={{ px: { xs: 2, sm: 2, md: 3 } }}
             >
-              {e.icon ?
-                <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>{e.icon}</ListItemIcon>
-                : null
-              }
-              <ListItemText primary={e.title}/>
-              {e.items && e.items.length ?
-                <React.Fragment>{open === e.to ? <ExpandLessIcon /> : <ExpandMoreIcon />}</React.Fragment>
-                : null
-              }
-            </ListItemButton>
+              {e.title}
+            </ListSubheader>
+          ) : (
+            <React.Fragment key={e.to}>
+              <ListItemButton
+                selected={location.pathname.indexOf(e.to) !== -1}
+                onClick={() => {
+                  if (
+                    e.items &&
+                    e.items.filter((f) => typeof f.show === "boolean" && f.show)
+                      .length
+                  ) {
+                    setOpen(open === e.to ? null : e.to);
+                  } else {
+                    if (typeof setDrawerOpen === "function") {
+                      setDrawerOpen(false);
+                    }
 
-            {e.items && e.items.filter((f) => (typeof f.show === "boolean") && f.show).length ?
-              <Collapse
-                in={open === e.to}
-                unmountOnExit
+                    navigate(e.to);
+                  }
+                }}
+                sx={{
+                  "&.Mui-selected": {
+                    color: (theme) => theme.palette.primary.main,
+                    borderRight: (theme) =>
+                      `3px solid ${theme.palette.primary.main}`,
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "light"
+                        ? alpha(theme.palette.primary.main, 0.08)
+                        : "transparent",
+
+                    "& .MuiListItemIcon-root": {
+                      color: "inherit",
+                    },
+                  },
+                  px: { xs: 2, sm: 2, md: 3 },
+                }}
               >
-                <List
-                  component="div"
-                  dense
-                >
-                  {e.items.filter((f) => (typeof f.show === "boolean") && f.show).map(f => (
-                    <ListItemButton
-                      key={f.to}
-                      selected={location.pathname.indexOf(e.to + f.to) !== -1}
-                      onClick={() => navigate(e.to + f.to)}
-                      sx={{
-                        "&.Mui-selected": {
-                          color: (theme) => theme.palette.primary.main,
-                          borderRight: (theme) => `3px solid ${theme.palette.primary.main}`,
-                          backgroundColor: (theme) => theme.palette.mode === "light" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                {e.icon ? (
+                  <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>
+                    {e.icon}
+                  </ListItemIcon>
+                ) : null}
+                <ListItemText primary={e.title} />
+                {e.items && e.items.length ? (
+                  <React.Fragment>
+                    {open === e.to ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </React.Fragment>
+                ) : null}
+              </ListItemButton>
 
-                          "& .MuiListItemIcon-root": {
-                            color: "inherit",
+              {e.items &&
+              e.items.filter((f) => typeof f.show === "boolean" && f.show)
+                .length ? (
+                <Collapse
+                  in={open === e.to}
+                  unmountOnExit
+                >
+                  <List
+                    component="div"
+                    dense
+                  >
+                    {e.items
+                      .filter((f) => typeof f.show === "boolean" && f.show)
+                      .map((f) => (
+                        <ListItemButton
+                          key={f.to}
+                          selected={
+                            location.pathname.indexOf(e.to + f.to) !== -1
                           }
-                        },
-                        px: { xs: 2, sm: 2, md: 3 },
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>{f.icon}</ListItemIcon>
-                      <ListItemText primary={f.title}/>
-                    </ListItemButton>
-                  ))}
-                </List>
-              </Collapse>
-              : null
-            }
-          </React.Fragment>
-      ))}
+                          onClick={() => navigate(e.to + f.to)}
+                          sx={{
+                            "&.Mui-selected": {
+                              color: (theme) => theme.palette.primary.main,
+                              borderRight: (theme) =>
+                                `3px solid ${theme.palette.primary.main}`,
+                              backgroundColor: (theme) =>
+                                theme.palette.mode === "light"
+                                  ? alpha(theme.palette.primary.main, 0.08)
+                                  : "transparent",
+
+                              "& .MuiListItemIcon-root": {
+                                color: "inherit",
+                              },
+                            },
+                            px: { xs: 2, sm: 2, md: 3 },
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>
+                            {f.icon}
+                          </ListItemIcon>
+                          <ListItemText primary={f.title} />
+                        </ListItemButton>
+                      ))}
+                  </List>
+                </Collapse>
+              ) : null}
+            </React.Fragment>
+          )
+        )}
     </List>
   );
 };

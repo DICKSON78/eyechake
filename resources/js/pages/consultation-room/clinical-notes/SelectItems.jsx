@@ -13,7 +13,7 @@ import {
   LinearProgress,
   Radio,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
@@ -21,12 +21,23 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationRules, numberFormat, throttle, validateInteger } from "../../../helpers";
+import {
+  formatError,
+  getValidationRules,
+  numberFormat,
+  throttle,
+  validateInteger,
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
-const SelectItems = ({ consultation, selected: initial, consultationType, fetchItems: fetchConsultationItems, modal }) => {
-
+const SelectItems = ({
+  consultation,
+  selected: initial,
+  consultationType,
+  fetchItems: fetchConsultationItems,
+  modal,
+}) => {
   const addToast = useToast();
 
   const paymentModeRef = useRef();
@@ -39,7 +50,9 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const [data, setData] = useState();
   const [error, setError] = useState();
 
-  const [paymentMode, setPaymentMode] = useState(consultation.payment_cache_item.payment_mode);
+  const [paymentMode, setPaymentMode] = useState(
+    consultation.payment_cache_item.payment_mode
+  );
   const [consultant, setConsultant] = useState(window.user.employee);
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
@@ -49,34 +62,73 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
   const [dosage, setDosage] = useState();
   const [comments, setComments] = useState();
 
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
-  const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: employees, handleFetch: fetchEmployees } = useFetch("api/employees", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
+    "api/lens-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: employees, handleFetch: fetchEmployees } = useFetch(
+    "api/employees",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data: items, loading: loadingItems, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
-    status: "Active",
-    per_page: 5000,
-    q: itemName,
-    consultation_type: consultationType,
-    is_consultation_item: "No",
-    payment_mode_id: paymentMode ? paymentMode.id : undefined,
-    item_type: itemType,
-    lens_type_id: lensTypeId
-  }, false, [], (response) => response.data.data.data);
+  const {
+    data: items,
+    loading: loadingItems,
+    setData: setItems,
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/items",
+    {
+      status: "Active",
+      per_page: 5000,
+      q: itemName,
+      consultation_type: consultationType,
+      is_consultation_item: "No",
+      payment_mode_id: paymentMode ? paymentMode.id : undefined,
+      item_type: itemType,
+      lens_type_id: lensTypeId,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [selected, setSelected] = useState(initial);
 
-  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost();
-  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+  const {
+    data: dataPost,
+    loading: loadingPost,
+    error: errorPost,
+    handlePost,
+  } = usePost();
+  const {
+    data: dataDelete,
+    loading: loadingDelete,
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
 
   useEffect(() => {
     if (consultationType === "Glass" && itemType === "Lens") {
@@ -154,7 +206,11 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
     setData(null);
     setError(null);
 
-    if (paymentModeRef.current.validate() && consultantRef.current.validate() && quantityRef.current.validate()) {
+    if (
+      paymentModeRef.current.validate() &&
+      consultantRef.current.validate() &&
+      quantityRef.current.validate()
+    ) {
       handlePost("api/consultations/add-item", {
         payment_mode_id: paymentMode.id,
         item_id: selectedItem.id,
@@ -176,10 +232,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
 
   return (
     <React.Fragment>
-      {(loadingPost || loadingDelete) ?
-        <LinearProgress />
-        : null
-      }
+      {loadingPost || loadingDelete ? <LinearProgress /> : null}
       <CardContent>
         <Grid
           container
@@ -241,17 +294,19 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                   fontWeight: 700,
                   color: "text.secondary",
                 }}
-                action={(
+                action={
                   <SearchTextField
-                    onChange={(value) => throttle(() => setItemName(value), 1000)}
+                    onChange={(value) =>
+                      throttle(() => setItemName(value), 1000)
+                    }
                     sx={{ width: 116 }}
                   />
-                )}
+                }
                 className="no-action-margin-right"
               />
               <Divider />
               {loadingItems && <LinearProgress />}
-              {consultationType === "Glass" ?
+              {consultationType === "Glass" ? (
                 <React.Fragment>
                   <CardContent sx={{ bgcolor: "background.default" }}>
                     <Select
@@ -261,7 +316,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                       options={["Lens", "Frame"]}
                       onChange={(value) => setItemType(value)}
                     />
-                    {itemType === "Lens" ?
+                    {itemType === "Lens" ? (
                       <Select
                         placeholder="Lens Type"
                         fullWidth
@@ -272,18 +327,16 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         onChange={(value) => setLensTypeId(value)}
                         containerProps={{ mt: 2 }}
                       />
-                      : null
-                    }
+                    ) : null}
                   </CardContent>
                   <Divider />
                 </React.Fragment>
-                : null
-              }
+              ) : null}
               <CardContent sx={{ height: "40vh", overflowY: "auto" }}>
                 {items.map((e) => (
                   <FormControlLabel
                     key={e.id}
-                    control={(
+                    control={
                       <Radio
                         size="small"
                         checked={selectedItem === e}
@@ -293,7 +346,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                           }
                         }}
                       />
-                    )}
+                    }
                     label={<Typography variant="body2">{e.name}</Typography>}
                     sx={{ display: "flex" }}
                   />
@@ -319,7 +372,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
               />
               <Divider />
               <CardContent>
-                {selectedItem ?
+                {selectedItem ? (
                   <Grid
                     container
                     spacing={1}
@@ -351,7 +404,13 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         disabled={true}
                         label="Unit Price"
                         fullWidth
-                        value={selectedItem.prices.length ? numberFormat(selectedItem.prices[0].unit_price || 0) : ""}
+                        value={
+                          selectedItem.prices.length
+                            ? numberFormat(
+                                selectedItem.prices[0].unit_price || 0
+                              )
+                            : ""
+                        }
                       />
                     </Grid>
                     <Grid
@@ -368,7 +427,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         defaultValue={quantity}
                         rules={[
                           validationRules.number,
-                          (value) => value > 0 || "Quantity has to be greater than 0."
+                          (value) =>
+                            value > 0 || "Quantity has to be greater than 0.",
                         ]}
                         onChange={(value) => {
                           value = validateInteger(value);
@@ -386,10 +446,15 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                         disabled={true}
                         label="Total Price"
                         fullWidth
-                        value={numberFormat((selectedItem.prices[0].unit_price || 0) * (quantity || 0)) || ""}
+                        value={
+                          numberFormat(
+                            (selectedItem.prices[0].unit_price || 0) *
+                              (quantity || 0)
+                          ) || ""
+                        }
                       />
                     </Grid>
-                    {consultationType === "Pharmacy" ?
+                    {consultationType === "Pharmacy" ? (
                       <Grid
                         item
                         md={4}
@@ -403,8 +468,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                           onChange={(value) => setDosage(value)}
                         />
                       </Grid>
-                      : null
-                    }
+                    ) : null}
                     <Grid
                       item
                       md={6}
@@ -436,15 +500,14 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                       </Button>
                     </Grid>
                   </Grid>
-                  : null
-                }
+                ) : null}
 
                 <Table
                   columns={[
                     {
                       field: "index",
                       headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
+                      valueGetter: (item, index) => index + 1,
                     },
                     {
                       field: "item_name",
@@ -454,7 +517,8 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                     {
                       field: "quantity",
                       headerName: "Quantity",
-                      valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                      valueGetter: (item, index) =>
+                        numberFormat(item.quantity || 0),
                     },
                     {
                       field: "dosage",
@@ -473,15 +537,17 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
                           <span>
                             <IconButton
                               size="small"
-                              disabled={loadingDelete || item.status !== "Pending"}
+                              disabled={
+                                loadingDelete || item.status !== "Pending"
+                              }
                               onClick={() => handleDeleteItem(item)}
                             >
-                              <DeleteIcon fontSize="small"/>
+                              <DeleteIcon fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
                       ),
-                    }
+                    },
                   ]}
                   items={selected}
                   hidePaginationFooter
@@ -492,7 +558,7 @@ const SelectItems = ({ consultation, selected: initial, consultationType, fetchI
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

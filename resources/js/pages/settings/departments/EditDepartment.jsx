@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -7,7 +16,6 @@ import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const EditDepartment = ({ item, modal, fetchDepartments }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -20,7 +28,10 @@ const EditDepartment = ({ item, modal, fetchDepartments }) => {
     status: item.status,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/departments/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/departments/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -79,7 +90,9 @@ const EditDepartment = ({ item, modal, fetchDepartments }) => {
                 label="Description"
                 fullWidth
                 defaultValue={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
             <Grid
@@ -89,15 +102,17 @@ const EditDepartment = ({ item, modal, fetchDepartments }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     defaultChecked={item.status === "Active"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      status: event.target.checked ? "Active" : "Inactive"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        status: event.target.checked ? "Active" : "Inactive",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Active"
               />
             </Grid>
@@ -105,7 +120,7 @@ const EditDepartment = ({ item, modal, fetchDepartments }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

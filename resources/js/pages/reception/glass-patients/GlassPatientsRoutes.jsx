@@ -9,7 +9,7 @@ const GlassPatientsRoutes = () => {
       <Route
         path="/"
         exact
-        element={<GlassPatients/>}
+        element={<GlassPatients />}
       />
       <Route
         path="/:patientId/:consultationId/*"

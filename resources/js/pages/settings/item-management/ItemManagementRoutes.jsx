@@ -7,9 +7,18 @@ import Items from "./items/Items";
 const ItemManagementRoutes = () => {
   return (
     <Routes>
-      <Route path="/units-of-measure" element={<UnitsOfMeasure />}/>
-      <Route path="/lens-types" element={<LensTypes />}/>
-      <Route path="/items" element={<Items />}/>
+      <Route
+        path="/units-of-measure"
+        element={<UnitsOfMeasure />}
+      />
+      <Route
+        path="/lens-types"
+        element={<LensTypes />}
+      />
+      <Route
+        path="/items"
+        element={<Items />}
+      />
     </Routes>
   );
 };

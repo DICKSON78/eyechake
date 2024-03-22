@@ -1,10 +1,23 @@
 import React from "react";
 
-import { Button, Card, CardContent, CardHeader, Chip, Divider } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Divider,
+} from "@mui/material";
 import Table from "../../../components/Table";
 
-const ConsultationItemsCard = ({ title, consultationType, loading, items, consultation, onClickAdd }) => {
-
+const ConsultationItemsCard = ({
+  title,
+  consultationType,
+  loading,
+  items,
+  consultation,
+  onClickAdd,
+}) => {
   const getStatusColor = (status) => {
     switch (status) {
       case "Pending":
@@ -52,7 +65,7 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
             {
               field: "index",
               headerName: "S/N",
-              valueGetter: (item, index) => (index + 1),
+              valueGetter: (item, index) => index + 1,
             },
             {
               field: "item_name",
@@ -79,9 +92,11 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
                   label={getStatusLabel(item.status)}
                 />
               ),
-            }
+            },
           ]}
-          items={items.filter((e) => e.consultation_type.name === consultationType)}
+          items={items.filter(
+            (e) => e.consultation_type.name === consultationType
+          )}
           hideNoItemsOverlayIcon
           hidePaginationFooter
           footerItems={[
@@ -101,8 +116,8 @@ const ConsultationItemsCard = ({ title, consultationType, loading, items, consul
                     Add
                   </Button>
                 ),
-              }
-            ]
+              },
+            ],
           ]}
         />
       </CardContent>

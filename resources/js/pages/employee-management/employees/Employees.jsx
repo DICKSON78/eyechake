@@ -1,8 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Chip, Divider, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
-import { EditRounded as EditIcon, MoreVert as MoreIcon } from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+} from "@mui/material";
+import {
+  EditRounded as EditIcon,
+  MoreVert as MoreIcon,
+} from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -14,7 +28,6 @@ import { useFetch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const Employees = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -33,11 +46,17 @@ const Employees = () => {
     job_title_id: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/employees", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/employees",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Employees - ${window.APP_NAME}`;
@@ -70,7 +89,12 @@ const Employees = () => {
       />
     );
 
-    modalRef.current.open("Edit Employee Access Details", component, "sm", item.full_name);
+    modalRef.current.open(
+      "Edit Employee Access Details",
+      component,
+      "sm",
+      item.full_name
+    );
   };
 
   const handleMenuOpen = (event, item) => {
@@ -104,7 +128,7 @@ const Employees = () => {
       <Card>
         <PageHeader
           title="Employees"
-          trailing={(
+          trailing={
             <React.Fragment>
               <Button
                 variant="contained"
@@ -113,7 +137,7 @@ const Employees = () => {
                 New Employee
               </Button>
             </React.Fragment>
-          )}
+          }
         />
         <Divider />
         <CardContent>
@@ -128,7 +152,8 @@ const Employees = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
@@ -183,7 +208,12 @@ const Employees = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Tooltip title="Edit">
@@ -191,7 +221,7 @@ const Employees = () => {
                         size="small"
                         onClick={() => openEditEmployeeModal(item)}
                       >
-                        <EditIcon fontSize="small"/>
+                        <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="More">
@@ -199,23 +229,25 @@ const Employees = () => {
                         size="small"
                         onClick={(event) => handleMenuOpen(event, item)}
                       >
-                        <MoreIcon/>
+                        <MoreIcon />
                       </IconButton>
                     </Tooltip>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      {item ?
+      {item ? (
         <Menu
           anchorEl={anchorEl}
           anchorOrigin={{
@@ -235,9 +267,8 @@ const Employees = () => {
             Edit Access Details
           </MenuItem>
         </Menu>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

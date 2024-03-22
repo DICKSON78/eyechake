@@ -1,5 +1,13 @@
 import React from "react";
-import { Autocomplete, Box, CircularProgress, Paper, Stack, TextField, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  CircularProgress,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
 import ClearIcon from "@mui/icons-material/CloseRounded";
 
@@ -32,7 +40,8 @@ class Select extends React.Component {
   }
 
   validate() {
-    let rules = this.props.rules || [], i = 0;
+    let rules = this.props.rules || [],
+      i = 0;
     if (this.props.required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
@@ -55,7 +64,20 @@ class Select extends React.Component {
   }
 
   render() {
-    const { containerProps, label, placeholder, required, horizontal, options, optionsLabel, optionsValue, clearable, endAdornment, loading, ...rest } = this.props;
+    const {
+      containerProps,
+      label,
+      placeholder,
+      required,
+      horizontal,
+      options,
+      optionsLabel,
+      optionsValue,
+      clearable,
+      endAdornment,
+      loading,
+      ...rest
+    } = this.props;
     return (
       <Box
         component="div"
@@ -65,7 +87,7 @@ class Select extends React.Component {
         })}
         {...containerProps}
       >
-        {label ?
+        {label ? (
           <Typography
             fontWeight={500}
             sx={{
@@ -75,11 +97,11 @@ class Select extends React.Component {
               ...(!horizontal && {
                 ml: 0.5,
                 mb: 0.5,
-              })
+              }),
             }}
           >
             {label}
-            {required ?
+            {required ? (
               <Typography
                 component="span"
                 color="error.main"
@@ -88,11 +110,9 @@ class Select extends React.Component {
               >
                 *
               </Typography>
-              : null
-            }
+            ) : null}
           </Typography>
-          : null
-        }
+        ) : null}
         <Box
           component="div"
           {...(horizontal && {
@@ -101,7 +121,9 @@ class Select extends React.Component {
         >
           <Autocomplete
             {...rest}
-            getOptionLabel={(option) => (optionsLabel ? option[optionsLabel] : option) || ""}
+            getOptionLabel={(option) =>
+              (optionsLabel ? option[optionsLabel] : option) || ""
+            }
             options={options}
             disableClearable={!clearable}
             loading={loading}
@@ -122,10 +144,12 @@ class Select extends React.Component {
                       alignItems="center"
                       spacing={1}
                     >
-                      {loading ?
-                        <CircularProgress color="inherit" size={18}/>
-                        : null
-                      }
+                      {loading ? (
+                        <CircularProgress
+                          color="inherit"
+                          size={18}
+                        />
+                      ) : null}
                       {endAdornment}
                       {params.InputProps.endAdornment}
                     </Stack>
@@ -150,7 +174,7 @@ class Select extends React.Component {
               }
             }}
           />
-          {this.state.error ?
+          {this.state.error ? (
             <Typography
               variant="body2"
               sx={{
@@ -161,8 +185,7 @@ class Select extends React.Component {
             >
               {this.state.error}
             </Typography>
-            : null
-          }
+          ) : null}
         </Box>
       </Box>
     );

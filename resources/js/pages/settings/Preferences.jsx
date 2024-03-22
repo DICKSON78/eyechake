@@ -12,7 +12,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableRow
+  TableRow,
 } from "@mui/material";
 import Page, { Header as PageHeader } from "../../components/Page";
 import Modal from "../../components/Modal";
@@ -25,7 +25,6 @@ import { formatError, getValidationRules } from "../../helpers";
 const validationRules = getValidationRules();
 
 const Preferences = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -53,18 +52,41 @@ const Preferences = () => {
         key: "SEND_REMINDER_MESSAGES_AT",
         value: "",
       },
-    ]
+    ],
   });
 
-  const { data: preferences, loading: loadingPreferences } = useFetch("api/preferences", null, true, null, (response) => {
-    const data = response.data.data;
-    setPreference(0, data.find((e) => e.key === "SEND_MESSAGES")?.value || "No");
-    setPreference(1, data.find((e) => e.key === "CONSULTATION_MESSAGE")?.value || "");
-    setPreference(2, data.find((e) => e.key === "PATIENT_TO_RETURN_REMINDER_MESSAGE")?.value || "");
-    setPreference(3, data.find((e) => e.key === "SEND_REMINDER_MESSAGES_AT")?.value || "11:00");
-    return data;
-  });
-  const { data, loading, error, handlePost } = usePost("api/preferences", formData);
+  const { data: preferences, loading: loadingPreferences } = useFetch(
+    "api/preferences",
+    null,
+    true,
+    null,
+    (response) => {
+      const data = response.data.data;
+      setPreference(
+        0,
+        data.find((e) => e.key === "SEND_MESSAGES")?.value || "No"
+      );
+      setPreference(
+        1,
+        data.find((e) => e.key === "CONSULTATION_MESSAGE")?.value || ""
+      );
+      setPreference(
+        2,
+        data.find((e) => e.key === "PATIENT_TO_RETURN_REMINDER_MESSAGE")
+          ?.value || ""
+      );
+      setPreference(
+        3,
+        data.find((e) => e.key === "SEND_REMINDER_MESSAGES_AT")?.value ||
+          "11:00"
+      );
+      return data;
+    }
+  );
+  const { data, loading, error, handlePost } = usePost(
+    "api/preferences",
+    formData
+  );
 
   useEffect(() => {
     document.title = `System Preferences - ${window.APP_NAME}`;
@@ -103,7 +125,7 @@ const Preferences = () => {
       ]}
     >
       <Card>
-        <PageHeader title="System Preferences"/>
+        <PageHeader title="System Preferences" />
         <Divider />
         <CardContent>
           <Form ref={formRef}>
@@ -116,7 +138,7 @@ const Preferences = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {loadingPreferences ?
+                {loadingPreferences ? (
                   <TableRow>
                     <TableCell
                       colSpan={3}
@@ -125,17 +147,23 @@ const Preferences = () => {
                       <LinearProgress />
                     </TableCell>
                   </TableRow>
-                  : null
-                }
-                {preferences ?
+                ) : null}
+                {preferences ? (
                   <React.Fragment>
                     <TableRow>
                       <TableCell>1</TableCell>
                       <TableCell> Send Messages </TableCell>
                       <TableCell>
                         <Checkbox
-                          defaultChecked={formData.preferences[0].value === "Yes"}
-                          onChange={(event) => setPreference(0, event.target.checked ? "Yes" : "No")}
+                          defaultChecked={
+                            formData.preferences[0].value === "Yes"
+                          }
+                          onChange={(event) =>
+                            setPreference(
+                              0,
+                              event.target.checked ? "Yes" : "No"
+                            )
+                          }
                         />
                       </TableCell>
                     </TableRow>
@@ -187,8 +215,7 @@ const Preferences = () => {
                       </TableCell>
                     </TableRow>
                   </React.Fragment>
-                  : null
-                }
+                ) : null}
               </TableBody>
             </Table>
           </Form>
@@ -212,7 +239,7 @@ const Preferences = () => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

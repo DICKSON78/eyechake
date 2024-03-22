@@ -1,23 +1,40 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 
-const FormLabelControl = ({ containerProps, label, control, required, children }) => {
-
+const FormLabelControl = ({
+  containerProps,
+  label,
+  control,
+  required,
+  horizontal,
+  labelWidth,
+  children,
+}) => {
   return (
     <Box
       component="div"
+      {...(horizontal && {
+        display: "flex",
+        flexDirection: "row",
+      })}
       {...containerProps}
     >
-      {label ?
+      {label ? (
         <Typography
           fontWeight={500}
           sx={{
-            ml: 0.5,
-            mb: 0.5,
+            ...(horizontal && {
+              mr: 1,
+              width: labelWidth,
+            }),
+            ...(!horizontal && {
+              ml: 0.5,
+              mb: 0.5,
+            }),
           }}
         >
           {label}
-          {required ?
+          {required ? (
             <Box
               component="span"
               color="error.main"
@@ -25,12 +42,17 @@ const FormLabelControl = ({ containerProps, label, control, required, children }
             >
               *
             </Box>
-            : null
-          }
+          ) : null}
         </Typography>
-        : null
-      }
-      {control}
+      ) : null}
+      <Box
+        component="div"
+        {...(horizontal && {
+          flexGrow: 1,
+        })}
+      >
+        {control}
+      </Box>
       {children}
     </Box>
   );

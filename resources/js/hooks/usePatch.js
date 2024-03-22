@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const usePatch = (uri, payload = null) => {
-
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -19,7 +18,8 @@ const usePatch = (uri, payload = null) => {
     setLoading(true);
     setError(null);
 
-    window.axios.patch("/" + uri, payload)
+    window.axios
+      .patch("/" + uri, payload)
       .then((response) => {
         setData(response.data);
         setLoading(false);

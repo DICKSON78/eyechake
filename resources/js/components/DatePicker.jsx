@@ -7,7 +7,7 @@ import {
   ArrowDropDownRounded as ArrowDropDownIcon,
   CalendarMonthRounded as CalendarIcon,
   ChevronLeftRounded as ChevronLeftIcon,
-  ChevronRightRounded as ChevronRightIcon
+  ChevronRightRounded as ChevronRightIcon,
 } from "@mui/icons-material";
 
 class DatePicker extends React.Component {
@@ -42,7 +42,8 @@ class DatePicker extends React.Component {
   }
 
   validate() {
-    let rules = this.props.rules || [], i = 0;
+    let rules = this.props.rules || [],
+      i = 0;
     if (this.props.required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
@@ -66,7 +67,8 @@ class DatePicker extends React.Component {
   }
 
   render() {
-    const { containerProps, fullWidth, label, required, horizontal, ...rest } = this.props;
+    const { containerProps, fullWidth, label, required, horizontal, ...rest } =
+      this.props;
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box
@@ -77,7 +79,7 @@ class DatePicker extends React.Component {
           })}
           {...containerProps}
         >
-          {label ?
+          {label ? (
             <Typography
               fontWeight={500}
               sx={{
@@ -87,11 +89,11 @@ class DatePicker extends React.Component {
                 ...(!horizontal && {
                   ml: 0.5,
                   mb: 0.5,
-                })
+                }),
               }}
             >
               {label}
-              {required ?
+              {required ? (
                 <Typography
                   component="span"
                   color="error.main"
@@ -100,11 +102,9 @@ class DatePicker extends React.Component {
                 >
                   *
                 </Typography>
-                : null
-              }
+              ) : null}
             </Typography>
-            : null
-          }
+          ) : null}
           <Box
             component="div"
             {...(horizontal && {
@@ -112,13 +112,13 @@ class DatePicker extends React.Component {
             })}
           >
             <MuiDatePicker
-              inputRef={(ref) => this.input = ref}
+              inputRef={(ref) => (this.input = ref)}
               PaperProps={{ variant: "elevation" }}
               components={{
                 LeftArrowIcon: ChevronLeftIcon,
                 OpenPickerIcon: CalendarIcon,
                 RightArrowIcon: ChevronRightIcon,
-                SwitchViewIcon: ArrowDropDownIcon
+                SwitchViewIcon: ArrowDropDownIcon,
               }}
               inputFormat="yyyy-MM-dd"
               mask="____-__-__"
@@ -143,7 +143,7 @@ class DatePicker extends React.Component {
               onClose={() => this.setState({ open: false })}
               onChange={(value) => this._onChange(value, true)}
             />
-            {this.state.error ?
+            {this.state.error ? (
               <Typography
                 variant="body2"
                 sx={{
@@ -154,8 +154,7 @@ class DatePicker extends React.Component {
               >
                 {this.state.error}
               </Typography>
-              : null
-            }
+            ) : null}
           </Box>
         </Box>
       </LocalizationProvider>

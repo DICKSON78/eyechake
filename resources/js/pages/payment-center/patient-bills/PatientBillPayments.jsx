@@ -10,7 +10,7 @@ import {
   Grid,
   IconButton,
   LinearProgress,
-  Tooltip
+  Tooltip,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Form from "../../../components/Form";
@@ -19,12 +19,15 @@ import Select from "../../../components/Select";
 import Table from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationRules, numberFormat } from "../../../helpers";
+import {
+  formatError,
+  getValidationRules,
+  numberFormat,
+} from "../../../helpers";
 
 const validationRules = getValidationRules();
 
 const PatientBillPayments = ({ bill, fetchBill, modal }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -34,19 +37,31 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
   const [data, setData] = useState();
   const [error, setError] = useState();
 
-  const { data: paymentChannels } = useFetch("api/payment-channels", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentChannels } = useFetch(
+    "api/payment-channels",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
   const {
     data: billPayments,
     loading: loadingFetchBillPayments,
     error: errorFetchBillPayments,
-    handleFetch: fetchBillPayments
-  } = useFetch("api/patient-item-bill-payments", {
-    bill_id: bill.id,
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+    handleFetch: fetchBillPayments,
+  } = useFetch(
+    "api/patient-item-bill-payments",
+    {
+      bill_id: bill.id,
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     bill_id: bill.id,
@@ -54,8 +69,18 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
     amount: undefined,
   });
 
-  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost("api/patient-item-bill-payments", formData);
-  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+  const {
+    data: dataPost,
+    loading: loadingPost,
+    error: errorPost,
+    handlePost,
+  } = usePost("api/patient-item-bill-payments", formData);
+  const {
+    data: dataDelete,
+    loading: loadingDelete,
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
 
   useEffect(() => {
     if (dataPost) {
@@ -123,16 +148,15 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
 
   return (
     <React.Fragment>
-      {(loadingFetchBillPayments || loadingPost || loadingDelete) ?
+      {loadingFetchBillPayments || loadingPost || loadingDelete ? (
         <LinearProgress />
-        : null
-      }
+      ) : null}
       <CardContent>
         <Grid
           container
           spacing={2}
         >
-          {bill.status === "Pending" ?
+          {bill.status === "Pending" ? (
             <Grid
               item
               md={4}
@@ -159,7 +183,9 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                       options={paymentChannels}
                       optionsLabel="name"
                       optionsValue="id"
-                      onChange={(value) => setFormData({ ...formData, channel_id: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, channel_id: value })
+                      }
                       containerProps={{ sx: { mb: 2 } }}
                     />
                     <TextField
@@ -168,7 +194,9 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                       fullWidth
                       required
                       rules={[validationRules.number]}
-                      onChange={(value) => setFormData({ ...formData, amount: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, amount: value })
+                      }
                     />
                   </Form>
                 </CardContent>
@@ -187,8 +215,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                 </Box>
               </Card>
             </Grid>
-            : null
-          }
+          ) : null}
           <Grid
             item
             md={bill.status === "Pending" ? 8 : 12}
@@ -196,7 +223,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
             xs={12}
           >
             <Card variant="outlined">
-              {bill.status === "Pending" ?
+              {bill.status === "Pending" ? (
                 <React.Fragment>
                   <CardHeader
                     title="Bill Payments"
@@ -208,8 +235,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                   />
                   <Divider />
                 </React.Fragment>
-                : null
-              }
+              ) : null}
               <CardContent>
                 <Table
                   loading={loadingFetchBillPayments}
@@ -217,7 +243,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                     {
                       field: "index",
                       headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
+                      valueGetter: (item, index) => index + 1,
                     },
                     {
                       field: "channel_id",
@@ -227,7 +253,8 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                     {
                       field: "amount",
                       headerName: "Amount",
-                      valueGetter: (item, index) => numberFormat(item.amount || 0),
+                      valueGetter: (item, index) =>
+                        numberFormat(item.amount || 0),
                     },
                     {
                       field: "created_by",
@@ -246,10 +273,12 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                           <span>
                             <IconButton
                               size="small"
-                              disabled={loadingDelete || bill.status === "Cleared"}
+                              disabled={
+                                loadingDelete || bill.status === "Cleared"
+                              }
                               onClick={() => handleSubmitDelete(item)}
                             >
-                              <DeleteIcon fontSize="small"/>
+                              <DeleteIcon fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
@@ -260,9 +289,9 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                   hidePaginationFooter
                   footerItems={[
                     [
-                      { value: "TOTAL", tableCellProps: { colSpan: 2 }, },
-                      { value: numberFormat(getTotalAmount() || 0), }
-                    ]
+                      { value: "TOTAL", tableCellProps: { colSpan: 2 } },
+                      { value: numberFormat(getTotalAmount() || 0) },
+                    ],
                   ]}
                 />
               </CardContent>
@@ -271,7 +300,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

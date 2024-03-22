@@ -7,11 +7,16 @@ import Select from "../../../components/Select";
 import useFetch from "../../../hooks/useFetch";
 
 const Filters = ({ params, setParams, ...rest }) => {
-
-  const { data: categories } = useFetch("api/expense-categories", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: categories } = useFetch(
+    "api/expense-categories",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   return (
     <Card
@@ -37,7 +42,12 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               label="Start Date"
               value={params.start_date || null}
-              onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({
+                  ...params,
+                  start_date: !isNaN(value) ? value : null,
+                })
+              }
             />
           </Grid>
           <Grid
@@ -50,7 +60,9 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               label="End Date"
               value={params.end_date || null}
-              onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({ ...params, end_date: !isNaN(value) ? value : null })
+              }
             />
           </Grid>
           <Grid

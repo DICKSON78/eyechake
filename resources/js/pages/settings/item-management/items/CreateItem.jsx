@@ -1,14 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
+import FormLabelControl from "../../../../components/FormLabelControl";
 
 import { useFetch, usePost, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
 
 const CreateItem = ({ modal, fetchItems }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -19,24 +28,49 @@ const CreateItem = ({ modal, fetchItems }) => {
   const unitOfMeasureRef = useRef();
   const lensTypeRef = useRef();
 
-  const { data: itemTypes } = useFetch("api/item-types", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: consultationTypes } = useFetch("api/consultation-types", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: unitsOfMeasure } = useFetch("api/units-of-measure", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
-  const { data: lensTypes } = useFetch("api/lens-types", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: itemTypes } = useFetch(
+    "api/item-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: consultationTypes } = useFetch(
+    "api/consultation-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: unitsOfMeasure } = useFetch(
+    "api/units-of-measure",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+  const { data: lensTypes } = useFetch(
+    "api/lens-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [itemType, setItemType] = useState();
+  const [consultationType, setConsultationType] = useState();
   const [formData, setFormData] = useState({
     name: undefined,
     code: undefined,
@@ -46,6 +80,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     lens_type_id: undefined,
     is_consultation_item: "No",
     is_stock_item: "No",
+    templates: [],
   });
 
   const { data, loading, error, handlePost } = usePost("api/items", formData);
@@ -68,7 +103,10 @@ const CreateItem = ({ modal, fetchItems }) => {
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
-      handlePost();
+      handlePost("api/items", {
+        ...formData,
+        templates: formData.templates.join(","),
+      });
     }
   };
 
@@ -140,8 +178,10 @@ const CreateItem = ({ modal, fetchItems }) => {
                 required
                 options={consultationTypes}
                 optionsLabel="name"
-                optionsValue="id"
-                onChange={(value) => setFormData({ ...formData, consultation_type_id: value })}
+                onChange={(value) => {
+                  setConsultationType(value);
+                  setFormData({ ...formData, consultation_type_id: value?.id });
+                }}
               />
             </Grid>
             <Grid
@@ -158,7 +198,9 @@ const CreateItem = ({ modal, fetchItems }) => {
                 optionsLabel="name"
                 optionsValue="id"
                 clearable
-                onChange={(value) => setFormData({ ...formData, unit_of_measure_id: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, unit_of_measure_id: value })
+                }
               />
             </Grid>
             <Grid
@@ -167,7 +209,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               sm={12}
               xs={12}
             >
-              {itemType && itemType.name === "Lens" ?
+              {itemType && itemType.name === "Lens" ? (
                 <Select
                   ref={lensTypeRef}
                   label="Lens Type"
@@ -175,10 +217,11 @@ const CreateItem = ({ modal, fetchItems }) => {
                   options={lensTypes}
                   optionsLabel="name"
                   optionsValue="id"
-                  onChange={(value) => setFormData({ ...formData, lens_type_id: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, lens_type_id: value })
+                  }
                 />
-                : null
-              }
+              ) : null}
             </Grid>
             <Grid
               item
@@ -187,15 +230,19 @@ const CreateItem = ({ modal, fetchItems }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     checked={formData.is_consultation_item === "Yes"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      is_consultation_item: event.target.checked ? "Yes" : "No"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        is_consultation_item: event.target.checked
+                          ? "Yes"
+                          : "No",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Consultation Item"
               />
             </Grid>
@@ -206,23 +253,72 @@ const CreateItem = ({ modal, fetchItems }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     checked={formData.is_stock_item === "Yes"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      is_stock_item: event.target.checked ? "Yes" : "No"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        is_stock_item: event.target.checked ? "Yes" : "No",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Stock Item"
               />
             </Grid>
+            {consultationType && consultationType.name === "Procedure" ? (
+              <Grid
+                item
+                md={12}
+                sm={12}
+                xs={12}
+              >
+                <FormLabelControl
+                  label="Item Templates"
+                  control={
+                    <Box
+                      p={2}
+                      border={(theme) => `1px solid ${theme.palette.divider}`}
+                      borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+                      bgcolor={(theme) =>
+                        theme.components.MuiOutlinedInput.styleOverrides.root
+                          .backgroundColor
+                      }
+                    >
+                      {["Surgery Record Report", "Cataract Surgery Record"].map(
+                        (e) => (
+                          <FormControlLabel
+                            key={e}
+                            control={
+                              <Checkbox
+                                checked={formData.templates.indexOf(e) !== -1}
+                                onChange={(event) =>
+                                  setFormData({
+                                    ...formData,
+                                    templates: event.target.checked
+                                      ? [...formData.templates, e]
+                                      : formData.templates.filter(
+                                          (f) => f !== e
+                                        ),
+                                  })
+                                }
+                              />
+                            }
+                            label={e}
+                          />
+                        )
+                      )}
+                    </Box>
+                  }
+                />
+              </Grid>
+            ) : null}
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

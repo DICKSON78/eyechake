@@ -10,7 +10,6 @@ import ClinicalNotes from "./clinical-notes/ClinicalNotes";
 import useFetch from "../../hooks/useFetch";
 
 const GlassPatientRoutes = () => {
-
   const navigate = useNavigate();
   const { patientId, consultationId } = useParams();
 
@@ -19,7 +18,13 @@ const GlassPatientRoutes = () => {
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
 
-  const { data: consultation, loading: loadingConsultation } = useFetch(`api/consultations/${consultationId}`, null, true, null, (response) => response.data.data);
+  const { data: consultation, loading: loadingConsultation } = useFetch(
+    `api/consultations/${consultationId}`,
+    null,
+    true,
+    null,
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     if (!patientId || !consultationId) {
@@ -42,29 +47,27 @@ const GlassPatientRoutes = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient || loadingConsultation ?
+      {loadingPatient || loadingConsultation ? (
         <Skeleton
           variant="rounded"
           height={256}
         />
-        : null
-      }
+      ) : null}
 
-      {patient && consultation ?
+      {patient && consultation ? (
         <Routes>
           <Route
             path="/clinical-notes"
-            element={(
+            element={
               <ClinicalNotes
                 patient={patient}
                 consultation={consultation}
               />
-            )}
+            }
           />
         </Routes>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

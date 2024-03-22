@@ -12,11 +12,16 @@ import useFetch from "../../hooks/useFetch";
 import { throttle } from "../../helpers";
 
 const PatientFilters = ({ params, setParams, ...rest }) => {
-
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   return (
     <Card
@@ -42,7 +47,12 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               fullWidth
               label="Start Date"
               value={params.start_date || null}
-              onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({
+                  ...params,
+                  start_date: !isNaN(value) ? value : null,
+                })
+              }
             />
           </Grid>
           <Grid
@@ -55,7 +65,9 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               fullWidth
               label="End Date"
               value={params.end_date || null}
-              onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({ ...params, end_date: !isNaN(value) ? value : null })
+              }
             />
           </Grid>
           <Grid
@@ -71,11 +83,16 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, patient_name: value }), 1000)}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, patient_name: value }),
+                  1000
+                )
+              }
             />
           </Grid>
           <Grid
@@ -91,11 +108,16 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small"/>
+                    <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
               }}
-              onChange={(value) => throttle(() => setParams({ ...params, patient_id: value }), 1000)}
+              onChange={(value) =>
+                throttle(
+                  () => setParams({ ...params, patient_id: value }),
+                  1000
+                )
+              }
             />
           </Grid>
           <Grid
@@ -111,7 +133,9 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               optionsLabel="name"
               optionsValue="id"
               clearable
-              onChange={(value) => setParams({ ...params, item_payment_mode_id: value })}
+              onChange={(value) =>
+                setParams({ ...params, item_payment_mode_id: value })
+              }
             />
           </Grid>
         </Grid>

@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -7,7 +14,6 @@ import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -19,7 +25,10 @@ const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
     description: undefined,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/payment-channels", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/payment-channels",
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -42,7 +51,6 @@ const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
       handlePost();
     }
   };
-
 
   return (
     <React.Fragment>
@@ -77,14 +85,16 @@ const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
                 ref={descriptionRef}
                 label="Description"
                 fullWidth
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

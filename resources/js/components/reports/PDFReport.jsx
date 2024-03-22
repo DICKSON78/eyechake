@@ -20,21 +20,31 @@ Font.register({
   ],
 });
 
-const PDFReportDocument = ({ title, subtitle, orientation, columns, items, nestedObject, nestedColumns, summationFooterColumns }) => {
-
+const PDFReportDocument = ({
+  title,
+  subtitle,
+  orientation,
+  columns,
+  items,
+  nestedObject,
+  nestedColumns,
+  summationFooterColumns,
+}) => {
   const getFooterItems = () => {
     // generate corresponding empty columns
     let footerColumns = [
       { value: null, style: { flex: 0.5 } }, // index cell
       ...columns.map((col) => {
         return { value: null, style: col.style };
-      })
+      }),
     ];
 
     // replace values with the given value at provided index
     summationFooterColumns.forEach((col, index) => {
       if (typeof col.reducer === "function") {
-        footerColumns[col.index || index].value = numberFormat(items.reduce(col.reducer, 0));
+        footerColumns[col.index || index].value = numberFormat(
+          items.reduce(col.reducer, 0)
+        );
       } else {
         footerColumns[col.index || index].value = col.value;
       }
@@ -72,36 +82,37 @@ const PDFReportDocument = ({ title, subtitle, orientation, columns, items, neste
               field: "index",
               headerName: "S/N",
               flex: 0.5,
-              valueGetter: (item, index) => (index + 1),
+              valueGetter: (item, index) => index + 1,
             },
             ...(columns || []),
           ]}
           items={items}
-          renderExpanded={nestedObject ?
-            (item, index) => (
-              <Table
-                columns={[
-                  {
-                    field: "index",
-                    headerName: "S/N",
-                    valueGetter: (item, index) => (index + 1),
-                  },
-                  ...(nestedColumns || []),
-                ]}
-                items={items[index] ? items[index][nestedObject] : []}
-              />
-            ) : null
+          renderExpanded={
+            nestedObject
+              ? (item, index) => (
+                  <Table
+                    columns={[
+                      {
+                        field: "index",
+                        headerName: "S/N",
+                        valueGetter: (item, index) => index + 1,
+                      },
+                      ...(nestedColumns || []),
+                    ]}
+                    items={items[index] ? items[index][nestedObject] : []}
+                  />
+                )
+              : null
           }
           repeatHead={!!nestedObject}
-          footerItems={summationFooterColumns ?
-            [
-              getFooterItems(),
-            ]
-            : null
-          }
+          footerItems={summationFooterColumns ? [getFooterItems()] : null}
         />
 
-        <Footer render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}/>
+        <Footer
+          render={({ pageNumber, totalPages }) =>
+            `${pageNumber} / ${totalPages}`
+          }
+        />
       </Page>
     </Document>
   );

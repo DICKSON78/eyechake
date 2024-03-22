@@ -32,7 +32,8 @@ class TextField extends React.Component {
   }
 
   validate() {
-    let rules = this.props.rules || [], i = 0;
+    let rules = this.props.rules || [],
+      i = 0;
     if (this.props.required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
@@ -66,7 +67,7 @@ class TextField extends React.Component {
         })}
         {...containerProps}
       >
-        {label ?
+        {label ? (
           <Typography
             fontWeight={500}
             sx={{
@@ -76,11 +77,11 @@ class TextField extends React.Component {
               ...(!horizontal && {
                 ml: 0.5,
                 mb: 0.5,
-              })
+              }),
             }}
           >
             {label}
-            {required ?
+            {required ? (
               <Typography
                 component="span"
                 color="error.main"
@@ -89,11 +90,9 @@ class TextField extends React.Component {
               >
                 *
               </Typography>
-              : null
-            }
+            ) : null}
           </Typography>
-          : null
-        }
+        ) : null}
         <Box
           component="div"
           {...(horizontal && {
@@ -101,7 +100,7 @@ class TextField extends React.Component {
           })}
         >
           <MuiTextField
-            inputRef={(ref) => this.input = ref}
+            inputRef={(ref) => (this.input = ref)}
             variant="outlined"
             size="small"
             margin="none"
@@ -111,7 +110,7 @@ class TextField extends React.Component {
             error={!!this.state.error}
             onChange={(event) => this._onChange(event.target.value, true)}
           />
-          {this.state.error ?
+          {this.state.error ? (
             <Typography
               variant="body2"
               sx={{
@@ -122,8 +121,7 @@ class TextField extends React.Component {
             >
               {this.state.error}
             </Typography>
-            : null
-          }
+          ) : null}
         </Box>
       </Box>
     );

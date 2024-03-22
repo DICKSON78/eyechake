@@ -7,25 +7,25 @@ const ReportsRoutes = () => {
     <Routes>
       <Route
         path="/served-procedures"
-        element={(
+        element={
           <PatientItems
             module="Procedure Room"
             title="Served Procedures Report"
             consultationType="Procedure"
             status="Served"
           />
-        )}
+        }
       />
       <Route
         path="/pending-procedures"
-        element={(
+        element={
           <PatientItems
             module="Procedure Room"
             title="Pending Procedures Report"
             consultationType="Procedure"
             status="Pending,Paid,Billed"
           />
-        )}
+        }
       />
     </Routes>
   );

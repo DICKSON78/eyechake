@@ -1,11 +1,22 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
-import { Stack, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import {
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
 const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
-
   const unaidedReVaRef = useRef();
   const unaidedRePhRef = useRef();
   const unaidedIpdRef = useRef();
@@ -22,7 +33,10 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
 
   const autoSave = (field, value) => {
     if (!visual_acuity || (visual_acuity && value !== visual_acuity[field])) {
-      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Visual Acuity", [field]: value });
+      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, {
+        what: "Visual Acuity",
+        [field]: value,
+      });
     }
   };
 
@@ -37,12 +51,12 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell/>
+          <TableCell />
           <TableCell colSpan={2}>Unaided</TableCell>
           <TableCell colSpan={2}>Aided</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell/>
+          <TableCell />
           <TableCell>RE</TableCell>
           <TableCell>LE</TableCell>
           <TableCell>RE</TableCell>
@@ -95,7 +109,9 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 ref={aidedReVaDescriptionRef}
                 placeholder="Enter description"
                 fullWidth
-                defaultValue={visual_acuity ? visual_acuity.aided_re_va_description : null}
+                defaultValue={
+                  visual_acuity ? visual_acuity.aided_re_va_description : null
+                }
                 onChange={(value) => {
                   setFormData({ ...formData, aided_re_va_description: value });
                   autoSave("aided_re_va_description", value);
@@ -124,7 +140,9 @@ const VisualAcuity = ({ consultation: { id, status, visual_acuity } }, ref) => {
                 ref={aidedLeVaDescriptionRef}
                 placeholder="Enter description"
                 fullWidth
-                defaultValue={visual_acuity ? visual_acuity.aided_le_va_description : null}
+                defaultValue={
+                  visual_acuity ? visual_acuity.aided_le_va_description : null
+                }
                 onChange={(value) => {
                   setFormData({ ...formData, aided_le_va_description: value });
                   autoSave("aided_le_va_description", value);

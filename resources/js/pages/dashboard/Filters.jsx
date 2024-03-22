@@ -4,7 +4,6 @@ import { Box, Button, CardActions, CardContent, Grid } from "@mui/material";
 import DatePicker from "../../components/DatePicker";
 
 const Filters = ({ params: initial, setParams: updateParams, modal }) => {
-
   const [params, setParams] = useState(initial);
 
   const handleSubmit = () => {
@@ -29,7 +28,12 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
               fullWidth
               label="Start Date"
               value={params.start_date || null}
-              onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({
+                  ...params,
+                  start_date: !isNaN(value) ? value : null,
+                })
+              }
             />
           </Grid>
           <Grid
@@ -42,13 +46,15 @@ const Filters = ({ params: initial, setParams: updateParams, modal }) => {
               fullWidth
               label="End Date"
               value={params.end_date || null}
-              onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+              onChange={(value) =>
+                setParams({ ...params, end_date: !isNaN(value) ? value : null })
+              }
             />
           </Grid>
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, LinearProgress, Skeleton, Stack } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  LinearProgress,
+  Skeleton,
+  Stack,
+} from "@mui/material";
 
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -10,10 +18,13 @@ import Table from "../../../components/Table";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationError, numberFormat } from "../../../helpers";
+import {
+  formatError,
+  getValidationError,
+  numberFormat,
+} from "../../../helpers";
 
 const PendingPatientItems = () => {
-
   const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
@@ -28,18 +39,27 @@ const PendingPatientItems = () => {
     data: items,
     setData: setItems,
     loading: loadingItems,
-    handleFetch: fetchItems
-  } = useFetch("api/patient-payment-cache-items", {
-    status: "Pending",
-    per_page: 500,
-    payment_cache_id: paymentCacheId,
-    transaction_type: "Credit"
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    {
+      status: "Pending",
+      per_page: 500,
+      payment_cache_id: paymentCacheId,
+      transaction_type: "Credit",
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data, loading, error, handlePost, setError } = usePost("api/patient-payment-cache-items/approve-credit-payment", {
-    payment_cache_id: paymentCacheId,
-    items: selectedItems.map((e) => e.id),
-  });
+  const { data, loading, error, handlePost, setError } = usePost(
+    "api/patient-payment-cache-items/approve-credit-payment",
+    {
+      payment_cache_id: paymentCacheId,
+      items: selectedItems.map((e) => e.id),
+    }
+  );
 
   useEffect(() => {
     document.title = `Pending Patient Items - ${window.APP_NAME}`;
@@ -86,7 +106,10 @@ const PendingPatientItems = () => {
   };
 
   const getTotalAmount = () => {
-    return items.reduce((acc, e) => acc + ((e.unit_price || 0) * (e.quantity || 0)), 0);
+    return items.reduce(
+      (acc, e) => acc + (e.unit_price || 0) * (e.quantity || 0),
+      0
+    );
   };
 
   return (
@@ -104,17 +127,16 @@ const PendingPatientItems = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ?
+      {loadingPatient ? (
         <Skeleton
           variant="rounded"
           height={256}
         />
-        : null
-      }
+      ) : null}
 
-      {patient ?
+      {patient ? (
         <Card>
-          <PageHeader title="Pending Patient Items"/>
+          <PageHeader title="Pending Patient Items" />
           <Divider />
           <CardContent>
             <Table
@@ -123,7 +145,7 @@ const PendingPatientItems = () => {
                 {
                   field: "index",
                   headerName: "S/N",
-                  valueGetter: (item, index) => (index + 1),
+                  valueGetter: (item, index) => index + 1,
                 },
                 {
                   field: "item_id",
@@ -138,18 +160,21 @@ const PendingPatientItems = () => {
                 {
                   field: "unit_price",
                   headerName: "Unit Price",
-                  valueGetter: (item, index) => numberFormat(item.unit_price || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.unit_price || 0),
                 },
                 {
                   field: "quantity",
                   headerName: "Quantity",
-                  valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.quantity || 0),
                 },
                 {
                   field: "total_price",
                   headerName: "Subtotal",
-                  valueGetter: (item, index) => numberFormat((item.unit_price || 0) * (item.quantity || 0)),
-                }
+                  valueGetter: (item, index) =>
+                    numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                },
               ]}
               items={items}
               hidePaginationFooter
@@ -158,9 +183,9 @@ const PendingPatientItems = () => {
               setChecked={setSelectedItems}
               footerItems={[
                 [
-                  { value: "TOTAL", tableCellProps: { colSpan: 6 }, },
-                  { value: numberFormat(getTotalAmount() || 0), }
-                ]
+                  { value: "TOTAL", tableCellProps: { colSpan: 6 } },
+                  { value: numberFormat(getTotalAmount() || 0) },
+                ],
               ]}
             />
           </CardContent>
@@ -174,15 +199,16 @@ const PendingPatientItems = () => {
             flexWrap="wrap"
             p={2}
           >
-            {false &&
-            <Button
-              disabled={loading}
-              variant="contained"
-              color="secondary"
-              onClick={() => console.log(true)}
-            >
-              Print Receipt
-            </Button>}
+            {false && (
+              <Button
+                disabled={loading}
+                variant="contained"
+                color="secondary"
+                onClick={() => console.log(true)}
+              >
+                Print Receipt
+              </Button>
+            )}
             <Button
               disabled={loading}
               variant="contained"
@@ -192,9 +218,8 @@ const PendingPatientItems = () => {
             </Button>
           </Stack>
         </Card>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -13,7 +13,7 @@ import {
   Radio,
   Stack,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/CloseRounded";
 
@@ -31,13 +31,12 @@ import {
   getValidationRules,
   numberFormat,
   throttle,
-  validateInteger
+  validateInteger,
 } from "../../helpers";
 
 const validationRules = getValidationRules();
 
 const Stocktaking = () => {
-
   const addToast = useToast();
 
   const modalRef = useRef();
@@ -55,24 +54,43 @@ const Stocktaking = () => {
   const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch("api/lens-types", {
-    status: "Active",
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
+  const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
+    "api/lens-types",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data: items, setData: setItems, handleFetch: fetchItems } = useFetch("api/items", {
-    status: "Active",
-    per_page: 5000,
-    is_stock_item: "Yes",
-    q: itemName,
-    item_type: itemType,
-    lens_type_id: lensTypeId
-  }, true, [], (response) => response.data.data.data);
+  const {
+    data: items,
+    setData: setItems,
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/items",
+    {
+      status: "Active",
+      per_page: 5000,
+      is_stock_item: "Yes",
+      q: itemName,
+      item_type: itemType,
+      lens_type_id: lensTypeId,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data, loading, error, handlePost, setError } = usePost("api/stocktakes", {
-    reason,
-    items: selectedItems,
-  });
+  const { data, loading, error, handlePost, setError } = usePost(
+    "api/stocktakes",
+    {
+      reason,
+      items: selectedItems,
+    }
+  );
 
   useEffect(() => {
     document.title = `Stocktaking - ${window.APP_NAME}`;
@@ -101,13 +119,19 @@ const Stocktaking = () => {
   }, [error]);
 
   const handleAddItem = () => {
-    if (quantityRef.current.validate() && unitBuyingPriceRef.current.validate()) {
-      setSelectedItems([...selectedItems, {
-        item_id: selectedItem.id,
-        item_name: selectedItem.name,
-        quantity,
-        unit_buying_price: unitBuyingPrice,
-      }]);
+    if (
+      quantityRef.current.validate() &&
+      unitBuyingPriceRef.current.validate()
+    ) {
+      setSelectedItems([
+        ...selectedItems,
+        {
+          item_id: selectedItem.id,
+          item_name: selectedItem.name,
+          quantity,
+          unit_buying_price: unitBuyingPrice,
+        },
+      ]);
 
       setSelectedItem(null);
       setQuantity(null);
@@ -123,7 +147,9 @@ const Stocktaking = () => {
     setError(null);
 
     if (!reasonRef.current.validate()) {
-      return setError(getValidationError("Please write reason for this stocktaking."));
+      return setError(
+        getValidationError("Please write reason for this stocktaking.")
+      );
     }
 
     if (!selectedItems.length) {
@@ -153,7 +179,7 @@ const Stocktaking = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Stocktaking"/>
+        <PageHeader title="Stocktaking" />
         <Divider />
         <CardContent>
           <Grid
@@ -209,11 +235,13 @@ const Stocktaking = () => {
                     fontWeight: 700,
                     color: "text.secondary",
                   }}
-                  action={(
+                  action={
                     <SearchTextField
-                      onChange={(value) => throttle(() => setItemName(value), 1000)}
+                      onChange={(value) =>
+                        throttle(() => setItemName(value), 1000)
+                      }
                     />
-                  )}
+                  }
                   className="no-action-margin-right"
                 />
                 <Divider />
@@ -225,7 +253,7 @@ const Stocktaking = () => {
                     options={["Pharmaceutical", "Lens", "Frame"]}
                     onChange={(value) => setItemType(value)}
                   />
-                  {itemType === "Lens" ?
+                  {itemType === "Lens" ? (
                     <Select
                       placeholder="Lens Type"
                       fullWidth
@@ -236,21 +264,20 @@ const Stocktaking = () => {
                       onChange={(value) => setLensTypeId(value)}
                       containerProps={{ mt: 2 }}
                     />
-                    : null
-                  }
+                  ) : null}
                 </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
                   {items.map((e) => (
                     <FormControlLabel
                       key={e.id}
-                      control={(
+                      control={
                         <Radio
                           size="small"
                           checked={selectedItem === e}
                           onChange={(event) => setSelectedItem(e)}
                         />
-                      )}
+                      }
                       label={<Typography variant="body2">{e.name}</Typography>}
                       sx={{ display: "flex" }}
                     />
@@ -279,7 +306,7 @@ const Stocktaking = () => {
                 />
                 <Divider />
                 <CardContent>
-                  {selectedItem ?
+                  {selectedItem ? (
                     <Grid
                       container
                       spacing={1}
@@ -329,7 +356,8 @@ const Stocktaking = () => {
                           defaultValue={quantity}
                           rules={[
                             validationRules.number,
-                            (value) => value > 0 || "Quantity has to be greater than 0."
+                            (value) =>
+                              value > 0 || "Quantity has to be greater than 0.",
                           ]}
                           onChange={(value) => {
                             value = validateInteger(value);
@@ -351,11 +379,16 @@ const Stocktaking = () => {
                           rules={[
                             (value) => {
                               value = (value || "").trim();
-                              return !value ? true : validationRules.number(value);
+                              return !value
+                                ? true
+                                : validationRules.number(value);
                             },
                             (value) => {
                               value = (value || "").trim();
-                              return !value ? true : (value > 0 || "Price has to be greater than 0.");
+                              return !value
+                                ? true
+                                : value > 0 ||
+                                    "Price has to be greater than 0.";
                             },
                           ]}
                           onChange={(value) => {
@@ -382,15 +415,14 @@ const Stocktaking = () => {
                         </Button>
                       </Grid>
                     </Grid>
-                    : null
-                  }
+                  ) : null}
 
                   <Table
                     columns={[
                       {
                         field: "index",
                         headerName: "S/N",
-                        valueGetter: (item, index) => (index + 1),
+                        valueGetter: (item, index) => index + 1,
                       },
                       {
                         field: "item_name",
@@ -399,12 +431,14 @@ const Stocktaking = () => {
                       {
                         field: "quantity",
                         headerName: "Quantity",
-                        valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                        valueGetter: (item, index) =>
+                          numberFormat(item.quantity || 0),
                       },
                       {
                         field: "unit_buying_price",
                         headerName: "Unit Buying Price",
-                        valueGetter: (item, index) => numberFormat(item.unit_buying_price || 0),
+                        valueGetter: (item, index) =>
+                          numberFormat(item.unit_buying_price || 0),
                       },
                       {
                         field: "actions",
@@ -416,13 +450,13 @@ const Stocktaking = () => {
                                 size="small"
                                 onClick={() => handleRemoveItem(index)}
                               >
-                                <DeleteIcon fontSize="small"/>
+                                <DeleteIcon fontSize="small" />
                               </IconButton>
                             </span>
                           </Tooltip>
                         ),
                         show: !data,
-                      }
+                      },
                     ]}
                     items={selectedItems}
                     hidePaginationFooter
@@ -451,7 +485,7 @@ const Stocktaking = () => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -11,7 +11,7 @@ import {
   LinearProgress,
   Paper,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 
 import { Header as PageHeader } from "../../../components/Page";
@@ -24,7 +24,11 @@ import Refraction from "./Refraction";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
-import { formatError, getValidationError, numberFormat } from "../../../helpers";
+import {
+  formatError,
+  getValidationError,
+  numberFormat,
+} from "../../../helpers";
 
 const Subheader = ({ title, sx }) => {
   return (
@@ -50,7 +54,6 @@ const Subheader = ({ title, sx }) => {
 };
 
 const ClinicalNotes = ({ patient, consultation }) => {
-
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -65,18 +68,29 @@ const ClinicalNotes = ({ patient, consultation }) => {
     data: items,
     setData: setItems,
     loading: loadingItems,
-    handleFetch: fetchItems
-  } = useFetch("api/patient-payment-cache-items", {
-    per_page: 500,
-    consultation_id: consultation.id,
-    consultation_type: "Glass",
-  }, false, [], (response) => response.data.data.data);
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    {
+      per_page: 500,
+      consultation_id: consultation.id,
+      consultation_type: "Glass",
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [remarks, setRemarks] = useState(consultation.remarks);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const { handlePatch: handleAutoSave } = usePatch();
-  const { data: dataDispense, loading: loadingDispense, error: errorDispense, handlePost: handleDispense } = usePost();
+  const {
+    data: dataDispense,
+    loading: loadingDispense,
+    error: errorDispense,
+    handlePost: handleDispense,
+  } = usePost();
 
   useEffect(() => {
     document.title = `Clinical Notes - ${window.APP_NAME}`;
@@ -102,7 +116,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   }, [errorDispense]);
 
-
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
@@ -117,10 +130,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const autoSave = (field, value) => {
     if (value !== consultation[field]) {
-      handleAutoSave(`api/consultations/${consultation.id}/auto-save-clinical-notes`, {
-        what: "Consultation",
-        [field]: value
-      });
+      handleAutoSave(
+        `api/consultations/${consultation.id}/auto-save-clinical-notes`,
+        {
+          what: "Consultation",
+          [field]: value,
+        }
+      );
     }
   };
 
@@ -129,7 +145,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
     setError(null);
 
     if (!formRef.current.validate()) {
-      return setError(getValidationError("Please complete all the required fields."));
+      return setError(
+        getValidationError("Please complete all the required fields.")
+      );
     }
 
     if (!selectedItems.length) {
@@ -184,12 +202,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
       <Card>
         <PageHeader
           title="Clinical Notes"
-          trailing={(
+          trailing={
             <PatientFilePDF
               consultationId={consultation.id}
               patient={patient}
             />
-          )}
+          }
         />
         <Divider />
         <Form ref={formRef}>
@@ -198,16 +216,16 @@ const ClinicalNotes = ({ patient, consultation }) => {
               title="Refraction Details"
               sx={{ mt: 0 }}
             />
-            <Refraction consultation={consultation}/>
+            <Refraction consultation={consultation} />
 
-            <Subheader title="Management"/>
+            <Subheader title="Management" />
             <Table
               loading={loadingItems}
               columns={[
                 {
                   field: "index",
                   headerName: "S/N",
-                  valueGetter: (item, index) => (index + 1),
+                  valueGetter: (item, index) => index + 1,
                 },
                 {
                   field: "item_id",
@@ -222,7 +240,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 {
                   field: "balance",
                   headerName: "Item Balance",
-                  valueGetter: (item, index) => numberFormat(item.item.balance || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.item.balance || 0),
                 },
                 {
                   field: "payment_mode_id",
@@ -232,7 +251,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 {
                   field: "quantity",
                   headerName: "Quantity",
-                  valueGetter: (item, index) => numberFormat(item.quantity || 0),
+                  valueGetter: (item, index) =>
+                    numberFormat(item.quantity || 0),
                 },
                 {
                   field: "comments",
@@ -248,16 +268,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       label={getStatusLabel(item.status)}
                     />
                   ),
-                }
+                },
               ]}
               items={items}
               hidePaginationFooter
-              checkboxSelection={(item, index) => item.status === "Paid" || item.status === "Billed"}
+              checkboxSelection={(item, index) =>
+                item.status === "Paid" || item.status === "Billed"
+              }
               checked={selectedItems}
               setChecked={setSelectedItems}
             />
 
-            <Subheader title="Remarks"/>
+            <Subheader title="Remarks" />
             <Grid
               container
               spacing={2}
@@ -302,7 +324,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
           </Button>
         </Stack>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </React.Fragment>
   );
 };

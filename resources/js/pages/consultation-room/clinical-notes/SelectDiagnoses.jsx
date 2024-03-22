@@ -13,7 +13,7 @@ import {
   IconButton,
   LinearProgress,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
@@ -21,8 +21,13 @@ import Table, { SearchTextField } from "../../../components/Table";
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
 import { formatError, throttle } from "../../../helpers";
 
-const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fetchDiagnoses, modal }) => {
-
+const SelectDiagnoses = ({
+  consultationId,
+  selected: initial,
+  diagnosisType,
+  fetchDiagnoses,
+  modal,
+}) => {
   const addToast = useToast();
 
   const [data, setData] = useState();
@@ -30,16 +35,32 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
 
   const [diseaseName, setDiseaseName] = useState();
 
-  const { data: diseases, loading: loadingDiseases } = useFetch("api/diseases", {
-    status: "Active",
-    per_page: 50000,
-    q: diseaseName
-  }, true, [], (response) => response.data.data.data);
+  const { data: diseases, loading: loadingDiseases } = useFetch(
+    "api/diseases",
+    {
+      status: "Active",
+      per_page: 50000,
+      q: diseaseName,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [selected, setSelected] = useState(initial);
 
-  const { data: dataPost, loading: loadingPost, error: errorPost, handlePost } = usePost();
-  const { data: dataDelete, loading: loadingDelete, error: errorDelete, handleDelete } = useDelete();
+  const {
+    data: dataPost,
+    loading: loadingPost,
+    error: errorPost,
+    handlePost,
+  } = usePost();
+  const {
+    data: dataDelete,
+    loading: loadingDelete,
+    error: errorDelete,
+    handleDelete,
+  } = useDelete();
 
   useEffect(() => {
     if (dataPost) {
@@ -87,7 +108,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
     handlePost("api/consultation-diagnoses", {
       consultation_id: consultationId,
       diagnosis_type: diagnosisType,
-      disease_id: item.id
+      disease_id: item.id,
     });
   };
 
@@ -99,10 +120,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
 
   return (
     <React.Fragment>
-      {(loadingPost || loadingDelete) ?
-        <LinearProgress />
-        : null
-      }
+      {loadingPost || loadingDelete ? <LinearProgress /> : null}
       <CardContent>
         <Grid
           container
@@ -122,11 +140,13 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                   fontWeight: 700,
                   color: "text.secondary",
                 }}
-                action={(
+                action={
                   <SearchTextField
-                    onChange={(value) => throttle(() => setDiseaseName(value), 1000)}
+                    onChange={(value) =>
+                      throttle(() => setDiseaseName(value), 1000)
+                    }
                   />
-                )}
+                }
                 className="no-action-margin-right"
               />
               <Divider />
@@ -135,7 +155,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                 {diseases.map((e) => (
                   <FormControlLabel
                     key={e.id}
-                    control={(
+                    control={
                       <Checkbox
                         size="small"
                         checked={!!selected.find((f) => f.disease_id === e.id)}
@@ -143,14 +163,16 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                           if (event.target.checked) {
                             handlePostDiagnosis(e);
                           } else {
-                            const item = selected.find((f) => f.disease_id === e.id);
+                            const item = selected.find(
+                              (f) => f.disease_id === e.id
+                            );
                             if (item) {
                               handleDeleteDiagnosis(item);
                             }
                           }
                         }}
                       />
-                    )}
+                    }
                     label={<Typography variant="body2">{e.name}</Typography>}
                     sx={{ display: "flex" }}
                   />
@@ -181,7 +203,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                     {
                       field: "index",
                       headerName: "S/N",
-                      valueGetter: (item, index) => (index + 1),
+                      valueGetter: (item, index) => index + 1,
                     },
                     {
                       field: "disease_name",
@@ -204,12 +226,12 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
                               disabled={loadingDelete}
                               onClick={() => handleDeleteDiagnosis(item)}
                             >
-                              <DeleteIcon fontSize="small"/>
+                              <DeleteIcon fontSize="small" />
                             </IconButton>
                           </span>
                         </Tooltip>
                       ),
-                    }
+                    },
                   ]}
                   items={selected}
                   hidePaginationFooter
@@ -220,7 +242,7 @@ const SelectDiagnoses = ({ consultationId, selected: initial, diagnosisType, fet
         </Grid>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

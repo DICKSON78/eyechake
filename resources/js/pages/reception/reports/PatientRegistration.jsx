@@ -12,21 +12,37 @@ import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
 import { useFetch } from "../../../hooks";
-import { formatDateForDb, getAge, getDateRangeTitle, throttle } from "../../../helpers";
+import {
+  formatDateForDb,
+  getAge,
+  getDateRangeTitle,
+  throttle,
+} from "../../../helpers";
 
 const PatientRegistration = () => {
-
   const districtRef = useRef();
 
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
-  const { data: regions } = useFetch("api/regions", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: regions } = useFetch(
+    "api/regions",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     id: undefined,
@@ -39,11 +55,21 @@ const PatientRegistration = () => {
     end_date: undefined,
   });
 
-  const { data: districts, setData: setDistricts, handleFetch: fetchDistricts } = useFetch("api/districts", {
-    status: "Active",
-    region_id: params.region_id,
-    per_page: 500
-  }, false, [], (response) => response.data.data.data);
+  const {
+    data: districts,
+    setData: setDistricts,
+    handleFetch: fetchDistricts,
+  } = useFetch(
+    "api/districts",
+    {
+      status: "Active",
+      region_id: params.region_id,
+      per_page: 500,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   useEffect(() => {
     document.title = `Patient Registration Report - ${window.APP_NAME}`;
@@ -73,10 +99,14 @@ const PatientRegistration = () => {
         uri="api/patients"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <React.Fragment>
             <Card
               variant="outlined"
@@ -100,7 +130,12 @@ const PatientRegistration = () => {
                       fullWidth
                       label="Start Date"
                       value={params.start_date || null}
-                      onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -113,7 +148,12 @@ const PatientRegistration = () => {
                       fullWidth
                       label="End Date"
                       value={params.end_date || null}
-                      onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -129,11 +169,16 @@ const PatientRegistration = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, name: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, name: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -149,11 +194,16 @@ const PatientRegistration = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, id: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(
+                          () => setParams({ ...params, id: value }),
+                          1000
+                        )
+                      }
                     />
                   </Grid>
                   <Grid
@@ -167,7 +217,9 @@ const PatientRegistration = () => {
                       fullWidth
                       options={["Male", "Female"]}
                       clearable
-                      onChange={(value) => setParams({ ...params, gender: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, gender: value })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -183,14 +235,16 @@ const PatientRegistration = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, payment_mode_id: value })
+                      }
                     />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "full_name",
@@ -203,7 +257,7 @@ const PatientRegistration = () => {
           {
             field: "date_of_birth",
             headerName: "Age",
-            valueGetter: (item, index) => getAge(item.date_of_birth)
+            valueGetter: (item, index) => getAge(item.date_of_birth),
           },
           {
             field: "gender",

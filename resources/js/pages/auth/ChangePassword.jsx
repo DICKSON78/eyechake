@@ -1,6 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, CardActions, CardContent, Grid, InputAdornment, LinearProgress } from "@mui/material";
-import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+} from "@mui/material";
+import {
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+} from "@mui/icons-material";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
@@ -8,7 +20,6 @@ import { usePost } from "../../hooks";
 import { formatError } from "../../helpers";
 
 const ChangePassword = ({ modal }) => {
-
   const formRef = useRef();
   const currentPasswordRef = useRef();
   const newPasswordRef = useRef();
@@ -17,7 +28,10 @@ const ChangePassword = ({ modal }) => {
     current_password: undefined,
     new_password: undefined,
   });
-  const { data, loading, error, handlePost } = usePost("api/auth/change-password", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/auth/change-password",
+    formData
+  );
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -79,11 +93,17 @@ const ChangePassword = ({ modal }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      {showPassword ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
                     </InputAdornment>
                   ),
                 }}
-                onChange={(value) => setFormData({ ...formData, current_password: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, current_password: value })
+                }
               />
             </Grid>
             <Grid
@@ -105,18 +125,24 @@ const ChangePassword = ({ modal }) => {
                       sx={{ cursor: "pointer" }}
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      {showPassword ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
                     </InputAdornment>
                   ),
                 }}
-                onChange={(value) => setFormData({ ...formData, new_password: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, new_password: value })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

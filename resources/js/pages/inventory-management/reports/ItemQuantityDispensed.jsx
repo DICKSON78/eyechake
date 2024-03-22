@@ -11,14 +11,24 @@ import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
 import useFetch from "../../../hooks/useFetch";
-import { formatDateForDb, getDateRangeTitle, numberFormat, throttle } from "../../../helpers";
+import {
+  formatDateForDb,
+  getDateRangeTitle,
+  numberFormat,
+  throttle,
+} from "../../../helpers";
 
 const ItemQuantityDispensed = () => {
-
-  const { data: paymentModes } = useFetch("api/payment-modes", {
-    status: "Active",
-    per_page: 500
-  }, true, [], (response) => response.data.data.data);
+  const { data: paymentModes } = useFetch(
+    "api/payment-modes",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const [params, setParams] = useState({
     consultation_type: "Pharmacy,Glass",
@@ -47,10 +57,14 @@ const ItemQuantityDispensed = () => {
         uri="api/reports/inventory-management/item-quantity-dispensed"
         params={{
           ...params,
-          start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-          end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+          start_date: params.start_date
+            ? formatDateForDb(params.start_date)
+            : undefined,
+          end_date: params.end_date
+            ? formatDateForDb(params.end_date)
+            : undefined,
         }}
-        prependInner={(
+        prependInner={
           <React.Fragment>
             <Card
               variant="outlined"
@@ -74,7 +88,12 @@ const ItemQuantityDispensed = () => {
                       fullWidth
                       label="Start Date"
                       value={params.start_date || null}
-                      onChange={(value) => setParams({ ...params, start_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -87,7 +106,12 @@ const ItemQuantityDispensed = () => {
                       fullWidth
                       label="End Date"
                       value={params.end_date || null}
-                      onChange={(value) => setParams({ ...params, end_date: !isNaN(value) ? value : null })}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
                     />
                   </Grid>
                   <Grid
@@ -103,11 +127,13 @@ const ItemQuantityDispensed = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
+                            <SearchIcon fontSize="small" />
                           </InputAdornment>
                         ),
                       }}
-                      onChange={(value) => throttle(() => setParams({ ...params, q: value }), 1000)}
+                      onChange={(value) =>
+                        throttle(() => setParams({ ...params, q: value }), 1000)
+                      }
                     />
                   </Grid>
                   <Grid
@@ -123,14 +149,16 @@ const ItemQuantityDispensed = () => {
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
-                      onChange={(value) => setParams({ ...params, payment_mode_id: value })}
+                      onChange={(value) =>
+                        setParams({ ...params, payment_mode_id: value })
+                      }
                     />
                   </Grid>
                 </Grid>
               </CardContent>
             </Card>
           </React.Fragment>
-        )}
+        }
         columns={[
           {
             field: "name",
@@ -150,7 +178,8 @@ const ItemQuantityDispensed = () => {
           {
             field: "quantity_dispensed",
             headerName: "Quantity Dispensed",
-            valueGetter: (item, index) => numberFormat(item.quantity_dispensed || 0),
+            valueGetter: (item, index) =>
+              numberFormat(item.quantity_dispensed || 0),
           },
           {
             field: "balance",
@@ -160,12 +189,16 @@ const ItemQuantityDispensed = () => {
           {
             field: "dispensed_value",
             headerName: "Dispensed Value",
-            valueGetter: (item, index) => numberFormat(item.dispensed_value || 0),
+            valueGetter: (item, index) =>
+              numberFormat(item.dispensed_value || 0),
           },
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 6, index: 1 },
-          { reducer: (acc, item, index) => acc + (item.dispensed_value || 0), index: 6 },
+          {
+            reducer: (acc, item, index) => acc + (item.dispensed_value || 0),
+            index: 6,
+          },
         ]}
       />
     </Page>

@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Checkbox, FormControlLabel, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -7,7 +16,6 @@ import { usePatch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const EditDisease = ({ item, modal, fetchDiseases }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -20,7 +28,10 @@ const EditDisease = ({ item, modal, fetchDiseases }) => {
     status: item.status,
   });
 
-  const { data, loading, error, handlePatch } = usePatch(`api/diseases/${item.id}`, formData);
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/diseases/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -89,15 +100,17 @@ const EditDisease = ({ item, modal, fetchDiseases }) => {
               xs={12}
             >
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     defaultChecked={item.status === "Active"}
-                    onChange={(event) => setFormData({
-                      ...formData,
-                      status: event.target.checked ? "Active" : "Inactive"
-                    })}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        status: event.target.checked ? "Active" : "Inactive",
+                      })
+                    }
                   />
-                )}
+                }
                 label="Active"
               />
             </Grid>
@@ -105,7 +118,7 @@ const EditDisease = ({ item, modal, fetchDiseases }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

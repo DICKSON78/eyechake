@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Jobs\SendConsultationMessageJob;
+use App\Models\CataractSurgeryRecord;
 use App\Models\Consultation;
 use App\Models\ConsultationExternalExamination;
 use App\Models\ConsultationFunctionalTest;
@@ -13,9 +14,11 @@ use App\Models\ConsultationVisualAcuity;
 use App\Models\Item;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
+use App\Models\SurgeryRecordReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use stdClass;
 
 class ConsultationsController extends Controller
 {
@@ -284,13 +287,15 @@ class ConsultationsController extends Controller
     {
         $with_diagnoses = $request->with_diagnoses;
         $with_items = $request->with_items;
-        $data = Consultation::with(['payment_cache_item' => function ($query) {
-            $query->with(['payment_cache.check_in.patient' => function ($query2) {
-                $query2->with(['region', 'district', 'ward']);
-            }]);
+        $with_item_templates = $request->with_item_templates;
+        $data = Consultation::with([
+            'payment_cache_item' => function ($query) {
+                $query->with(['payment_cache.check_in.patient' => function ($query2) {
+                    $query2->with(['region', 'district', 'ward']);
+                }]);
 
-            $query->with(['payment_mode', 'consultant', 'server']);
-        }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
+                $query->with(['payment_mode', 'consultant', 'server']);
+            }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
             'to_optician_sender',
         ]);
 
@@ -307,6 +312,21 @@ class ConsultationsController extends Controller
                 })
                 ->get();
         }
+
+        if ($with_item_templates) {
+            $data->templates = new stdClass();
+            $data->templates->surgery_record_report = SurgeryRecordReport::with(['creator'])
+                ->whereHas('payment_cache_item.payment_cache', function ($query) use ($id) {
+                    $query->where('consultation_id', $id);
+                })
+                ->first();
+            $data->templates->cataract_surgery_record = CataractSurgeryRecord::with(['creator'])
+                ->whereHas('payment_cache_item.payment_cache', function ($query) use ($id) {
+                    $query->where('consultation_id', $id);
+                })
+                ->first();
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -354,67 +374,67 @@ class ConsultationsController extends Controller
 
         switch ($request->what) {
             case 'Consultation': {
-                $request->validate([
-                    'patient_to_return' => 'sometimes|required|in:Yes,No',
-                    'to_return_date' => 'nullable|date_format:Y-m-d',
-                ]);
-                $data->update($request->except('what'));
-            }
+                    $request->validate([
+                        'patient_to_return' => 'sometimes|required|in:Yes,No',
+                        'to_return_date' => 'nullable|date_format:Y-m-d',
+                    ]);
+                    $data->update($request->except('what'));
+                }
                 break;
             case 'External Examination': {
-                if ($data->external_examination) {
-                    $data->external_examination->update($request->except('what'));
-                } else {
-                    $input = $request->except('what');
-                    $input['consultation_id'] = $id;
-                    $input['created_by'] = $user->id;
-                    ConsultationExternalExamination::create($input);
+                    if ($data->external_examination) {
+                        $data->external_examination->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        ConsultationExternalExamination::create($input);
+                    }
                 }
-            }
                 break;
             case 'Functional Test': {
-                if ($data->functional_tests) {
-                    $data->functional_tests->update($request->except('what'));
-                } else {
-                    $input = $request->except('what');
-                    $input['consultation_id'] = $id;
-                    $input['created_by'] = $user->id;
-                    ConsultationFunctionalTest::create($input);
+                    if ($data->functional_tests) {
+                        $data->functional_tests->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        ConsultationFunctionalTest::create($input);
+                    }
                 }
-            }
                 break;
             case 'Visual Acuity': {
-                if ($data->visual_acuity) {
-                    $data->visual_acuity->update($request->except('what'));
-                } else {
-                    $input = $request->except('what');
-                    $input['consultation_id'] = $id;
-                    $input['created_by'] = $user->id;
-                    ConsultationVisualAcuity::create($input);
+                    if ($data->visual_acuity) {
+                        $data->visual_acuity->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        ConsultationVisualAcuity::create($input);
+                    }
                 }
-            }
                 break;
             case 'Refraction': {
-                if ($data->refraction) {
-                    $data->refraction->update($request->except('what'));
-                } else {
-                    $input = $request->except('what');
-                    $input['consultation_id'] = $id;
-                    $input['created_by'] = $user->id;
-                    ConsultationRefraction::create($input);
+                    if ($data->refraction) {
+                        $data->refraction->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        ConsultationRefraction::create($input);
+                    }
                 }
-            }
                 break;
             case 'Fundoscopy': {
-                if ($data->fundoscopy) {
-                    $data->fundoscopy->update($request->except('what'));
-                } else {
-                    $input = $request->except('what');
-                    $input['consultation_id'] = $id;
-                    $input['created_by'] = $user->id;
-                    ConsultationFundoscopy::create($input);
+                    if ($data->fundoscopy) {
+                        $data->fundoscopy->update($request->except('what'));
+                    } else {
+                        $input = $request->except('what');
+                        $input['consultation_id'] = $id;
+                        $input['created_by'] = $user->id;
+                        ConsultationFundoscopy::create($input);
+                    }
                 }
-            }
                 break;
         }
 

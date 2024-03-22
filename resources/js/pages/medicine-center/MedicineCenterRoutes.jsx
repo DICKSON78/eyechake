@@ -8,7 +8,7 @@ const MedicineCenterRoutes = () => {
     <Routes>
       <Route
         path="dispensing-requests/*"
-        element={<DispensingRoutes consultationType="Pharmacy"/>}
+        element={<DispensingRoutes consultationType="Pharmacy" />}
       />
       <Route
         path="reports/*"

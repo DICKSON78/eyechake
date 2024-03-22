@@ -12,7 +12,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 import {
   ArrowDropDownRounded as ArrowDropDownIcon,
@@ -20,7 +20,7 @@ import {
   ChevronRightRounded as ChevronRightIcon,
   FirstPageRounded as FirstPageIcon,
   LastPageRounded as LastPageIcon,
-  SearchRounded as SearchIcon
+  SearchRounded as SearchIcon,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import TextField from "./TextField";
@@ -51,8 +51,8 @@ const NoItemsOverlayContainer = styled("div")(({ theme, height }) => ({
 
 const NoItemsOverlay = ({ message, hideIcon }) => {
   return (
-    <NoItemsOverlayContainer height={hideIcon ? 24 : 160 }>
-      {!hideIcon ?
+    <NoItemsOverlayContainer height={hideIcon ? 24 : 160}>
+      {!hideIcon ? (
         <svg
           width="120"
           height="100"
@@ -98,12 +98,11 @@ const NoItemsOverlay = ({ message, hideIcon }) => {
                 rx="2.849"
                 ry="2.815"
               />
-              <path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z"/>
+              <path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z" />
             </g>
           </g>
         </svg>
-        : null
-      }
+      ) : null}
       <Typography
         mt={hideIcon ? 0 : 1}
         variant="body2"
@@ -137,7 +136,7 @@ const SearchTextField = ({ placeholder, onChange, sx }) => {
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon fontSize="small"/>
+            <SearchIcon fontSize="small" />
           </InputAdornment>
         ),
       }}
@@ -170,7 +169,9 @@ const TablePaginationActions = ({ count, page, rowsPerPage, onPageChange }) => {
         <ChevronRightIcon />
       </IconButton>
       <IconButton
-        onClick={(event) => onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1))}
+        onClick={(event) =>
+          onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1))
+        }
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
       >
         <LastPageIcon />
@@ -179,14 +180,34 @@ const TablePaginationActions = ({ count, page, rowsPerPage, onPageChange }) => {
   );
 };
 
-const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOverlayIcon, initialState, itemCount, page, pageSize, onPageChange, onPageSizeChange, hidePaginationFooter, checkboxSelection, checked, setChecked, footerItems, renderExpanded, repeatHead }) => {
-
-  columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
+const Table = ({
+  loading,
+  columns,
+  items,
+  noItemsOverlayMessage,
+  hideNoItemsOverlayIcon,
+  initialState,
+  itemCount,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  hidePaginationFooter,
+  checkboxSelection,
+  checked,
+  setChecked,
+  footerItems,
+  renderExpanded,
+  repeatHead,
+}) => {
+  columns = columns.filter(
+    (col) => typeof col.show === "undefined" || col.show
+  );
   checked = checked || [];
 
   const [state, setState] = useState({
     items,
-    ...initialState
+    ...initialState,
   });
 
   useEffect(() => {
@@ -195,7 +216,9 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
 
   const getCheckableItems = () => {
     if (typeof checkboxSelection === "function") {
-      return state.items.filter((item, index) => checkboxSelection(item, index));
+      return state.items.filter((item, index) =>
+        checkboxSelection(item, index)
+      );
     }
 
     return state.items;
@@ -212,15 +235,20 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
   const renderTableHeadRow = () => {
     return (
       <TableRow>
-        {checkboxSelection ?
+        {checkboxSelection ? (
           <TableCell
             component="th"
             sx={{ width: 64 }}
           >
             <Checkbox
-              checked={getCheckableItems().length > 0 && checked.length === getCheckableItems().length}
+              checked={
+                getCheckableItems().length > 0 &&
+                checked.length === getCheckableItems().length
+              }
               onChange={(event) => {
-                const checked1 = event.target.checked ? getCheckableItems() : [];
+                const checked1 = event.target.checked
+                  ? getCheckableItems()
+                  : [];
 
                 if (typeof setChecked === "function") {
                   setChecked(checked1);
@@ -228,8 +256,7 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
               }}
             />
           </TableCell>
-          : null
-        }
+        ) : null}
         {columns.map((col, index) => (
           <TableCell
             key={index}
@@ -250,11 +277,9 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
   return (
     <Box sx={{ minWidth: 300, overflowX: "auto" }}>
       <MuiTable>
-        <TableHead>
-          {renderTableHeadRow()}
-        </TableHead>
+        <TableHead>{renderTableHeadRow()}</TableHead>
         <TableBody>
-          {loading ?
+          {loading ? (
             <TableRow>
               <TableCell
                 colSpan={columns.length + (checkboxSelection ? 1 : 0)}
@@ -263,20 +288,23 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                 <LinearProgress />
               </TableCell>
             </TableRow>
-            : null
-          }
-          {state.items.length > 0 ?
+          ) : null}
+          {state.items.length > 0 ? (
             <React.Fragment>
               {state.items.map((item, index, array) => (
                 <React.Fragment key={index}>
                   <TableRow selected={checked.indexOf(item) !== -1}>
-                    {checkboxSelection ?
+                    {checkboxSelection ? (
                       <TableCell>
                         <Checkbox
                           disabled={!isItemCheckable(item, index)}
                           checked={checked.indexOf(item) !== -1}
                           onChange={(event) => {
-                            const checked1 = event.target.checked ? [...checked, item] : checked.filter((e, i) => i !== checked.indexOf(item));
+                            const checked1 = event.target.checked
+                              ? [...checked, item]
+                              : checked.filter(
+                                  (e, i) => i !== checked.indexOf(item)
+                                );
 
                             if (typeof setChecked === "function") {
                               setChecked(checked1);
@@ -284,20 +312,21 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                           }}
                         />
                       </TableCell>
-                      : null
-                    }
+                    ) : null}
                     {columns.map((col, colIndex) => (
                       <TableCell
                         key={colIndex}
                         {...col.tableCellProps}
                       >
                         {typeof col.renderCell === "function"
-                          ? col.renderCell(item, index, array) : typeof col.valueGetter === "function"
-                            ? col.valueGetter(item, index, array) : item[col.field]}
+                          ? col.renderCell(item, index, array)
+                          : typeof col.valueGetter === "function"
+                            ? col.valueGetter(item, index, array)
+                            : item[col.field]}
                       </TableCell>
                     ))}
                   </TableRow>
-                  {renderExpanded ?
+                  {renderExpanded ? (
                     <TableRow
                       selected={checked.indexOf(item) !== -1}
                       className="expanded"
@@ -307,18 +336,14 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                         {renderExpanded(item, index, array)}
                       </TableCell>
                     </TableRow>
-                    : null
-                  }
-                  {repeatHead && index < array.length - 1 ?
-                    <React.Fragment>
-                      {renderTableHeadRow()}
-                    </React.Fragment>
-                    : null
-                  }
+                  ) : null}
+                  {repeatHead && index < array.length - 1 ? (
+                    <React.Fragment>{renderTableHeadRow()}</React.Fragment>
+                  ) : null}
                 </React.Fragment>
               ))}
             </React.Fragment>
-            :
+          ) : (
             <TableRow>
               <TableCell colSpan={columns.length + (checkboxSelection ? 1 : 0)}>
                 <NoItemsOverlay
@@ -327,9 +352,9 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
                 />
               </TableCell>
             </TableRow>
-          }
+          )}
         </TableBody>
-        {footerItems ?
+        {footerItems ? (
           <TableFooter>
             {footerItems.map((itemColumns, index, array) => (
               <TableRow key={index}>
@@ -345,10 +370,9 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
               </TableRow>
             ))}
           </TableFooter>
-          : null
-        }
+        ) : null}
       </MuiTable>
-      {!hidePaginationFooter ?
+      {!hidePaginationFooter ? (
         <TablePagination
           component="div"
           count={itemCount}
@@ -367,12 +391,11 @@ const Table = ({ loading, columns, items, noItemsOverlayMessage, hideNoItemsOver
           }}
           SelectProps={{
             IconComponent: ArrowDropDownIcon,
-            MenuProps: { PaperProps: { variant: "elevation" } }
+            MenuProps: { PaperProps: { variant: "elevation" } },
           }}
           ActionsComponent={TablePaginationActions}
         />
-        : null
-      }
+      ) : null}
     </Box>
   );
 };

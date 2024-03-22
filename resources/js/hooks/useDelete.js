@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const useDelete = (uri = null) => {
-
   const [data, setData] = useState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
@@ -15,7 +14,8 @@ const useDelete = (uri = null) => {
     setLoading(true);
     setError(null);
 
-    window.axios.delete("/" + uri)
+    window.axios
+      .delete("/" + uri)
       .then((response) => {
         setData(response.data);
         setLoading(false);

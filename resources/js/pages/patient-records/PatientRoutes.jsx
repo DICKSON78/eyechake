@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import Skeleton from "@mui/material/Skeleton";
 import Tabs from "@mui/material/Tabs";
@@ -12,7 +18,6 @@ import PatientFile from "./patient-file/PatientFile";
 import PatientPaymentHistory from "./PatientPaymentHistory";
 
 const PatientRoutes = () => {
-
   const location = useLocation();
   const navigate = useNavigate();
   const { patientId } = useParams();
@@ -53,15 +58,14 @@ const PatientRoutes = () => {
         onLoadSuccess={(responseData) => setPatient(responseData)}
       />
 
-      {loadingPatient ?
+      {loadingPatient ? (
         <Skeleton
           variant="rounded"
           height={256}
         />
-        : null
-      }
+      ) : null}
 
-      {patient ?
+      {patient ? (
         <React.Fragment>
           <Tabs
             value={selectedTab}
@@ -79,17 +83,16 @@ const PatientRoutes = () => {
           <Routes>
             <Route
               path="/patient-file"
-              element={<PatientFile patient={patient}/>}
+              element={<PatientFile patient={patient} />}
             />
             <Route
               path="/payment-history"
-              element={<PatientPaymentHistory patient={patient}/>}
+              element={<PatientPaymentHistory patient={patient} />}
             />
           </Routes>
         </React.Fragment>
-        : null
-      }
-      <Modal ref={modalRef}/>
+      ) : null}
+      <Modal ref={modalRef} />
     </Page>
   );
 };

@@ -1,11 +1,21 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import TextField from "../../../../components/TextField";
 import usePatch from "../../../../hooks/usePatch";
 
 const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
-
   const subReSphRef = useRef();
   const subReCylRef = useRef();
   const subReAxisRef = useRef();
@@ -25,7 +35,10 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
 
   const autoSave = (field, value) => {
     if (!refraction || (refraction && value !== refraction[field])) {
-      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Refraction", [field]: value });
+      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, {
+        what: "Refraction",
+        [field]: value,
+      });
     }
   };
 
@@ -149,16 +162,15 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
           </TableCell>
         </TableRow>
 
-
         <TableRow>
           <TableCell component="th">ADD</TableCell>
           <TableCell component="th">VA</TableCell>
-          <TableCell component="th"/>
-          <TableCell component="th"/>
+          <TableCell component="th" />
+          <TableCell component="th" />
           <TableCell component="th">ADD</TableCell>
           <TableCell component="th">VA</TableCell>
-          <TableCell component="th"/>
-          <TableCell component="th"/>
+          <TableCell component="th" />
+          <TableCell component="th" />
         </TableRow>
         <TableRow>
           <TableCell>
@@ -183,8 +195,8 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
               }}
             />
           </TableCell>
-          <TableCell/>
-          <TableCell/>
+          <TableCell />
+          <TableCell />
           <TableCell>
             <TextField
               ref={subLeAddRef}
@@ -207,8 +219,8 @@ const RefractionDetails = ({ consultation: { id, refraction } }, ref) => {
               }}
             />
           </TableCell>
-          <TableCell/>
-          <TableCell/>
+          <TableCell />
+          <TableCell />
         </TableRow>
       </TableBody>
     </Table>

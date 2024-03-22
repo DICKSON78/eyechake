@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 
@@ -7,7 +14,6 @@ import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreateRegion = ({ modal, onSuccess }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -68,7 +74,7 @@ const CreateRegion = ({ modal, onSuccess }) => {
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"

@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -8,7 +13,6 @@ import TextField from "../../../components/TextField";
 import usePatch from "../../../hooks/usePatch";
 
 const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
-
   const reRef = useRef();
   const leRef = useRef();
 
@@ -18,7 +22,10 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
 
   const autoSave = (field, value) => {
     if (!fundoscopy || (fundoscopy && value !== fundoscopy[field])) {
-      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, { what: "Fundoscopy", [field]: value });
+      handleAutoSave(`api/consultations/${id}/auto-save-clinical-notes`, {
+        what: "Fundoscopy",
+        [field]: value,
+      });
     }
   };
 

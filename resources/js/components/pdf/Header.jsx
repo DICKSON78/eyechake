@@ -4,7 +4,6 @@ import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
 import logo from "../../../images/logo.png";
 
 const Header = ({ fixed, title, subtitle, dense }) => {
-
   const getAddressLine = () => {
     let contacts = [window.clinic.name];
 
@@ -39,8 +38,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         }),
       }}
     >
-      <View
-        style={{ width: 112 }}>
+      <View style={{ width: 112 }}>
         <Image
           src={logo}
           style={{
@@ -69,7 +67,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         >
           {title}
         </Text>
-        {subtitle ?
+        {subtitle ? (
           <Text
             style={[
               styles.text,
@@ -87,10 +85,9 @@ const Header = ({ fixed, title, subtitle, dense }) => {
           >
             {subtitle}
           </Text>
-          : null
-        }
+        ) : null}
       </View>
-      {!dense ?
+      {!dense ? (
         <View style={{ width: 112 }}>
           <Text
             style={[
@@ -103,8 +100,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
             {`${getAddressLine()}`}
           </Text>
         </View>
-        : null
-      }
+      ) : null}
     </View>
   );
 };

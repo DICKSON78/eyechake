@@ -1,8 +1,13 @@
 import React from "react";
 import { Grid, Paper, Typography } from "@mui/material";
 
-const Descriptions = ({ columns, items, containerProps, itemSpacing, itemProps }) => {
-
+const Descriptions = ({
+  columns,
+  items,
+  containerProps,
+  itemSpacing,
+  itemProps,
+}) => {
   items = (items || []).filter((e) => !!e.value);
   itemSpacing = itemSpacing || 2;
   columns = columns || 3;

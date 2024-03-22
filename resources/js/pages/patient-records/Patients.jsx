@@ -11,7 +11,6 @@ import { useFetch, useToast } from "../../hooks";
 import { formatError, getAge } from "../../helpers";
 
 const Patients = () => {
-
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -26,11 +25,17 @@ const Patients = () => {
     payment_mode_id: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch("api/patients", params, true, {
-    data: [],
-    total: 0,
-    page: 1
-  }, (response) => response.data.data);
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/patients",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => response.data.data
+  );
 
   useEffect(() => {
     document.title = `Patient Records - ${window.APP_NAME}`;
@@ -43,14 +48,9 @@ const Patients = () => {
   }, [error]);
 
   return (
-    <Page
-      breadcrumbs={[
-        { title: "Home" },
-        { title: "Patient Records" },
-      ]}
-    >
+    <Page breadcrumbs={[{ title: "Home" }, { title: "Patient Records" }]}>
       <Card>
-        <PageHeader title="Registered Patients"/>
+        <PageHeader title="Registered Patients" />
         <Divider />
         <CardContent>
           <Filters
@@ -64,7 +64,8 @@ const Patients = () => {
               {
                 field: "index",
                 headerName: "S/N",
-                valueGetter: (item, index) => ((params.per_page * (params.page - 1)) + index + 1),
+                valueGetter: (item, index) =>
+                  params.per_page * (params.page - 1) + index + 1,
               },
               {
                 field: "full_name",
@@ -112,30 +113,41 @@ const Patients = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={<Divider orientation="vertical" sx={{ height: 16 }}/>}
+                    divider={
+                      <Divider
+                        orientation="vertical"
+                        sx={{ height: 16 }}
+                      />
+                    }
                     spacing={1}
                   >
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => navigate(`/patient-records/patients/${item.id}/patient-file`)}
+                      onClick={() =>
+                        navigate(
+                          `/patient-records/patients/${item.id}/patient-file`
+                        )
+                      }
                     >
                       View Records
                     </Button>
                   </Stack>
                 ),
-              }
+              },
             ]}
             items={data.data}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) => setParams({ ...params, per_page: value, page: 1 })}
+            onPageSizeChange={(value) =>
+              setParams({ ...params, per_page: value, page: 1 })
+            }
           />
         </CardContent>
       </Card>
-      <Modal ref={modalRef}/>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

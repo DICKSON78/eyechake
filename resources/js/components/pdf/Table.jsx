@@ -1,9 +1,18 @@
 import React from "react";
 import { StyleSheet, Text, View } from "@react-pdf/renderer";
 
-const Table = ({ caption, containerStyle, columns, items, footerItems, renderExpanded, repeatHead }) => {
-
-  columns = columns.filter((col) => (typeof col.show === "undefined") || col.show);
+const Table = ({
+  caption,
+  containerStyle,
+  columns,
+  items,
+  footerItems,
+  renderExpanded,
+  repeatHead,
+}) => {
+  columns = columns.filter(
+    (col) => typeof col.show === "undefined" || col.show
+  );
 
   const renderTableHeadRow = () => {
     return (
@@ -30,14 +39,13 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
 
   return (
     <View style={[styles.table, { ...containerStyle }]}>
-      {caption ?
+      {caption ? (
         <View style={styles.tableRow}>
           <Text style={[styles.text, styles.tableCell, { fontWeight: "bold" }]}>
             {caption}
           </Text>
         </View>
-        : null
-      }
+      ) : null}
       {renderTableHeadRow()}
       {items.map((item, index, array) => (
         <React.Fragment key={index}>
@@ -54,27 +62,30 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
                   },
                 ]}
               >
-                {col.valueGetter ? col.valueGetter(item, index) : item[col.field]}
+                {col.valueGetter
+                  ? col.valueGetter(item, index)
+                  : item[col.field]}
               </Text>
             ))}
           </View>
-          {renderExpanded ?
-            <View style={[styles.tableRow, { backgroundColor: "rgba(3, 155, 229, 0.12)" }]}>
+          {renderExpanded ? (
+            <View
+              style={[
+                styles.tableRow,
+                { backgroundColor: "rgba(3, 155, 229, 0.12)" },
+              ]}
+            >
               <View style={styles.tableCell}>
                 {renderExpanded(item, index, array)}
               </View>
             </View>
-            : null
-          }
-          {repeatHead && index < array.length - 1 ?
-            <React.Fragment>
-              {renderTableHeadRow()}
-            </React.Fragment>
-            : null
-          }
+          ) : null}
+          {repeatHead && index < array.length - 1 ? (
+            <React.Fragment>{renderTableHeadRow()}</React.Fragment>
+          ) : null}
         </React.Fragment>
       ))}
-      {!items.length ?
+      {!items.length ? (
         <View style={styles.tableRow}>
           <Text
             style={[
@@ -89,9 +100,8 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
             No data available
           </Text>
         </View>
-        : null
-      }
-      {footerItems ?
+      ) : null}
+      {footerItems ? (
         <View>
           {footerItems.map((itemColumns, index, array) => (
             <View
@@ -107,7 +117,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
                     {
                       fontWeight: "bold",
                       ...col.style,
-                    }
+                    },
                   ]}
                 >
                   {col.value}
@@ -116,8 +126,7 @@ const Table = ({ caption, containerStyle, columns, items, footerItems, renderExp
             </View>
           ))}
         </View>
-        : null
-      }
+      ) : null}
     </View>
   );
 };

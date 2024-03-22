@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, CardActions, CardContent, Grid, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Grid,
+  LinearProgress,
+} from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
@@ -8,7 +15,6 @@ import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
 const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
-
   const addToast = useToast();
 
   const formRef = useRef();
@@ -22,7 +28,10 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
     transaction_type: undefined,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/payment-modes", formData);
+  const { data, loading, error, handlePost } = usePost(
+    "api/payment-modes",
+    formData
+  );
 
   useEffect(() => {
     if (data) {
@@ -45,7 +54,6 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
       handlePost();
     }
   };
-
 
   return (
     <React.Fragment>
@@ -80,7 +88,9 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
                 ref={descriptionRef}
                 label="Description"
                 fullWidth
-                onChange={(value) => setFormData({ ...formData, description: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
               />
             </Grid>
             <Grid
@@ -95,14 +105,16 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
                 fullWidth
                 required
                 options={["Cash", "Credit"]}
-                onChange={(value) => setFormData({ ...formData, transaction_type: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, transaction_type: value })
+                }
               />
             </Grid>
           </Grid>
         </Form>
       </CardContent>
       <CardActions>
-        <Box flexGrow={1}/>
+        <Box flexGrow={1} />
         <Button
           variant="outlined"
           size="large"
