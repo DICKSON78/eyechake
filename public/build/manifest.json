@@ -1,6 +1,6 @@
 {
   "resources/images/logo.png": {
-    "file": "assets/logo.d8ff4d2b.png",
+    "file": "assets/logo.07704b6a.png",
     "src": "resources/images/logo.png"
   },
   "resources/images/loader.svg": {
@@ -20,11 +20,11 @@
     "src": "resources/fonts/Custom-Bold.ttf"
   },
   "resources/js/app.jsx": {
-    "file": "assets/app.a3aa30a2.js",
+    "file": "assets/app.5debd70c.js",
     "src": "resources/js/app.jsx",
     "isEntry": true,
     "assets": [
-      "assets/logo.d8ff4d2b.png",
+      "assets/logo.07704b6a.png",
       "assets/loader.2a755fad.svg",
       "assets/Custom-Regular.707fdc5c.ttf",
       "assets/Custom-Italic.3225cec6.ttf",
