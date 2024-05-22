@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  Box,
   Collapse,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
+  Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
@@ -33,7 +35,7 @@ import {
 } from "@mui/icons-material";
 import GlassPatientsIcon from "./icons/AddLens";
 
-const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
+const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -69,12 +71,14 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Glass Patients",
           icon: <GlassPatientsIcon />,
           to: "/reception/glass-patients",
+          badge: notifications?.glass_patients,
           show: user.privileges.reception,
         },
         {
           title: "Patients to Return",
           icon: <PatientsToReturnIcon />,
           to: "/reception/to-return/patients",
+          badge: notifications?.patients_to_return,
           show: user.privileges.reception,
         },
         {
@@ -105,12 +109,14 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Patients Sent to Cashier",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-cash-patients",
+          badge: notifications?.patients_sent_to_cashier,
           show: user.privileges.payment_center,
         },
         {
           title: "Credit Patients Approval",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-credit-patients",
+          badge: notifications?.credit_patients_approval,
           show: user.privileges.payment_center,
         },
         {
@@ -165,6 +171,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Patients Sent to Doctor",
           icon: <WaitingIcon />,
           to: "/consultation-room/consultation-patients/pending",
+          badge: notifications?.patients_sent_to_doctor,
           show: user.privileges.consultation_room,
         },
         {
@@ -181,6 +188,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Patients Sent to Optician",
           icon: <WaitingIcon />,
           to: "/optician-center/glass-patients",
+          badge: notifications?.patients_sent_to_optician,
           show: user.privileges.optician_center,
         },
         {
@@ -217,6 +225,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Dispensing Requests",
           icon: <WaitingIcon />,
           to: "/medicine-center/dispensing-requests",
+          badge: notifications?.dispensing_requests,
           show: user.privileges.medicine_center,
         },
         {
@@ -253,6 +262,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
           title: "Procedure Requests",
           icon: <WaitingIcon />,
           to: "/procedure-room/procedure-requests",
+          badge: notifications?.procedure_requests,
           show: user.privileges.procedure_room,
         },
         {
@@ -457,7 +467,7 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
     } else {
       setItems([]);
     }
-  }, [drawerOpen, user]);
+  }, [drawerOpen, user, notifications]);
 
   return (
     <List
@@ -523,6 +533,21 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                   </ListItemIcon>
                 ) : null}
                 <ListItemText primary={e.title} />
+                {e.badge ? (
+                  <Box
+                    ml={1}
+                    bgcolor="error.main"
+                    borderRadius={2}
+                    px={1}
+                  >
+                    <Typography
+                      color="error.contrastText"
+                      variant="caption"
+                    >
+                      {e.badge}
+                    </Typography>
+                  </Box>
+                ) : null}
                 {e.items && e.items.length ? (
                   <React.Fragment>
                     {open === e.to ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -571,6 +596,21 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
                             {f.icon}
                           </ListItemIcon>
                           <ListItemText primary={f.title} />
+                          {f.badge ? (
+                            <Box
+                              ml={1}
+                              bgcolor="error.main"
+                              borderRadius={2}
+                              px={1}
+                            >
+                              <Typography
+                                color="error.contrastText"
+                                variant="caption"
+                              >
+                                {f.badge}
+                              </Typography>
+                            </Box>
+                          ) : null}
                         </ListItemButton>
                       ))}
                   </List>
@@ -583,4 +623,4 @@ const SideMenu = ({ drawerOpen, setDrawerOpen, user }) => {
   );
 };
 
-export default SideMenu;
+export default Menu;

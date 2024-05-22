@@ -38,14 +38,14 @@ import {
 import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
 
 import darkTheme from "../themes/dark";
-import SideMenu from "../components/SideMenu";
+import Menu from "../components/Menu";
 import Modal from "../components/Modal";
 import ChangePassword from "../pages/auth/ChangePassword";
 import loader from "../../images/loader.svg";
 
-import { useFetch } from "../hooks";
+import useFetch from "../hooks/useFetch";
 
-const drawerWidth = 256;
+const drawerWidth = 272;
 
 const drawerOpenedMixin = (theme) => ({
   width: drawerWidth,
@@ -67,6 +67,7 @@ const drawerClosedMixin = (theme) => ({
 });
 
 const Default = ({ setThemeMode, setUser }) => {
+  const notificationsTimer = useRef();
   const modalRef = useRef();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -83,11 +84,25 @@ const Default = ({ setThemeMode, setUser }) => {
     null,
     (response) => response.data.data
   );
+  const { data: notifications, handleFetch: fetchNotifications } = useFetch(
+    "api/notifications",
+    null,
+    false,
+    null,
+    (response) => response.data.data
+  );
 
-  const [appReady, setAppReady] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState();
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (notificationsTimer.current) {
+        window.clearInterval(notificationsTimer.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setLoading(loadingUser);
@@ -98,11 +113,18 @@ const Default = ({ setThemeMode, setUser }) => {
   }, [loadingClinic]);
 
   useEffect(() => {
-    if (user && !loadingClinic) {
+    if (user && clinic) {
       window.user = user;
-      window.clinic = clinic || {};
+      window.clinic = clinic;
       setUser(user);
-      setAppReady(true);
+      fetchNotifications();
+
+      if (!notificationsTimer.current) {
+        notificationsTimer.current = window.setInterval(
+          fetchNotifications,
+          30000
+        );
+      }
     }
   }, [user, clinic]);
 
@@ -140,7 +162,7 @@ const Default = ({ setThemeMode, setUser }) => {
 
   return (
     <React.Fragment>
-      {appReady ? (
+      {user ? (
         <React.Fragment>
           <ThemeProvider theme={darkTheme}>
             <AppBar
@@ -278,10 +300,11 @@ const Default = ({ setThemeMode, setUser }) => {
               onClose={toggleDrawer}
             >
               <Toolbar />
-              <SideMenu
+              <Menu
                 drawerOpen={isDrawerOpen}
                 setDrawerOpen={setIsDrawerOpen}
                 user={user}
+                notifications={notifications}
               />
             </Drawer>
           ) : null}
@@ -307,9 +330,10 @@ const Default = ({ setThemeMode, setUser }) => {
                 }}
               >
                 <Toolbar />
-                <SideMenu
+                <Menu
                   drawerOpen={isDrawerOpen}
                   user={user}
+                  notifications={notifications}
                 />
               </Drawer>
             ) : null}

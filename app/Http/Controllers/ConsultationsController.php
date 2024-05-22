@@ -127,10 +127,12 @@ class ConsultationsController extends Controller
             $now = Carbon::now()->format('Y-m-d');
             $data->where('patient_to_return', $patient_to_return)
                 ->where(function ($query) use ($to_return_date, $now) {
-                    $query->where('to_return_date', '>=', $now);
+                    $query->whereNotNull('to_return_date');
 
                     if ($to_return_date) {
                         $query->where('to_return_date', $to_return_date);
+                    } else {
+                        $query->where('to_return_date', '>=', $now);
                     }
                 });
         }

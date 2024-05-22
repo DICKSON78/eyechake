@@ -20,6 +20,7 @@ use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\JobTitlesController;
 use App\Http\Controllers\LensTypesController;
 use App\Http\Controllers\MessagesController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
 use App\Http\Controllers\PatientItemBillsController;
@@ -75,6 +76,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
 Route::group(['middleware' => 'auth:sanctum'], function ($router) {
     $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
     $router->get('/dashboard', DashboardController::class);
+    $router->get('/notifications', NotificationsController::class);
     $router->apiResource('/clinic-details', ClinicDetailsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);

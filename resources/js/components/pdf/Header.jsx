@@ -42,7 +42,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         <Image
           src={logo}
           style={{
-            width: 40,
+            width: 56,
             height: "auto",
             ...(dense && {
               margin: "0 auto",
