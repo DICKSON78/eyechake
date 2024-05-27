@@ -80,7 +80,7 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
         }
 
-        $item_payments->select(DB::raw("'Immediate' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
+        $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
         $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
 
         $data = $item_payments->union($bill_payments);

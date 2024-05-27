@@ -50,7 +50,7 @@ const theme = createTheme({
       default: "#f0f3f7",
       paper: "#fff",
     },
-    divider: "#e0e0e0",
+    divider: "#dae2ed",
   },
   typography: {
     fontFamily: "Custom, sans-serif",
@@ -191,7 +191,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          border: "1px solid #e0e0e0",
+          border: "1px solid #dae2ed",
           borderBottomWidth: 0,
           borderRadius: "6px 6px 0 0",
           marginRight: "8px",
@@ -206,7 +206,7 @@ const theme = createTheme({
           backgroundColor: "rgba(240, 243, 247, 0.24)",
           "&:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
-              borderColor: "#e0e0e0 !important",
+              borderColor: "#dae2ed !important",
             },
           "&:hover:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
@@ -246,7 +246,7 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          border: "1px solid #e0e0e0",
+          border: "1px solid #dae2ed",
           padding: "8px 12px",
         },
         head: {

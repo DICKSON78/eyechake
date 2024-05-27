@@ -8,7 +8,6 @@ use App\Models\ExpensePayment;
 use App\Models\Patient;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
-use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,11 +35,6 @@ class DashboardController extends Controller
                 'expenses' => 0,
                 'new_patients' => 0,
                 'consulted_patients' => 0,
-                'glass' => 0,
-                'pharmacy' => 0,
-                'procedure' => 0,
-                'others' => 0,
-                'consultation' => 0,
             ],
             'statistics' => [
                 'expenses_by_category' => [],
@@ -50,65 +44,17 @@ class DashboardController extends Controller
         ];
 
         $data['counts']['total_sales'] = PatientItemPayment::query()
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
-                ->sum('amount') + PatientItemBillPayment::query()
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
-                ->sum('amount');
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->sum('amount');
 
         $data['counts']['discount'] = PatientItemPayment::query()
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->sum('discount');
-
-        $data['counts']['glass'] = PatientPaymentCacheItem::query()
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Glass');
-            })
-            ->whereIn('status', ['Paid', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-
-        $data['counts']['pharmacy'] = PatientPaymentCacheItem::query()
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Pharmacy');
-            })
-            ->whereIn('status', ['Paid', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-
-        $data['counts']['procedure'] = PatientPaymentCacheItem::query()
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Procedure');
-            })
-            ->whereIn('status', ['Paid', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-
-        $data['counts']['others'] = PatientPaymentCacheItem::query()
-            ->whereHas('consultation_type', function ($query) {
-                $query->where('name', 'Others');
-            })
-            ->whereIn('status', ['Paid', 'Served'])
-            ->whereNull('bill_id')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->sum(DB::raw('unit_price * quantity'));
-
-        $data['counts']['consultation'] = Consultation::query()->join('patient_payment_cache_items as it', 'consultations.payment_cache_item_id', '=', 'it.id')
-            ->where('consultations.patient_direction', 'Direct to Doctor')
-            ->whereIn('it.status', ['Paid', 'Served'])
-            ->whereNull('it.bill_id')
-            ->whereDate('it.created_at', '>=', $start_date)
-            ->whereDate('it.created_at', '<=', $end_date)
-            ->sum(DB::raw('it.unit_price * it.quantity'));
 
         $data['counts']['expenses'] = ExpensePayment::query()
             ->whereDate('created_at', '>=', $start_date)
@@ -128,7 +74,7 @@ class DashboardController extends Controller
             ->count();
 
         $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount FROM expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
-        $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
+        $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
 
         $date = Carbon::today()->subMonths(11);
 
@@ -142,12 +88,12 @@ class DashboardController extends Controller
                     [
                         'name' => 'total_sales',
                         'amount' => PatientItemPayment::query()
-                                ->whereDate('created_at', '>=', $start_date)
-                                ->whereDate('created_at', '<=', $end_date)
-                                ->sum('amount') + PatientItemBillPayment::query()
-                                ->whereDate('created_at', '>=', $start_date)
-                                ->whereDate('created_at', '<=', $end_date)
-                                ->sum('amount'),
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
+                            ->whereDate('created_at', '>=', $start_date)
+                            ->whereDate('created_at', '<=', $end_date)
+                            ->sum('amount'),
                     ],
                     [
                         'name' => 'discount',

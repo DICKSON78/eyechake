@@ -36,7 +36,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    username: item.username,
+    username: item.user?.username,
     password: undefined,
     privileges: item.user ? item.user.privileges.map((e) => e.privilege) : [],
     status: item.status,

@@ -6,7 +6,7 @@ const InfoCard = ({ title, count, icon, color }) => {
   return (
     <Grid
       item
-      md={3}
+      md={6}
       sm={12}
       xs={12}
     >
