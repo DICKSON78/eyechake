@@ -44,10 +44,10 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     background: {
-      default: "#2c2f3e",
-      paper: "#2c2f3e",
+      default: "#20222c",
+      paper: "#20222c",
     },
-    divider: "rgba(255, 255, 255, 0.15)",
+    divider: "rgba(255, 255, 255, 0.08)",
   },
   typography: {
     fontFamily: "Custom, sans-serif",
@@ -83,7 +83,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#2c2f3e",
+          backgroundColor: "#20222c",
           boxShadow: "none",
         },
       },
@@ -117,7 +117,7 @@ const theme = createTheme({
           props: { variant: "outlined-elevation" },
           style: {
             boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
           },
         },
       ],
@@ -125,7 +125,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
         },
       },
     },
@@ -200,11 +200,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
           borderBottomWidth: 0,
           borderRadius: "5px 5px 0 0",
           marginRight: "8px",
-          backgroundColor: "#2c2f3e",
+          backgroundColor: "#20222c",
           minHeight: "auto",
         },
       },
@@ -214,7 +214,7 @@ const theme = createTheme({
         root: {
           "&:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
-              borderColor: "rgba(255, 255, 255, 0.15) !important",
+              borderColor: "rgba(255, 255, 255, 0.08) !important",
             },
           "&:hover:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
@@ -246,7 +246,7 @@ const theme = createTheme({
         root: {
           "& .MuiTableRow-root th": {
             padding: "12px",
-            backgroundColor: "#2c2f3e",
+            backgroundColor: "#20222c",
             fontWeight: 500,
           },
         },
@@ -255,7 +255,7 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
           padding: "8px 12px",
         },
         head: {
@@ -275,6 +275,11 @@ const theme = createTheme({
             backgroundColor: alpha("#345ea8", 0.12),
           },
         },
+      },
+    },
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
       },
     },
     MuiSvgIcon: {

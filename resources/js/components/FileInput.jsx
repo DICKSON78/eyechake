@@ -1,119 +1,198 @@
-import React from "react";
-import { Box, OutlinedInput, Typography } from "@mui/material";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import Box from "@mui/material/Box";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Typography from "@mui/material/Typography";
+import AttachmentIcon from "@mui/icons-material/AttachmentRounded";
 
-class FileInput extends React.Component {
-  constructor(props) {
-    super(props);
+const FileInput = (
+  {
+    containerProps,
+    label,
+    fullWidth,
+    required,
+    horizontal,
+    rules,
+    onChange,
+    ...rest
+  },
+  ref
+) => {
+  const inputRef = useRef();
 
-    this.input = React.createRef();
+  const [state, setState] = useState({
+    value: null,
+    error: null,
+    validate: false,
+    focused: false,
+  });
 
-    this.state = {
-      value: null,
-      error: null,
-    };
-  }
+  useEffect(() => {
+    if (state.validate) {
+      _validate();
+    }
+  }, [state.value, state.validate]);
 
-  _onChange(value, validate = true) {
-    if (this.props.onChange) {
-      this.props.onChange(value);
+  const _onChange = (value, validate = true) => {
+    if (onChange) {
+      onChange(value);
     }
 
-    this.setState({ value }, () => {
-      if (validate) {
-        this.validate();
-      }
-    });
-  }
+    setState({ ...state, value, validate });
+  };
 
-  validate() {
-    let rules = this.props.rules || [],
-      i = 0;
-    if (this.props.required) {
+  const _validate = () => {
+    rules = rules || [];
+    let i = 0;
+    if (required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
 
     for (; i < rules.length; i++) {
-      let validate = rules[i](this.state.value);
+      let validate = rules[i](state.value);
       if (validate !== true) {
-        this.setState({ error: validate });
+        setState({ ...state, error: validate });
         return false;
       } else {
-        this.setState({ error: undefined });
+        setState({ ...state, error: undefined });
       }
     }
 
     return true;
-  }
+  };
 
-  render() {
-    const { containerProps, label, required, horizontal, ...rest } = this.props;
-    return (
+  useImperativeHandle(ref, () => ({
+    validate: _validate,
+  }));
+
+  return (
+    <Box
+      component="div"
+      {...(horizontal && {
+        display: "flex",
+        flexDirection: "row",
+      })}
+      {...containerProps}
+    >
+      {label ? (
+        <Typography
+          fontWeight={500}
+          {...(horizontal && {
+            mr: 1,
+          })}
+          {...(!horizontal && {
+            mx: 0.5,
+            mb: 0.5,
+          })}
+        >
+          {label}
+          {required ? (
+            <Typography
+              component="span"
+              color="error.main"
+              fontWeight="bold"
+              ml={0.25}
+            >
+              *
+            </Typography>
+          ) : null}
+        </Typography>
+      ) : null}
       <Box
         component="div"
         {...(horizontal && {
-          display: "flex",
-          flexDirection: "row",
+          flexGrow: 1,
         })}
-        {...containerProps}
       >
-        {label ? (
-          <Typography
-            fontWeight={500}
+        <Box
+          component="label"
+          position="relative"
+          display={fullWidth ? "block" : "inline-block"}
+          border={(theme) => `1px solid ${theme.palette.divider}`}
+          borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+          bgcolor={(theme) =>
+            theme.components.MuiOutlinedInput.styleOverrides?.root
+              ?.backgroundColor
+          }
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              opacity: 0,
+            },
+            ...(state.focused && {
+              borderColor: (theme) => theme.palette.primary.main,
+              borderWidth: 2,
+            }),
+            ...(state.error && {
+              borderColor: (theme) => theme.palette.error.main,
+            }),
+          }}
+        >
+          <Box
+            borderRadius="inherit"
+            display="flex"
+            alignItems="center"
+            position="absolute"
+            top={0}
+            width="100%"
+            height="100%"
+            px={1.5}
             sx={{
-              ...(horizontal && {
-                mr: 1,
-              }),
-              ...(!horizontal && {
-                ml: 0.5,
-                mb: 0.5,
+              gap: 1,
+              ...(rest?.disabled && {
+                color: (theme) =>
+                  theme.palette.mode === "light"
+                    ? "rgba(0, 0, 0, 0.38)"
+                    : "rgba(255, 255, 255, 0.5)",
+                "& .MuiTypography-root": {
+                  color: "inherit",
+                },
               }),
             }}
           >
-            {label}
-            {required ? (
-              <Typography
-                component="span"
-                color="error.main"
-                fontWeight="bold"
-                ml={0.25}
-              >
-                *
-              </Typography>
-            ) : null}
-          </Typography>
-        ) : null}
-        <Box
-          component="div"
-          {...(horizontal && {
-            flexGrow: 1,
-          })}
-        >
+            <Typography
+              color={state.value ? "text.primary" : "text.secondary"}
+              flexGrow={1}
+              noWrap
+            >
+              {state.value ? state.value[0].name : "Browse files..."}
+            </Typography>
+            <AttachmentIcon fontSize="small" />
+          </Box>
           <OutlinedInput
-            inputRef={(ref) => (this.input = ref)}
+            inputRef={inputRef}
+            variant="outlined"
             size="small"
             margin="none"
+            autoComplete="off"
+            fullWidth={fullWidth}
             {...rest}
             type="file"
             required={required}
-            error={!!this.state.error}
-            onChange={(event) => this._onChange(event.target.files, true)}
+            onChange={(event) => _onChange(event.target.files, true)}
+            onFocus={(event) => setState({ ...state, focused: true })}
+            onBlur={(event) => setState({ ...state, focused: false })}
           />
-          {this.state.error ? (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "error.main",
-                ml: 0.5,
-                mt: 0.25,
-              }}
-            >
-              {this.state.error}
-            </Typography>
-          ) : null}
         </Box>
+        {state.error ? (
+          <Typography
+            variant="body2"
+            color="error.main"
+            mt={0.25}
+            {...(!horizontal && {
+              mx: 0.5,
+            })}
+          >
+            {state.error}
+          </Typography>
+        ) : null}
       </Box>
-    );
-  }
-}
+    </Box>
+  );
+};
 
-export default FileInput;
+export default forwardRef(FileInput);

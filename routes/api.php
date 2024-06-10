@@ -19,6 +19,13 @@ use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\JobTitlesController;
 use App\Http\Controllers\LensTypesController;
+use App\Http\Controllers\Marketing\DailyActivitiesController;
+use App\Http\Controllers\Marketing\EventsController;
+use App\Http\Controllers\Marketing\IdeasController;
+use App\Http\Controllers\Marketing\InformationSourcesController;
+use App\Http\Controllers\Marketing\MarketingDashboardController;
+use App\Http\Controllers\Marketing\MarketingStrategiesController;
+use App\Http\Controllers\Marketing\ResearchPlansController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PatientCheckInsController;
@@ -38,9 +45,6 @@ use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\SurgeryRecordReportsController;
 use App\Http\Controllers\UnitsOfMeasureController;
 use App\Http\Controllers\WardsController;
-use App\Models\Employee;
-use App\Models\UserPrivilege;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,27 +58,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    $user = $request->user();
-    $user->employee = Employee::with(['department', 'job_title'])->where('user_id', $user->id)->first();
-    $user_privileges = UserPrivilege::where('user_id', $user->id)->get()->toArray();
-    $user_privileges = array_map(function ($e) {
-        return $e['privilege'];
-    }, $user_privileges);
-
-    $user->privileges = new stdClass();
-    foreach ($user_privileges as $privilege) {
-        $user->privileges->$privilege = true;
-    }
-    return $user;
-});
-
 Route::group(['prefix' => 'auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function ($router) {
-    $router->post('/auth/change-password', [AuthController::class, 'changePassword']);
+    $router->controller(AuthController::class)->prefix('auth')->group(function ($router) {
+        $router->post('/change-password', 'changePassword');
+        $router->get('/user', 'getAuthUser');
+    });
+
     $router->get('/dashboard', DashboardController::class);
     $router->get('/notifications', NotificationsController::class);
     $router->apiResource('/clinic-details', ClinicDetailsController::class);
@@ -130,6 +123,16 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
     $router->apiResource('/preferences', PreferencesController::class);
 
     $router->get('/messages', MessagesController::class);
+
+    $router->prefix('marketing')->group(function ($router) {
+        $router->get('/dashboard', MarketingDashboardController::class);
+        $router->apiResource('/daily-activities', DailyActivitiesController::class);
+        $router->apiResource('/ideas', IdeasController::class);
+        $router->apiResource('/events', EventsController::class);
+        $router->apiResource('/research-plans', ResearchPlansController::class);
+        $router->apiResource('/marketing-strategies', MarketingStrategiesController::class);
+        $router->apiResource('/information-sources', InformationSourcesController::class);
+    });
 
     $router->prefix('reports')->group(function ($router) {
         $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {

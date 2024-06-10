@@ -35,9 +35,10 @@ class PatientsController extends Controller
         $district_id = $request->district_id;
         $ward_id = $request->ward_id;
         $payment_mode_id = $request->payment_mode_id;
+        $info_source_id = $request->info_source_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $data = Patient::with(['payment_mode', 'creator']);
+        $data = Patient::with(['payment_mode', 'information_source', 'creator']);
 
         if ($id) {
             $data->where('id', $id);
@@ -71,6 +72,10 @@ class PatientsController extends Controller
             $data->where('payment_mode_id', $payment_mode_id);
         }
 
+        if ($info_source_id) {
+            $data->where('info_source_id', $info_source_id);
+        }
+
         if ($start_date) {
             $data->whereDate('created_at', '>=', $start_date);
         }
@@ -101,6 +106,7 @@ class PatientsController extends Controller
             'district_id' => 'nullable|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
+            'info_source_id' => 'nullable|exists:information_sources,id',
         ]);
 
         $input = $request->all();
@@ -117,7 +123,7 @@ class PatientsController extends Controller
      */
     public function show($id)
     {
-        $data = Patient::with(['payment_mode', 'creator'])->findOrFail($id);
+        $data = Patient::with(['payment_mode', 'information_source', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -139,6 +145,7 @@ class PatientsController extends Controller
             'district_id' => 'nullable|exists:districts,id',
             'ward_id' => 'nullable|exists:wards,id',
             'payment_mode_id' => 'sometimes|required|exists:payment_modes,id',
+            'info_source_id' => 'nullable|exists:information_sources,id',
         ]);
 
         $data = Patient::findOrFail($id);

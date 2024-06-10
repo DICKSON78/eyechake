@@ -1,131 +1,156 @@
-import React from "react";
-import { Box, TextField as MuiTextField, Typography } from "@mui/material";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import Box from "@mui/material/Box";
+import MuiTextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
-class TextField extends React.Component {
-  constructor(props) {
-    super(props);
+const TextField = (
+  {
+    containerProps,
+    label,
+    required,
+    horizontal,
+    rules,
+    value,
+    defaultValue,
+    valueFilter,
+    onChange,
+    ...rest
+  },
+  ref
+) => {
+  const inputRef = useRef();
 
-    this.input = React.createRef();
+  const [state, setState] = useState({
+    value: defaultValue,
+    error: null,
+    validate: false,
+  });
 
-    this.state = {
-      value: props.defaultValue,
-      error: null,
-    };
-  }
+  useEffect(() => {
+    setState({ ...state, value: defaultValue || value });
+  }, [defaultValue, value]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.value !== this.props.value) {
-      this.setState({ value: this.props.value });
+  useEffect(() => {
+    if (state.validate) {
+      _validate();
     }
-  }
+  }, [state.value, state.validate]);
 
-  _onChange(value, validate = true) {
-    if (this.props.onChange) {
-      this.props.onChange(value, this.input);
+  const _onChange = (value, validate = true) => {
+    if (valueFilter) {
+      value = valueFilter(value);
     }
 
-    this.setState({ value }, () => {
-      if (validate) {
-        this.validate();
-      }
-    });
-  }
+    if (onChange) {
+      onChange(value);
+    }
 
-  validate() {
-    let rules = this.props.rules || [],
-      i = 0;
-    if (this.props.required) {
+    setState({ ...state, value, validate });
+  };
+
+  const _validate = () => {
+    rules = rules || [];
+    let i = 0;
+    if (required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
 
     for (; i < rules.length; i++) {
-      let validate = rules[i](this.state.value);
+      let validate = rules[i](state.value);
       if (validate !== true) {
-        this.setState({ error: validate });
+        setState({ ...state, error: validate });
         return false;
       } else {
-        this.setState({ error: undefined });
+        setState({ ...state, error: undefined });
       }
     }
 
     return true;
-  }
+  };
 
-  setValue(value, validate = false) {
-    this.input.value = value;
-    this._onChange(value, validate);
-  }
+  const _setValue = (value, validate = false) => {
+    inputRef.current.value = value;
+    _onChange(value, validate);
+  };
 
-  render() {
-    const { containerProps, label, required, horizontal, ...rest } = this.props;
-    return (
+  useImperativeHandle(ref, () => ({
+    validate: _validate,
+    setValue: _setValue,
+  }));
+
+  return (
+    <Box
+      component="div"
+      {...(horizontal && {
+        display: "flex",
+        flexDirection: "row",
+      })}
+      {...containerProps}
+    >
+      {label ? (
+        <Typography
+          fontWeight={500}
+          {...(horizontal && {
+            mr: 1,
+          })}
+          {...(!horizontal && {
+            mx: 0.5,
+            mb: 0.5,
+          })}
+        >
+          {label}
+          {required ? (
+            <Typography
+              component="span"
+              color="error.main"
+              fontWeight="bold"
+              ml={0.25}
+            >
+              *
+            </Typography>
+          ) : null}
+        </Typography>
+      ) : null}
       <Box
         component="div"
         {...(horizontal && {
-          display: "flex",
-          flexDirection: "row",
+          flexGrow: 1,
         })}
-        {...containerProps}
       >
-        {label ? (
+        <MuiTextField
+          inputRef={inputRef}
+          variant="outlined"
+          size="small"
+          margin="none"
+          autoComplete="off"
+          {...rest}
+          defaultValue={defaultValue}
+          value={value}
+          required={required}
+          error={!!state.error}
+          onChange={(event) => _onChange(event.target.value, true)}
+        />
+        {state.error ? (
           <Typography
-            fontWeight={500}
-            sx={{
-              ...(horizontal && {
-                mr: 1,
-              }),
-              ...(!horizontal && {
-                ml: 0.5,
-                mb: 0.5,
-              }),
-            }}
+            variant="body2"
+            color="error.main"
+            mt={0.25}
+            {...(!horizontal && {
+              mx: 0.5,
+            })}
           >
-            {label}
-            {required ? (
-              <Typography
-                component="span"
-                color="error.main"
-                fontWeight="bold"
-                ml={0.25}
-              >
-                *
-              </Typography>
-            ) : null}
+            {state.error}
           </Typography>
         ) : null}
-        <Box
-          component="div"
-          {...(horizontal && {
-            flexGrow: 1,
-          })}
-        >
-          <MuiTextField
-            inputRef={(ref) => (this.input = ref)}
-            variant="outlined"
-            size="small"
-            margin="none"
-            autoComplete="off"
-            {...rest}
-            required={required}
-            error={!!this.state.error}
-            onChange={(event) => this._onChange(event.target.value, true)}
-          />
-          {this.state.error ? (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "error.main",
-                ml: 0.5,
-                mt: 0.25,
-              }}
-            >
-              {this.state.error}
-            </Typography>
-          ) : null}
-        </Box>
       </Box>
-    );
-  }
-}
+    </Box>
+  );
+};
 
-export default TextField;
+export default forwardRef(TextField);

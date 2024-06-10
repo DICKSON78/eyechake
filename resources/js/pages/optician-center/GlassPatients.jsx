@@ -154,7 +154,7 @@ const ConsultationPatients = () => {
               },
               {
                 field: "sent_to_optician_at",
-                headerName: "Date",
+                headerName: "Date Sent",
               },
               {
                 field: "actions",

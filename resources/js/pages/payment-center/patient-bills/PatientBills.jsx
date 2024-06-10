@@ -128,7 +128,7 @@ const PatientBills = () => {
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Created",
               },
               {
                 field: "actions",

@@ -26,31 +26,21 @@ const Expenses = ({ module, createdBy }) => {
   const addToast = useToast();
   const modalRef = useRef();
 
-  const { data: categories } = useFetch(
-    "api/expense-categories",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
-
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
     status: "Pending",
     category_id: undefined,
+    created_by: createdBy,
     start_date: undefined,
     end_date: undefined,
-    created_by: createdBy,
   });
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/expenses",
     {
       ...params,
+      created_by: createdBy,
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -68,10 +58,6 @@ const Expenses = ({ module, createdBy }) => {
   useEffect(() => {
     document.title = `Expenses - ${window.APP_NAME}`;
   }, []);
-
-  useEffect(() => {
-    setParams({ ...params, created_by: createdBy });
-  }, [createdBy]);
 
   useEffect(() => {
     if (error) {
@@ -180,6 +166,10 @@ const Expenses = ({ module, createdBy }) => {
                   params.per_page * (params.page - 1) + index + 1,
               },
               {
+                field: "expense_date",
+                headerName: "Expense Date",
+              },
+              {
                 field: "category_id",
                 headerName: "Category",
                 valueGetter: (item, index) => item.category.name,
@@ -205,17 +195,13 @@ const Expenses = ({ module, createdBy }) => {
                 headerName: "Description",
               },
               {
-                field: "expense_date",
-                headerName: "Expense Date",
-              },
-              {
                 field: "created_by",
                 headerName: "Created By",
                 valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Created",
               },
               {
                 field: "status",
@@ -237,16 +223,17 @@ const Expenses = ({ module, createdBy }) => {
                     alignItems="center"
                     spacing={1}
                   >
-                    {item.paid_amount < item.total_amount ? (
-                      <Tooltip title="Edit">
+                    <Tooltip title="Edit">
+                      <span>
                         <IconButton
+                          disabled={item.paid_amount >= item.total_amount}
                           size="small"
                           onClick={() => openEditExpenseModal(item)}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                    ) : null}
+                      </span>
+                    </Tooltip>
                     <Button
                       variant="contained"
                       size="small"
@@ -268,7 +255,7 @@ const Expenses = ({ module, createdBy }) => {
             }
             footerItems={[
               [
-                { value: "TOTAL", tableCellProps: { colSpan: 2 } },
+                { value: "TOTAL", tableCellProps: { colSpan: 3 } },
                 {
                   value: numberFormat(
                     data.data.reduce((acc, item) => acc + item.total_amount, 0)

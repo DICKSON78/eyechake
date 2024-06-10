@@ -78,7 +78,7 @@ const PatientPaymentHistory = ({ patient }) => {
             },
             {
               field: "created_at",
-              headerName: "Date",
+              headerName: "Date Created",
             },
             {
               field: "transaction_type",

@@ -142,7 +142,6 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 fullWidth
                 multiline
                 rows={3}
-                required
                 defaultValue={formData.description}
                 onChange={(value) =>
                   setFormData({ ...formData, description: value })
@@ -152,7 +151,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
             <Grid
               item
               md={6}
-              sm={6}
+              sm={12}
               xs={12}
             >
               <DatePicker

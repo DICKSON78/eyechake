@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\Expense;
+use App\Models\ExpensePayment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -78,12 +79,22 @@ class ExpensesController extends Controller
         $request->validate([
             'category_id' => 'required|exists:expense_categories,id',
             'total_amount' => 'required|numeric|min:0',
+            'paid_amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date_format:Y-m-d',
         ]);
 
         $input = $request->all();
         $input['created_by'] = $request->user()->id;
         $data = Expense::create($input);
+
+        if ($data) {
+            ExpensePayment::create([
+                'expense_id' => $data->id,
+                'amount' => $request->paid_amount,
+                'created_by' => $input['created_by'],
+            ]);
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 

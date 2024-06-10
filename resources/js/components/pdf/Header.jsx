@@ -5,16 +5,16 @@ import logo from "../../../images/logo.png";
 
 const Header = ({ fixed, title, subtitle, dense }) => {
   const getAddressLine = () => {
-    let contacts = [window.clinic.name];
+    let contacts = [window.user.clinic.name];
 
-    if (window.clinic.address) {
-      contacts.push(window.clinic.address);
+    if (window.user.clinic.address) {
+      contacts.push(window.user.clinic.address);
     }
-    if (window.clinic.phone) {
-      contacts.push("Phone: " + window.clinic.phone);
+    if (window.user.clinic.phone) {
+      contacts.push("Phone: " + window.user.clinic.phone);
     }
-    if (window.clinic.email) {
-      contacts.push("Email: " + window.clinic.email);
+    if (window.user.clinic.email) {
+      contacts.push("Email: " + window.user.clinic.email);
     }
 
     return contacts.join("\n");
@@ -42,7 +42,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
         <Image
           src={logo}
           style={{
-            width: 56,
+            width: 80,
             height: "auto",
             ...(dense && {
               margin: "0 auto",

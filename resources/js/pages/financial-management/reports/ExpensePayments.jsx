@@ -169,7 +169,7 @@ const ExpensePayments = ({ module, createdBy }) => {
           },
           {
             field: "created_at",
-            headerName: "Date",
+            headerName: "Date Created",
           },
         ]}
         summationFooterColumns={[

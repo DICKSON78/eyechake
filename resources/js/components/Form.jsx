@@ -1,14 +1,12 @@
-import React, { cloneElement } from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
 
-class Form extends React.Component {
-  constructor(props) {
-    super(props);
+const Form = ({ children, ...rest }, ref) => {
+  const formRef = useRef();
 
-    this.allFields = 0;
-    this.validFields = 0;
-  }
+  const allFields = useRef(0);
+  const validFields = useRef(0);
 
-  _validateInputs(children) {
+  const _validateInputs = (children) => {
     if (!children) return true;
 
     if (typeof children.forEach !== "function") {
@@ -20,22 +18,22 @@ class Form extends React.Component {
       .forEach((e) => {
         const hasChildren = e.props && e.props.children;
         if (hasChildren) {
-          this._validateInputs(e.props.children);
+          _validateInputs(e.props.children);
         } else {
           if (e.ref && e.props && (e.props.required || e.props.rules)) {
-            const component = cloneElement(e).ref.current;
+            const component = e.ref.current;
             if (component) {
-              this.allFields++;
+              allFields.current++;
               if (component.validate()) {
-                this.validFields++;
+                validFields.current++;
               }
             }
           }
         }
       });
-  }
+  };
 
-  _clearInputs(children) {
+  const _clearInputs = (children) => {
     if (!children) return true;
 
     if (typeof children.forEach !== "function") {
@@ -47,40 +45,37 @@ class Form extends React.Component {
       .forEach((e) => {
         const hasChildren = e.props && e.props.children;
         if (hasChildren) {
-          this._clearInputs(e.props.children);
+          _clearInputs(e.props.children);
         } else {
           if (e.ref) {
-            const component = cloneElement(e).ref.current;
+            const component = e.ref.current;
             if (component && typeof component.setValue === "function") {
               component.setValue(null);
             }
           }
         }
       });
-  }
+  };
 
-  validate() {
-    this.allFields = 0;
-    this.validFields = 0;
-    this._validateInputs(this.props.children);
-    return this.allFields === this.validFields;
-  }
+  useImperativeHandle(ref, () => ({
+    validate: () => {
+      allFields.current = 0;
+      validFields.current = 0;
+      _validateInputs(children);
+      return allFields.current === validFields.current;
+    },
+    clear: () => _clearInputs(children),
+  }));
 
-  clear() {
-    this._clearInputs(this.props.children);
-  }
+  return (
+    <form
+      ref={formRef}
+      autoComplete={"off"}
+      {...rest}
+    >
+      {children}
+    </form>
+  );
+};
 
-  render() {
-    return (
-      <form
-        ref={(ref) => (this.form = ref)}
-        autoComplete={"off"}
-        {...this.props}
-      >
-        {this.props.children}
-      </form>
-    );
-  }
-}
-
-export default Form;
+export default forwardRef(Form);

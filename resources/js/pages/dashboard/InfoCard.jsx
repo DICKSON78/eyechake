@@ -1,21 +1,26 @@
 import React from "react";
 import { Avatar, Box, Card, Grid, Stack, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 
-const InfoCard = ({ title, count, icon, color }) => {
+const InfoCard = ({ title, count, icon, color, ...rest }) => {
+  const theme = useTheme();
+
   return (
     <Grid
       item
       md={6}
       sm={12}
       xs={12}
+      {...rest}
     >
       <Card
-        variant="elevation"
-        elevation={0}
+        {...(theme.palette.mode === "light" && {
+          variant: "elevation",
+          elevation: 0,
+        })}
         sx={{
           p: 3,
-          background: (theme) =>
+          background:
             theme.palette.mode === "light"
               ? `linear-gradient(to bottom right, ${alpha(color, 0.8)}, ${alpha(color, 0.18)})`
               : theme.palette.background.paper,

@@ -113,7 +113,7 @@ const Expenses = ({ module, createdBy }) => {
           },
           {
             field: "created_at",
-            headerName: "Date",
+            headerName: "Date Created",
           },
           {
             field: "status",

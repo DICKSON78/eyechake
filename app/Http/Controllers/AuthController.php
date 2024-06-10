@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\ClinicDetail;
+use App\Models\Employee;
+use App\Models\Preference;
+use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -24,8 +28,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             if ($user->status == 'Inactive') {
-                return $this->sendResponse(null, Response::HTTP_FORBIDDEN,
-                    'You do not have access to the system.');
+                return $this->sendResponse(
+                    null,
+                    Response::HTTP_FORBIDDEN,
+                    'You do not have access to the system.'
+                );
             }
 
             $token = $user->createToken('MyApp')->plainTextToken;
@@ -35,8 +42,11 @@ class AuthController extends Controller
                 'user' => $user
             ], Response::HTTP_OK, 'Logged in successfully.');
         } else {
-            return $this->sendResponse(null, Response::HTTP_UNAUTHORIZED,
-                'Incorrect username/password combination.');
+            return $this->sendResponse(
+                null,
+                Response::HTTP_UNAUTHORIZED,
+                'Incorrect username/password combination.'
+            );
         }
     }
 
@@ -56,7 +66,29 @@ class AuthController extends Controller
             return $this->sendResponse($user, Response::HTTP_OK, 'Password changed successfully.');
         }
 
-        return $this->sendResponse(null, Response::HTTP_UNPROCESSABLE_ENTITY,
-            'Incorrect current password.');
+        return $this->sendResponse(
+            null,
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+            'Incorrect current password.'
+        );
+    }
+
+    public function getAuthUser(Request $request)
+    {
+        $user = $request->user();
+        $user->clinic = ClinicDetail::first() ?? new \stdClass();
+        $user->clinic->preferences = Preference::all();
+        $user->employee = Employee::with(['department', 'job_title'])->where('user_id', $user->id)->first();
+        $user_privileges = UserPrivilege::where('user_id', $user->id)->get();
+        $user_privileges = $user_privileges->map(function ($e) {
+            return $e->privilege;
+        });
+
+        $user->privileges = new \stdClass();
+        foreach ($user_privileges as $privilege) {
+            $user->privileges->$privilege = true;
+        }
+
+        return $this->sendResponse($user, Response::HTTP_OK, 'Success.');
     }
 }

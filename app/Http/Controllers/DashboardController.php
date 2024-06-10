@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\ClinicDetail;
 use App\Models\Consultation;
 use App\Models\ExpensePayment;
 use App\Models\Patient;
@@ -24,9 +25,9 @@ class DashboardController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
-        $now = Carbon::now()->format('Y-m-d');
-        $start_date = $request->start_date ?? '1970-01-01';
-        $end_date = $request->end_date ?? $now;
+        $today = Carbon::today()->format('Y-m-d');
+        $start_date = $request->start_date ?? '2000-01-01';
+        $end_date = $request->end_date ?? $today;
 
         $data = [
             'counts' => [
@@ -35,12 +36,13 @@ class DashboardController extends Controller
                 'expenses' => 0,
                 'new_patients' => 0,
                 'consulted_patients' => 0,
+                'sms_balance' => 0,
             ],
             'statistics' => [
                 'expenses_by_category' => [],
                 'payments_by_channel' => [],
+                'yearly' => [],
             ],
-            'yearly_statistics' => [],
         ];
 
         $data['counts']['total_sales'] = PatientItemPayment::query()
@@ -73,7 +75,12 @@ class DashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount FROM expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
+        $clinic_details = ClinicDetail::first();
+        if ($clinic_details) {
+            $data['counts']['sms_balance'] = $clinic_details->sms_balance;
+        }
+
+        $data['statistics']['expenses_by_category'] = DB::select('select exp.category_id, cat.name, sum(expp.amount) as amount from expense_payments as expp inner join expenses as exp on expp.expense_id = exp.id inner join expense_categories as cat on exp.category_id = cat.id where (date(expp.created_at) between ? and ?) group by exp.category_id', [$start_date, $end_date]);
         $data['statistics']['payments_by_channel'] = DB::select('select channel_id, name, sum(amount) as amount from ((select pmt.channel_id, pc.name, sum(pmt.amount - pmt.discount) as amount from patient_item_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id) union (select pmt.channel_id, pc.name, sum(pmt.amount) as amount from patient_item_bill_payments as pmt inner join payment_channels as pc on pmt.channel_id = pc.id where (date(pmt.created_at) between ? and ?) group by pmt.channel_id)) as payments group by name', [$start_date, $end_date, $start_date, $end_date]);
 
         $date = Carbon::today()->subMonths(11);
@@ -82,7 +89,7 @@ class DashboardController extends Controller
             $start_date = $date->copy()->startOfMonth()->format('Y-m-d');
             $end_date = $date->copy()->endOfMonth()->format('Y-m-d');
 
-            $data['yearly_statistics'][] = [
+            $data['statistics']['yearly'][] = [
                 'month' => $date->format('M'),
                 'statistics' => [
                     [

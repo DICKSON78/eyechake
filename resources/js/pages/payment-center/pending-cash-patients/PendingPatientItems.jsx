@@ -125,7 +125,7 @@ const PendingPatientItems = () => {
 
     if (
       !discountRef.current.validate() ||
-      !paymentChannelRef.current.validate()
+      (action === "make_payment" && !paymentChannelRef.current.validate())
     ) {
       return false;
     }

@@ -10,7 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import { EditRounded as EditIcon } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table, { SearchTextField } from "../../../components/Table";
 import Modal from "../../../components/Modal";

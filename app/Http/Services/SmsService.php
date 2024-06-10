@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Models\ClinicDetail;
 use App\Models\Message;
 use App\Models\Patient;
 use App\Models\Preference;
@@ -73,6 +74,15 @@ class SmsService
                 'api_response' => json_encode($response->data),
                 'patient_id' => $patient_id,
             ]);
+
+            $sms_client = $response->client;
+            if ($sms_client) {
+                $clinic_details = ClinicDetail::first();
+                if ($clinic_details) {
+                    $clinic_details->sms_balance = $sms_client->balance;
+                    $clinic_details->save();
+                }
+            }
 
             return $response;
         } catch (Exception $exception) {

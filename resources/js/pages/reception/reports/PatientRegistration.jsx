@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -11,7 +11,7 @@ import DatePicker from "../../../components/DatePicker";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
-import { useFetch } from "../../../hooks";
+import useFetch from "../../../hooks/useFetch";
 import {
   formatDateForDb,
   getAge,
@@ -20,21 +20,8 @@ import {
 } from "../../../helpers";
 
 const PatientRegistration = () => {
-  const districtRef = useRef();
-
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
-
-  const { data: regions } = useFetch(
-    "api/regions",
     {
       status: "Active",
       per_page: 500,
@@ -49,40 +36,13 @@ const PatientRegistration = () => {
     name: undefined,
     gender: undefined,
     payment_mode_id: undefined,
-    region_id: undefined,
-    district_id: undefined,
     start_date: undefined,
     end_date: undefined,
   });
 
-  const {
-    data: districts,
-    setData: setDistricts,
-    handleFetch: fetchDistricts,
-  } = useFetch(
-    "api/districts",
-    {
-      status: "Active",
-      region_id: params.region_id,
-      per_page: 500,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
-
   useEffect(() => {
     document.title = `Patient Registration Report - ${window.APP_NAME}`;
   }, []);
-
-  useEffect(() => {
-    setParams({ ...params, district_id: undefined });
-    setDistricts([]);
-
-    if (params.region_id) {
-      fetchDistricts();
-    }
-  }, [params.region_id]);
 
   return (
     <Page
@@ -278,12 +238,12 @@ const PatientRegistration = () => {
           },
           {
             field: "created_by",
-            headerName: "Registered By",
+            headerName: "Created By",
             valueGetter: (item, index) => item.creator?.full_name,
           },
           {
             field: "created_at",
-            headerName: "Date",
+            headerName: "Date Created",
           },
         ]}
       />

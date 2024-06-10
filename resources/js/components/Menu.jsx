@@ -18,33 +18,170 @@ import {
   DoneAllRounded as DoneIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
+  EventNoteRounded as AppointmentsIcon,
   GroupRounded as PeopleIcon,
   HomeRounded as HomeIcon,
   HourglassBottomRounded as WaitingIcon,
+  InfoRounded as InfoIcon,
   Inventory2Rounded as ItemsIcon,
+  LightbulbRounded as IdeaDevelopmentIcon,
   LibraryBooksRounded as ReportsIcon,
+  LocalActivityRounded as OutreachProgrammesIcon,
+  LocationSearchingRounded as MarketResearchIcon,
   ManageAccountsRounded as EmployeeManagementIcon,
   MessageRounded as MessageIcon,
   MoneyRounded as PaymentModesIcon,
   PaymentRounded as PaymentChannelsIcon,
   PestControlRounded as DiseasesIcon,
   ScheduleRounded as PatientsToReturnIcon,
+  SendRounded as MarketingStrategiesIcon,
   SettingsRounded as SettingsIcon,
+  TaskRounded as DailyActivitiesIcon,
   TrendingDownRounded as ExpensesIcon,
   WindowRounded as DepartmentsIcon,
 } from "@mui/icons-material";
 import GlassPatientsIcon from "./icons/AddLens";
 
-const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
+const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
+  const isSelected = () => {
+    if (location.pathname === item.to) {
+      return true;
+    }
+
+    if (location.pathname.indexOf(item.to) === 0) {
+      const nextChars = location.pathname.substring(item.to.length);
+      if (/^\/.+/.test(nextChars)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  return item.subheader ? (
+    <ListSubheader sx={{ px: { xs: 1, sm: 1, md: 1.5 } }}>
+      {item.title}
+    </ListSubheader>
+  ) : (
+    <ListItemButton
+      selected={isSelected()}
+      onClick={() => {
+        navigate(item.to);
+        if (typeof setDrawerOpen === "function") {
+          setDrawerOpen(false);
+        }
+      }}
+      sx={{
+        "&:hover, &.Mui-selected, &.Mui-selected:hover": {
+          color: "primary.main",
+          borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
+
+          "& .MuiListItemIcon-root": {
+            color: "inherit",
+          },
+        },
+        px: { xs: 1, sm: 1, md: 1.5 },
+      }}
+    >
+      {item.icon ? (
+        <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+      ) : null}
+      <ListItemText primary={item.title} />
+      {item.badge ? (
+        <Box
+          ml={1}
+          bgcolor="error.main"
+          borderRadius={2}
+          px={1}
+        >
+          <Typography
+            color="error.contrastText"
+            variant="caption"
+          >
+            {item.badge}
+          </Typography>
+        </Box>
+      ) : null}
+    </ListItemButton>
+  );
+};
+
+const MultiLevelMenuItem = ({ item, location, generateMenuTree }) => {
+  const [open, setOpen] = useState();
+
+  return (
+    <Box className="MuiListItem-multilevel">
+      <ListItemButton
+        selected={location.pathname.indexOf(item.to) === 0}
+        onClick={(event) => setOpen(open === item.to ? null : item.to)}
+        sx={{
+          "&:hover, &.Mui-selected, &.Mui-selected:hover": {
+            color: "primary.main",
+            borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
+
+            "& .MuiListItemIcon-root": {
+              color: "inherit",
+            },
+          },
+          px: { xs: 1, sm: 1, md: 1.5 },
+        }}
+      >
+        {item.icon ? (
+          <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+        ) : null}
+        <ListItemText primary={item.title} />
+        {item.badge ? (
+          <Box
+            ml={1.5}
+            bgcolor="error.main"
+            borderRadius={2}
+            px={1}
+          >
+            <Typography
+              color="error.contrastText"
+              variant="caption"
+            >
+              {item.badge}
+            </Typography>
+          </Box>
+        ) : null}
+        {open === item.to ? (
+          <ExpandLessIcon sx={{ ml: 0.5 }} />
+        ) : (
+          <ExpandMoreIcon sx={{ ml: 0.5 }} />
+        )}
+      </ListItemButton>
+
+      <Collapse
+        in={open === item.to}
+        unmountOnExit
+      >
+        <List
+          component="div"
+          dense
+          sx={{ pl: 2 }}
+        >
+          {generateMenuTree(item.items)}
+        </List>
+      </Collapse>
+    </Box>
+  );
+};
+
+const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [items, setItems] = useState([]);
-  const [open, setOpen] = useState();
 
   useEffect(() => {
     if (user) {
       setItems([
+        {
+          title: "MENU",
+          subheader: true,
+          show: true,
+        },
         {
           title: "Dashboard",
           icon: <HomeIcon />,
@@ -59,6 +196,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
         },
         {
           title: "RECEPTION",
+          subheader: true,
           show: !!drawerOpen && user.privileges.reception,
         },
         {
@@ -96,13 +234,14 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Patient Registration Report",
               icon: <ReportsIcon />,
-              to: "/patient-registration",
+              to: "/reception/reports/patient-registration",
               show: user.privileges.reception,
             },
           ],
         },
         {
           title: "PAYMENT CENTER",
+          subheader: true,
           show: !!drawerOpen && user.privileges.payment_center,
         },
         {
@@ -146,25 +285,26 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Daily Cash Collection Report",
               icon: <ReportsIcon />,
-              to: "/daily-cash-collection",
+              to: "/payment-center/reports/daily-cash-collection",
               show: user.privileges.payment_center,
             },
             {
               title: "Daily Credit Collection Report",
               icon: <ReportsIcon />,
-              to: "/daily-credit-collection",
+              to: "/payment-center/reports/daily-credit-collection",
               show: user.privileges.payment_center,
             },
             {
               title: "Expenses Report",
               icon: <ReportsIcon />,
-              to: "/expenses",
+              to: "/payment-center/reports/expenses",
               show: user.privileges.payment_center,
             },
           ],
         },
         {
           title: "CONSULTATION ROOM",
+          subheader: true,
           show: !!drawerOpen && user.privileges.consultation_room,
         },
         {
@@ -182,6 +322,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
         },
         {
           title: "OPTICIAN CENTER",
+          subheader: true,
           show: !!drawerOpen && user.privileges.optician_center,
         },
         {
@@ -200,25 +341,26 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Items Dispensed Report",
               icon: <ReportsIcon />,
-              to: "/items-dispensed",
+              to: "/optician-center/reports/items-dispensed",
               show: user.privileges.optician_center,
             },
             {
               title: "Items Not Dispensed Report",
               icon: <ReportsIcon />,
-              to: "/items-not-dispensed",
+              to: "/optician-center/reports/items-not-dispensed",
               show: user.privileges.optician_center,
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
-              to: "/item-balance",
+              to: "/optician-center/reports/item-balance",
               show: user.privileges.optician_center,
             },
           ],
         },
         {
           title: "MEDICINE CENTER",
+          subheader: true,
           show: !!drawerOpen && user.privileges.medicine_center,
         },
         {
@@ -237,25 +379,26 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Medicines Dispensed Report",
               icon: <ReportsIcon />,
-              to: "/medicines-dispensed",
+              to: "/medicine-center/reports/medicines-dispensed",
               show: user.privileges.medicine_center,
             },
             {
               title: "Medicines Not Dispensed Report",
               icon: <ReportsIcon />,
-              to: "/medicines-not-dispensed",
+              to: "/medicine-center/reports/medicines-not-dispensed",
               show: user.privileges.medicine_center,
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
-              to: "/item-balance",
+              to: "/medicine-center/reports/item-balance",
               show: user.privileges.medicine_center,
             },
           ],
         },
         {
           title: "PROCEDURE ROOM",
+          subheader: true,
           show: !!drawerOpen && user.privileges.procedure_room,
         },
         {
@@ -274,19 +417,20 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Served Procedures Report",
               icon: <ReportsIcon />,
-              to: "/served-procedures",
+              to: "/procedure-room/reports/served-procedures",
               show: user.privileges.procedure_room,
             },
             {
               title: "Pending Procedures Report",
               icon: <ReportsIcon />,
-              to: "/pending-procedures",
+              to: "/procedure-room/reports/pending-procedures",
               show: user.privileges.procedure_room,
             },
           ],
         },
         {
           title: "INVENTORY MANAGEMENT",
+          subheader: true,
           show: !!drawerOpen && user.privileges.inventory_management,
         },
         {
@@ -304,19 +448,95 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
-              to: "/item-balance",
+              to: "/inventory-management/reports/item-balance",
               show: user.privileges.inventory_management,
             },
             {
               title: "Quantity Dispensed Report",
               icon: <ReportsIcon />,
-              to: "/item-quantity-dispensed",
+              to: "/inventory-management/reports/item-quantity-dispensed",
               show: user.privileges.inventory_management,
             },
           ],
         },
         {
+          title: "MARKETING MANAGEMENT",
+          subheader: true,
+          show: !!drawerOpen && user.privileges.marketing,
+        },
+        {
+          title: "Dashboard",
+          icon: <HomeIcon />,
+          to: "/marketing/dashboard",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Daily Acitivities",
+          icon: <DailyActivitiesIcon />,
+          to: "/marketing/daily-activities",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Idea Development",
+          icon: <IdeaDevelopmentIcon />,
+          to: "/marketing/idea-development",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Market Research Plans",
+          icon: <MarketResearchIcon />,
+          to: "/marketing/research-plans",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Marketing Strategies",
+          icon: <MarketingStrategiesIcon />,
+          to: "/marketing/strategies",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Appointments",
+          icon: <AppointmentsIcon />,
+          to: "/marketing/appointments",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Outreach Programmes",
+          icon: <OutreachProgrammesIcon />,
+          to: "/marketing/outreach-programmes",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Reports",
+          icon: <ReportsIcon />,
+          to: "/marketing/reports",
+          show: user.privileges.marketing,
+          items: [
+            {
+              title: "Patient Registration Report",
+              icon: <ReportsIcon />,
+              to: "/marketing/reports/patient-registration",
+              show: user.privileges.marketing,
+            },
+          ],
+        },
+        {
+          title: "Settings",
+          icon: <SettingsIcon />,
+          to: "/marketing/settings",
+          show: user.privileges.marketing,
+          items: [
+            {
+              title: "Sources of Information",
+              icon: <InfoIcon />,
+              to: "/marketing/settings/information-sources",
+              show: user.privileges.marketing,
+            },
+          ],
+        },
+        {
           title: "FINANCIAL MANAGEMENT",
+          subheader: true,
           show: !!drawerOpen && user.privileges.financial_management,
         },
         {
@@ -334,49 +554,50 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Cash Collection Report",
               icon: <ReportsIcon />,
-              to: "/cash-collection",
+              to: "/financial-management/reports/cash-collection",
               show: user.privileges.financial_management,
             },
             {
               title: "Credit Collection Report",
               icon: <ReportsIcon />,
-              to: "/credit-collection",
+              to: "/financial-management/reports/credit-collection",
               show: user.privileges.financial_management,
             },
             {
               title: "Pending Patient Bills Report",
               icon: <ReportsIcon />,
-              to: "/pending-patient-bills",
+              to: "/financial-management/reports/pending-patient-bills",
               show: user.privileges.financial_management,
             },
             {
               title: "Cleared Patient Bills Report",
               icon: <ReportsIcon />,
-              to: "/cleared-patient-bills",
+              to: "/financial-management/reports/cleared-patient-bills",
               show: user.privileges.financial_management,
             },
             {
               title: "Bill Payment Report",
               icon: <ReportsIcon />,
-              to: "/patient-bill-payments",
+              to: "/financial-management/reports/patient-bill-payments",
               show: user.privileges.financial_management,
             },
             {
               title: "Expenses Report",
               icon: <ReportsIcon />,
-              to: "/expenses",
+              to: "/financial-management/reports/expenses",
               show: user.privileges.financial_management,
             },
             {
               title: "Expense Payments Report",
               icon: <ReportsIcon />,
-              to: "/expense-payments",
+              to: "/financial-management/reports/expense-payments",
               show: user.privileges.financial_management,
             },
           ],
         },
         {
           title: "EMPLOYEE MANAGEMENT",
+          subheader: true,
           show: !!drawerOpen && user.privileges.employee_management,
         },
         {
@@ -387,6 +608,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
         },
         {
           title: "SETTINGS",
+          subheader: true,
           show: !!drawerOpen && user.privileges.settings,
         },
         {
@@ -398,19 +620,19 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
             {
               title: "Units of Measure",
               icon: <SettingsIcon />,
-              to: "/units-of-measure",
+              to: "/settings/item-management/units-of-measure",
               show: user.privileges.settings,
             },
             {
               title: "Lens Types",
               icon: <SettingsIcon />,
-              to: "/lens-types",
+              to: "/settings/item-management/lens-types",
               show: user.privileges.settings,
             },
             {
               title: "Items",
               icon: <SettingsIcon />,
-              to: "/items",
+              to: "/settings/item-management/items",
               show: user.privileges.settings,
             },
           ],
@@ -469,156 +691,42 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications }) => {
     }
   }, [drawerOpen, user, notifications]);
 
+  const generateMenuTree = (items) => {
+    if (!items) return null;
+
+    return items
+      .filter((e) => typeof e.show === "boolean" && e.show)
+      .map((e) => {
+        const hasChildren = e.items?.filter(
+          (e) => typeof e.show === "boolean" && e.show
+        )?.length;
+        return hasChildren ? (
+          <MultiLevelMenuItem
+            key={e.to}
+            item={e}
+            location={location}
+            generateMenuTree={generateMenuTree}
+          />
+        ) : (
+          <SingleLevelMenuItem
+            key={e.subheader ? e.title : e.to}
+            item={e}
+            setDrawerOpen={setDrawerOpen}
+            location={location}
+            navigate={navigate}
+          />
+        );
+      });
+  };
+
   return (
     <List
       component="nav"
-      subheader={
-        drawerOpen ? (
-          <ListSubheader sx={{ px: { xs: 2, sm: 2, md: 3 } }}>
-            MENU
-          </ListSubheader>
-        ) : null
-      }
       dense
+      disablePadding
+      {...rest}
     >
-      {items
-        .filter((e) => typeof e.show === "boolean" && e.show)
-        .map((e) =>
-          !e.to ? (
-            <ListSubheader
-              key={e.title}
-              sx={{ px: { xs: 2, sm: 2, md: 3 } }}
-            >
-              {e.title}
-            </ListSubheader>
-          ) : (
-            <React.Fragment key={e.to}>
-              <ListItemButton
-                selected={location.pathname.indexOf(e.to) !== -1}
-                onClick={() => {
-                  if (
-                    e.items &&
-                    e.items.filter((f) => typeof f.show === "boolean" && f.show)
-                      .length
-                  ) {
-                    setOpen(open === e.to ? null : e.to);
-                  } else {
-                    if (typeof setDrawerOpen === "function") {
-                      setDrawerOpen(false);
-                    }
-
-                    navigate(e.to);
-                  }
-                }}
-                sx={{
-                  "&.Mui-selected": {
-                    color: (theme) => theme.palette.primary.main,
-                    borderRight: (theme) =>
-                      `3px solid ${theme.palette.primary.main}`,
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "light"
-                        ? alpha(theme.palette.primary.main, 0.08)
-                        : "transparent",
-
-                    "& .MuiListItemIcon-root": {
-                      color: "inherit",
-                    },
-                  },
-                  px: { xs: 2, sm: 2, md: 3 },
-                }}
-              >
-                {e.icon ? (
-                  <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>
-                    {e.icon}
-                  </ListItemIcon>
-                ) : null}
-                <ListItemText primary={e.title} />
-                {e.badge ? (
-                  <Box
-                    ml={1}
-                    bgcolor="error.main"
-                    borderRadius={2}
-                    px={1}
-                  >
-                    <Typography
-                      color="error.contrastText"
-                      variant="caption"
-                    >
-                      {e.badge}
-                    </Typography>
-                  </Box>
-                ) : null}
-                {e.items && e.items.length ? (
-                  <React.Fragment>
-                    {open === e.to ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </React.Fragment>
-                ) : null}
-              </ListItemButton>
-
-              {e.items &&
-              e.items.filter((f) => typeof f.show === "boolean" && f.show)
-                .length ? (
-                <Collapse
-                  in={open === e.to}
-                  unmountOnExit
-                >
-                  <List
-                    component="div"
-                    dense
-                  >
-                    {e.items
-                      .filter((f) => typeof f.show === "boolean" && f.show)
-                      .map((f) => (
-                        <ListItemButton
-                          key={f.to}
-                          selected={
-                            location.pathname.indexOf(e.to + f.to) !== -1
-                          }
-                          onClick={() => navigate(e.to + f.to)}
-                          sx={{
-                            "&.Mui-selected": {
-                              color: (theme) => theme.palette.primary.main,
-                              borderRight: (theme) =>
-                                `3px solid ${theme.palette.primary.main}`,
-                              backgroundColor: (theme) =>
-                                theme.palette.mode === "light"
-                                  ? alpha(theme.palette.primary.main, 0.08)
-                                  : "transparent",
-
-                              "& .MuiListItemIcon-root": {
-                                color: "inherit",
-                              },
-                            },
-                            px: { xs: 2, sm: 2, md: 3 },
-                          }}
-                        >
-                          <ListItemIcon sx={{ minWidth: drawerOpen ? 32 : 56 }}>
-                            {f.icon}
-                          </ListItemIcon>
-                          <ListItemText primary={f.title} />
-                          {f.badge ? (
-                            <Box
-                              ml={1}
-                              bgcolor="error.main"
-                              borderRadius={2}
-                              px={1}
-                            >
-                              <Typography
-                                color="error.contrastText"
-                                variant="caption"
-                              >
-                                {f.badge}
-                              </Typography>
-                            </Box>
-                          ) : null}
-                        </ListItemButton>
-                      ))}
-                  </List>
-                </Collapse>
-              ) : null}
-            </React.Fragment>
-          )
-        )}
+      {generateMenuTree(items)}
     </List>
   );
 };

@@ -1,165 +1,179 @@
-import React from "react";
-import { Box, TextField, Typography } from "@mui/material";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers";
-import {
-  ArrowDropDownRounded as ArrowDropDownIcon,
-  CalendarMonthRounded as CalendarIcon,
-  ChevronLeftRounded as ChevronLeftIcon,
-  ChevronRightRounded as ChevronRightIcon,
-} from "@mui/icons-material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
+import CalendarIcon from "@mui/icons-material/CalendarMonthRounded";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightIcon from "@mui/icons-material/ChevronRightRounded";
 
-class DatePicker extends React.Component {
-  constructor(props) {
-    super(props);
+const DatePicker = (
+  {
+    containerProps,
+    fullWidth,
+    label,
+    required,
+    horizontal,
+    views,
+    rules,
+    value,
+    onChange,
+    ...rest
+  },
+  ref
+) => {
+  const inputRef = useRef();
 
-    this.input = React.createRef();
+  const [state, setState] = useState({
+    value,
+    error: null,
+    validate: false,
+    open: false,
+  });
 
-    this.state = {
-      value: props.value,
-      error: null,
-      open: false,
-    };
-  }
+  useEffect(() => {
+    setState({ ...state, value });
+  }, [value]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.value !== this.props.value) {
-      this.setState({ value: this.props.value });
+  useEffect(() => {
+    if (state.validate) {
+      _validate();
     }
-  }
+  }, [state.value, state.validate]);
 
-  _onChange(value, validate = true) {
-    if (this.props.onChange) {
-      this.props.onChange(value);
+  const _onChange = (value, validate = true) => {
+    if (onChange) {
+      onChange(value);
     }
 
-    this.setState({ value }, () => {
-      if (validate) {
-        this.validate();
-      }
-    });
-  }
+    setState({ ...state, value, validate });
+  };
 
-  validate() {
-    let rules = this.props.rules || [],
-      i = 0;
-    if (this.props.required) {
+  const _validate = () => {
+    rules = rules || [];
+    let i = 0;
+    if (required) {
       rules.unshift((value) => !!value || "This field is required.");
     }
 
     for (; i < rules.length; i++) {
-      let validate = rules[i](this.state.value);
+      let validate = rules[i](state.value);
       if (validate !== true) {
-        this.setState({ error: validate });
+        setState({ ...state, error: validate });
         return false;
       } else {
-        this.setState({ error: undefined });
+        setState({ ...state, error: undefined });
       }
     }
 
     return true;
-  }
+  };
 
-  setValue(value, validate = false) {
-    this.input.value = value;
-    this._onChange(value, validate);
-  }
+  const _setValue = (value, validate = false) => {
+    _onChange(value, validate);
+  };
 
-  render() {
-    const { containerProps, fullWidth, label, required, horizontal, ...rest } =
-      this.props;
-    return (
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
+  useImperativeHandle(ref, () => ({
+    validate: _validate,
+    setValue: _setValue,
+  }));
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Box
+        component="div"
+        {...(horizontal && {
+          display: "flex",
+          flexDirection: "row",
+        })}
+        {...containerProps}
+      >
+        {label ? (
+          <Typography
+            fontWeight={500}
+            {...(horizontal && {
+              mr: 1,
+            })}
+            {...(!horizontal && {
+              mx: 0.5,
+              mb: 0.5,
+            })}
+          >
+            {label}
+            {required ? (
+              <Typography
+                component="span"
+                color="error.main"
+                fontWeight="bold"
+                ml={0.25}
+              >
+                *
+              </Typography>
+            ) : null}
+          </Typography>
+        ) : null}
         <Box
           component="div"
           {...(horizontal && {
-            display: "flex",
-            flexDirection: "row",
+            flexGrow: 1,
           })}
-          {...containerProps}
         >
-          {label ? (
+          <MuiDatePicker
+            inputRef={inputRef}
+            format="yyyy-MM-dd"
+            {...rest}
+            value={value}
+            slots={{
+              leftArrowIcon: ChevronLeftIcon,
+              openPickerIcon: CalendarIcon,
+              rightArrowIcon: ChevronRightIcon,
+              switchViewIcon: ArrowDropDownIcon,
+            }}
+            slotProps={{
+              textField: {
+                variant: "outlined",
+                type: "text",
+                size: "small",
+                margin: "none",
+                autoComplete: "off",
+                fullWidth,
+                required,
+                readOnly: true,
+                InputProps: {
+                  error: !!state.error,
+                  onClick: () => setState({ ...state, open: true }),
+                },
+              },
+            }}
+            views={views}
+            open={state.open}
+            onClose={() => setState({ ...state, open: false })}
+            onChange={(value) => _onChange(value, true)}
+          />
+          {state.error ? (
             <Typography
-              fontWeight={500}
-              sx={{
-                ...(horizontal && {
-                  mr: 1,
-                }),
-                ...(!horizontal && {
-                  ml: 0.5,
-                  mb: 0.5,
-                }),
-              }}
+              variant="body2"
+              color="error.main"
+              mt={0.25}
+              {...(!horizontal && {
+                mx: 0.5,
+              })}
             >
-              {label}
-              {required ? (
-                <Typography
-                  component="span"
-                  color="error.main"
-                  fontWeight="bold"
-                  ml={0.25}
-                >
-                  *
-                </Typography>
-              ) : null}
+              {state.error}
             </Typography>
           ) : null}
-          <Box
-            component="div"
-            {...(horizontal && {
-              flexGrow: 1,
-            })}
-          >
-            <MuiDatePicker
-              inputRef={(ref) => (this.input = ref)}
-              PaperProps={{ variant: "elevation" }}
-              components={{
-                LeftArrowIcon: ChevronLeftIcon,
-                OpenPickerIcon: CalendarIcon,
-                RightArrowIcon: ChevronRightIcon,
-                SwitchViewIcon: ArrowDropDownIcon,
-              }}
-              inputFormat="yyyy-MM-dd"
-              mask="____-__-__"
-              {...rest}
-              renderInput={(params) => (
-                <TextField
-                  variant="outlined"
-                  type="text"
-                  size="small"
-                  margin="none"
-                  autoComplete="off"
-                  fullWidth={fullWidth}
-                  required={required}
-                  {...params}
-                />
-              )}
-              InputProps={{
-                error: !!this.state.error,
-                onClick: () => this.setState({ open: true }),
-              }}
-              open={this.state.open}
-              onClose={() => this.setState({ open: false })}
-              onChange={(value) => this._onChange(value, true)}
-            />
-            {this.state.error ? (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "error.main",
-                  ml: 0.5,
-                  mt: 0.25,
-                }}
-              >
-                {this.state.error}
-              </Typography>
-            ) : null}
-          </Box>
         </Box>
-      </LocalizationProvider>
-    );
-  }
-}
+      </Box>
+    </LocalizationProvider>
+  );
+};
 
-export default DatePicker;
+export default forwardRef(DatePicker);

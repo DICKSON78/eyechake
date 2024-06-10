@@ -247,7 +247,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
                     },
                     {
                       field: "created_at",
-                      headerName: "Date",
+                      headerName: "Date Created",
                     },
                     {
                       field: "actions",

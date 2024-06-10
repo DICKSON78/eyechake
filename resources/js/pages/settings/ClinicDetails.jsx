@@ -27,10 +27,10 @@ const ClinicDetails = () => {
   const addressRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: window.clinic.name,
-    phone: window.clinic.phone,
-    email: window.clinic.email,
-    address: window.clinic.address,
+    name: window.user.clinic.name,
+    phone: window.user.clinic.phone,
+    email: window.user.clinic.email,
+    address: window.user.clinic.address,
   });
 
   const { data, loading, error, handlePost } = usePost(

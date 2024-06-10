@@ -22,7 +22,7 @@ const Auth = () => {
           <Box
             component="img"
             display="block"
-            width={112}
+            width={160}
             mt={2}
             mx="auto"
             alt="Logo"

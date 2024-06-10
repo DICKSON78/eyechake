@@ -226,14 +226,14 @@ export const getAddress = (region, district, ward) => {
     address += `, ${district.name}`;
 
     if (address.indexOf(", ") === 0) {
-      address = address.substr(2);
+      address = address.substring(2);
     }
   }
   if (region) {
     address += `, ${region.name}`;
 
     if (address.indexOf(", ") === 0) {
-      address = address.substr(2);
+      address = address.substring(2);
     }
   }
 
@@ -256,4 +256,26 @@ export const getDateRangeTitle = (startDate, endDate) => {
   }
 
   return title;
+};
+
+export const getPrivileges = (preferences) => {
+  return [
+    { label: "Dashboard", value: "dashboard" },
+    { label: "Reception", value: "reception" },
+    { label: "Payment Center", value: "payment_center" },
+    { label: "Consultation Room", value: "consultation_room" },
+    { label: "Optician Center", value: "optician_center" },
+    { label: "Medicine Center", value: "medicine_center" },
+    { label: "Procedure Room", value: "procedure_room" },
+    { label: "Inventory Management", value: "inventory_management" },
+    {
+      label: "Marketing",
+      value: "marketing",
+      show:
+        preferences?.find((e) => e.key === "MARKETING_MODULE")?.value === "Yes",
+    },
+    { label: "Financial Management", value: "financial_management" },
+    { label: "Employee Management", value: "employee_management" },
+    { label: "Settings", value: "settings" },
+  ];
 };

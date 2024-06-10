@@ -121,7 +121,7 @@ const DispensingRequests = ({ consultationType }) => {
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Sent",
               },
               {
                 field: "actions",

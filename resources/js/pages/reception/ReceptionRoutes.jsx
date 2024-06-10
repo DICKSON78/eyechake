@@ -1,6 +1,5 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import PatientRegistration from "./patients/PatientRegistration";
 import Patients from "./patients/Patients";
 import CheckInPatient from "./CheckInPatient";
 import PatientRecords from "./patients/PatientRecords";
@@ -24,10 +23,6 @@ const ReceptionRoutes = () => {
       <Route
         path="/patients/:patientId/records/*"
         element={<PatientRecords />}
-      />
-      <Route
-        path="/patients/new"
-        element={<PatientRegistration />}
       />
       <Route
         path="/glass-patients/*"

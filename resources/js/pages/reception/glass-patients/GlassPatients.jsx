@@ -126,7 +126,7 @@ const GlassPatients = () => {
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Sent",
                 valueGetter: (item, index) =>
                   item.patient_direction === "Direct to Doctor"
                     ? item.payment_cache_item.served_at

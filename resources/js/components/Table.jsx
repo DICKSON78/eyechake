@@ -12,6 +12,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -314,16 +315,22 @@ const Table = ({
                       </TableCell>
                     ) : null}
                     {columns.map((col, colIndex) => (
-                      <TableCell
+                      <Tooltip
                         key={colIndex}
-                        {...col.tableCellProps}
+                        title={
+                          typeof col.renderCell === "function"
+                            ? undefined
+                            : col.headerName
+                        }
                       >
-                        {typeof col.renderCell === "function"
-                          ? col.renderCell(item, index, array)
-                          : typeof col.valueGetter === "function"
-                            ? col.valueGetter(item, index, array)
-                            : item[col.field]}
-                      </TableCell>
+                        <TableCell {...col.tableCellProps}>
+                          {typeof col.renderCell === "function"
+                            ? col.renderCell(item, index, array)
+                            : typeof col.valueGetter === "function"
+                              ? col.valueGetter(item, index, array)
+                              : item[col.field]}
+                        </TableCell>
+                      </Tooltip>
                     ))}
                   </TableRow>
                   {renderExpanded ? (
@@ -382,16 +389,18 @@ const Table = ({
               onPageChange(page1 + 1);
             }
           }}
-          rowsPerPageOptions={[5, 10, 25, 50, 100, 250]}
+          rowsPerPageOptions={[25, 50, 100, 250, 500, 1000]}
           rowsPerPage={pageSize}
           onRowsPerPageChange={(event) => {
             if (typeof onPageSizeChange === "function") {
               onPageSizeChange(event.target.value);
             }
           }}
-          SelectProps={{
-            IconComponent: ArrowDropDownIcon,
-            MenuProps: { PaperProps: { variant: "elevation" } },
+          slotProps={{
+            select: {
+              IconComponent: ArrowDropDownIcon,
+              MenuProps: { PaperProps: { variant: "elevation" } },
+            },
           }}
           ActionsComponent={TablePaginationActions}
         />

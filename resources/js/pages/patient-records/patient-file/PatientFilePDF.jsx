@@ -168,16 +168,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
               label: "Payment Mode",
               value: consultation.payment_cache_item.payment_mode.name,
             },
-            {
-              label: "Consultant",
-              value: consultation.payment_cache_item.consultant?.full_name,
-            },
-            {
-              label: "Consultation Date",
-              value:
-                consultation.payment_cache_item.served_at ||
-                consultation.created_at,
-            },
           ]}
           containerStyle={{
             marginBottom: 8,
@@ -986,6 +976,16 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 },
                 { label: "Return Date", value: consultation.to_return_date },
                 { label: "Remarks", value: consultation.remarks },
+                {
+                  label: "Consultant",
+                  value: consultation.payment_cache_item.consultant?.full_name,
+                },
+                {
+                  label: "Consultation Date",
+                  value:
+                    consultation.payment_cache_item.served_at ||
+                    consultation.created_at,
+                },
               ]}
               containerStyle={{
                 marginBottom: 8,

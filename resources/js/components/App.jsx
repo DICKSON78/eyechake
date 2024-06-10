@@ -5,8 +5,9 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { CssBaseline, GlobalStyles } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
+import ThemeProvider from "@mui/material/styles/ThemeProvider";
 import { ToastContextProvider } from "../contexts/ToastContext";
 import lightTheme from "../themes/light";
 import darkTheme from "../themes/dark";
@@ -22,6 +23,7 @@ import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes"
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
+import MarketingRoutes from "../pages/marketing/MarketingRoutes";
 import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
 import EmployeeManagementRoutes from "../pages/employee-management/EmployeeManagementRoutes";
 import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
@@ -37,6 +39,7 @@ const App = () => {
   }, [themeMode]);
 
   const [user, setUser] = useState();
+  const [smsBalance, setSmsBalance] = useState(0);
 
   return (
     <ThemeProvider theme={theme}>
@@ -72,6 +75,7 @@ const App = () => {
                 <DefaultLayout
                   setThemeMode={setThemeMode}
                   setUser={setUser}
+                  smsBalance={smsBalance}
                 />
               }
             >
@@ -79,7 +83,9 @@ const App = () => {
                 <Route
                   path="dashboard"
                   element={
-                    user && user.privileges.dashboard ? <Dashboard /> : null
+                    user && user.privileges.dashboard ? (
+                      <Dashboard setSmsBalance={setSmsBalance} />
+                    ) : null
                   }
                 />
                 <Route
@@ -139,6 +145,14 @@ const App = () => {
                   element={
                     user && user.privileges.inventory_management ? (
                       <InventoryManagementRoutes />
+                    ) : null
+                  }
+                />
+                <Route
+                  path="marketing/*"
+                  element={
+                    user && user.privileges.marketing ? (
+                      <MarketingRoutes />
                     ) : null
                   }
                 />

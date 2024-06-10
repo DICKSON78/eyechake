@@ -20,6 +20,7 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
+import CreatePatient from "./CreatePatient";
 import EditPatient from "./EditPatient";
 
 import { useFetch, useToast } from "../../../hooks";
@@ -66,6 +67,17 @@ const Patients = () => {
     }
   }, [error]);
 
+  const openCreatePatientModal = () => {
+    let component = (
+      <CreatePatient
+        modal={modalRef.current}
+        fetchPatients={handleFetch}
+      />
+    );
+
+    modalRef.current.open("Create Patient", component, "md");
+  };
+
   const openEditPatientModal = (item) => {
     let component = (
       <EditPatient
@@ -104,7 +116,7 @@ const Patients = () => {
             <React.Fragment>
               <Button
                 variant="contained"
-                onClick={() => navigate("/reception/patients/new")}
+                onClick={openCreatePatientModal}
               >
                 New Patient
               </Button>
@@ -159,12 +171,12 @@ const Patients = () => {
               },
               {
                 field: "created_by",
-                headerName: "Registered By",
+                headerName: "Created By",
                 valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Created",
               },
               {
                 field: "actions",

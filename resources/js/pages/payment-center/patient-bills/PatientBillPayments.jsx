@@ -263,7 +263,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
                     },
                     {
                       field: "created_at",
-                      headerName: "Date",
+                      headerName: "Date Created",
                     },
                     {
                       field: "actions",

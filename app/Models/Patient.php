@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Marketing\InformationSource;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ class Patient extends Model
 
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
-        'address', 'national_id', 'phone', 'occupation', 'payment_mode_id', 'created_by',
+        'address', 'national_id', 'phone', 'occupation', 'payment_mode_id', 'info_source_id', 'created_by',
     ];
 
     public function region()
@@ -35,6 +36,11 @@ class Patient extends Model
     public function payment_mode()
     {
         return $this->belongsTo(PaymentMode::class, 'payment_mode_id');
+    }
+
+    public function information_source()
+    {
+        return $this->belongsTo(InformationSource::class, 'info_source_id');
     }
 
     public function creator()

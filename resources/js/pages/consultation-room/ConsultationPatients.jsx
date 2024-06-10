@@ -178,7 +178,8 @@ const ConsultationPatients = () => {
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName:
+                  status === "pending" ? "Date Sent" : "Date Consulted",
                 valueGetter: (item) =>
                   item.payment_cache_item.served_at || item.created_at,
               },

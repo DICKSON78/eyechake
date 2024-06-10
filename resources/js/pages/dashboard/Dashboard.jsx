@@ -6,7 +6,7 @@ import {
   Divider,
   Grid,
   IconButton,
-  Tooltip as MuiTooltip,
+  Tooltip,
 } from "@mui/material";
 import {
   Person2Rounded as PersonIcon,
@@ -25,7 +25,7 @@ import InfoCard from "./InfoCard";
 import Filters from "./Filters";
 import Chart from "react-apexcharts";
 
-import { useTheme } from "@mui/material/styles";
+import useTheme from "@mui/material/styles/useTheme";
 import {
   blue,
   cyan,
@@ -44,7 +44,7 @@ import {
 import { useFetch, useToast } from "../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../helpers";
 
-const Dashboard = () => {
+const Dashboard = ({ setSmsBalance }) => {
   const theme = useTheme();
   const addToast = useToast();
 
@@ -74,6 +74,12 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (data) {
+      setSmsBalance(data.counts.sms_balance);
+    }
+  }, [data]);
+
+  useEffect(() => {
     if (error) {
       addToast({ message: formatError(error), severity: "error" });
     }
@@ -99,11 +105,11 @@ const Dashboard = () => {
       <CardHeader
         title="Dashboard"
         action={
-          <MuiTooltip title="Show filters">
+          <Tooltip title="Show filters">
             <IconButton onClick={openFiltersModal}>
               <FilterIcon />
             </IconButton>
-          </MuiTooltip>
+          </Tooltip>
         }
         titleTypographyProps={{
           variant: "h4",
@@ -209,20 +215,31 @@ const Dashboard = () => {
                             show: false,
                           },
                         },
+                        plotOptions: {
+                          pie: {
+                            donut: {
+                              size: "50%",
+                            },
+                          },
+                        },
                         colors: [
                           teal[400],
                           red[300],
-                          cyan[400],
                           lightBlue[400],
                           deepOrange[300],
                           lime[600],
                           pink[300],
-                          green[400],
+                          cyan[400],
                           purple[300],
+                          green[400],
                           yellow[500],
                         ],
                         stroke: {
-                          show: false,
+                          show: true,
+                          width: 3,
+                          colors: data.statistics.expenses_by_category.map(
+                            (e) => theme.palette.background.paper
+                          ),
                         },
                         dataLabels: {
                           style: {
@@ -259,7 +276,7 @@ const Dashboard = () => {
                       series={data.statistics.expenses_by_category.map(
                         (e) => e.amount
                       )}
-                      type="pie"
+                      type="donut"
                       height={
                         data.statistics.expenses_by_category.length ? 288 : 256
                       }
@@ -296,20 +313,31 @@ const Dashboard = () => {
                             show: false,
                           },
                         },
+                        plotOptions: {
+                          pie: {
+                            donut: {
+                              size: "50%",
+                            },
+                          },
+                        },
                         colors: [
                           blue[400],
-                          cyan[400],
                           red[300],
-                          lightBlue[400],
+                          green[400],
+                          indigo[400],
                           teal[400],
                           purple[300],
+                          cyan[400],
                           lime[600],
                           pink[300],
-                          green[400],
                           yellow[500],
                         ],
                         stroke: {
-                          show: false,
+                          show: true,
+                          width: 3,
+                          colors: data.statistics.payments_by_channel.map(
+                            (e) => theme.palette.background.paper
+                          ),
                         },
                         dataLabels: {
                           style: {
@@ -346,7 +374,7 @@ const Dashboard = () => {
                       series={data.statistics.payments_by_channel.map(
                         (e) => e.amount
                       )}
-                      type="pie"
+                      type="donut"
                       height={
                         data.statistics.payments_by_channel.length ? 288 : 256
                       }
@@ -452,7 +480,7 @@ const Dashboard = () => {
                 series={[
                   {
                     name: "Sales",
-                    data: data.yearly_statistics.map((e) => ({
+                    data: data.statistics.yearly.map((e) => ({
                       x: e.month,
                       y:
                         e.statistics.find((f) => f.name === "total_sales")
@@ -461,7 +489,7 @@ const Dashboard = () => {
                   },
                   {
                     name: "Expenses",
-                    data: data.yearly_statistics.map((e) => ({
+                    data: data.statistics.yearly.map((e) => ({
                       x: e.month,
                       y:
                         e.statistics.find((f) => f.name === "expenses")
@@ -510,7 +538,7 @@ const Dashboard = () => {
                   colors: [teal[400], pink[300], theme.palette.info.main],
                   stroke: {
                     show: true,
-                    width: [4, 4, 4],
+                    width: [3, 3, 3],
                   },
                   dataLabels: {
                     enabled: false,
@@ -567,7 +595,7 @@ const Dashboard = () => {
                 series={[
                   {
                     name: "Male",
-                    data: data.yearly_statistics.map((e) => ({
+                    data: data.statistics.yearly.map((e) => ({
                       x: e.month,
                       y:
                         e.statistics.find((f) => f.name === "new_patients_male")
@@ -576,7 +604,7 @@ const Dashboard = () => {
                   },
                   {
                     name: "Female",
-                    data: data.yearly_statistics.map((e) => ({
+                    data: data.statistics.yearly.map((e) => ({
                       x: e.month,
                       y:
                         e.statistics.find(
@@ -586,7 +614,7 @@ const Dashboard = () => {
                   },
                   {
                     name: "Total",
-                    data: data.yearly_statistics.map((e) => ({
+                    data: data.statistics.yearly.map((e) => ({
                       x: e.month,
                       y:
                         (e.statistics.find(

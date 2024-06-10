@@ -242,7 +242,7 @@ const DailyCreditCollection = ({ module }) => {
           },
           {
             field: "created_at",
-            headerName: "Date",
+            headerName: "Date Created",
           },
         ]}
         summationFooterColumns={[

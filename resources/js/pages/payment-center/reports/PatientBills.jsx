@@ -247,7 +247,7 @@ const PatientBills = ({ module, status }) => {
           },
           {
             field: "created_at",
-            headerName: "Date",
+            headerName: "Date Created",
           },
         ]}
         summationFooterColumns={[

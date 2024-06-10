@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { useTheme } from "@mui/material/styles";
+import useTheme from "@mui/material/styles/useTheme";
 import {
   AppBar,
   Avatar,
@@ -35,7 +35,8 @@ import {
   MoreVert as MoreIcon,
   Person2Rounded as UserIcon,
 } from "@mui/icons-material";
-import { Heart as HeartIcon, Menu as MenuIcon } from "../components/icons";
+import HeartIcon from "../components/icons/Heart";
+import MenuIcon from "../components/icons/Menu";
 
 import darkTheme from "../themes/dark";
 import Menu from "../components/Menu";
@@ -44,6 +45,8 @@ import ChangePassword from "../pages/auth/ChangePassword";
 import loader from "../../images/loader.svg";
 
 import useFetch from "../hooks/useFetch";
+
+import { numberFormat } from "../helpers";
 
 const drawerWidth = 272;
 
@@ -57,28 +60,26 @@ const drawerOpenedMixin = (theme) => ({
 });
 
 const drawerClosedMixin = (theme) => ({
+  width: 0,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
   whiteSpace: "nowrap",
-  width: 72,
 });
 
-const Default = ({ setThemeMode, setUser }) => {
+const Default = ({ setThemeMode, setUser, smsBalance }) => {
   const notificationsTimer = useRef();
   const modalRef = useRef();
+  const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const breakpointDownMedium = useMediaQuery(theme.breakpoints.down("md"));
   const breakpointUpMedium = useMediaQuery(theme.breakpoints.up("md"));
 
-  const [loading, setLoading] = useState(false);
-
-  const { data: user, loading: loadingUser } = useFetch("api/user");
-  const { data: clinic, loading: loadingClinic } = useFetch(
-    "api/clinic-details",
+  const { data: user, loading } = useFetch(
+    "api/auth/user",
     null,
     true,
     null,
@@ -105,17 +106,8 @@ const Default = ({ setThemeMode, setUser }) => {
   }, []);
 
   useEffect(() => {
-    setLoading(loadingUser);
-  }, [loadingUser]);
-
-  useEffect(() => {
-    setLoading(loadingClinic);
-  }, [loadingClinic]);
-
-  useEffect(() => {
-    if (user && clinic) {
+    if (user) {
       window.user = user;
-      window.clinic = clinic;
       setUser(user);
       fetchNotifications();
 
@@ -126,7 +118,7 @@ const Default = ({ setThemeMode, setUser }) => {
         );
       }
     }
-  }, [user, clinic]);
+  }, [user]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -235,6 +227,23 @@ const Default = ({ setThemeMode, setUser }) => {
                   </IconButton>
                 </Tooltip>
 
+                {user.privileges.dashboard &&
+                location.pathname.indexOf("/dashboard") === 0 ? (
+                  <Chip
+                    variant="outlined"
+                    sx={{ mr: { xs: 1, sm: 1, md: 2 } }}
+                    color="primary"
+                    label={
+                      <Typography
+                        variant="body2"
+                        color="primary.contrastText"
+                      >
+                        {`SMS Balance: ${numberFormat(smsBalance)}`}
+                      </Typography>
+                    }
+                  />
+                ) : null}
+
                 <Chip
                   variant="outlined"
                   sx={{
@@ -261,7 +270,7 @@ const Default = ({ setThemeMode, setUser }) => {
                     </Stack>
                   }
                   onClick={handleAccountMenuOpen}
-                ></Chip>
+                />
 
                 <IconButton
                   color="inherit"

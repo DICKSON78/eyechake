@@ -364,7 +364,12 @@ const PatientItems = ({
           },
           {
             field: status !== "Served" ? "created_at" : "served_at",
-            headerName: "Date",
+            headerName:
+              status !== "Served"
+                ? "Date Created"
+                : consultationType === "Pharmacy"
+                  ? "Date Dispensed"
+                  : "Date Served",
           },
           {
             field: "status",

@@ -20,8 +20,7 @@ window.axios.interceptors.response.use(
   },
   (error) => {
     if (
-      error.response &&
-      error.response.status === 401 &&
+      error?.response?.status === 401 &&
       window.location.href.indexOf("/login") === -1
     ) {
       return (window.location.href = "/login");

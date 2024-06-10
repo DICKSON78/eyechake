@@ -99,12 +99,12 @@ const Patients = () => {
               },
               {
                 field: "created_by",
-                headerName: "Registered By",
+                headerName: "Created By",
                 valueGetter: (item, index) => item.creator?.full_name,
               },
               {
                 field: "created_at",
-                headerName: "Date",
+                headerName: "Date Created",
               },
               {
                 field: "actions",

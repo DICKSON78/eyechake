@@ -8,6 +8,7 @@ use App\Models\ConsultationType;
 use App\Models\ItemType;
 use App\Models\JobTitle;
 use App\Models\PaymentMode;
+use App\Models\Preference;
 use App\Models\UnitOfMeasure;
 use App\Models\User;
 use App\Models\UserPrivilege;
@@ -94,6 +95,15 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Lens', 'description' => 'Lens Item', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Frame', 'description' => 'Frame Item', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Others', 'description' => 'Other Item', 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        Preference::insert([
+            ['key' => 'CONSULTATION_MESSAGE', 'value' => 'Habari {name}, Hongera na asante kwa kupata huduma kwetu. Ni tumaini letu umepata huduma stahiki. Kwa maoni kuhusu huduma zetu tuma ujumbe au piga simu namba 0676 506 323. Karibu sana.'],
+            ['key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya macho yako. Wasiliana nasi 0676 506 323.'],
+            ['key' => 'SEND_MESSAGES', 'value' => 'No'],
+            ['key' => 'SEND_REMINDER_MESSAGES_AT', 'value' => '11:00'],
+            ['key' => 'SMS_SENDER_NAME', 'value' => 'INFO'],
+            ['key' => 'MARKETING_MODULE', 'value' => 'No'],
         ]);
     }
 }

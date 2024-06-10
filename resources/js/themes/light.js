@@ -47,7 +47,7 @@ const theme = createTheme({
       secondary: "rgba(0, 0, 0, 0.58)",
     },
     background: {
-      default: "#f0f3f7",
+      default: "#f1f3f4",
       paper: "#fff",
     },
     divider: "#dae2ed",
@@ -109,7 +109,7 @@ const theme = createTheme({
           props: { variant: "outlined-elevation" },
           style: {
             boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
-            border: "1px solid #e5e5e5",
+            border: "1px solid #dae2ed",
           },
         },
       ],
@@ -226,9 +226,10 @@ const theme = createTheme({
     MuiTable: {
       styleOverrides: {
         root: {
-          "&:not(.no-hover-highlight) .MuiTableBody-root .MuiTableRow-root:hover": {
-            backgroundColor: "#f5f5f5",
-          },
+          "&:not(.no-hover-highlight) .MuiTableBody-root .MuiTableRow-root:hover":
+            {
+              backgroundColor: "#f1f3f4",
+            },
         },
       },
     },
@@ -237,7 +238,7 @@ const theme = createTheme({
         root: {
           "& .MuiTableRow-root th": {
             padding: "12px",
-            backgroundColor: "#f0f3f7",
+            backgroundColor: "#f1f3f4",
             fontWeight: 500,
           },
         },
@@ -251,11 +252,11 @@ const theme = createTheme({
         },
         head: {
           padding: "12px",
-          backgroundColor: "#f0f3f7",
+          backgroundColor: "#f1f3f4",
         },
         footer: {
           padding: "12px",
-          backgroundColor: "#f0f3f7",
+          backgroundColor: "#f1f3f4",
           fontSize: "0.75rem",
           fontWeight: 700,
         },
@@ -268,6 +269,11 @@ const theme = createTheme({
             backgroundColor: alpha(lightBlue[600], 0.12),
           },
         },
+      },
+    },
+    MuiTooltip: {
+      defaultProps: {
+        arrow: true,
       },
     },
     MuiSvgIcon: {

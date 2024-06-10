@@ -31,25 +31,12 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
   const lastNameRef = useRef();
   const genderRef = useRef();
   const dateOfBirthRef = useRef();
-  const regionRef = useRef();
-  const districtRef = useRef();
-  const wardRef = useRef();
   const addressRef = useRef();
   const nationalIdRef = useRef();
   const phoneRef = useRef();
   const occupationRef = useRef();
   const paymentModeRef = useRef();
-
-  const { data: regions, setData: setRegions } = useFetch(
-    "api/regions",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
+  const informationSourceRef = useRef();
 
   const [formData, setFormData] = useState({
     first_name: item.first_name,
@@ -57,15 +44,17 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     last_name: item.last_name,
     gender: item.gender,
     date_of_birth: item.date_of_birth ? new Date(item.date_of_birth) : null,
-    region_id: item.region_id,
-    district_id: item.district_id,
-    ward_id: item.ward_id,
     address: item.address,
     national_id: item.national_id,
     phone: item.phone,
     occupation: item.occupation,
     payment_mode_id: item.payment_mode_id,
+    info_source_id: item.info_source_id,
   });
+
+  const marketingEnabled =
+    window.user.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
+      ?.value === "Yes";
 
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
@@ -77,36 +66,18 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     [],
     (response) => response.data.data.data
   );
-  const {
-    data: districts,
-    setData: setDistricts,
-    handleFetch: fetchDistricts,
-  } = useFetch(
-    "api/districts",
-    {
-      status: "Active",
-      per_page: 500,
-      region_id: formData.region_id,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
-  const {
-    data: wards,
-    setData: setWards,
-    handleFetch: fetchWards,
-  } = useFetch(
-    "api/wards",
-    {
-      status: "Active",
-      per_page: 500,
-      district_id: formData.district_id,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
+
+  const { data: informationSources, handleFetch: fetchInformationSources } =
+    useFetch(
+      "api/marketing/information-sources",
+      {
+        status: "Active",
+        per_page: 500,
+      },
+      false,
+      [],
+      (response) => response.data.data.data
+    );
 
   const { data, loading, error, handlePatch } = usePatch(
     `api/patients/${item.id}`,
@@ -125,6 +96,12 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
   };
 
   useEffect(() => {
+    if (marketingEnabled) {
+      fetchInformationSources();
+    }
+  }, []);
+
+  useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
@@ -139,18 +116,6 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
-
-  useEffect(() => {
-    if (formData.region_id) {
-      fetchDistricts();
-    }
-  }, [formData.region_id]);
-
-  useEffect(() => {
-    if (formData.district_id) {
-      fetchWards();
-    }
-  }, [formData.district_id]);
 
   return (
     <React.Fragment>
@@ -245,86 +210,6 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 }
               />
             </Grid>
-            {false && (
-              <React.Fragment>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={regionRef}
-                    label="Region"
-                    fullWidth
-                    required
-                    options={regions}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={
-                      regions.find((e) => e.id === formData.region_id) || null
-                    }
-                    onChange={(value) => {
-                      setDistricts([]);
-                      setWards([]);
-                      setFormData({
-                        ...formData,
-                        region_id: value,
-                        district_id: null,
-                        ward_id: null,
-                      });
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={districtRef}
-                    label="District"
-                    fullWidth
-                    required
-                    options={districts}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={
-                      districts.find((e) => e.id === formData.district_id) ||
-                      null
-                    }
-                    onChange={(value) => {
-                      setWards([]);
-                      setFormData({
-                        ...formData,
-                        district_id: value,
-                        ward_id: null,
-                      });
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <Select
-                    ref={wardRef}
-                    label="Ward"
-                    fullWidth
-                    options={wards}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    value={wards.find((e) => e.id === formData.ward_id) || null}
-                    onChange={(value) =>
-                      setFormData({ ...formData, ward_id: value })
-                    }
-                  />
-                </Grid>
-              </React.Fragment>
-            )}
             <Grid
               item
               md={4}
@@ -411,6 +296,32 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 }
               />
             </Grid>
+            {marketingEnabled ? (
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={informationSourceRef}
+                  label="Source of Information"
+                  fullWidth
+                  clearable
+                  options={informationSources}
+                  optionsLabel="name"
+                  optionsValue="id"
+                  value={
+                    informationSources.find(
+                      (e) => e.id === formData.info_source_id
+                    ) || null
+                  }
+                  onChange={(value) =>
+                    setFormData({ ...formData, info_source_id: value })
+                  }
+                />
+              </Grid>
+            ) : null}
           </Grid>
         </Form>
       </CardContent>
