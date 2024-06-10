@@ -74,11 +74,13 @@ const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
       sx={{
         "&:hover, &.Mui-selected, &.Mui-selected:hover": {
           color: "primary.main",
-          borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
 
           "& .MuiListItemIcon-root": {
             color: "inherit",
           },
+        },
+        "&.Mui-selected, &.Mui-selected:hover": {
+          borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
         },
         px: { xs: 1, sm: 1, md: 1.5 },
       }}
@@ -117,11 +119,13 @@ const MultiLevelMenuItem = ({ item, location, generateMenuTree }) => {
         sx={{
           "&:hover, &.Mui-selected, &.Mui-selected:hover": {
             color: "primary.main",
-            borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
 
             "& .MuiListItemIcon-root": {
               color: "inherit",
             },
+          },
+          "&.Mui-selected, &.Mui-selected:hover": {
+            borderRight: (theme) => `4px solid ${theme.palette.primary.main}`,
           },
           px: { xs: 1, sm: 1, md: 1.5 },
         }}

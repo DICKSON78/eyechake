@@ -78,6 +78,10 @@ const Expenses = ({ module, createdBy }) => {
         }
         columns={[
           {
+            field: "expense_date",
+            headerName: "Expense Date",
+          },
+          {
             field: "category_id",
             headerName: "Category",
             valueGetter: (item, index) => item.category.name,
@@ -103,10 +107,6 @@ const Expenses = ({ module, createdBy }) => {
             headerName: "Description",
           },
           {
-            field: "expense_date",
-            headerName: "Expense Date",
-          },
-          {
             field: "created_by",
             headerName: "Created By",
             valueGetter: (item, index) => item.creator?.full_name,
@@ -129,7 +129,7 @@ const Expenses = ({ module, createdBy }) => {
           },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 2, index: 1 },
+          { value: "TOTAL", span: 3, index: 1 },
           { reducer: (acc, item, index) => acc + item.total_amount, index: 2 },
           { reducer: (acc, item, index) => acc + item.paid_amount, index: 3 },
           {
