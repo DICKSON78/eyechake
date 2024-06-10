@@ -449,6 +449,7 @@ class ConsultationsController extends Controller
             'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
             'require_glass' => 'sometimes|required|in:Yes,No',
+            'info_source_id' => 'sometimes|exists:information_sources,id',
         ]);
 
         $user = $request->user();
@@ -496,6 +497,13 @@ class ConsultationsController extends Controller
         // send message to patient
         if ($data->patient_direction == 'Direct to Doctor') {
             SendConsultationMessageJob::dispatch($data);
+        }
+
+        // update source of information
+        if ($request->info_source_id) {
+            $patient = $data->payment_cache_item->payment_cache->check_in->patient;
+            $patient->info_source_id = $request->info_source_id;
+            $patient->save();
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

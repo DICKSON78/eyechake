@@ -25,6 +25,7 @@ import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import Select from "../../../components/Select";
 import DiagnosisCard from "./DiagnosisCard";
 import SelectDiagnoses from "./SelectDiagnoses";
 import ExternalExamination from "./ExternalExamination";
@@ -87,6 +88,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const fundoscopyRef = useRef();
   const patientToReturnDateRef = useRef();
   const remarksRef = useRef();
+  const informationSourceRef = useRef();
+
+  const marketingEnabled =
+    window.user.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
+      ?.value === "Yes";
 
   const [data, setData] = useState();
   const [error, setError] = useState();
@@ -95,6 +101,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     to_return_date: consultation.to_return_date
       ? new Date(consultation.to_return_date)
       : null,
+    info_source_id: patient.info_source_id,
   });
 
   const {
@@ -127,6 +134,17 @@ const ClinicalNotes = ({ patient, consultation }) => {
     [],
     (response) => response.data.data.data
   );
+  const { data: informationSources, handleFetch: fetchInformationSources } =
+    useFetch(
+      "api/marketing/information-sources",
+      {
+        status: "Active",
+        per_page: 500,
+      },
+      false,
+      [],
+      (response) => response.data.data.data
+    );
 
   const { handlePatch: handleAutoSave } = usePatch();
   const {
@@ -138,11 +156,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   useEffect(() => {
     document.title = `Clinical Notes - ${window.APP_NAME}`;
-  }, []);
 
-  useEffect(() => {
     fetchDiagnoses();
     fetchItems();
+
+    if (marketingEnabled) {
+      fetchInformationSources();
+    }
   }, []);
 
   useEffect(() => {
@@ -654,6 +674,33 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       label="Require Glass"
                     />
                   </Grid>
+                  {marketingEnabled ? (
+                    <Grid
+                      item
+                      md={6}
+                      sm={12}
+                      xs={12}
+                    >
+                      <Select
+                        ref={informationSourceRef}
+                        fullWidth
+                        label="Source of Information"
+                        horizontal
+                        clearable
+                        options={informationSources}
+                        optionsLabel="name"
+                        optionsValue="id"
+                        value={
+                          informationSources.find(
+                            (e) => e.id === formData.info_source_id
+                          ) || null
+                        }
+                        onChange={(value) =>
+                          setFormData({ ...formData, info_source_id: value })
+                        }
+                      />
+                    </Grid>
+                  ) : null}
                 </React.Fragment>
               ) : null}
             </Grid>
