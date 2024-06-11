@@ -468,7 +468,7 @@ class ConsultationsController extends Controller
             'patient_to_return' => 'sometimes|required|in:Yes,No',
             'to_return_date' => 'nullable|required_if:patient_to_return,Yes|date_format:Y-m-d',
             'require_glass' => 'sometimes|required|in:Yes,No',
-            'info_source_id' => 'sometimes|exists:information_sources,id',
+            'info_source_id' => 'nullable|exists:information_sources,id',
         ]);
 
         $user = $request->user();
