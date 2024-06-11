@@ -286,11 +286,6 @@ const ProcedureRequestItems = ({ patient, paymentCacheId }) => {
       {item ? (
         <Menu
           anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left",
-          }}
-          PaperProps={{ variant: "elevation" }}
           open={isMenuOpen}
           onClose={handleMenuClose}
         >

@@ -41,6 +41,7 @@ class ConsultationsController extends Controller
         ]);
 
         $per_page = $request->per_page ?? 25;
+        $with_diagnoses = $request->with_diagnoses;
         $status = $request->status;
         $require_glass = $request->require_glass;
         $payment_cache_item_id = $request->payment_cache_item_id;
@@ -54,6 +55,7 @@ class ConsultationsController extends Controller
         $patient_to_return = $request->patient_to_return;
         $to_return_date = $request->to_return_date;
         $item_payment_mode_id = $request->item_payment_mode_id;
+        $disease_id = $request->disease_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Consultation::with(['payment_cache_item' => function ($query) {
@@ -63,6 +65,10 @@ class ConsultationsController extends Controller
 
             $query->with(['item', 'payment_mode', 'consultant']);
         }, 'creator', 'to_optician_sender']);
+
+        if ($with_diagnoses == 'Yes') {
+            $data->with(['diagnoses.disease']);
+        }
 
         if ($status) {
             if ($status === 'Awaiting Glass') {
@@ -147,6 +153,12 @@ class ConsultationsController extends Controller
         if ($item_payment_mode_id) {
             $data->whereHas('payment_cache_item', function ($query) use ($item_payment_mode_id) {
                 $query->where('payment_mode_id', $item_payment_mode_id);
+            });
+        }
+
+        if ($disease_id) {
+            $data->whereHas('diagnoses', function ($query) use ($disease_id) {
+                $query->where('disease_id', $disease_id);
             });
         }
 
@@ -308,13 +320,13 @@ class ConsultationsController extends Controller
             'to_optician_sender',
         ]);
 
-        if ($with_diagnoses) {
+        if ($with_diagnoses == 'Yes') {
             $data->with(['diagnoses.disease']);
         }
 
         $data = $data->findOrFail($id);
 
-        if ($with_items) {
+        if ($with_items == 'Yes') {
             $data->items = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server'])
                 ->whereHas('payment_cache', function ($query) use ($id) {
                     $query->where('consultation_id', $id);
@@ -322,7 +334,7 @@ class ConsultationsController extends Controller
                 ->get();
         }
 
-        if ($with_item_templates) {
+        if ($with_item_templates == 'Yes') {
             $data->templates = new stdClass();
             $data->templates->surgery_record_report = SurgeryRecordReport::with(['creator'])
                 ->whereHas('payment_cache_item.payment_cache', function ($query) use ($id) {

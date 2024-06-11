@@ -117,12 +117,29 @@ const theme = createTheme({
         variant: "outlined-elevation",
       },
     },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          "&:not(.MuiModalContent-root) > .MuiCardHeader-root + .MuiCardContent-root":
+            {
+              paddingTop: 0,
+            },
+        },
+      },
+    },
     MuiCardHeader: {
       styleOverrides: {
         root: {
-          "&.no-action-margin-right .MuiCardHeader-action": {
+          "&.no-action-margin .MuiCardHeader-action": {
             marginRight: 0,
           },
+        },
+      },
+      defaultProps: {
+        titleTypographyProps: {
+          variant: "subtitle1",
+          fontWeight: 700,
+          color: "text.secondary",
         },
       },
     },
@@ -226,21 +243,33 @@ const theme = createTheme({
     MuiTable: {
       styleOverrides: {
         root: {
-          "&:not(.no-hover-highlight) .MuiTableBody-root .MuiTableRow-root:hover":
+          borderCollapse: "separate",
+          borderSpacing: 0,
+          "&:not(.no-hover-highlight) > .MuiTableBody-root > .MuiTableRow-root":
             {
-              backgroundColor: "#f1f3f4",
+              "&:hover > .MuiTableCell-root": {
+                backgroundColor: "#f1f3f4",
+              },
             },
-        },
-      },
-    },
-    MuiTableBody: {
-      styleOverrides: {
-        root: {
-          "& .MuiTableRow-root th": {
-            padding: "12px",
-            backgroundColor: "#f1f3f4",
-            fontWeight: 500,
-          },
+          "&.no-table-head > .MuiTableBody-root > .MuiTableRow-root:first-of-type > .MuiTableCell-root":
+            {
+              "&:first-of-type": {
+                borderTopLeftRadius: 6,
+              },
+              "&:last-child": {
+                borderTopRightRadius: 6,
+              },
+            },
+          "&.has-footer > .MuiTableBody-root > .MuiTableRow-root:last-child > .MuiTableCell-root":
+            {
+              borderBottomWidth: 1,
+              "&:first-of-type": {
+                borderBottomLeftRadius: 0,
+              },
+              "&:last-child": {
+                borderBottomRightRadius: 0,
+              },
+            },
         },
       },
     },
@@ -249,6 +278,13 @@ const theme = createTheme({
         root: {
           border: "1px solid #dae2ed",
           padding: "8px 12px",
+          "&:not(:last-child)": {
+            borderRightWidth: 0,
+            borderBottomWidth: 0,
+          },
+          "&:last-child": {
+            borderBottomWidth: 0,
+          },
         },
         head: {
           padding: "12px",
@@ -266,7 +302,72 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "&.expanded": {
-            backgroundColor: alpha(lightBlue[600], 0.12),
+            backgroundColor: alpha(lightBlue[600], 0.18),
+          },
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          "& > .MuiTableRow-root:first-of-type > .MuiTableCell-root": {
+            "&:first-of-type": {
+              borderTopLeftRadius: 6,
+            },
+            "&:last-child": {
+              borderTopRightRadius: 6,
+            },
+          },
+        },
+      },
+    },
+    MuiTableBody: {
+      styleOverrides: {
+        root: {
+          "& > .MuiTableRow-root": {
+            "&:hover": {
+              backgroundColor: "#f1f3f4",
+            },
+            "& > th": {
+              padding: "12px",
+              backgroundColor: "#f1f3f4",
+              fontWeight: 500,
+            },
+            "&:last-child > .MuiTableCell-root": {
+              borderBottomWidth: 1,
+              "&:first-of-type": {
+                borderBottomLeftRadius: 6,
+
+                "& + .MuiTableCell-root": {
+                  borderBottomLeftRadius: 0,
+                },
+              },
+              "&:last-child": {
+                borderBottomRightRadius: 6,
+              },
+            },
+          },
+        },
+      },
+    },
+    MuiTableFooter: {
+      styleOverrides: {
+        root: {
+          "& > .MuiTableRow-root": {
+            "&:first-of-type > .MuiTableCell-root": {
+              borderTopWidth: 0,
+            },
+            "&:last-child": {
+              "& > .MuiTableCell-root": {
+                borderBottomWidth: 1,
+              },
+              "& > .MuiTableCell-root:first-of-type": {
+                borderBottomLeftRadius: 6,
+              },
+              "& > .MuiTableCell-root:last-child": {
+                borderBottomRightRadius: 6,
+              },
+            },
           },
         },
       },
@@ -274,6 +375,28 @@ const theme = createTheme({
     MuiTooltip: {
       defaultProps: {
         arrow: true,
+      },
+    },
+    MuiPopover: {
+      defaultProps: {
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "left",
+        },
+        slotProps: {
+          paper: { variant: "outlined-elevation" },
+        },
+      },
+    },
+    MuiMenu: {
+      defaultProps: {
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "left",
+        },
+        slotProps: {
+          paper: { variant: "outlined-elevation" },
+        },
       },
     },
     MuiSvgIcon: {

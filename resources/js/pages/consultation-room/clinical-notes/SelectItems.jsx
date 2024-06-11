@@ -289,11 +289,6 @@ const SelectItems = ({
             <Card variant="outlined">
               <CardHeader
                 title="Select Item"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
                 action={
                   <SearchTextField
                     onChange={(value) =>
@@ -302,7 +297,7 @@ const SelectItems = ({
                     sx={{ width: 116 }}
                   />
                 }
-                className="no-action-margin-right"
+                className="no-action-margin"
               />
               <Divider />
               {loadingItems && <LinearProgress />}
@@ -362,14 +357,7 @@ const SelectItems = ({
             xs={12}
           >
             <Card variant="outlined">
-              <CardHeader
-                title="Selected Items"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Selected Items" />
               <Divider />
               <CardContent>
                 {selectedItem ? (

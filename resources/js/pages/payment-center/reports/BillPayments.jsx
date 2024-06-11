@@ -32,7 +32,7 @@ const BillPayments = ({ module }) => {
   );
 
   const [params, setParams] = useState({
-    with_patient: true,
+    with_patient: "Yes",
     bill_id: undefined,
     patient_id: undefined,
     patient_name: undefined,

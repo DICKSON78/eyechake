@@ -33,7 +33,7 @@ const CreditCollection = ({ module }) => {
   );
 
   const [params, setParams] = useState({
-    with_patient: true,
+    with_patient: "Yes",
     transaction_type: "Credit",
     status: "Paid,Served",
     patient_id: undefined,

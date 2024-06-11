@@ -1041,9 +1041,9 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
   } = useFetch(
     `api/consultations/${consultationId}`,
     {
-      with_diagnoses: true,
-      with_items: true,
-      with_item_templates: true,
+      with_diagnoses: "Yes",
+      with_items: "Yes",
+      with_item_templates: "Yes",
     },
     false,
     null,

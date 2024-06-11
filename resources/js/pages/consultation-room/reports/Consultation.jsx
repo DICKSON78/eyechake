@@ -11,6 +11,7 @@ import { formatDateForDb, getAge, getDateRangeTitle } from "../../../helpers";
 
 const Consultation = () => {
   const [params, setParams] = useState({
+    with_diagnoses: "Yes",
     patient_direction: "Direct to Doctor",
     status: "Consulted",
     patient_id: undefined,
@@ -18,6 +19,7 @@ const Consultation = () => {
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: undefined,
+    disease_id: undefined,
     item_id: undefined,
     start_date: undefined,
     end_date: undefined,
@@ -53,6 +55,7 @@ const Consultation = () => {
           <Filters
             params={params}
             setParams={setParams}
+            showDiagnosis
             sx={{ mb: 2 }}
           />
         }
@@ -91,12 +94,6 @@ const Consultation = () => {
               item.payment_cache_item.payment_cache.check_in.patient.phone,
           },
           {
-            field: "payment_mode_id",
-            headerName: "Payment Mode",
-            valueGetter: (item, index) =>
-              item.payment_cache_item.payment_mode.name,
-          },
-          {
             field: "consultant",
             headerName: "Consultant",
             valueGetter: (item, index) =>
@@ -111,6 +108,14 @@ const Consultation = () => {
             field: "item_name",
             headerName: "Consultation Item",
             valueGetter: (item, index) => item.payment_cache_item.item.name,
+          },
+          {
+            field: "diagnosis",
+            headerName: "Diagnosis",
+            valueGetter: (item, index) =>
+              item.diagnoses
+                .map((e) => `${e.disease.code} ${e.disease.name}`.trim())
+                .join("; "),
           },
           {
             field: "actions",

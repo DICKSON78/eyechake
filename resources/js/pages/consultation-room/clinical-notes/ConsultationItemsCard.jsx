@@ -49,14 +49,7 @@ const ConsultationItemsCard = ({
 
   return (
     <Card variant="outlined">
-      <CardHeader
-        title={title}
-        titleTypographyProps={{
-          variant: "subtitle1",
-          fontWeight: 700,
-          color: "text.secondary",
-        }}
-      />
+      <CardHeader title={title} />
       <Divider />
       <CardContent>
         <Table

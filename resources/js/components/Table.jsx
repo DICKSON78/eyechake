@@ -277,7 +277,7 @@ const Table = ({
 
   return (
     <Box sx={{ minWidth: 300, overflowX: "auto" }}>
-      <MuiTable>
+      <MuiTable {...(footerItems ? { className: "has-footer" } : null)}>
         <TableHead>{renderTableHeadRow()}</TableHead>
         <TableBody>
           {loading ? (
@@ -399,7 +399,7 @@ const Table = ({
           slotProps={{
             select: {
               IconComponent: ArrowDropDownIcon,
-              MenuProps: { PaperProps: { variant: "elevation" } },
+              MenuProps: { PaperProps: { variant: "outlined-elevation" } },
             },
           }}
           ActionsComponent={TablePaginationActions}

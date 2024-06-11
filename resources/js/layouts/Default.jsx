@@ -377,63 +377,53 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
 
           <Popover
             anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            PaperProps={{ variant: "elevation" }}
             open={isAccountMenuOpen}
             onClose={handleAccountMenuClose}
           >
-            <Card
-              variant="elevation"
-              sx={{ width: 300 }}
-            >
-              <CardHeader
-                title={user.full_name}
-                subheader={user.job_title?.name}
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: "500",
-                }}
-                avatar={
-                  <Avatar>
-                    <UserIcon />
-                  </Avatar>
-                }
-              />
-              <Divider />
-              <MenuList dense>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    role={undefined}
-                    onClick={() => {
-                      handleAccountMenuClose();
-                      openChangePasswordModal();
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 32 }}>
-                      <LockIcon />
-                    </ListItemIcon>
-                    <ListItemText>Change Password</ListItemText>
-                  </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    role={undefined}
-                    onClick={() => {
-                      handleAccountMenuClose();
-                      handleLogout();
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 32 }}>
-                      <LogoutIcon />
-                    </ListItemIcon>
-                    <ListItemText>Logout</ListItemText>
-                  </ListItemButton>
-                </ListItem>
-              </MenuList>
-            </Card>
+            <CardHeader
+              title={user.full_name}
+              subheader={user.job_title?.name}
+              titleTypographyProps={{
+                variant: "subtitle1",
+                fontWeight: "500",
+              }}
+              avatar={
+                <Avatar>
+                  <UserIcon />
+                </Avatar>
+              }
+            />
+            <Divider />
+            <MenuList dense>
+              <ListItem disablePadding>
+                <ListItemButton
+                  role={undefined}
+                  onClick={() => {
+                    handleAccountMenuClose();
+                    openChangePasswordModal();
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <LockIcon />
+                  </ListItemIcon>
+                  <ListItemText>Change Password</ListItemText>
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  role={undefined}
+                  onClick={() => {
+                    handleAccountMenuClose();
+                    handleLogout();
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <LogoutIcon />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
+                </ListItemButton>
+              </ListItem>
+            </MenuList>
           </Popover>
         </React.Fragment>
       ) : null}

@@ -4,11 +4,12 @@ import SearchIcon from "@mui/icons-material/SearchRounded";
 import DatePicker from "../../components/DatePicker";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
+import SelectDisease from "../../components/SelectDisease";
 import useFetch from "../../hooks/useFetch";
 
 import { throttle } from "../../helpers";
 
-const PatientFilters = ({ params, setParams, ...rest }) => {
+const PatientFilters = ({ params, setParams, showDiagnosis, ...rest }) => {
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
     {
@@ -187,6 +188,22 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               onChange={(value) => setParams({ ...params, item_id: value })}
             />
           </Grid>
+          {showDiagnosis ? (
+            <Grid
+              item
+              md={3}
+              sm={6}
+              xs={12}
+            >
+              <SelectDisease
+                label="Diagnosis"
+                clearable
+                onChange={(value) =>
+                  setParams({ ...params, disease_id: value?.id })
+                }
+              />
+            </Grid>
+          ) : null}
         </Grid>
       </CardContent>
     </Card>

@@ -27,7 +27,7 @@ const ExpensePayments = ({ module, createdBy }) => {
   );
 
   const [params, setParams] = useState({
-    with_expense: true,
+    with_expense: "Yes",
     category_id: undefined,
     start_date: undefined,
     end_date: undefined,

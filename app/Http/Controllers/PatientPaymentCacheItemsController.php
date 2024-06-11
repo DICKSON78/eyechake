@@ -106,7 +106,7 @@ class PatientPaymentCacheItemsController extends Controller
             $data->where('bill_id', $bill_id);
         }
 
-        if ($with_patient) {
+        if ($with_patient == 'Yes') {
             $data->with(['payment_cache.check_in.patient']);
         }
 

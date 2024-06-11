@@ -71,7 +71,7 @@ class PatientItemBillsController extends Controller
             });
         }
 
-        if ($with_items) {
+        if ($with_items == 'Yes') {
             $data->with(['items' => function ($query) {
                 $query->with(['item.unit_of_measure', 'payment_mode', 'creator']);
             }]);

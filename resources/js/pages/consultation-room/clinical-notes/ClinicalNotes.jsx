@@ -291,7 +291,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               sx={{ mt: 0 }}
             />
 
-            <Table>
+            <Table className="no-table-head">
               <TableBody>
                 <TableRow>
                   <TableCell component="th">

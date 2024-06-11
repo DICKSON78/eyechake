@@ -43,11 +43,11 @@ class PatientItemPaymentsController extends Controller
             $data->where('channel_id', $payment_channel_id);
         }
 
-        if ($with_patient) {
+        if ($with_patient == 'Yes') {
             $data->with(['first_item'])->whereHas('first_item');
         }
 
-        if ($with_items) {
+        if ($with_items == 'Yes') {
             $data->with(['items' => function ($query) {
                 $query->with(['item.unit_of_measure', 'payment_mode', 'creator']);
             }]);

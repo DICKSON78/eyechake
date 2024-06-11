@@ -164,14 +164,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
               xs={12}
             >
               <Card variant="outlined">
-                <CardHeader
-                  title="Add Bill Payment"
-                  titleTypographyProps={{
-                    variant: "subtitle1",
-                    fontWeight: 700,
-                    color: "text.secondary",
-                  }}
-                />
+                <CardHeader title="Add Bill Payment" />
                 <Divider />
                 <CardContent>
                   <Form ref={formRef}>
@@ -225,14 +218,7 @@ const PatientBillPayments = ({ bill, fetchBill, modal }) => {
             <Card variant="outlined">
               {bill.status === "Pending" ? (
                 <React.Fragment>
-                  <CardHeader
-                    title="Bill Payments"
-                    titleTypographyProps={{
-                      variant: "subtitle1",
-                      fontWeight: 700,
-                      color: "text.secondary",
-                    }}
-                  />
+                  <CardHeader title="Bill Payments" />
                   <Divider />
                 </React.Fragment>
               ) : null}

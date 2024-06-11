@@ -157,14 +157,7 @@ const ManageItemPrices = ({ item, modal }) => {
             xs={12}
           >
             <Card variant="outlined">
-              <CardHeader
-                title="Add Item Price"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Add Item Price" />
               <Divider />
               <CardContent>
                 <Form ref={formRef}>
@@ -215,14 +208,7 @@ const ManageItemPrices = ({ item, modal }) => {
             xs={12}
           >
             <Card variant="outlined">
-              <CardHeader
-                title="Item Prices"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Item Prices" />
               <Divider />
               <CardContent>
                 <Table

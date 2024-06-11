@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ChevronRightRounded as ChevronRightIcon } from "@mui/icons-material";
+import ChevronRightIcon from "@mui/icons-material/ChevronRightRounded";
 
 const Header = ({
   title,

@@ -164,7 +164,7 @@ const Dashboard = () => {
                 title="Registered Patients"
                 count={numberFormat(data.counts.new_patients)}
                 icon={<PersonIcon />}
-                color={purple[300]}
+                color={purple[400]}
                 sx={{ m: 1 }}
               />
               <CardContent>
@@ -188,16 +188,16 @@ const Dashboard = () => {
                       },
                     },
                     colors: [
-                      purple[300],
+                      purple[400],
                       teal[400],
-                      red[300],
+                      red[400],
                       lightBlue[400],
                       deepOrange[300],
                       lime[600],
-                      pink[300],
-                      cyan[400],
-                      green[400],
-                      yellow[500],
+                      pink[400],
+                      cyan[500],
+                      green[500],
+                      yellow[600],
                     ],
                     stroke: {
                       show: true,
@@ -293,7 +293,7 @@ const Dashboard = () => {
                         },
                       },
                     },
-                    colors: [blue[400], lime[600], purple[300]],
+                    colors: [blue[400], lime[600], purple[400]],
                     stroke: {
                       show: true,
                       width: 3,
@@ -382,7 +382,7 @@ const Dashboard = () => {
                     },
                     colors: [
                       theme.palette.warning.main,
-                      cyan[400],
+                      cyan[500],
                       lightBlue[400],
                     ],
                     stroke: {
@@ -473,7 +473,7 @@ const Dashboard = () => {
                         },
                       },
                     },
-                    colors: [cyan[500], pink[300], yellow[500]],
+                    colors: [cyan[500], pink[400], yellow[600]],
                     stroke: {
                       show: true,
                       width: 3,
@@ -532,14 +532,7 @@ const Dashboard = () => {
             xs={12}
           >
             <Card>
-              <CardHeader
-                title="Patient Registration"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Patient Registration" />
               <Divider />
               <Chart
                 options={{
@@ -558,10 +551,11 @@ const Dashboard = () => {
                       borderRadiusWhenStacked: "last",
                     },
                   },
-                  colors: [teal[400], pink[300], theme.palette.info.main],
+                  colors: [teal[400], pink[400], theme.palette.info.main],
                   stroke: {
                     show: true,
                     width: [3, 3, 3],
+                    curve: "smooth",
                   },
                   dataLabels: {
                     enabled: false,
@@ -664,11 +658,6 @@ const Dashboard = () => {
             <Card variant="outlined-elevation">
               <CardHeader
                 title="Today's Activities"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
                 action={
                   <Tooltip title="View all">
                     <IconButton

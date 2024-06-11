@@ -218,14 +218,7 @@ const PatientBill = () => {
               itemSpacing={1}
             />
             <Card variant="outlined">
-              <CardHeader
-                title="Bill Items"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Bill Items" />
               <Divider />
               <CardContent>
                 <Table

@@ -151,14 +151,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
               xs={12}
             >
               <Card variant="outlined">
-                <CardHeader
-                  title="Add Expense Payment"
-                  titleTypographyProps={{
-                    variant: "subtitle1",
-                    fontWeight: 700,
-                    color: "text.secondary",
-                  }}
-                />
+                <CardHeader title="Add Expense Payment" />
                 <Divider />
                 <CardContent>
                   <Form ref={formRef}>
@@ -210,14 +203,7 @@ const ExpensePayments = ({ expense, fetchExpenses, modal }) => {
             <Card variant="outlined">
               {expense.status === "Pending" ? (
                 <React.Fragment>
-                  <CardHeader
-                    title="Expense Payments"
-                    titleTypographyProps={{
-                      variant: "subtitle1",
-                      fontWeight: 700,
-                      color: "text.secondary",
-                    }}
-                  />
+                  <CardHeader title="Expense Payments" />
                   <Divider />
                 </React.Fragment>
               ) : null}

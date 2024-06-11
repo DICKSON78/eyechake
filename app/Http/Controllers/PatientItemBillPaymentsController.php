@@ -47,7 +47,7 @@ class PatientItemBillPaymentsController extends Controller
             $data->where('channel_id', $payment_channel_id);
         }
 
-        if ($with_patient) {
+        if ($with_patient == 'Yes') {
             $data->with(['bill.first_item'])->whereHas('bill.first_item');
         }
 

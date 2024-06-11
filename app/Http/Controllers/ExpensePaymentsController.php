@@ -37,7 +37,7 @@ class ExpensePaymentsController extends Controller
         $sort_direction = $request->sort_direction ?? 'asc';
         $data = ExpensePayment::with(['creator']);
 
-        if ($with_expense) {
+        if ($with_expense == 'Yes') {
             $data->with(['expense.category']);
         }
 

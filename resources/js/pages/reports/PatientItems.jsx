@@ -39,7 +39,7 @@ const PatientItems = ({
   );
 
   const [params, setParams] = useState({
-    with_patient: true,
+    with_patient: "Yes",
     consultation_type: consultationType,
     payment_mode_type: paymentModeType,
     status,

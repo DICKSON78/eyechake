@@ -135,11 +135,6 @@ const SelectDiagnoses = ({
             <Card variant="outlined">
               <CardHeader
                 title="Select Disease"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
                 action={
                   <SearchTextField
                     onChange={(value) =>
@@ -147,7 +142,7 @@ const SelectDiagnoses = ({
                     }
                   />
                 }
-                className="no-action-margin-right"
+                className="no-action-margin"
               />
               <Divider />
               {loadingDiseases && <LinearProgress />}
@@ -188,14 +183,7 @@ const SelectDiagnoses = ({
             xs={12}
           >
             <Card variant="outlined">
-              <CardHeader
-                title="Selected Diseases"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Selected Diseases" />
               <Divider />
               <CardContent>
                 <Table

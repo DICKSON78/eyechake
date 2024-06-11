@@ -325,11 +325,6 @@ const CheckInPatient = () => {
                 <Card variant="outlined">
                   <CardHeader
                     title="Select Item"
-                    titleTypographyProps={{
-                      variant: "subtitle1",
-                      fontWeight: 700,
-                      color: "text.secondary",
-                    }}
                     action={
                       <SearchTextField
                         onChange={(value) =>
@@ -337,7 +332,7 @@ const CheckInPatient = () => {
                         }
                       />
                     }
-                    className="no-action-margin-right"
+                    className="no-action-margin"
                   />
                   <Divider />
                   <CardContent sx={{ bgcolor: "background.default" }}>
@@ -393,14 +388,7 @@ const CheckInPatient = () => {
                   variant="outlined"
                   sx={{ mb: 1 }}
                 >
-                  <CardHeader
-                    title="Added Items"
-                    titleTypographyProps={{
-                      variant: "subtitle1",
-                      fontWeight: 700,
-                      color: "text.secondary",
-                    }}
-                  />
+                  <CardHeader title="Added Items" />
                   <Divider />
                   <CardContent>
                     {selectedItem ? (

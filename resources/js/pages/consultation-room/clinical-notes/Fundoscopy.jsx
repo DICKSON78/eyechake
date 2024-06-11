@@ -37,7 +37,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
   }));
 
   return (
-    <Table>
+    <Table className="no-table-head">
       <TableBody>
         <TableRow>
           <TableCell component="th">RE</TableCell>

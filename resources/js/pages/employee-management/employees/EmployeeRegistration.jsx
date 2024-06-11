@@ -428,14 +428,7 @@ const EmployeeRegistration = () => {
               variant="outlined"
               sx={{ mt: 2 }}
             >
-              <CardHeader
-                title="Access Privileges"
-                titleTypographyProps={{
-                  variant: "subtitle1",
-                  fontWeight: 700,
-                  color: "text.secondary",
-                }}
-              />
+              <CardHeader title="Access Privileges" />
               <Divider />
               <CardContent>
                 {getPrivilegesTree(
