@@ -42,7 +42,12 @@ import {
   yellow,
 } from "@mui/material/colors";
 import { useFetch, useToast } from "../../hooks";
-import { formatDateForDb, formatError, numberFormat } from "../../helpers";
+import {
+  formatDateForDb,
+  formatError,
+  numberFormat,
+  round,
+} from "../../helpers";
 
 const Dashboard = ({ setSmsBalance }) => {
   const theme = useTheme();
@@ -125,6 +130,12 @@ const Dashboard = ({ setSmsBalance }) => {
         <Grid
           container
           spacing={{ xs: 2, sm: 2, md: 3 }}
+          justifyContent="stretch"
+          sx={{
+            "& .MuiCard-root": {
+              minHeight: "100%",
+            },
+          }}
         >
           <Grid
             item
@@ -163,7 +174,7 @@ const Dashboard = ({ setSmsBalance }) => {
                 color={pink[300]}
               />
               <InfoCard
-                title="New Patients"
+                title="Registered Patients"
                 count={numberFormat(data.counts.new_patients)}
                 icon={<PersonIcon />}
                 color={blue[400]}
@@ -217,8 +228,8 @@ const Dashboard = ({ setSmsBalance }) => {
                         },
                         plotOptions: {
                           pie: {
-                            donut: {
-                              size: "50%",
+                            dataLabels: {
+                              offset: -16,
                             },
                           },
                         },
@@ -235,7 +246,7 @@ const Dashboard = ({ setSmsBalance }) => {
                           yellow[500],
                         ],
                         stroke: {
-                          show: true,
+                          show: false,
                           width: 3,
                           colors: data.statistics.expenses_by_category.map(
                             (e) => theme.palette.background.paper
@@ -243,8 +254,8 @@ const Dashboard = ({ setSmsBalance }) => {
                         },
                         dataLabels: {
                           style: {
-                            fontWeight: "400",
-                            fontSize: "10px",
+                            fontSize: 10,
+                            fontWeight: 400,
                           },
                           dropShadow: {
                             enabled: false,
@@ -276,7 +287,7 @@ const Dashboard = ({ setSmsBalance }) => {
                       series={data.statistics.expenses_by_category.map(
                         (e) => e.amount
                       )}
-                      type="donut"
+                      type="pie"
                       height={
                         data.statistics.expenses_by_category.length ? 288 : 256
                       }
@@ -315,25 +326,25 @@ const Dashboard = ({ setSmsBalance }) => {
                         },
                         plotOptions: {
                           pie: {
-                            donut: {
-                              size: "50%",
+                            dataLabels: {
+                              offset: -16,
                             },
                           },
                         },
                         colors: [
                           blue[400],
                           red[300],
+                          cyan[400],
                           green[400],
                           indigo[400],
                           teal[400],
                           purple[300],
-                          cyan[400],
                           lime[600],
                           pink[300],
                           yellow[500],
                         ],
                         stroke: {
-                          show: true,
+                          show: false,
                           width: 3,
                           colors: data.statistics.payments_by_channel.map(
                             (e) => theme.palette.background.paper
@@ -341,8 +352,8 @@ const Dashboard = ({ setSmsBalance }) => {
                         },
                         dataLabels: {
                           style: {
-                            fontWeight: "400",
-                            fontSize: "10px",
+                            fontSize: 10,
+                            fontWeight: 400,
                           },
                           dropShadow: {
                             enabled: false,
@@ -374,7 +385,7 @@ const Dashboard = ({ setSmsBalance }) => {
                       series={data.statistics.payments_by_channel.map(
                         (e) => e.amount
                       )}
-                      type="donut"
+                      type="pie"
                       height={
                         data.statistics.payments_by_channel.length ? 288 : 256
                       }
@@ -384,7 +395,160 @@ const Dashboard = ({ setSmsBalance }) => {
               </Grid>
             </Grid>
           </Grid>
-
+          <Grid
+            item
+            md={12}
+            sm={12}
+            xs={12}
+          >
+            <Card>
+              <CardHeader
+                title="Consultations by Item"
+                titleTypographyProps={{
+                  variant: "subtitle1",
+                  fontWeight: 700,
+                  color: "text.secondary",
+                }}
+              />
+              <Divider />
+              <CardContent>
+                {data.statistics.consultations_by_item.map((e, i, a) => (
+                  <Chart
+                    key={e.id}
+                    options={{
+                      chart: {
+                        fontFamily: theme.typography.fontFamily,
+                        foreColor: theme.palette.text.primary,
+                        background: "transparent",
+                        stacked: true,
+                        sparkline: {
+                          enabled: true,
+                        },
+                        toolbar: {
+                          show: false,
+                        },
+                      },
+                      plotOptions: {
+                        bar: {
+                          horizontal: true,
+                          barHeight: 12,
+                          borderRadius: 6,
+                          borderRadiusApplication: "around",
+                          borderRadiusWhenStacked: "all",
+                          colors: {
+                            backgroundBarColors: [
+                              theme.palette.background.default,
+                            ],
+                            backgroundBarRadius: 6,
+                          },
+                        },
+                      },
+                      title: {
+                        floating: true,
+                        offsetX: -8,
+                        offsetY: 6,
+                        text: e.name,
+                        style: {
+                          fontSize: 12,
+                          fontWeight: 400,
+                        },
+                      },
+                      subtitle: {
+                        floating: true,
+                        align: "right",
+                        offsetX: 8,
+                        offsetY: 6,
+                        text: numberFormat(e.consultations),
+                        style: {
+                          fontSize: 12,
+                        },
+                      },
+                      colors: [
+                        [
+                          cyan[400],
+                          pink[300],
+                          blue[400],
+                          green[400],
+                          yellow[600],
+                        ][i % 3],
+                      ],
+                      stroke: {
+                        show: false,
+                      },
+                      dataLabels: {
+                        enabled: false,
+                        style: {
+                          fontSize: 10,
+                          fontWeight: 400,
+                        },
+                        dropShadow: {
+                          enabled: false,
+                        },
+                        formatter: (val, opts) => numberFormat(val),
+                      },
+                      grid: {
+                        show: false,
+                        borderColor: theme.palette.divider,
+                      },
+                      xaxis: {
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          height: 6,
+                        },
+                      },
+                      yaxis: {
+                        max: 100,
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          width: 6,
+                        },
+                        labels: {
+                          formatter: (val, index) => numberFormat(val),
+                        },
+                      },
+                      tooltip: {
+                        theme: "dark",
+                        fillSeriesColor: true,
+                      },
+                      legend: {
+                        markers: {
+                          width: 14,
+                          height: 8,
+                          radius: 4,
+                        },
+                      },
+                    }}
+                    series={[
+                      {
+                        name: "Percentage",
+                        data: [
+                          round(
+                            (e.consultations /
+                              (a.reduce((acc, f) => acc + f.consultations, 0) ||
+                                1)) *
+                              100,
+                            2
+                          ),
+                        ],
+                      },
+                    ]}
+                    type="bar"
+                    height="64"
+                  />
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
           <Grid
             item
             md={6}
@@ -413,23 +577,20 @@ const Dashboard = ({ setSmsBalance }) => {
                   },
                   plotOptions: {
                     bar: {
-                      borderRadius: 0,
-                      borderRadiusApplication: "end",
-                      borderRadiusWhenStacked: "last",
+                      borderRadius: 8,
+                      borderRadiusApplication: "around",
+                      borderRadiusWhenStacked: "all",
                     },
                   },
-                  colors: [
-                    theme.palette.primary.main,
-                    theme.palette.warning.main,
-                  ],
+                  colors: [purple[300], theme.palette.warning.main],
                   stroke: {
                     show: false,
                   },
                   dataLabels: {
                     enabled: false,
                     style: {
-                      fontWeight: "400",
-                      fontSize: "10px",
+                      fontSize: 10,
+                      fontWeight: 400,
                     },
                     dropShadow: {
                       enabled: false,
@@ -528,23 +689,17 @@ const Dashboard = ({ setSmsBalance }) => {
                       show: false,
                     },
                   },
-                  plotOptions: {
-                    bar: {
-                      borderRadius: 0,
-                      borderRadiusApplication: "end",
-                      borderRadiusWhenStacked: "last",
-                    },
-                  },
                   colors: [teal[400], pink[300], theme.palette.info.main],
                   stroke: {
                     show: true,
                     width: [3, 3, 3],
+                    curve: "smooth",
                   },
                   dataLabels: {
                     enabled: false,
                     style: {
-                      fontWeight: "400",
-                      fontSize: "10px",
+                      fontSize: 10,
+                      fontWeight: 400,
                     },
                     dropShadow: {
                       enabled: false,

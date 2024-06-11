@@ -101,14 +101,14 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         elevation1: {
-          boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
+          boxShadow: "0px 8px 24px 0px rgba(140, 149, 159, 0.08)",
         },
       },
       variants: [
         {
           props: { variant: "outlined-elevation" },
           style: {
-            boxShadow: "0 4px 16px 0 rgba(169, 184, 200, 0.24)",
+            boxShadow: "0px 8px 24px 0px rgba(140, 149, 159, 0.08)",
             border: "1px solid #dae2ed",
           },
         },

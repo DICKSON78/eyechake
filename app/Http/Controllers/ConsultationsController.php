@@ -44,6 +44,7 @@ class ConsultationsController extends Controller
         $status = $request->status;
         $require_glass = $request->require_glass;
         $payment_cache_item_id = $request->payment_cache_item_id;
+        $item_id = $request->item_id;
         $patient_direction = $request->patient_direction;
         $consultant_id = $request->consultant_id;
         $patient_id = $request->patient_id;
@@ -60,7 +61,7 @@ class ConsultationsController extends Controller
                 $query2->with(['region', 'district', 'ward']);
             }]);
 
-            $query->with(['payment_mode', 'consultant']);
+            $query->with(['item', 'payment_mode', 'consultant']);
         }, 'creator', 'to_optician_sender']);
 
         if ($status) {
@@ -87,6 +88,12 @@ class ConsultationsController extends Controller
 
         if ($payment_cache_item_id) {
             $data->where('payment_cache_item_id', $payment_cache_item_id);
+        }
+
+        if ($item_id) {
+            $data->whereHas('payment_cache_item', function ($query) use ($item_id) {
+                $query->where('item_id', $item_id);
+            });
         }
 
         if ($patient_direction) {
@@ -296,7 +303,7 @@ class ConsultationsController extends Controller
                     $query2->with(['region', 'district', 'ward']);
                 }]);
 
-                $query->with(['payment_mode', 'consultant', 'server']);
+                $query->with(['item', 'payment_mode', 'consultant', 'server']);
             }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
             'to_optician_sender',
         ]);

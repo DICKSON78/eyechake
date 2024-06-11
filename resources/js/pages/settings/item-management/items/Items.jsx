@@ -10,10 +10,9 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import {
-  EditRounded as EditIcon,
-  Settings as SettingsIcon,
-} from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/AddRounded";
+import EditIcon from "@mui/icons-material/EditRounded";
+import SettingsIcon from "@mui/icons-material/SettingsRounded";
 import Page, { Header as PageHeader } from "../../../../components/Page";
 import Table from "../../../../components/Table";
 import Modal from "../../../../components/Modal";
@@ -128,6 +127,7 @@ const Items = () => {
             <React.Fragment>
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreateItemModal}
               >
                 New Item

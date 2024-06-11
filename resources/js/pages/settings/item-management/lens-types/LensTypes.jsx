@@ -10,6 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../../components/Page";
 import Table, { SearchTextField } from "../../../../components/Table";
@@ -112,6 +113,7 @@ const LensTypes = () => {
               />
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreateLensTypeModal}
               >
                 New Lens Type

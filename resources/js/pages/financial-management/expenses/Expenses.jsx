@@ -10,6 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -142,6 +143,7 @@ const Expenses = ({ module, createdBy }) => {
             <React.Fragment>
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreateExpenseModal}
               >
                 New Expense

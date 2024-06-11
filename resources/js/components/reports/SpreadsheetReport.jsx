@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { utils, writeFile } from "xlsx";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
+import DownloadIcon from "@mui/icons-material/DownloadRounded";
 
 const SpreadsheetReport = ({ title, format, columns, items }) => {
   const [loading, setLoading] = useState(false);
@@ -8,7 +9,7 @@ const SpreadsheetReport = ({ title, format, columns, items }) => {
   const generate = useCallback(() => {
     setLoading(true);
 
-    // Flatten objects
+    // flatten objects
     const rows = items.map(
       (r) => {
         let e = {};
@@ -21,17 +22,17 @@ const SpreadsheetReport = ({ title, format, columns, items }) => {
       [items]
     );
 
-    // Generate worksheet and workbook
+    // generate worksheet and workbook
     const worksheet = utils.json_to_sheet(rows);
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, "Sheet 1");
 
-    // Fix headers
+    // fix headers
     utils.sheet_add_aoa(worksheet, [columns.map((c) => c.headerName)], {
       origin: "A1",
     });
 
-    /* Create a file */
+    // create a file
     writeFile(workbook, `${title}.${format}`);
     setLoading(false);
   }, [format, title, columns, items]);
@@ -40,7 +41,8 @@ const SpreadsheetReport = ({ title, format, columns, items }) => {
     <Button
       disabled={loading}
       variant="contained"
-      color="info"
+      color="success"
+      startIcon={<DownloadIcon />}
       onClick={generate}
     >
       {loading ? "Generating Document..." : format === "csv" ? "CSV" : "Excel"}

@@ -10,7 +10,6 @@ import {
   ListSubheader,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 
 import {
   BadgeRounded as JobTitlesIcon,
@@ -325,6 +324,20 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           show: user.privileges.consultation_room,
         },
         {
+          title: "Reports",
+          icon: <ReportsIcon />,
+          to: "/consultation-room/reports",
+          show: user.privileges.consultation_room,
+          items: [
+            {
+              title: "Consultation Report",
+              icon: <ReportsIcon />,
+              to: "/consultation-room/reports/consultation",
+              show: user.privileges.consultation_room,
+            },
+          ],
+        },
+        {
           title: "OPTICIAN CENTER",
           subheader: true,
           show: !!drawerOpen && user.privileges.optician_center,
@@ -520,6 +533,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
               title: "Patient Registration Report",
               icon: <ReportsIcon />,
               to: "/marketing/reports/patient-registration",
+              show: user.privileges.marketing,
+            },
+            {
+              title: "Consultation Report",
+              icon: <ReportsIcon />,
+              to: "/marketing/reports/consultation",
               show: user.privileges.marketing,
             },
           ],

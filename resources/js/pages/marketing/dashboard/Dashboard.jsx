@@ -161,7 +161,7 @@ const Dashboard = () => {
           >
             <Card>
               <InfoCard
-                title="New Patients"
+                title="Registered Patients"
                 count={numberFormat(data.counts.new_patients)}
                 icon={<PersonIcon />}
                 color={purple[300]}
@@ -241,7 +241,7 @@ const Dashboard = () => {
                     },
                   }}
                   series={data.statistics.patients_by_information_source.map(
-                    (e) => e.total_patients
+                    (e) => e.patients
                   )}
                   type="donut"
                   height={
@@ -265,7 +265,7 @@ const Dashboard = () => {
                 title="Daily Activities"
                 count={numberFormat(
                   data.statistics.daily_activities.reduce(
-                    (acc, e) => acc + e.total_activities,
+                    (acc, e) => acc + e.activities,
                     0
                   )
                 )}
@@ -334,7 +334,7 @@ const Dashboard = () => {
                     },
                   }}
                   series={data.statistics.daily_activities.map(
-                    (e) => e.total_activities
+                    (e) => e.activities
                   )}
                   type="donut"
                   height={data.statistics.daily_activities.length ? 288 : 256}
@@ -354,7 +354,7 @@ const Dashboard = () => {
                 title="Appointments"
                 count={numberFormat(
                   data.statistics.appointments.reduce(
-                    (acc, e) => acc + e.total_appointments,
+                    (acc, e) => acc + e.appointments,
                     0
                   )
                 )}
@@ -425,7 +425,7 @@ const Dashboard = () => {
                     },
                   }}
                   series={data.statistics.appointments.map(
-                    (e) => e.total_appointments
+                    (e) => e.appointments
                   )}
                   type="donut"
                   height={data.statistics.appointments.length ? 288 : 256}
@@ -445,7 +445,7 @@ const Dashboard = () => {
                 title="Outreach Programmes"
                 count={numberFormat(
                   data.statistics.outreach_programmes.reduce(
-                    (acc, e) => acc + e.total_programmes,
+                    (acc, e) => acc + e.programmes,
                     0
                   )
                 )}
@@ -514,7 +514,7 @@ const Dashboard = () => {
                     },
                   }}
                   series={data.statistics.outreach_programmes.map(
-                    (e) => e.total_programmes
+                    (e) => e.programmes
                   )}
                   type="donut"
                   height={

@@ -1,15 +1,10 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import PatientRegistration from "./PatientRegistration";
-import Consultation from "../../consultation-room/reports/Consultation";
+import Consultation from "./Consultation";
 
 const ReportsRoutes = () => {
   return (
     <Routes>
-      <Route
-        path="/patient-registration"
-        element={<PatientRegistration />}
-      />
       <Route
         path="/consultation"
         element={<Consultation />}

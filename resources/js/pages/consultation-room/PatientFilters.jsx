@@ -19,6 +19,17 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
     [],
     (response) => response.data.data.data
   );
+  const { data: items } = useFetch(
+    "api/items",
+    {
+      status: "Active",
+      is_consultation_item: "Yes",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   return (
     <Card
@@ -36,7 +47,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
         >
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -54,7 +65,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
           </Grid>
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -69,7 +80,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
           </Grid>
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -94,7 +105,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
           </Grid>
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -119,7 +130,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
           </Grid>
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -144,7 +155,7 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
           </Grid>
           <Grid
             item
-            md
+            md={3}
             sm={6}
             xs={12}
           >
@@ -158,6 +169,22 @@ const PatientFilters = ({ params, setParams, ...rest }) => {
               onChange={(value) =>
                 setParams({ ...params, item_payment_mode_id: value })
               }
+            />
+          </Grid>
+          <Grid
+            item
+            md={3}
+            sm={6}
+            xs={12}
+          >
+            <Select
+              label="Consultation Item"
+              fullWidth
+              options={items}
+              optionsLabel="name"
+              optionsValue="id"
+              clearable
+              onChange={(value) => setParams({ ...params, item_id: value })}
             />
           </Grid>
         </Grid>

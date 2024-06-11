@@ -10,6 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -122,6 +123,7 @@ const Events = ({ eventType }) => {
             <React.Fragment>
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreateEventModal}
               >
                 {`New ${eventType}`}

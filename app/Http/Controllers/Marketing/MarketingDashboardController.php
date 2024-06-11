@@ -34,6 +34,7 @@ class MarketingDashboardController extends Controller
             ],
             'statistics' => [
                 'patients_by_information_source' => [],
+                'consultations_by_item' => [],
                 'daily_activities' => [],
                 'ideas' => [],
                 'appointments' => [],
@@ -50,11 +51,12 @@ class MarketingDashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['statistics']['patients_by_information_source'] = DB::select('select inf.id, inf.name, count(pt.id) as total_patients from information_sources as inf inner join patients as pt on pt.info_source_id = inf.id where (date(pt.created_at) between ? and ?) group by pt.info_source_id', [$start_date, $end_date]);
-        $data['statistics']['daily_activities'] = DB::select('select status, count(id) as total_activities from daily_activities where (activity_date between ? and ?) group by status', [$start_date, $end_date]);
-        $data['statistics']['ideas'] = DB::select('select status, count(id) as total_ideas from ideas where (date(created_at) between ? and ?) group by status', [$start_date, $end_date]);
-        $data['statistics']['appointments'] = DB::select('select status, count(id) as total_appointments from events where event_type = ? and (event_date between ? and ?) group by status', ['Appointment', $start_date, $end_date]);
-        $data['statistics']['outreach_programmes'] = DB::select('select status, count(id) as total_programmes from events where event_type = ? and (event_date between ? and ?) group by status', ['Outreach Programme', $start_date, $end_date]);
+        $data['statistics']['patients_by_information_source'] = DB::select('select inf.id, inf.name, count(pt.id) as patients from information_sources as inf inner join patients as pt on pt.info_source_id = inf.id where (date(pt.created_at) between ? and ?) group by pt.info_source_id', [$start_date, $end_date]);
+        $data['statistics']['consultations_by_item'] = DB::select('select it.id, it.name, count(ct.id) as consultations from items as it inner join patient_payment_cache_items as ppci on ppci.item_id = it.id inner join consultations as ct on ct.payment_cache_item_id = ppci.id where ppci.status = ? and (date(ppci.served_at) between ? and ?) and ct.patient_direction = ? and ct.status = ? group by ppci.item_id order by consultations desc', ['Served', $start_date, $end_date, 'Direct to Doctor', 'Consulted']);
+        $data['statistics']['daily_activities'] = DB::select('select status, count(id) as activities from daily_activities where (activity_date between ? and ?) group by status', [$start_date, $end_date]);
+        $data['statistics']['ideas'] = DB::select('select status, count(id) as ideas from ideas where (date(created_at) between ? and ?) group by status', [$start_date, $end_date]);
+        $data['statistics']['appointments'] = DB::select('select status, count(id) as appointments from events where event_type = ? and (event_date between ? and ?) group by status', ['Appointment', $start_date, $end_date]);
+        $data['statistics']['outreach_programmes'] = DB::select('select status, count(id) as programmes from events where event_type = ? and (event_date between ? and ?) group by status', ['Outreach Programme', $start_date, $end_date]);
 
         $date = Carbon::today()->subMonths(11);
 

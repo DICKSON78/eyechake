@@ -40,6 +40,7 @@ const ConsultationPatients = () => {
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: undefined,
+    item_id: undefined,
     start_date: new Date(),
     end_date: undefined,
   });
@@ -182,6 +183,11 @@ const ConsultationPatients = () => {
                   status === "pending" ? "Date Sent" : "Date Consulted",
                 valueGetter: (item) =>
                   item.payment_cache_item.served_at || item.created_at,
+              },
+              {
+                field: "item_name",
+                headerName: "Consultation Item",
+                valueGetter: (item, index) => item.payment_cache_item.item.name,
               },
               {
                 field: "actions",

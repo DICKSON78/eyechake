@@ -138,6 +138,11 @@ const ExpensePayments = ({ module, createdBy }) => {
         }
         columns={[
           {
+            field: "expense_date",
+            headerName: "Expense Date",
+            valueGetter: (item, index) => item.expense.expense_date,
+          },
+          {
             field: "category_id",
             headerName: "Category",
             valueGetter: (item, index) => item.expense.category.name,
@@ -147,11 +152,6 @@ const ExpensePayments = ({ module, createdBy }) => {
             headerName: "Total Amount",
             valueGetter: (item, index) =>
               numberFormat(item.expense.total_amount),
-          },
-          {
-            field: "expense_date",
-            headerName: "Expense Date",
-            valueGetter: (item, index) => item.expense.expense_date,
           },
           {
             field: "amount",

@@ -44,7 +44,7 @@ class SurgeryRecordReportsController extends Controller
             }]);
 
             $query->with(['payment_mode', 'consultant']);
-        }, 'creator', 'to_optician_sender']);
+        }, 'creator']);
 
         if ($status) {
             $data->where('status', $status);

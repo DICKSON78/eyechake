@@ -12,10 +12,9 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
-import {
-  EditRounded as EditIcon,
-  MoreVert as MoreIcon,
-} from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/AddRounded";
+import EditIcon from "@mui/icons-material/EditRounded";
+import MoreIcon from "@mui/icons-material/MoreVertRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -116,6 +115,7 @@ const Patients = () => {
             <React.Fragment>
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreatePatientModal}
               >
                 New Patient

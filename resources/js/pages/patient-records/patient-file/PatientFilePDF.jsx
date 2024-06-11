@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
+import DownloadIcon from "@mui/icons-material/DownloadRounded";
 import {
   Document,
   Font,
@@ -167,6 +168,20 @@ const PDFReportDocument = ({ consultation, patient }) => {
             {
               label: "Payment Mode",
               value: consultation.payment_cache_item.payment_mode.name,
+            },
+            {
+              label: "Consultation Item",
+              value: consultation.payment_cache_item.item.name,
+            },
+            {
+              label: "Consultant",
+              value: consultation.payment_cache_item.consultant?.full_name,
+            },
+            {
+              label: "Consultation Date",
+              value:
+                consultation.payment_cache_item.served_at ||
+                consultation.created_at,
             },
           ]}
           containerStyle={{
@@ -976,16 +991,6 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 },
                 { label: "Return Date", value: consultation.to_return_date },
                 { label: "Remarks", value: consultation.remarks },
-                {
-                  label: "Consultant",
-                  value: consultation.payment_cache_item.consultant?.full_name,
-                },
-                {
-                  label: "Consultation Date",
-                  value:
-                    consultation.payment_cache_item.served_at ||
-                    consultation.created_at,
-                },
               ]}
               containerStyle={{
                 marginBottom: 8,
@@ -1071,6 +1076,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
       disabled={loading}
       variant="contained"
       color="secondary"
+      startIcon={<DownloadIcon />}
       onClick={handleFetch}
       {...rest}
     >

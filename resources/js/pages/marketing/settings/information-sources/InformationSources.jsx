@@ -10,6 +10,7 @@ import {
   Stack,
   Tooltip,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import Page, { Header as PageHeader } from "../../../../components/Page";
 import Table, { SearchTextField } from "../../../../components/Table";
@@ -112,6 +113,7 @@ const InformationSources = () => {
               />
               <Button
                 variant="contained"
+                startIcon={<AddIcon />}
                 onClick={openCreateInformationSourceModal}
               >
                 New Source of Information

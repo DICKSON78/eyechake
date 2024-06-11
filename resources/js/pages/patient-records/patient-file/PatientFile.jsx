@@ -63,16 +63,21 @@ const PatientFile = ({ patient }) => {
                   params.per_page * (params.page - 1) + index + 1,
               },
               {
-                field: "created_at",
-                headerName: "Date",
-                valueGetter: (item) =>
-                  item.payment_cache_item.served_at || item.created_at,
+                field: "item_name",
+                headerName: "Consultation Item",
+                valueGetter: (item, index) => item.payment_cache_item.item.name,
               },
               {
                 field: "consultant",
                 headerName: "Consultant",
                 valueGetter: (item, index) =>
                   item.payment_cache_item.consultant?.full_name,
+              },
+              {
+                field: "created_at",
+                headerName: "Date",
+                valueGetter: (item) =>
+                  item.payment_cache_item.served_at || item.created_at,
               },
               {
                 field: "status",

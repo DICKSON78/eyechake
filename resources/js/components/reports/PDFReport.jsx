@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
+import DownloadIcon from "@mui/icons-material/DownloadRounded";
 import { Document, Font, Page, pdf } from "@react-pdf/renderer";
 
 import fontRegular from "../../../fonts/Custom-Regular.ttf";
@@ -141,6 +142,7 @@ const PDFReport = ({ title, columns, items, ...rest }) => {
       disabled={loading}
       variant="contained"
       color="secondary"
+      startIcon={<DownloadIcon />}
       onClick={generatePdfDocument}
     >
       {loading ? "Generating PDF..." : "PDF"}
