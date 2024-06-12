@@ -121,7 +121,7 @@ const GlassPatients = () => {
                 headerName: "Sent By",
                 valueGetter: (item, index) =>
                   item.patient_direction === "Direct to Doctor"
-                    ? item.payment_cache_item.server?.full_name
+                    ? item.payment_cache_item.consultant?.full_name
                     : item.creator?.full_name,
               },
               {

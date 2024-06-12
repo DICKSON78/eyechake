@@ -214,7 +214,6 @@ class PatientPaymentCacheItemsController extends Controller
                         if ($item->item->is_consultation_item == 'Yes') {
                             Consultation::create([
                                 'payment_cache_item_id' => $item->id,
-                                'consultant_id' => $item->consultant_id,
                                 'created_by' => $user->id,
                             ]);
                         } else {
@@ -222,7 +221,6 @@ class PatientPaymentCacheItemsController extends Controller
                                 $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
                                     'patient_direction' => 'Direct to Optician',
-                                    'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
                                     'require_glass' => 'Yes',
                                 ]);
@@ -275,7 +273,6 @@ class PatientPaymentCacheItemsController extends Controller
                     if ($item->item->is_consultation_item == 'Yes') {
                         Consultation::create([
                             'payment_cache_item_id' => $item->id,
-                            'consultant_id' => $item->consultant_id,
                             'created_by' => $user->id,
                         ]);
                     } else {
@@ -283,7 +280,6 @@ class PatientPaymentCacheItemsController extends Controller
                             $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
                                 'patient_direction' => 'Direct to Optician',
-                                'consultant_id' => $item->consultant_id,
                                 'created_by' => $user->id,
                                 'require_glass' => 'Yes',
                             ]);
@@ -335,7 +331,6 @@ class PatientPaymentCacheItemsController extends Controller
                         if ($item->item->is_consultation_item == 'Yes') {
                             Consultation::create([
                                 'payment_cache_item_id' => $item->id,
-                                'consultant_id' => $item->consultant_id,
                                 'created_by' => $user->id,
                             ]);
                         } else {
@@ -343,7 +338,6 @@ class PatientPaymentCacheItemsController extends Controller
                                 $consultation = Consultation::create([
                                     'payment_cache_item_id' => $item->id,
                                     'patient_direction' => 'Direct to Optician',
-                                    'consultant_id' => $item->consultant_id,
                                     'created_by' => $user->id,
                                     'require_glass' => 'Yes',
                                 ]);
