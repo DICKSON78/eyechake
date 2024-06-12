@@ -24,6 +24,7 @@ const PatientItems = ({
   module,
   title,
   consultationType,
+  stockItem,
   paymentModeType,
   status,
 }) => {
@@ -40,9 +41,10 @@ const PatientItems = ({
 
   const [params, setParams] = useState({
     with_patient: "Yes",
-    consultation_type: consultationType,
-    payment_mode_type: paymentModeType,
-    status,
+    consultation_type: undefined,
+    is_stock_item: undefined,
+    payment_mode_type: undefined,
+    status: undefined,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -57,15 +59,6 @@ const PatientItems = ({
   useEffect(() => {
     document.title = `${title} - ${window.APP_NAME}`;
   }, [title]);
-
-  useEffect(() => {
-    setParams({
-      ...params,
-      consultation_type: consultationType,
-      payment_mode_type: paymentModeType,
-      status,
-    });
-  }, [consultationType, paymentModeType, status]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -87,7 +80,11 @@ const PatientItems = ({
       return "Not Paid";
     }
 
-    if (consultationType === "Pharmacy" || consultationType === "Glass") {
+    if (
+      consultationType === "Pharmacy" ||
+      consultationType === "Glass" ||
+      consultationType === "Others"
+    ) {
       if (status === "Served") {
         return "Dispensed";
       }
@@ -111,6 +108,10 @@ const PatientItems = ({
         uri="api/patient-payment-cache-items"
         params={{
           ...params,
+          consultation_type: consultationType,
+          is_stock_item: stockItem,
+          payment_mode_type: paymentModeType,
+          status,
           start_date: params.start_date
             ? formatDateForDb(params.start_date)
             : undefined,
@@ -358,7 +359,11 @@ const PatientItems = ({
           {
             field: "served_by",
             headerName:
-              consultationType === "Pharmacy" ? "Dispensed By" : "Served By",
+              consultationType === "Pharmacy" ||
+              consultationType === "Glass" ||
+              consultationType === "Others"
+                ? "Dispensed By"
+                : "Served By",
             valueGetter: (item) => item.server?.full_name,
             show: status === "Served",
           },
@@ -367,7 +372,9 @@ const PatientItems = ({
             headerName:
               status !== "Served"
                 ? "Date Created"
-                : consultationType === "Pharmacy"
+                : consultationType === "Pharmacy" ||
+                    consultationType === "Glass" ||
+                    consultationType === "Others"
                   ? "Date Dispensed"
                   : "Date Served",
           },

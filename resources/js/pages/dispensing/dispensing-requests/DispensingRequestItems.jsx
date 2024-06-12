@@ -26,7 +26,7 @@ import {
   numberFormat,
 } from "../../../helpers";
 
-const DispensingRequestItems = ({ consultationType }) => {
+const DispensingRequestItems = ({ consultationType, stockItem }) => {
   const addToast = useToast();
   const { patientId, paymentCacheId } = useParams();
 
@@ -48,6 +48,7 @@ const DispensingRequestItems = ({ consultationType }) => {
       per_page: 500,
       payment_cache_id: paymentCacheId,
       consultation_type: consultationType,
+      is_stock_item: stockItem,
     },
     false,
     [],
@@ -146,9 +147,11 @@ const DispensingRequestItems = ({ consultationType }) => {
         { title: "Home" },
         {
           title:
-            consultationType === "Glass"
-              ? "Optician Center"
-              : "Medicine Center",
+            consultationType === "Others"
+              ? "Other Dispensing"
+              : consultationType === "Glass"
+                ? "Optician Center"
+                : "Medicine Center",
         },
         { title: "Dispensing Requests" },
         { title: patientId },

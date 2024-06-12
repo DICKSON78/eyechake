@@ -200,7 +200,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "RECEPTION",
           subheader: true,
-          show: !!drawerOpen && user.privileges.reception,
+          show: user.privileges.reception,
         },
         {
           title: "Patients/Customers",
@@ -245,7 +245,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "PAYMENT CENTER",
           subheader: true,
-          show: !!drawerOpen && user.privileges.payment_center,
+          show: user.privileges.payment_center,
         },
         {
           title: "Patients Sent to Cashier",
@@ -308,7 +308,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "CONSULTATION ROOM",
           subheader: true,
-          show: !!drawerOpen && user.privileges.consultation_room,
+          show: user.privileges.consultation_room,
         },
         {
           title: "Patients Sent to Doctor",
@@ -340,7 +340,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "OPTICIAN CENTER",
           subheader: true,
-          show: !!drawerOpen && user.privileges.optician_center,
+          show: user.privileges.optician_center,
         },
         {
           title: "Patients Sent to Optician",
@@ -378,7 +378,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "MEDICINE CENTER",
           subheader: true,
-          show: !!drawerOpen && user.privileges.medicine_center,
+          show: user.privileges.medicine_center,
         },
         {
           title: "Dispensing Requests",
@@ -416,7 +416,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "PROCEDURE ROOM",
           subheader: true,
-          show: !!drawerOpen && user.privileges.procedure_room,
+          show: user.privileges.procedure_room,
         },
         {
           title: "Procedure Requests",
@@ -446,9 +446,47 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           ],
         },
         {
+          title: "OTHER DISPENSING",
+          subheader: true,
+          show: user.privileges.other_dispensing,
+        },
+        {
+          title: "Dispensing Requests",
+          icon: <WaitingIcon />,
+          to: "/other-dispensing/dispensing-requests",
+          badge: notifications?.other_dispensing_requests,
+          show: user.privileges.other_dispensing,
+        },
+        {
+          title: "Reports",
+          icon: <ReportsIcon />,
+          to: "/other-dispensing/reports",
+          show: user.privileges.other_dispensing,
+          items: [
+            {
+              title: "Items Dispensed Report",
+              icon: <ReportsIcon />,
+              to: "/other-dispensing/reports/items-dispensed",
+              show: user.privileges.other_dispensing,
+            },
+            {
+              title: "Items Not Dispensed Report",
+              icon: <ReportsIcon />,
+              to: "/other-dispensing/reports/items-not-dispensed",
+              show: user.privileges.other_dispensing,
+            },
+            {
+              title: "Item Balance Report",
+              icon: <ReportsIcon />,
+              to: "/other-dispensing/reports/item-balance",
+              show: user.privileges.other_dispensing,
+            },
+          ],
+        },
+        {
           title: "INVENTORY MANAGEMENT",
           subheader: true,
-          show: !!drawerOpen && user.privileges.inventory_management,
+          show: user.privileges.inventory_management,
         },
         {
           title: "Stocktaking",
@@ -479,7 +517,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "MARKETING MANAGEMENT",
           subheader: true,
-          show: !!drawerOpen && user.privileges.marketing,
+          show: user.privileges.marketing,
         },
         {
           title: "Dashboard",
@@ -560,7 +598,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "FINANCIAL MANAGEMENT",
           subheader: true,
-          show: !!drawerOpen && user.privileges.financial_management,
+          show: user.privileges.financial_management,
         },
         {
           title: "Expenses",
@@ -621,7 +659,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "EMPLOYEE MANAGEMENT",
           subheader: true,
-          show: !!drawerOpen && user.privileges.employee_management,
+          show: user.privileges.employee_management,
         },
         {
           title: "Employees",
@@ -632,7 +670,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
         {
           title: "SETTINGS",
           subheader: true,
-          show: !!drawerOpen && user.privileges.settings,
+          show: user.privileges.settings,
         },
         {
           title: "Item Management",

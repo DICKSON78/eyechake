@@ -10,7 +10,7 @@ import Filters from "../PatientFilters";
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
 
-const DispensingRequests = ({ consultationType }) => {
+const DispensingRequests = ({ consultationType, stockItem }) => {
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -19,7 +19,8 @@ const DispensingRequests = ({ consultationType }) => {
     page: 1,
     per_page: 25,
     item_status: "Pending,Paid,Billed",
-    item_consultation_type: consultationType,
+    item_consultation_type: undefined,
+    is_stock_item: undefined,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -33,6 +34,8 @@ const DispensingRequests = ({ consultationType }) => {
     "api/patient-payment-cache",
     {
       ...params,
+      item_consultation_type: consultationType,
+      is_stock_item: stockItem,
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -63,9 +66,11 @@ const DispensingRequests = ({ consultationType }) => {
         { title: "Home" },
         {
           title:
-            consultationType === "Glass"
-              ? "Optician Center"
-              : "Medicine Center",
+            consultationType === "Others"
+              ? "Other Dispensing"
+              : consultationType === "Glass"
+                ? "Optician Center"
+                : "Medicine Center",
         },
         { title: "Dispensing Requests" },
       ]}
@@ -143,7 +148,7 @@ const DispensingRequests = ({ consultationType }) => {
                       size="small"
                       onClick={() =>
                         navigate(
-                          `/${consultationType === "Glass" ? "optician" : "medicine"}-center/dispensing-requests/${item.check_in.patient_id}/${item.id}`
+                          `/${consultationType === "Others" ? "other-dispensing" : consultationType === "Glass" ? "optician-center" : "medicine-center"}/dispensing-requests/${item.check_in.patient_id}/${item.id}`
                         )
                       }
                     >

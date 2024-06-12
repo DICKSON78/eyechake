@@ -8,7 +8,7 @@ import { numberFormat, throttle } from "../../../helpers";
 
 const ItemBalance = ({ module, consultationType }) => {
   const [params, setParams] = useState({
-    consultation_type: consultationType,
+    consultation_type: undefined,
     status: "Active",
     is_stock_item: "Yes",
     q: undefined,
@@ -17,10 +17,6 @@ const ItemBalance = ({ module, consultationType }) => {
   useEffect(() => {
     document.title = `Item Balance Report - ${window.APP_NAME}`;
   }, []);
-
-  useEffect(() => {
-    setParams({ ...params, consultation_type: consultationType });
-  }, [consultationType]);
 
   return (
     <Page
@@ -34,7 +30,7 @@ const ItemBalance = ({ module, consultationType }) => {
       <Report
         title="Item Balance Report"
         uri="api/items"
-        params={params}
+        params={{ ...params, consultation_type: consultationType }}
         headerTrailingContent={
           <React.Fragment>
             <SearchTextField

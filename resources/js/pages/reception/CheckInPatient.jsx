@@ -91,7 +91,7 @@ const CheckInPatient = () => {
   const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
   const [quantity, setQuantity] = useState(1);
-  const [comments, setComments] = useState(1);
+  const [comments, setComments] = useState();
   const [selectedItems, setSelectedItems] = useState([]);
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(

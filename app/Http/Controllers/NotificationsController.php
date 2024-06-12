@@ -26,6 +26,7 @@ class NotificationsController extends Controller
             'glass_patients' => 0,
             'dispensing_requests' => 0,
             'procedure_requests' => 0,
+            'other_dispensing_requests' => 0,
             'patients_to_return' => 0,
         ];
 
@@ -104,6 +105,19 @@ class NotificationsController extends Controller
             $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
             $query->whereHas('consultation_type', function ($query2) {
                 $query2->where('name', 'Procedure');
+            });
+        })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->count();
+
+        $data['other_dispensing_requests'] = PatientPaymentCache::whereHas('items', function ($query) {
+            $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
+            $query->whereHas('consultation_type', function ($query2) {
+                $query2->where('name', 'Others');
+            });
+            $query->whereHas('item', function ($query2) {
+                $query2->where('is_stock_item', 'Yes');
             });
         })
             ->whereDate('created_at', '>=', $start_date)

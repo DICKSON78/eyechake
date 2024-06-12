@@ -22,6 +22,7 @@ import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomR
 import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
 import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
 import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
+import OtherDispensingRoutes from "../pages/other-dispensing/OtherDispensingRoutes";
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
 import MarketingRoutes from "../pages/marketing/MarketingRoutes";
 import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
@@ -83,7 +84,7 @@ const App = () => {
                 <Route
                   path="dashboard"
                   element={
-                    user && user.privileges.dashboard ? (
+                    user?.privileges?.dashboard ? (
                       <Dashboard setSmsBalance={setSmsBalance} />
                     ) : null
                   }
@@ -95,15 +96,13 @@ const App = () => {
                 <Route
                   path="reception/*"
                   element={
-                    user && user.privileges.reception ? (
-                      <ReceptionRoutes />
-                    ) : null
+                    user?.privileges?.reception ? <ReceptionRoutes /> : null
                   }
                 />
                 <Route
                   path="payment-center/*"
                   element={
-                    user && user.privileges.payment_center ? (
+                    user?.privileges?.payment_center ? (
                       <PaymentCenterRoutes />
                     ) : null
                   }
@@ -111,7 +110,7 @@ const App = () => {
                 <Route
                   path="consultation-room/*"
                   element={
-                    user && user.privileges.consultation_room ? (
+                    user?.privileges?.consultation_room ? (
                       <ConsultationRoomRoutes />
                     ) : null
                   }
@@ -119,7 +118,7 @@ const App = () => {
                 <Route
                   path="optician-center/*"
                   element={
-                    user && user.privileges.optician_center ? (
+                    user?.privileges?.optician_center ? (
                       <OpticianCenterRoutes />
                     ) : null
                   }
@@ -127,7 +126,7 @@ const App = () => {
                 <Route
                   path="medicine-center/*"
                   element={
-                    user && user.privileges.medicine_center ? (
+                    user?.privileges?.medicine_center ? (
                       <MedicineCenterRoutes />
                     ) : null
                   }
@@ -135,15 +134,23 @@ const App = () => {
                 <Route
                   path="procedure-room/*"
                   element={
-                    user && user.privileges.procedure_room ? (
+                    user?.privileges?.procedure_room ? (
                       <ProcedureRoomRoutes />
+                    ) : null
+                  }
+                />
+                <Route
+                  path="other-dispensing/*"
+                  element={
+                    user?.privileges?.other_dispensing ? (
+                      <OtherDispensingRoutes />
                     ) : null
                   }
                 />
                 <Route
                   path="inventory-management/*"
                   element={
-                    user && user.privileges.inventory_management ? (
+                    user?.privileges?.inventory_management ? (
                       <InventoryManagementRoutes />
                     ) : null
                   }
@@ -151,15 +158,13 @@ const App = () => {
                 <Route
                   path="marketing/*"
                   element={
-                    user && user.privileges.marketing ? (
-                      <MarketingRoutes />
-                    ) : null
+                    user?.privileges?.marketing ? <MarketingRoutes /> : null
                   }
                 />
                 <Route
                   path="financial-management/*"
                   element={
-                    user && user.privileges.financial_management ? (
+                    user?.privileges?.financial_management ? (
                       <FinancialManagementRoutes />
                     ) : null
                   }
@@ -167,7 +172,7 @@ const App = () => {
                 <Route
                   path="employee-management/*"
                   element={
-                    user && user.privileges.employee_management ? (
+                    user?.privileges?.employee_management ? (
                       <EmployeeManagementRoutes />
                     ) : null
                   }
@@ -175,7 +180,7 @@ const App = () => {
                 <Route
                   path="settings/*"
                   element={
-                    user && user.privileges.settings ? <SettingsRoutes /> : null
+                    user?.privileges?.settings ? <SettingsRoutes /> : null
                   }
                 />
               </React.Fragment>

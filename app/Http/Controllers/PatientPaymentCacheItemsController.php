@@ -38,6 +38,7 @@ class PatientPaymentCacheItemsController extends Controller
         $payment_mode_id = $request->payment_mode_id;
         $transaction_type = $request->transaction_type;
         $consultation_type = $request->consultation_type;
+        $is_stock_item = $request->is_stock_item;
         $consultant_id = $request->consultant_id;
         $consultation_id = $request->consultation_id;
         $bill_id = $request->bill_id;
@@ -89,6 +90,12 @@ class PatientPaymentCacheItemsController extends Controller
         if ($consultation_type) {
             $data->whereHas('consultation_type', function ($query) use ($consultation_type) {
                 $query->where('name', $consultation_type);
+            });
+        }
+
+        if ($is_stock_item) {
+            $data->whereHas('item', function ($query) use ($is_stock_item) {
+                $query->where('is_stock_item', $is_stock_item);
             });
         }
 
@@ -243,8 +250,11 @@ class PatientPaymentCacheItemsController extends Controller
             return $this->sendResponse($payment, Response::HTTP_OK, 'Payment made successfully.');
         }
 
-        return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR,
-            'An error occurred. Payment could not be made.');
+        return $this->sendResponse(
+            null,
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            'An error occurred. Payment could not be made.'
+        );
     }
 
     public function approveCreditPayment(Request $request)
@@ -356,8 +366,11 @@ class PatientPaymentCacheItemsController extends Controller
             return $this->sendResponse($bill, Response::HTTP_OK, 'Bill created successfully.');
         }
 
-        return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR,
-            'An error occurred. Bill could not be created.');
+        return $this->sendResponse(
+            null,
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            'An error occurred. Bill could not be created.'
+        );
     }
 
     private function updateStatus(Request $request, $status, $message, $callback)
