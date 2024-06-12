@@ -27,7 +27,11 @@ class InventoryManagementReportsController extends Controller
         $consultation_type = $request->consultation_type;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        $data = PatientPaymentCacheItem::with(['item.unit_of_measure'])->where('status', 'Served');
+        $data = PatientPaymentCacheItem::with(['item.unit_of_measure'])
+            ->whereHas('item', function ($query) {
+                $query->where('is_stock_item', 'Yes');
+            })
+            ->where('status', 'Served');
 
         if ($q) {
             $data->whereHas('item', function ($query) use ($q) {
