@@ -61,6 +61,7 @@ class DatabaseSeeder extends Seeder
             ['user_id' => 1, 'privilege' => 'optician_center'],
             ['user_id' => 1, 'privilege' => 'medicine_center'],
             ['user_id' => 1, 'privilege' => 'procedure_room'],
+            ['user_id' => 1, 'privilege' => 'other_dispensing'],
             ['user_id' => 1, 'privilege' => 'inventory_management'],
             ['user_id' => 1, 'privilege' => 'financial_management'],
             ['user_id' => 1, 'privilege' => 'employee_management'],
