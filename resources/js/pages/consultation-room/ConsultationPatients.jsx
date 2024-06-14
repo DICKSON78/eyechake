@@ -34,7 +34,7 @@ const ConsultationPatients = () => {
     page: 1,
     per_page: 25,
     patient_direction: "Direct to Doctor",
-    status: capitalize(status),
+    status: undefined,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -49,6 +49,7 @@ const ConsultationPatients = () => {
     "api/consultations",
     {
       ...params,
+      status: capitalize(status),
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -65,7 +66,6 @@ const ConsultationPatients = () => {
 
   useEffect(() => {
     document.title = `${getTitle()} - ${window.APP_NAME}`;
-    setParams({ ...params, status: capitalize(status) });
   }, [status]);
 
   useEffect(() => {
