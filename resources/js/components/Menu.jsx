@@ -750,7 +750,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
     } else {
       setItems([]);
     }
-  }, [drawerOpen, user, notifications]);
+  }, [user, notifications]);
 
   const generateMenuTree = (items) => {
     if (!items) return null;
