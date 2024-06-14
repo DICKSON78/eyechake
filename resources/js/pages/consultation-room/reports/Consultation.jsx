@@ -114,7 +114,7 @@ const Consultation = () => {
             headerName: "Diagnosis",
             valueGetter: (item, index) =>
               item.diagnoses
-                .map((e) => `${e.disease.code} ${e.disease.name}`.trim())
+                .map((e) => `${e.disease.code || ""} ${e.disease.name}`.trim())
                 .join("; "),
           },
           {
