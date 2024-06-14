@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Chip } from "@mui/material";
+import Chip from "@mui/material/Chip";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../expenses/Filters";
@@ -15,16 +15,12 @@ const Expenses = ({ module, createdBy }) => {
     category_id: undefined,
     start_date: undefined,
     end_date: undefined,
-    created_by: createdBy,
+    created_by: undefined,
   });
 
   useEffect(() => {
     document.title = `Expenses Report - ${window.APP_NAME}`;
   }, []);
-
-  useEffect(() => {
-    setParams({ ...params, created_by: createdBy });
-  }, [createdBy]);
 
   const getStatus = (item) => {
     if (item.paid_amount < item.total_amount) {
@@ -62,6 +58,7 @@ const Expenses = ({ module, createdBy }) => {
         uri="api/expenses"
         params={{
           ...params,
+          created_by: createdBy,
           start_date: params.start_date
             ? formatDateForDb(params.start_date)
             : undefined,

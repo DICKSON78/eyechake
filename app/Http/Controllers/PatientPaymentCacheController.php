@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Item;
-use App\Models\PatientCheckIn;
 use App\Models\PatientPaymentCache;
-use App\Models\PatientPaymentCacheItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
