@@ -56,6 +56,7 @@ const Consultation = () => {
             params={params}
             setParams={setParams}
             showDiagnosis
+            showConsultant
             sx={{ mb: 2 }}
           />
         }

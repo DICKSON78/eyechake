@@ -21,9 +21,11 @@ import {
   Person2Rounded as PersonIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
+  LightbulbRounded as IdeaDevelopmentIcon,
   LocalActivityRounded as OutreachProgrammesIcon,
   LocationSearchingRounded as MarketResearchIcon,
   NorthEastRounded as ViewMoreIcon,
+  PhoneInTalkRounded as CommunicationLogsIcon,
   SendRounded as MarketingStrategiesIcon,
   TaskRounded as DailyActivitiesIcon,
 } from "@mui/icons-material";
@@ -82,7 +84,7 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
-    document.title = `Dashboard - ${window.APP_NAME}`;
+    document.title = `Marketing Dashboard - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -116,15 +118,15 @@ const Dashboard = () => {
 
   return (
     <Page
-      title="Dashboard"
+      title="Marketing Dashboard"
       breadcrumbs={[
         { title: "Home" },
         { title: "Marketing Management" },
-        { title: "Dashboard" },
+        { title: "Marketing Dashboard" },
       ]}
     >
       <CardHeader
-        title="Dashboard"
+        title="Marketing Dashboard"
         action={
           <Tooltip title="Show filters">
             <IconButton onClick={openFiltersModal}>
@@ -527,6 +529,179 @@ const Dashboard = () => {
 
           <Grid
             item
+            md={3}
+            sm={6}
+            xs={12}
+          >
+            <Card>
+              <InfoCard
+                title="Ideas"
+                count={numberFormat(
+                  data.statistics.ideas.reduce((acc, e) => acc + e.ideas, 0)
+                )}
+                icon={<IdeaDevelopmentIcon />}
+                color={lime[600]}
+                sx={{ m: 1 }}
+              />
+              <CardContent>
+                <Chart
+                  options={{
+                    labels: data.statistics.ideas.map((e) => e.status),
+                    chart: {
+                      fontFamily: theme.typography.fontFamily,
+                      background: "transparent",
+                      toolbar: {
+                        show: false,
+                      },
+                    },
+                    plotOptions: {
+                      pie: {
+                        donut: {
+                          size: "50%",
+                        },
+                      },
+                    },
+                    colors: [
+                      theme.palette.warning.main,
+                      teal[500],
+                      lightBlue[500],
+                    ],
+                    stroke: {
+                      show: true,
+                      width: 3,
+                      colors: data.statistics.ideas.map(
+                        (e) => theme.palette.background.paper
+                      ),
+                    },
+                    dataLabels: {
+                      style: {
+                        fontWeight: "400",
+                        fontSize: "10px",
+                      },
+                      dropShadow: {
+                        enabled: false,
+                      },
+                    },
+                    tooltip: {
+                      y: {
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
+                      },
+                    },
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: data.statistics.ideas.map(
+                          (e) => theme.palette.text.secondary
+                        ),
+                        useSeriesColors: false,
+                      },
+                      markers: {
+                        width: 14,
+                        height: 8,
+                        radius: 4,
+                      },
+                    },
+                  }}
+                  series={data.statistics.ideas.map((e) => e.ideas)}
+                  type="donut"
+                  height={data.statistics.ideas.length ? 288 : 256}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid
+            item
+            md={3}
+            sm={6}
+            xs={12}
+          >
+            <Card>
+              <InfoCard
+                title="Communication Logs"
+                count={numberFormat(
+                  data.statistics.communication_logs.reduce(
+                    (acc, e) => acc + e.logs,
+                    0
+                  )
+                )}
+                icon={<CommunicationLogsIcon />}
+                color={red[400]}
+                sx={{ m: 1 }}
+              />
+              <CardContent>
+                <Chart
+                  options={{
+                    labels: data.statistics.communication_logs.map(
+                      (e) => e.communication_type
+                    ),
+                    chart: {
+                      fontFamily: theme.typography.fontFamily,
+                      background: "transparent",
+                      toolbar: {
+                        show: false,
+                      },
+                    },
+                    plotOptions: {
+                      pie: {
+                        donut: {
+                          size: "50%",
+                        },
+                      },
+                    },
+                    colors: [pink[400], cyan[500], green[500]],
+                    stroke: {
+                      show: true,
+                      width: 3,
+                      colors: data.statistics.communication_logs.map(
+                        (e) => theme.palette.background.paper
+                      ),
+                    },
+                    dataLabels: {
+                      style: {
+                        fontWeight: "400",
+                        fontSize: "10px",
+                      },
+                      dropShadow: {
+                        enabled: false,
+                      },
+                    },
+                    tooltip: {
+                      y: {
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
+                      },
+                    },
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: data.statistics.communication_logs.map(
+                          (e) => theme.palette.text.secondary
+                        ),
+                        useSeriesColors: false,
+                      },
+                      markers: {
+                        width: 14,
+                        height: 8,
+                        radius: 4,
+                      },
+                    },
+                  }}
+                  series={data.statistics.communication_logs.map((e) => e.logs)}
+                  type="donut"
+                  height={data.statistics.communication_logs.length ? 288 : 256}
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid
+            item
             md={6}
             sm={12}
             xs={12}
@@ -646,67 +821,6 @@ const Dashboard = () => {
                 type="line"
                 height="272"
               />
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Card variant="outlined-elevation">
-              <CardHeader
-                title="Today's Activities"
-                action={
-                  <Tooltip title="View all">
-                    <IconButton
-                      size="small"
-                      onClick={() => navigate("/marketing/daily-activities")}
-                    >
-                      <ViewMoreIcon />
-                    </IconButton>
-                  </Tooltip>
-                }
-              />
-              <Divider />
-              <CardContent>
-                <List disablePadding>
-                  {data.lists.daily_activities.map((e, i) => (
-                    <ListItem
-                      key={e.id}
-                      dense
-                    >
-                      <ListItemAvatar>
-                        <Avatar
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            bgcolor: [
-                              theme.palette.primary.main,
-                              theme.palette.secondary.main,
-                            ][i % 2],
-                          }}
-                        >
-                          <PersonIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={e.creator?.full_name}
-                        secondary={e.description}
-                        primaryTypographyProps={{ noWrap: true }}
-                        secondaryTypographyProps={{ noWrap: true }}
-                      />
-                      <Box flexGrow={1} />
-                      <Chip
-                        size="small"
-                        color={getStatusColor(e.status)}
-                        label={e.status}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
             </Card>
           </Grid>
         </Grid>

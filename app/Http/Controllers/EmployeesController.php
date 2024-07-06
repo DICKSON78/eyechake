@@ -32,6 +32,7 @@ class EmployeesController extends Controller
         $name = $request->name;
         $gender = $request->gender;
         $phone = $request->phone;
+        $designation = $request->designation;
         $department_id = $request->department_id;
         $job_title_id = $request->job_title_id;
         $employee_number = $request->employee_number;
@@ -51,6 +52,10 @@ class EmployeesController extends Controller
 
         if ($phone) {
             $data->where('phone', 'like', '%' . $phone . '%');
+        }
+
+        if ($designation) {
+            $data->where('designation', $designation);
         }
 
         if ($department_id) {
@@ -84,6 +89,7 @@ class EmployeesController extends Controller
             'username' => 'required|unique:users,username',
             'gender' => 'required|in:Male,Female',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
+            'designation' => 'nullable|in:Doctor,Other',
             'department_id' => 'nullable|exists:departments,id',
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:employees,employee_number',
@@ -141,6 +147,7 @@ class EmployeesController extends Controller
             'last_name' => 'sometimes|required',
             'gender' => 'sometimes|required|in:Male,Female',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
+            'designation' => 'nullable|in:Doctor,Other',
             'department_id' => 'nullable|exists:departments,id',
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:employees,employee_number,' . $id,

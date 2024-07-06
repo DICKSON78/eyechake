@@ -13,8 +13,9 @@ class Employee extends Model
     protected $appends = ['full_name'];
 
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'department_id', 'job_title_id', 'employee_number',
-        'date_of_birth', 'gender', 'national_id', 'phone', 'user_id', 'created_by', 'status',
+        'first_name', 'middle_name', 'last_name', 'designation', 'department_id', 'job_title_id',
+        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'user_id',
+        'created_by', 'status',
     ];
 
     public function department()

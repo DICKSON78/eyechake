@@ -6,6 +6,7 @@ import Ideas from "./ideas/Ideas";
 import ResearchPlans from "./research-plans/ResearchPlans";
 import MarketingStrategies from "./marketing-strategies/MarketingStrategies";
 import Events from "./events/Events";
+import CommunicationLogs from "./communication-logs/CommunicationLogs";
 import SettingsRoutes from "./settings/SettingsRoutes";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
@@ -39,6 +40,10 @@ const FinancialManagementRoutes = () => {
       <Route
         path="/outreach-programmes"
         element={<Events eventType="Outreach Programme" />}
+      />
+      <Route
+        path="/communication-logs"
+        element={<CommunicationLogs />}
       />
       <Route
         path="/settings/*"

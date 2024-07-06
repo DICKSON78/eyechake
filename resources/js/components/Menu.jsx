@@ -32,6 +32,7 @@ import {
   MoneyRounded as PaymentModesIcon,
   PaymentRounded as PaymentChannelsIcon,
   PestControlRounded as DiseasesIcon,
+  PhoneInTalkRounded as CommunicationLogsIcon,
   ScheduleRounded as PatientsToReturnIcon,
   SendRounded as MarketingStrategiesIcon,
   SettingsRounded as SettingsIcon,
@@ -520,7 +521,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           show: user.privileges.marketing,
         },
         {
-          title: "Dashboard",
+          title: "Marketing Dashboard",
           icon: <HomeIcon />,
           to: "/marketing/dashboard",
           show: user.privileges.marketing,
@@ -559,6 +560,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           title: "Outreach Programmes",
           icon: <OutreachProgrammesIcon />,
           to: "/marketing/outreach-programmes",
+          show: user.privileges.marketing,
+        },
+        {
+          title: "Communication Logs",
+          icon: <CommunicationLogsIcon />,
+          to: "/marketing/communication-logs",
           show: user.privileges.marketing,
         },
         {

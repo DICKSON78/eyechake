@@ -26,6 +26,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
   const employeeNumberRef = useRef();
   const genderRef = useRef();
   const dateOfBirthRef = useRef();
+  const designationRef = useRef();
   const departmentRef = useRef();
   const jobTitleRef = useRef();
   const nationalIdRef = useRef();
@@ -59,6 +60,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     employee_number: item.employee_number,
     gender: item.gender,
     date_of_birth: item.date_of_birth ? new Date(item.date_of_birth) : null,
+    designation: item.designation,
     department_id: item.department_id,
     job_title_id: item.job_title_id,
     national_id: item.national_id,
@@ -203,6 +205,23 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
                 value={formData.date_of_birth}
                 onChange={(value) =>
                   setFormData({ ...formData, date_of_birth: value })
+                }
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <Select
+                ref={designationRef}
+                label="Designation"
+                fullWidth
+                options={["Doctor", "Other"]}
+                value={formData.designation || null}
+                onChange={(value) =>
+                  setFormData({ ...formData, designation: value })
                 }
               />
             </Grid>

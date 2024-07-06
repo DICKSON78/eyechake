@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Marketing;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\Marketing\DailyActivity;
 use App\Models\Patient;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
@@ -38,6 +37,7 @@ class MarketingDashboardController extends Controller
                 'ideas' => [],
                 'appointments' => [],
                 'outreach_programmes' => [],
+                'communication_logs' => [],
                 'yearly' => [],
             ],
             'lists' => [
@@ -55,6 +55,7 @@ class MarketingDashboardController extends Controller
         $data['statistics']['ideas'] = DB::select('select status, count(id) as ideas from ideas where (date(created_at) between ? and ?) group by status', [$start_date, $end_date]);
         $data['statistics']['appointments'] = DB::select('select status, count(id) as appointments from events where event_type = ? and (event_date between ? and ?) group by status', ['Appointment', $start_date, $end_date]);
         $data['statistics']['outreach_programmes'] = DB::select('select status, count(id) as programmes from events where event_type = ? and (event_date between ? and ?) group by status', ['Outreach Programme', $start_date, $end_date]);
+        $data['statistics']['communication_logs'] = DB::select('select communication_type, count(id) as logs from communication_logs where (date(created_at) between ? and ?) group by communication_type', [$start_date, $end_date]);
 
         $date = Carbon::today()->subMonths(11);
 
@@ -97,11 +98,6 @@ class MarketingDashboardController extends Controller
             $date->addMonthNoOverflow();
         }
 
-        $data['lists']['daily_activities'] = DailyActivity::with(['creator'])
-            ->select('id', 'description', 'created_by', 'status')
-            ->where('activity_date', $today)
-            ->limit(5)
-            ->get();
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 }

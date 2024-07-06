@@ -172,6 +172,10 @@ const Employees = () => {
                 headerName: "Phone Number",
               },
               {
+                field: "designation",
+                headerName: "Designation",
+              },
+              {
                 field: "department_id",
                 headerName: "Department",
                 valueGetter: (item, index) => item.department?.name,
@@ -185,10 +189,12 @@ const Employees = () => {
                 field: "created_by",
                 headerName: "Created By",
                 valueGetter: (item, index) => item.creator?.full_name,
+                show: false,
               },
               {
                 field: "created_at",
                 headerName: "Date Created",
+                show: false,
               },
               {
                 field: "status",

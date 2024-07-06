@@ -19,6 +19,7 @@ use App\Http\Controllers\ItemsController;
 use App\Http\Controllers\ItemTypesController;
 use App\Http\Controllers\JobTitlesController;
 use App\Http\Controllers\LensTypesController;
+use App\Http\Controllers\Marketing\CommunicationLogsController;
 use App\Http\Controllers\Marketing\DailyActivitiesController;
 use App\Http\Controllers\Marketing\EventsController;
 use App\Http\Controllers\Marketing\IdeasController;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Marketing\MarketingStrategiesController;
 use App\Http\Controllers\Marketing\ResearchPlansController;
 use App\Http\Controllers\MessagesController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\PatientAttachmentsController;
 use App\Http\Controllers\PatientCheckInsController;
 use App\Http\Controllers\PatientItemBillPaymentsController;
 use App\Http\Controllers\PatientItemBillsController;
@@ -89,6 +91,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
 
     $router->apiResource('/patients', PatientsController::class);
     $router->apiResource('/patient-check-ins', PatientCheckInsController::class);
+    $router->apiResource('/patient-attachments', PatientAttachmentsController::class);
 
     $router->apiResource('/patient-payment-cache', PatientPaymentCacheController::class);
     $router->apiResource('/patient-payment-cache-items', PatientPaymentCacheItemsController::class);
@@ -132,6 +135,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
         $router->apiResource('/research-plans', ResearchPlansController::class);
         $router->apiResource('/marketing-strategies', MarketingStrategiesController::class);
         $router->apiResource('/information-sources', InformationSourcesController::class);
+        $router->apiResource('/communication-logs', CommunicationLogsController::class);
     });
 
     $router->prefix('reports')->group(function ($router) {

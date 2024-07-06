@@ -18,6 +18,7 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 import Select from "../../../components/Select";
+import SelectEmployee from "../../../components/SelectEmployee";
 import TextField from "../../../components/TextField";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
@@ -74,16 +75,6 @@ const SelectItems = ({
   );
   const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
     "api/payment-modes",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
-  const { data: employees, handleFetch: fetchEmployees } = useFetch(
-    "api/employees",
     {
       status: "Active",
       per_page: 500,
@@ -263,13 +254,11 @@ const SelectItems = ({
             sm={12}
             xs={12}
           >
-            <Select
+            <SelectEmployee
               ref={consultantRef}
               label="Consultant"
-              fullWidth
-              options={employees}
-              optionsLabel="full_name"
-              isOptionEqualToValue={(option, value) => option.id === value.id}
+              clearable
+              params={{ designation: "Doctor" }}
               value={consultant || null}
               onChange={(value) => setConsultant(value)}
             />

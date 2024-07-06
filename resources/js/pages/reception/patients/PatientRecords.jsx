@@ -16,6 +16,7 @@ import Modal from "../../../components/Modal";
 import PatientDetails from "./PatientDetails";
 import PatientFile from "../../patient-records/patient-file/PatientFile";
 import PatientPaymentHistory from "../../patient-records/PatientPaymentHistory";
+import PatientAttachments from "../../patient-records/patient-attachments/PatientAttachments";
 
 const PatientRecords = () => {
   const location = useLocation();
@@ -41,6 +42,8 @@ const PatientRecords = () => {
       setSelectedTab(0);
     } else if (location.pathname.indexOf("/payment-history") !== -1) {
       setSelectedTab(1);
+    } else if (location.pathname.indexOf("/attachments") !== -1) {
+      setSelectedTab(2);
     }
   }, [location.pathname]);
 
@@ -80,6 +83,10 @@ const PatientRecords = () => {
               label="Payment History"
               onClick={() => navigate("payment-history")}
             />
+            <Tab
+              label="Attachments"
+              onClick={() => navigate("attachments")}
+            />
           </Tabs>
           <Routes>
             <Route
@@ -89,6 +96,10 @@ const PatientRecords = () => {
             <Route
               path="/payment-history"
               element={<PatientPaymentHistory patient={patient} />}
+            />
+            <Route
+              path="/attachments"
+              element={<PatientAttachments patient={patient} />}
             />
           </Routes>
         </React.Fragment>

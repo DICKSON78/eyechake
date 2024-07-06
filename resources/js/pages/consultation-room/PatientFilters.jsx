@@ -1,25 +1,25 @@
 import React from "react";
-import { Card, CardContent, Grid, InputAdornment } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import DatePicker from "../../components/DatePicker";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import SelectDisease from "../../components/SelectDisease";
+import SelectEmployee from "../../components/SelectEmployee";
 import useFetch from "../../hooks/useFetch";
 
 import { throttle } from "../../helpers";
 
-const PatientFilters = ({ params, setParams, showDiagnosis, ...rest }) => {
-  const { data: paymentModes } = useFetch(
-    "api/payment-modes",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
+const PatientFilters = ({
+  params,
+  setParams,
+  showDiagnosis,
+  showConsultant,
+  ...rest
+}) => {
   const { data: items } = useFetch(
     "api/items",
     {
@@ -161,24 +161,6 @@ const PatientFilters = ({ params, setParams, showDiagnosis, ...rest }) => {
             xs={12}
           >
             <Select
-              label="Payment Mode"
-              fullWidth
-              options={paymentModes}
-              optionsLabel="name"
-              optionsValue="id"
-              clearable
-              onChange={(value) =>
-                setParams({ ...params, item_payment_mode_id: value })
-              }
-            />
-          </Grid>
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Select
               label="Consultation Item"
               fullWidth
               options={items}
@@ -200,6 +182,23 @@ const PatientFilters = ({ params, setParams, showDiagnosis, ...rest }) => {
                 clearable
                 onChange={(value) =>
                   setParams({ ...params, disease_id: value?.id })
+                }
+              />
+            </Grid>
+          ) : null}
+          {showConsultant ? (
+            <Grid
+              item
+              md={3}
+              sm={6}
+              xs={12}
+            >
+              <SelectEmployee
+                label="Consultant"
+                clearable
+                params={{ designation: "Doctor" }}
+                onChange={(value) =>
+                  setParams({ ...params, consultant_id: value?.id })
                 }
               />
             </Grid>

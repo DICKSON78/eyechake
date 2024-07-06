@@ -24,6 +24,7 @@ import Modal from "../../components/Modal";
 import PatientDetails from "./patients/PatientDetails";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
+import SelectEmployee from "../../components/SelectEmployee";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
@@ -55,16 +56,6 @@ const CheckInPatient = () => {
 
   const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
     "api/payment-modes",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    false,
-    [],
-    (response) => response.data.data.data
-  );
-  const { data: employees, handleFetch: fetchEmployees } = useFetch(
-    "api/employees",
     {
       status: "Active",
       per_page: 500,
@@ -140,7 +131,6 @@ const CheckInPatient = () => {
   useEffect(() => {
     if (patient) {
       fetchPaymentModes();
-      fetchEmployees();
       fetchItemTypes();
       setPaymentMode(patient.payment_mode);
     }
@@ -301,12 +291,11 @@ const CheckInPatient = () => {
                 sm={12}
                 xs={12}
               >
-                <Select
+                <SelectEmployee
                   ref={consultantRef}
                   label="Consultant"
-                  fullWidth
-                  options={employees}
-                  optionsLabel="full_name"
+                  clearable
+                  params={{ designation: "Doctor" }}
                   onChange={(value) => setConsultant(value)}
                 />
               </Grid>

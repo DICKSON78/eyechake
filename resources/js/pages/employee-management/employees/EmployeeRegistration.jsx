@@ -41,6 +41,7 @@ const EmployeeRegistration = () => {
   const employeeNumberRef = useRef();
   const genderRef = useRef();
   const dateOfBirthRef = useRef();
+  const designationRef = useRef();
   const departmentRef = useRef();
   const jobTitleRef = useRef();
   const nationalIdRef = useRef();
@@ -78,6 +79,7 @@ const EmployeeRegistration = () => {
     employee_number: undefined,
     gender: undefined,
     date_of_birth: null,
+    designation: undefined,
     department_id: undefined,
     job_title_id: undefined,
     national_id: undefined,
@@ -303,6 +305,22 @@ const EmployeeRegistration = () => {
                       ...formData,
                       date_of_birth: !isNaN(value) ? value : null,
                     })
+                  }
+                />
+              </Grid>
+              <Grid
+                item
+                md={4}
+                sm={6}
+                xs={12}
+              >
+                <Select
+                  ref={designationRef}
+                  label="Designation"
+                  fullWidth
+                  options={["Doctor", "Other"]}
+                  onChange={(value) =>
+                    setFormData({ ...formData, designation: value })
                   }
                 />
               </Grid>

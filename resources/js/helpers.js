@@ -258,6 +258,17 @@ export const getDateRangeTitle = (startDate, endDate) => {
   return title;
 };
 
+/**
+ * Gets file extension from `filename`.
+ * @param {String} filename
+ * @returns {String}
+ */
+export const getFileExtension = (filename) => {
+  filename = filename || "";
+  const parts = filename.split(".");
+  return (parts[parts.length - 1] || "").toUpperCase();
+};
+
 export const getPrivileges = (preferences) => {
   return [
     { label: "Dashboard", value: "dashboard" },
