@@ -38,7 +38,7 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()} SysTech
+            {new Date().getFullYear()}
           </Typography>
         </Card>
       </Box>

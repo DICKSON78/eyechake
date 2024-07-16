@@ -6,7 +6,6 @@ import {
   AppBar,
   Avatar,
   Box,
-  Card,
   CardHeader,
   Chip,
   Divider,
@@ -35,7 +34,6 @@ import {
   MoreVert as MoreIcon,
   Person2Rounded as UserIcon,
 } from "@mui/icons-material";
-import HeartIcon from "../components/icons/Heart";
 import MenuIcon from "../components/icons/Menu";
 
 import darkTheme from "../themes/dark";
@@ -362,16 +360,6 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
               <Box flexGrow={1}>
                 <Outlet />
               </Box>
-              <Divider />
-              <Toolbar sx={{ bgcolor: "background.paper" }}>
-                <Typography
-                  textAlign="center"
-                  flexGrow={1}
-                >
-                  &copy; {new Date().getFullYear()}. Developed with{" "}
-                  <HeartIcon /> by SysTech.
-                </Typography>
-              </Toolbar>
             </Box>
           </Box>
 
