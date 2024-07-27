@@ -12,8 +12,8 @@ import useFetch from "../../../hooks/useFetch";
 import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
-  const { data: employees } = useFetch(
-    "api/employees",
+  const { data: users } = useFetch(
+    "api/users",
     { per_page: 500 },
     true,
     [],
@@ -76,7 +76,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             <Select
               label="Created By"
               fullWidth
-              options={employees}
+              options={users}
               optionsLabel="full_name"
               optionsValue="user_id"
               clearable

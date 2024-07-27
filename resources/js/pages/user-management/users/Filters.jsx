@@ -54,7 +54,7 @@ const Filters = ({ params, setParams, ...rest }) => {
           >
             <TextField
               fullWidth
-              label="Employee Name"
+              label="User Name"
               placeholder="Search"
               InputProps={{
                 startAdornment: (

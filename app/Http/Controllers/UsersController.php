@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Employee;
 use App\Models\User;
 use App\Models\UserPrivilege;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
-class EmployeesController extends Controller
+class UsersController extends Controller
 {
     use ApiResponse;
 
@@ -36,7 +35,9 @@ class EmployeesController extends Controller
         $department_id = $request->department_id;
         $job_title_id = $request->job_title_id;
         $employee_number = $request->employee_number;
-        $data = Employee::with(['department', 'job_title', 'user.privileges', 'creator']);
+        $data = User::with(['department', 'job_title', 'privileges', 'creator']);
+
+        //$data->where('role', '!=', 'Admin');
 
         if ($status) {
             $data->where('status', $status);
@@ -92,30 +93,22 @@ class EmployeesController extends Controller
             'designation' => 'nullable|in:Doctor,Other',
             'department_id' => 'nullable|exists:departments,id',
             'job_title_id' => 'nullable|exists:job_titles,id',
-            'employee_number' => 'nullable|unique:employees,employee_number',
+            'employee_number' => 'nullable|unique:users,employee_number',
             'password' => 'required',
             'privileges' => 'required|array',
         ]);
 
-        $input = $request->except('username', 'password', 'privileges');
+        $input = $request->except('password', 'privileges');
+        $input['password'] = Hash::make($request->password);
         $input['created_by'] = $request->user()->id;
-        $data = Employee::create($input);
+        $data = User::create($input);
 
         if ($data) {
-            $input = $request->only('username', 'password');
-            $input['password'] = Hash::make($request->password);
-            $input['created_by'] = $request->user()->id;
-            $user = User::create($input);
-            if ($user) {
-                $privileges = array_map(function ($e) use ($user) {
-                    return ['user_id' => $user->id, 'privilege' => $e];
-                }, $request->json('privileges'));
+            $privileges = array_map(function ($e) use ($data) {
+                return ['user_id' => $data->id, 'privilege' => $e];
+            }, $request->json('privileges'));
 
-                UserPrivilege::insert($privileges);
-
-                $data->user_id = $user->id;
-                $data->save();
-            }
+            UserPrivilege::insert($privileges);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -129,7 +122,7 @@ class EmployeesController extends Controller
      */
     public function show($id)
     {
-        $data = User::with(['job_title', 'user.privileges', 'creator'])->findOrFail($id);
+        $data = User::with(['job_title', 'privileges', 'creator'])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -145,55 +138,34 @@ class EmployeesController extends Controller
         $request->validate([
             'first_name' => 'sometimes|required',
             'last_name' => 'sometimes|required',
+            'username' => 'sometimes|required|unique:users,username,' . $id,
             'gender' => 'sometimes|required|in:Male,Female',
             'date_of_birth' => 'nullable|date_format:Y-m-d',
             'designation' => 'nullable|in:Doctor,Other',
             'department_id' => 'nullable|exists:departments,id',
             'job_title_id' => 'nullable|exists:job_titles,id',
-            'employee_number' => 'nullable|unique:employees,employee_number,' . $id,
+            'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'sometimes|required|in:Active,Inactive',
             'privileges' => 'sometimes|required|array',
         ]);
 
-        $data = Employee::findOrFail($id);
-        $data->update($request->except('username', 'password', 'privileges'));
+        $data = User::findOrFail($id);
+        $input = $request->except('privileges');
 
-        $user = User::find($data->user_id);
-        if (!$user) {
-            if ($request->username && $request->password) {
-                $request->validate([
-                    'username' => 'unique:users,username',
-                ]);
-                $input = $request->only('username', 'password', 'status');
-                $input['password'] = Hash::make($request->password);
-                $input['created_by'] = $request->user()->id;
-                $user = User::create($input);
-            }
-        } else {
-            $request->validate([
-                'username' => 'sometimes|required|unique:users,username,' . $user->id,
-            ]);
-            $input = $request->only('username', 'status');
-
-            if ($request->password) {
-                $input['password'] = Hash::make($request->password);
-            }
-            $user->update($input);
+        if ($request->password) {
+            $input['password'] = Hash::make($request->password);
         }
 
-        if ($user) {
-            if ($request->privileges) {
-                // delete and reinsert privileges
-                UserPrivilege::where('user_id', $user->id)->delete();
-                $privileges = array_map(function ($e) use ($user) {
-                    return ['user_id' => $user->id, 'privilege' => $e];
-                }, $request->json('privileges'));
+        $data->update($input);
 
-                UserPrivilege::insert($privileges);
-            }
+        if ($request->privileges) {
+            // delete and reinsert privileges
+            UserPrivilege::where('user_id', $data->id)->delete();
+            $privileges = array_map(function ($e) use ($data) {
+                return ['user_id' => $data->id, 'privilege' => $e];
+            }, $request->json('privileges'));
 
-            $data->user_id = $user->id;
-            $data->save();
+            UserPrivilege::insert($privileges);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

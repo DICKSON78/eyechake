@@ -104,7 +104,7 @@ const ConsultationPatients = () => {
                       setParams({
                         ...params,
                         consultant_id: event.target.checked
-                          ? window.user.employee?.id
+                          ? window.user?.id
                           : undefined,
                       })
                     }

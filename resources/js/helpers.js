@@ -287,7 +287,7 @@ export const getPrivileges = (preferences) => {
         preferences?.find((e) => e.key === "MARKETING_MODULE")?.value === "Yes",
     },
     { label: "Financial Management", value: "financial_management" },
-    { label: "Employee Management", value: "employee_management" },
+    { label: "User Management", value: "user_management" },
     { label: "Settings", value: "settings" },
   ];
 };

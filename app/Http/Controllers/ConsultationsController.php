@@ -244,7 +244,7 @@ class ConsultationsController extends Controller
             'consultation_id' => 'required|exists:consultations,id',
             'item_id' => 'required|exists:items,id',
             'payment_mode_id' => 'required|exists:payment_modes,id',
-            'consultant_id' => 'nullable|exists:employees,id',
+            'consultant_id' => 'nullable|exists:users,id',
             'quantity' => 'required|numeric|min:1',
         ]);
 
@@ -508,10 +508,8 @@ class ConsultationsController extends Controller
         }
 
         // update consultant
-        if ($user->employee) {
-            $data->payment_cache_item->consultant_id = $user->employee->id;
-            $data->payment_cache_item->save();
-        }
+        $data->payment_cache_item->consultant_id = $user->id;
+        $data->payment_cache_item->save();
 
         // send message to patient
         if ($data->patient_direction == 'Direct to Doctor') {

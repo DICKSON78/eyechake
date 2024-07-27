@@ -8,7 +8,7 @@ import DatePicker from "../../components/DatePicker";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
 import SelectDisease from "../../components/SelectDisease";
-import SelectEmployee from "../../components/SelectEmployee";
+import SelectUser from "../../components/SelectUser";
 import useFetch from "../../hooks/useFetch";
 
 import { throttle } from "../../helpers";
@@ -193,7 +193,7 @@ const PatientFilters = ({
               sm={6}
               xs={12}
             >
-              <SelectEmployee
+              <SelectUser
                 label="Consultant"
                 clearable
                 params={{ designation: "Doctor" }}

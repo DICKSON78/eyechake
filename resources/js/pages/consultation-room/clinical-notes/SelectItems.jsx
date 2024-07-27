@@ -18,7 +18,7 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Table, { SearchTextField } from "../../../components/Table";
 import Select from "../../../components/Select";
-import SelectEmployee from "../../../components/SelectEmployee";
+import SelectUser from "../../../components/SelectUser";
 import TextField from "../../../components/TextField";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
@@ -54,7 +54,7 @@ const SelectItems = ({
   const [paymentMode, setPaymentMode] = useState(
     consultation.payment_cache_item.payment_mode
   );
-  const [consultant, setConsultant] = useState(window.user.employee);
+  const [consultant, setConsultant] = useState(window.user);
   const [itemName, setItemName] = useState();
   const [itemType, setItemType] = useState();
   const [lensTypeId, setLensTypeId] = useState();
@@ -254,7 +254,7 @@ const SelectItems = ({
             sm={12}
             xs={12}
           >
-            <SelectEmployee
+            <SelectUser
               ref={consultantRef}
               label="Consultant"
               clearable

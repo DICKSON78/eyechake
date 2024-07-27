@@ -25,7 +25,7 @@ import TextField from "../../../components/TextField";
 import { usePatch, useToast } from "../../../hooks";
 import { formatError, getPrivileges } from "../../../helpers";
 
-const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
+const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
   const addToast = useToast();
 
   const formRef = useRef();
@@ -35,14 +35,14 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    username: item.user?.username,
+    username: item.username,
     password: undefined,
-    privileges: item.user ? item.user.privileges.map((e) => e.privilege) : [],
+    privileges: item.privileges.map((e) => e.privilege),
     status: item.status,
   });
 
   const { data, loading, error, handlePatch } = usePatch(
-    `api/employees/${item.id}`,
+    `api/users/${item.id}`,
     formData
   );
 
@@ -50,7 +50,7 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        fetchEmployees();
+        fetchUsers();
         modal.close();
       }, 1000);
     }
@@ -254,4 +254,4 @@ const EditEmployeeAccessDetails = ({ item, modal, fetchEmployees }) => {
   );
 };
 
-export default EditEmployeeAccessDetails;
+export default EditUserAccessDetails;

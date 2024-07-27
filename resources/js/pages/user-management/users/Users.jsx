@@ -20,13 +20,13 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "./Filters";
-import EditEmployee from "./EditEmployee";
-import EditEmployeeAccessDetails from "./EditEmployeeAccessDetails";
+import EditUser from "./EditUser";
+import EditUserAccessDetails from "./EditUserAccessDetails";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
 
-const Employees = () => {
+const Users = () => {
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
@@ -46,7 +46,7 @@ const Employees = () => {
   });
 
   const { data, loading, error, handleFetch } = useFetch(
-    "api/employees",
+    "api/users",
     params,
     true,
     {
@@ -58,7 +58,7 @@ const Employees = () => {
   );
 
   useEffect(() => {
-    document.title = `Employees - ${window.APP_NAME}`;
+    document.title = `Users - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -67,29 +67,29 @@ const Employees = () => {
     }
   }, [error]);
 
-  const openEditEmployeeModal = (item) => {
+  const openEditUserModal = (item) => {
     let component = (
-      <EditEmployee
+      <EditUser
         item={item}
         modal={modalRef.current}
-        fetchEmployees={handleFetch}
+        fetchUsers={handleFetch}
       />
     );
 
-    modalRef.current.open("Edit Employee", component, "md");
+    modalRef.current.open("Edit User", component, "md");
   };
 
-  const openEditEmployeeAccessDetailsModal = () => {
+  const openEditUserAccessDetailsModal = () => {
     let component = (
-      <EditEmployeeAccessDetails
+      <EditUserAccessDetails
         item={item}
         modal={modalRef.current}
-        fetchEmployees={handleFetch}
+        fetchUsers={handleFetch}
       />
     );
 
     modalRef.current.open(
-      "Edit Employee Access Details",
+      "Edit User Access Details",
       component,
       "sm",
       item.full_name
@@ -120,21 +120,21 @@ const Employees = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Employee Management" },
-        { title: "Employees" },
+        { title: "User Management" },
+        { title: "Users" },
       ]}
     >
       <Card>
         <PageHeader
-          title="Employees"
+          title="Users"
           trailing={
             <React.Fragment>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => navigate("/employee-management/employees/new")}
+                onClick={() => navigate("/user-management/users/new")}
               >
-                New Employee
+                New User
               </Button>
             </React.Fragment>
           }
@@ -157,7 +157,7 @@ const Employees = () => {
               },
               {
                 field: "full_name",
-                headerName: "Employee Name",
+                headerName: "User Name",
               },
               {
                 field: "employee_number",
@@ -225,7 +225,7 @@ const Employees = () => {
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
-                        onClick={() => openEditEmployeeModal(item)}
+                        onClick={() => openEditUserModal(item)}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -261,7 +261,7 @@ const Employees = () => {
         >
           <MenuItem
             onClick={() => {
-              openEditEmployeeAccessDetailsModal();
+              openEditUserAccessDetailsModal();
               handleMenuClose();
             }}
           >
@@ -274,4 +274,4 @@ const Employees = () => {
   );
 };
 
-export default Employees;
+export default Users;

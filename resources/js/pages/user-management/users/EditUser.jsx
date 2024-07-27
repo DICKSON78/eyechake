@@ -16,7 +16,7 @@ import Select from "../../../components/Select";
 import { useFetch, usePatch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError } from "../../../helpers";
 
-const EditEmployee = ({ item, modal, fetchEmployees }) => {
+const EditUser = ({ item, modal, fetchUsers }) => {
   const addToast = useToast();
 
   const formRef = useRef();
@@ -68,7 +68,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
   });
 
   const { data, loading, error, handlePatch } = usePatch(
-    `api/employees/${item.id}`,
+    `api/users/${item.id}`,
     {
       ...formData,
       date_of_birth: formData.date_of_birth
@@ -81,7 +81,7 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        fetchEmployees();
+        fetchUsers();
         modal.close();
       }, 1000);
     }
@@ -326,4 +326,4 @@ const EditEmployee = ({ item, modal, fetchEmployees }) => {
   );
 };
 
-export default EditEmployee;
+export default EditUser;

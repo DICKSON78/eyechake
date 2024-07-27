@@ -2,11 +2,11 @@ import React, { forwardRef, useEffect, useState } from "react";
 import Select from "./Select";
 import useFetch from "../hooks/useFetch";
 
-const SelectEmployee = ({ params, value, onChange, ...rest }, ref) => {
+const SelectUser = ({ params, value, onChange, ...rest }, ref) => {
   const [selected, setSelected] = useState();
 
   const { data, loading } = useFetch(
-    "api/employees",
+    "api/users",
     { per_page: 25, ...params },
     true,
     [],
@@ -19,7 +19,7 @@ const SelectEmployee = ({ params, value, onChange, ...rest }, ref) => {
 
   return (
     <Select
-      label="Employee"
+      label="User"
       fullWidth
       {...rest}
       ref={ref}
@@ -38,4 +38,4 @@ const SelectEmployee = ({ params, value, onChange, ...rest }, ref) => {
   );
 };
 
-export default forwardRef(SelectEmployee);
+export default forwardRef(SelectUser);

@@ -10,7 +10,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DiseasesController;
 use App\Http\Controllers\DistrictsController;
-use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\ExpenseCategoriesController;
 use App\Http\Controllers\ExpensePaymentsController;
 use App\Http\Controllers\ExpensesController;
@@ -46,6 +45,7 @@ use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\SurgeryRecordReportsController;
 use App\Http\Controllers\UnitsOfMeasureController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WardsController;
 use Illuminate\Support\Facades\Route;
 
@@ -75,7 +75,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
     $router->apiResource('/clinic-details', ClinicDetailsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
-    $router->apiResource('/employees', EmployeesController::class);
+    $router->apiResource('/users', UsersController::class);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/payment-channels', PaymentChannelsController::class);
     $router->apiResource('/units-of-measure', UnitsOfMeasureController::class);

@@ -24,7 +24,7 @@ import Modal from "../../components/Modal";
 import PatientDetails from "./patients/PatientDetails";
 import TextField from "../../components/TextField";
 import Select from "../../components/Select";
-import SelectEmployee from "../../components/SelectEmployee";
+import SelectUser from "../../components/SelectUser";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
@@ -291,7 +291,7 @@ const CheckInPatient = () => {
                 sm={12}
                 xs={12}
               >
-                <SelectEmployee
+                <SelectUser
                   ref={consultantRef}
                   label="Consultant"
                   clearable

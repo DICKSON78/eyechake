@@ -26,7 +26,7 @@ import OtherDispensingRoutes from "../pages/other-dispensing/OtherDispensingRout
 import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
 import MarketingRoutes from "../pages/marketing/MarketingRoutes";
 import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
-import EmployeeManagementRoutes from "../pages/employee-management/EmployeeManagementRoutes";
+import UserManagementRoutes from "../pages/user-management/UserManagementRoutes";
 import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
 import SettingsRoutes from "../pages/settings/SettingsRoutes";
 
@@ -170,10 +170,10 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="employee-management/*"
+                  path="user-management/*"
                   element={
-                    user?.privileges?.employee_management ? (
-                      <EmployeeManagementRoutes />
+                    user?.privileges?.user_management ? (
+                      <UserManagementRoutes />
                     ) : null
                   }
                 />

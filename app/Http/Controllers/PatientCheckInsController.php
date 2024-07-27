@@ -90,7 +90,7 @@ class PatientCheckInsController extends Controller
             'payment_mode_id' => 'required|exists:payment_modes,id',
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:items,id',
-            'items.*.consultant_id' => 'nullable|exists:employees,id',
+            'items.*.consultant_id' => 'nullable|exists:users,id',
             'items.*.payment_mode_id' => 'required|exists:payment_modes,id',
             'items.*.quantity' => 'required|numeric|min:1',
         ]);

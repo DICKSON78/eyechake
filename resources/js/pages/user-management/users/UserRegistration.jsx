@@ -28,7 +28,7 @@ import Select from "../../../components/Select";
 import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getPrivileges } from "../../../helpers";
 
-const EmployeeRegistration = () => {
+const UserRegistration = () => {
   const addToast = useToast();
   const navigate = useNavigate();
 
@@ -88,7 +88,7 @@ const EmployeeRegistration = () => {
     privileges: [],
   });
 
-  const { data, loading, error, handlePost } = usePost("api/employees", {
+  const { data, loading, error, handlePost } = usePost("api/users", {
     ...formData,
     date_of_birth: formData.date_of_birth
       ? formatDateForDb(formData.date_of_birth)
@@ -96,7 +96,7 @@ const EmployeeRegistration = () => {
   });
 
   useEffect(() => {
-    document.title = `Employee Registration - ${window.APP_NAME}`;
+    document.title = `User Registration - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const EmployeeRegistration = () => {
       addToast({ message: data.message, severity: "success" });
 
       window.setTimeout(() => {
-        navigate("/employee-management/employees");
+        navigate("/user-management/users");
       }, 1000);
     }
   }, [data]);
@@ -197,12 +197,12 @@ const EmployeeRegistration = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Employee Management" },
-        { title: "Employee Registration" },
+        { title: "User Management" },
+        { title: "User Registration" },
       ]}
     >
       <Card>
-        <PageHeader title="Employee Registration" />
+        <PageHeader title="User Registration" />
         <Divider />
         <CardContent>
           <Form ref={formRef}>
@@ -480,4 +480,4 @@ const EmployeeRegistration = () => {
   );
 };
 
-export default EmployeeRegistration;
+export default UserRegistration;
