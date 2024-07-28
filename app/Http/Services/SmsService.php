@@ -2,7 +2,7 @@
 
 namespace App\Http\Services;
 
-use App\Models\ClinicDetail;
+use App\Models\Clinic;
 use App\Models\Message;
 use App\Models\Patient;
 use App\Models\Preference;
@@ -77,10 +77,10 @@ class SmsService
 
             $sms_client = $response->client;
             if ($sms_client) {
-                $clinic_details = ClinicDetail::first();
-                if ($clinic_details) {
-                    $clinic_details->sms_balance = $sms_client->balance;
-                    $clinic_details->save();
+                $clinic = Clinic::where('sms_key', $sms_client->secretKey)->first();
+                if ($clinic) {
+                    $clinic->sms_balance = $sms_client->balance;
+                    $clinic->save();
                 }
             }
 
