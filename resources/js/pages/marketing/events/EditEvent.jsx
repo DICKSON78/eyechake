@@ -85,7 +85,7 @@ const EditEvent = ({ eventType, item, modal, fetchEvents }) => {
                 label="Event Date"
                 fullWidth
                 required
-                value={formData.event_date}
+                value={formData.event_date || null}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
@@ -162,7 +162,7 @@ const EditEvent = ({ eventType, item, modal, fetchEvents }) => {
                 fullWidth
                 options={["Pending", "Cancelled", "Completed"]}
                 required
-                value={formData.status || null}
+                value={formData.status}
                 onChange={(value) =>
                   setFormData({ ...formData, status: value })
                 }

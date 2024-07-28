@@ -831,7 +831,7 @@ const CataractSurgeryRecord = ({ patient, paymentCacheitem }) => {
                                     <TableCell>
                                       <DatePicker
                                         fullWidth
-                                        value={formData.operation_date}
+                                        value={formData.operation_date || null}
                                         onChange={(value) => {
                                           if (!isNaN(value)) {
                                             setFormData({

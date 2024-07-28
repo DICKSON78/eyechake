@@ -27,13 +27,29 @@ class ExpensesController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $category_id = $request->category_id;
         $created_by = $request->created_by;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Expense::with(['category', 'creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($status == 'Pending') {
             $data->whereRaw('coalesce((select sum(amount) from expense_payments where expense_id = expenses.id), 0) < total_amount');

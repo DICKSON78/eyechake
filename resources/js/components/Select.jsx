@@ -148,7 +148,7 @@ const Select = (
           options={options}
           disableClearable={!clearable}
           loading={loading}
-          value={value}
+          value={value || null}
           renderInput={(params) => (
             <TextField
               {...params}

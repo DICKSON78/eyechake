@@ -32,6 +32,7 @@ const Items = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    clinic_id: undefined,
     status: undefined,
     q: undefined,
     item_type_id: undefined,
@@ -203,6 +204,12 @@ const Items = () => {
                     label={item.status}
                   />
                 ),
+              },
+              {
+                field: "clinic_id",
+                headerName: "Clinic",
+                valueGetter: (item) => item.clinic?.name,
+                show: window.user.role === "Admin",
               },
               {
                 field: "actions",

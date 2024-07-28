@@ -56,6 +56,7 @@ const Dashboard = ({ setSmsBalance }) => {
   const modalRef = useRef();
 
   const [params, setParams] = useState({
+    clinic_id: undefined,
     start_date: new Date(),
     end_date: undefined,
   });
@@ -64,6 +65,7 @@ const Dashboard = ({ setSmsBalance }) => {
     "api/dashboard",
     {
       ...params,
+      clinic: undefined,
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -80,7 +82,7 @@ const Dashboard = ({ setSmsBalance }) => {
 
   useEffect(() => {
     if (data) {
-      setSmsBalance(data.counts.sms_balance);
+      setSmsBalance(data.summary.sms_balance);
     }
   }, [data]);
 
@@ -149,39 +151,39 @@ const Dashboard = ({ setSmsBalance }) => {
             >
               <InfoCard
                 title="Total Sales"
-                count={numberFormat(data.counts.total_sales)}
+                count={numberFormat(data.summary.total_sales)}
                 icon={<SalesIcon />}
                 color={purple[400]}
               />
               <InfoCard
                 title="Expenses"
-                count={numberFormat(data.counts.expenses)}
+                count={numberFormat(data.summary.expenses)}
                 icon={<ExpensesIcon />}
                 color={theme.palette.warning.main}
               />
               <InfoCard
                 title="Net Profit"
                 count={numberFormat(
-                  data.counts.total_sales - data.counts.expenses
+                  data.summary.total_sales - data.summary.expenses
                 )}
                 icon={<NetProfitIcon />}
                 color={cyan[500]}
               />
               <InfoCard
                 title="Total Discount"
-                count={numberFormat(data.counts.discount)}
+                count={numberFormat(data.summary.discount)}
                 icon={<DiscountIcon />}
                 color={pink[400]}
               />
               <InfoCard
                 title="Registered Patients"
-                count={numberFormat(data.counts.new_patients)}
+                count={numberFormat(data.summary.new_patients)}
                 icon={<PersonIcon />}
                 color={blue[400]}
               />
               <InfoCard
                 title="Consulted Patients"
-                count={numberFormat(data.counts.consulted_patients)}
+                count={numberFormat(data.summary.consulted_patients)}
                 icon={<DoneIcon />}
                 color={green[500]}
               />

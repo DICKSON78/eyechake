@@ -639,7 +639,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     label="Return Date"
                     horizontal
                     required={formData.patient_to_return === "Yes"}
-                    value={formData.to_return_date}
+                    value={formData.to_return_date || null}
                     onChange={(value) => {
                       if (!isNaN(value)) {
                         setFormData({ ...formData, to_return_date: value });
@@ -690,11 +690,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
                         options={informationSources}
                         optionsLabel="name"
                         optionsValue="id"
-                        value={
-                          informationSources.find(
-                            (e) => e.id === formData.info_source_id
-                          ) || null
+                        isOptionEqualToValue={(option, value) =>
+                          option.id === value.id
                         }
+                        value={informationSources.find(
+                          (e) => e.id === formData.info_source_id
+                        )}
                         onChange={(value) =>
                           setFormData({ ...formData, info_source_id: value })
                         }

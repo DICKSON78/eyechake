@@ -130,7 +130,7 @@ const EditCommunicationLog = ({ item, modal, fetchCommunicationLogs }) => {
                 fullWidth
                 options={["Phone", "Chat", "Email"]}
                 required
-                value={formData.communication_type || null}
+                value={formData.communication_type}
                 onChange={(value) =>
                   setFormData({ ...formData, communication_type: value })
                 }
@@ -148,7 +148,7 @@ const EditCommunicationLog = ({ item, modal, fetchCommunicationLogs }) => {
                 fullWidth
                 options={["Incoming", "Outgoing"]}
                 required
-                value={formData.communication_direction || null}
+                value={formData.communication_direction}
                 onChange={(value) =>
                   setFormData({ ...formData, communication_direction: value })
                 }

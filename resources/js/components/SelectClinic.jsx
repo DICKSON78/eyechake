@@ -6,12 +6,12 @@ import useFetch from "../hooks/useFetch";
 
 import { throttle } from "../helpers";
 
-const SelectDisease = ({ params, value, onChange, ...rest }, ref) => {
+const SelectClinic = ({ params, value, onChange, ...rest }, ref) => {
   const [selected, setSelected] = useState();
   const [searchQuery, setSearchQuery] = useState();
 
   const { data, loading } = useFetch(
-    "api/diseases",
+    "api/clinics",
     {
       per_page: 25,
       ...params,
@@ -28,39 +28,14 @@ const SelectDisease = ({ params, value, onChange, ...rest }, ref) => {
 
   return (
     <Select
-      label="Disease"
+      label="Clinic"
       fullWidth
       {...rest}
       ref={ref}
       loading={loading}
-      filterOptions={(options, state) => {
-        const newOptions = [];
-        options.forEach((e) => {
-          const input = state.inputValue.toLowerCase();
-          if (
-            e.name.toLowerCase().includes(input) ||
-            e.code.toLowerCase().includes(input)
-          )
-            newOptions.push(e);
-        });
-        return newOptions;
-      }}
       options={data}
       optionsLabel="name"
       isOptionEqualToValue={(option, value) => option.id === value.id}
-      renderOption={(props, option) => (
-        <ListItem
-          dense
-          disablePadding
-          {...props}
-        >
-          <ListItemText
-            primary={option.name}
-            secondary={option.code}
-            secondaryTypographyProps={{ variant: "caption" }}
-          />
-        </ListItem>
-      )}
       value={selected}
       onInputChange={(event) =>
         throttle(() => setSearchQuery(event?.target?.value), 500)
@@ -75,4 +50,4 @@ const SelectDisease = ({ params, value, onChange, ...rest }, ref) => {
   );
 };
 
-export default forwardRef(SelectDisease);
+export default forwardRef(SelectClinic);

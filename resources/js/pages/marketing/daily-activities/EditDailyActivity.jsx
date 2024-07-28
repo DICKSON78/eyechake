@@ -81,7 +81,7 @@ const EditDailyActivity = ({ item, modal, fetchDailyActivities }) => {
                 label="Activity Date"
                 fullWidth
                 required
-                value={formData.activity_date}
+                value={formData.activity_date || null}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
@@ -121,7 +121,7 @@ const EditDailyActivity = ({ item, modal, fetchDailyActivities }) => {
                 fullWidth
                 options={["Pending", "Cancelled", "Completed"]}
                 required
-                value={formData.status || null}
+                value={formData.status}
                 onChange={(value) =>
                   setFormData({ ...formData, status: value })
                 }

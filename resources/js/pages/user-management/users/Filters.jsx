@@ -6,6 +6,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
+import SelectClinic from "../../../components/SelectClinic";
 import useFetch from "../../../hooks/useFetch";
 
 import { throttle } from "../../../helpers";
@@ -54,7 +55,7 @@ const Filters = ({ params, setParams, ...rest }) => {
           >
             <TextField
               fullWidth
-              label="User Name"
+              label="Full Name"
               placeholder="Search"
               InputProps={{
                 startAdornment: (
@@ -107,6 +108,21 @@ const Filters = ({ params, setParams, ...rest }) => {
               onChange={(value) => setParams({ ...params, gender: value })}
             />
           </Grid>
+          {window.user.role === "Admin" ? (
+            <Grid
+              item
+              md
+              sm={12}
+              xs={12}
+            >
+              <SelectClinic
+                clearable
+                onChange={(value) =>
+                  setParams({ ...params, clinic_id: value?.id })
+                }
+              />
+            </Grid>
+          ) : null}
           <Grid
             item
             md

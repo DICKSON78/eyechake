@@ -101,9 +101,8 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 options={categories}
                 optionsLabel="name"
                 optionsValue="id"
-                value={
-                  categories.find((e) => e.id === formData.category_id) || null
-                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={categories.find((e) => e.id === formData.category_id)}
                 onChange={(value) =>
                   setFormData({ ...formData, category_id: value })
                 }
@@ -159,7 +158,7 @@ const EditExpense = ({ item, modal, fetchExpenses }) => {
                 label="Expense Date"
                 fullWidth
                 required
-                value={formData.expense_date}
+                value={formData.expense_date || null}
                 onChange={(value) =>
                   setFormData({
                     ...formData,

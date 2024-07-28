@@ -27,7 +27,9 @@ class ExpensePaymentsController extends Controller
             'sort_direction' => 'sometimes|in:asc,desc',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $with_expense = $request->with_expense;
         $expense_id = $request->expense_id;
         $category_id = $request->category_id;
@@ -36,6 +38,20 @@ class ExpensePaymentsController extends Controller
         $end_date = $request->end_date;
         $sort_direction = $request->sort_direction ?? 'asc';
         $data = ExpensePayment::with(['creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($with_expense == 'Yes') {
             $data->with(['expense.category']);

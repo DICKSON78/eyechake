@@ -20,7 +20,9 @@ class MessagesController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $patient_name = $request->patient_name;
         $patient_phone = $request->patient_phone;
         $patient_id = $request->patient_id;
@@ -29,6 +31,20 @@ class MessagesController extends Controller
         $end_date = $request->end_date;
 
         $data = Message::with(['patient']);
+
+        if ($user->is_admin) {
+            $data->with(['patient.creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('patient.creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('patient.creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($patient_name) {
             $data->whereHas('patient', function ($query) use ($patient_name) {

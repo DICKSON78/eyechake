@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\JobTitle;
+use App\Models\Clinic;
+use App\Models\Preference;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class JobTitlesController extends Controller
+class ClinicsController extends Controller
 {
     use ApiResponse;
 
@@ -24,29 +25,21 @@ class JobTitlesController extends Controller
             'page' => 'sometimes|integer|min:1',
         ]);
 
-        $user = $request->user();
         $per_page = $request->per_page ?? 25;
-        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $q = $request->q;
-        $data = JobTitle::query();
-
-        if ($user->is_admin) {
-            $data->with(['clinic']);
-
-            if ($clinic_id) {
-                $data->where('clinic_id', $clinic_id);
-            }
-        } else {
-            $data->where('clinic_id', $user->clinic_id);
-        }
+        $data = Clinic::query();
 
         if ($status) {
-            $data->where('status', $status);
+            //$data->where('status', $status);
         }
 
         if ($q) {
-            $data->where('name', 'like', '%' . $q . '%');
+            $data->where(function ($query) use ($q) {
+                $query->where('name', 'like', '%' . $q . '%');
+                $query->orWhere('phone', 'like', '%' . $q . '%');
+                $query->orWhere('email', 'like', '%' . $q . '%');
+            });
         }
 
         $data = $data->paginate($per_page);
@@ -61,24 +54,22 @@ class JobTitlesController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->user();
-        if ($user->is_admin) {
-            $request->validate([
-                'clinic_id' => 'required|exists:clinics,id',
-            ]);
-
-            $clinic_id = $request->clinic_id;
-        } else {
-            $clinic_id = $user->clinic_id;
-        }
-
         $request->validate([
-            'name' => 'required|unique:job_titles,name',
+            'name' => 'required',
         ]);
 
-        $input = $request->only('name', 'description');
-        $input['clinic_id'] = $clinic_id;
-        $data = JobTitle::create($input);
+        $data = Clinic::create($request->except('logo'));
+        if ($data) {
+            Preference::insert([
+                ['clinic_id' => $data->id, 'key' => 'CONSULTATION_MESSAGE', 'value' => 'Habari {name}, Hongera na asante kwa kupata huduma kwetu. Ni tumaini letu umepata huduma stahiki. Kwa maoni kuhusu huduma zetu tuma ujumbe au piga simu namba 0676 506 323. Karibu sana.'],
+                ['clinic_id' => $data->id, 'key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya macho yako. Wasiliana nasi 0676 506 323.'],
+                ['clinic_id' => $data->id, 'key' => 'SEND_MESSAGES', 'value' => 'No'],
+                ['clinic_id' => $data->id, 'key' => 'SEND_REMINDER_MESSAGES_AT', 'value' => '11:00'],
+                ['clinic_id' => $data->id, 'key' => 'SMS_SENDER_NAME', 'value' => 'INFO'],
+                ['clinic_id' => $data->id, 'key' => 'MARKETING_MODULE', 'value' => 'No'],
+            ]);
+        }
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
@@ -90,7 +81,7 @@ class JobTitlesController extends Controller
      */
     public function show($id)
     {
-        $data = JobTitle::findOrFail($id);
+        $data = Clinic::findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -104,12 +95,12 @@ class JobTitlesController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'sometimes|required|unique:job_titles,name,' . $id,
-            'status' => 'sometimes|required|in:Active,Inactive',
+            'name' => 'sometimes|required',
+            //'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
-        $data = JobTitle::findOrFail($id);
-        $data->update($request->all());
+        $data = Clinic::findOrFail($id);
+        $data->update($request->except('logo'));
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 
@@ -121,8 +112,6 @@ class JobTitlesController extends Controller
      */
     public function destroy($id)
     {
-        $data = JobTitle::findOrFail($id);
-        $data->delete();
-        return $this->sendResponse($data, Response::HTTP_OK, 'Deleted successfully.');
+        //
     }
 }

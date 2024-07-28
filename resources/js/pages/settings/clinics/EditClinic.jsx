@@ -4,43 +4,44 @@ import {
   Button,
   CardActions,
   CardContent,
+  Checkbox,
+  FormControlLabel,
   Grid,
   LinearProgress,
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
-import DatePicker from "../../../components/DatePicker";
 
-import { usePost, useToast } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { usePatch, useToast } from "../../../hooks";
+import { formatError } from "../../../helpers";
 
-const CreateEvent = ({ eventType, modal, fetchEvents }) => {
+const EditClinic = ({ item, modal, fetchClinics }) => {
   const addToast = useToast();
 
   const formRef = useRef();
-  const dateRef = useRef();
-  const titleRef = useRef();
-  const locationRef = useRef();
-  const descriptionRef = useRef();
+  const nameRef = useRef();
+  const phoneRef = useRef();
+  const emailRef = useRef();
+  const addressRef = useRef();
 
   const [formData, setFormData] = useState({
-    event_type: eventType,
-    event_date: new Date(),
-    title: undefined,
-    location: undefined,
-    description: undefined,
+    name: item.name,
+    phone: item.phone,
+    email: item.email,
+    address: item.address,
+    status: item.status,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/marketing/events", {
-    ...formData,
-    event_date: formatDateForDb(formData.event_date),
-  });
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/clinics/${item.id}`,
+    formData
+  );
 
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        fetchEvents();
+        fetchClinics();
         modal.close();
       }, 1000);
     }
@@ -54,7 +55,7 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
-      handlePost();
+      handlePatch();
     }
   };
 
@@ -73,18 +74,13 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               sm={12}
               xs={12}
             >
-              <DatePicker
-                ref={dateRef}
-                label="Event Date"
+              <TextField
+                ref={nameRef}
+                label="Clinic Name"
                 fullWidth
                 required
-                value={formData.event_date || null}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    event_date: !isNaN(value) ? value : null,
-                  })
-                }
+                defaultValue={item.name}
+                onChange={(value) => setFormData({ ...formData, name: value })}
               />
             </Grid>
             <Grid
@@ -94,11 +90,12 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               xs={12}
             >
               <TextField
-                ref={titleRef}
-                label="Title"
+                ref={phoneRef}
+                label="Phone"
                 fullWidth
                 required
-                onChange={(value) => setFormData({ ...formData, title: value })}
+                defaultValue={item.phone}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
               />
             </Grid>
             <Grid
@@ -108,12 +105,26 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               xs={12}
             >
               <TextField
-                ref={locationRef}
-                label="Location"
+                ref={emailRef}
+                label="Email"
                 fullWidth
-                required
+                defaultValue={item.email}
+                onChange={(value) => setFormData({ ...formData, email: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                ref={addressRef}
+                label="Address"
+                fullWidth
+                defaultValue={item.address}
                 onChange={(value) =>
-                  setFormData({ ...formData, location: value })
+                  setFormData({ ...formData, address: value })
                 }
               />
             </Grid>
@@ -122,22 +133,20 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               md={6}
               sm={12}
               xs={12}
-            />
-            <Grid
-              item
-              md={12}
-              sm={12}
-              xs={12}
             >
-              <TextField
-                ref={descriptionRef}
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                onChange={(value) =>
-                  setFormData({ ...formData, description: value })
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    defaultChecked={item.status === "Active"}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        status: event.target.checked ? "Active" : "Inactive",
+                      })
+                    }
+                  />
                 }
+                label="Active"
               />
             </Grid>
           </Grid>
@@ -166,4 +175,4 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
   );
 };
 
-export default CreateEvent;
+export default EditClinic;

@@ -76,7 +76,7 @@ const CreateDailyActivity = ({ modal, fetchDailyActivities }) => {
                 label="Activity Date"
                 fullWidth
                 required
-                value={formData.activity_date}
+                value={formData.activity_date || null}
                 onChange={(value) =>
                   setFormData({
                     ...formData,

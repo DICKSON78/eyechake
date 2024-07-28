@@ -281,7 +281,7 @@ const CheckInPatient = () => {
                   isOptionEqualToValue={(option, value) =>
                     option.id === value.id
                   }
-                  value={paymentMode || null}
+                  value={paymentMode}
                   onChange={(value) => setPaymentMode(value)}
                 />
               </Grid>

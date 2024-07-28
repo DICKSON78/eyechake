@@ -65,6 +65,7 @@ const Dashboard = () => {
   const modalRef = useRef();
 
   const [params, setParams] = useState({
+    clinic_id: undefined,
     start_date: new Date(),
     end_date: undefined,
   });
@@ -73,6 +74,7 @@ const Dashboard = () => {
     "api/marketing/dashboard",
     {
       ...params,
+      clinic: undefined,
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -164,7 +166,7 @@ const Dashboard = () => {
             <Card>
               <InfoCard
                 title="Registered Patients"
-                count={numberFormat(data.counts.new_patients)}
+                count={numberFormat(data.summary.new_patients)}
                 icon={<PersonIcon />}
                 color={purple[400]}
                 sx={{ m: 1 }}

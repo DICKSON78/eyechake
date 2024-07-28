@@ -40,7 +40,9 @@ class ConsultationsController extends Controller
             'to_return_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $with_diagnoses = $request->with_diagnoses;
         $status = $request->status;
         $require_glass = $request->require_glass;
@@ -68,6 +70,20 @@ class ConsultationsController extends Controller
 
         if ($with_diagnoses == 'Yes') {
             $data->with(['diagnoses.disease']);
+        }
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
         }
 
         if ($status) {

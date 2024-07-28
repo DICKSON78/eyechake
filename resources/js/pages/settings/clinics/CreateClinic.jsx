@@ -9,38 +9,36 @@ import {
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
-import DatePicker from "../../../components/DatePicker";
 
 import { usePost, useToast } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { formatError } from "../../../helpers";
 
-const CreateEvent = ({ eventType, modal, fetchEvents }) => {
+const CreateClinic = ({ modal, fetchClinics }) => {
   const addToast = useToast();
 
   const formRef = useRef();
-  const dateRef = useRef();
-  const titleRef = useRef();
-  const locationRef = useRef();
-  const descriptionRef = useRef();
+  const nameRef = useRef();
+  const phoneRef = useRef();
+  const emailRef = useRef();
+  const addressRef = useRef();
 
   const [formData, setFormData] = useState({
-    event_type: eventType,
-    event_date: new Date(),
-    title: undefined,
-    location: undefined,
-    description: undefined,
+    name: undefined,
+    phone: undefined,
+    email: undefined,
+    address: undefined,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/marketing/events", {
-    ...formData,
-    event_date: formatDateForDb(formData.event_date),
-  });
+  const { data, loading, error, handlePost } = usePost(
+    "api/clinics",
+    formData
+  );
 
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
       window.setTimeout(() => {
-        fetchEvents();
+        fetchClinics();
         modal.close();
       }, 1000);
     }
@@ -73,18 +71,12 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               sm={12}
               xs={12}
             >
-              <DatePicker
-                ref={dateRef}
-                label="Event Date"
+              <TextField
+                ref={nameRef}
+                label="Clinic Name"
                 fullWidth
                 required
-                value={formData.event_date || null}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    event_date: !isNaN(value) ? value : null,
-                  })
-                }
+                onChange={(value) => setFormData({ ...formData, name: value })}
               />
             </Grid>
             <Grid
@@ -94,11 +86,11 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               xs={12}
             >
               <TextField
-                ref={titleRef}
-                label="Title"
+                ref={phoneRef}
+                label="Phone"
                 fullWidth
                 required
-                onChange={(value) => setFormData({ ...formData, title: value })}
+                onChange={(value) => setFormData({ ...formData, phone: value })}
               />
             </Grid>
             <Grid
@@ -108,13 +100,10 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               xs={12}
             >
               <TextField
-                ref={locationRef}
-                label="Location"
+                ref={emailRef}
+                label="Email"
                 fullWidth
-                required
-                onChange={(value) =>
-                  setFormData({ ...formData, location: value })
-                }
+                onChange={(value) => setFormData({ ...formData, email: value })}
               />
             </Grid>
             <Grid
@@ -122,22 +111,12 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
               md={6}
               sm={12}
               xs={12}
-            />
-            <Grid
-              item
-              md={12}
-              sm={12}
-              xs={12}
             >
               <TextField
-                ref={descriptionRef}
-                label="Description"
+                ref={addressRef}
+                label="Address"
                 fullWidth
-                multiline
-                rows={3}
-                onChange={(value) =>
-                  setFormData({ ...formData, description: value })
-                }
+                onChange={(value) => setFormData({ ...formData, address: value })}
               />
             </Grid>
           </Grid>
@@ -166,4 +145,4 @@ const CreateEvent = ({ eventType, modal, fetchEvents }) => {
   );
 };
 
-export default CreateEvent;
+export default CreateClinic;

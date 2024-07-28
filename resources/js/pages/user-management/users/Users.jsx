@@ -38,6 +38,7 @@ const Users = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
+    clinic_id: undefined,
     employee_number: undefined,
     name: undefined,
     gender: undefined,
@@ -157,7 +158,7 @@ const Users = () => {
               },
               {
                 field: "full_name",
-                headerName: "User Name",
+                headerName: "Full Name",
               },
               {
                 field: "employee_number",
@@ -206,6 +207,12 @@ const Users = () => {
                     label={item.status}
                   />
                 ),
+              },
+              {
+                field: "clinic_id",
+                headerName: "Clinic",
+                valueGetter: (item) => item.clinic?.name,
+                show: window.user.role === "Admin",
               },
               {
                 field: "actions",

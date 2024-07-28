@@ -189,7 +189,7 @@ const EditMarketingStrategy = ({ item, modal, fetchMarketingStrategies }) => {
                 fullWidth
                 options={["Open", "Cancelled", "Closed"]}
                 required
-                value={formData.status || null}
+                value={formData.status}
                 onChange={(value) =>
                   setFormData({ ...formData, status: value })
                 }

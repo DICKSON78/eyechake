@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import SelectClinic from "../../../components/SelectClinic";
 
 import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -17,10 +18,12 @@ const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
   const addToast = useToast();
 
   const formRef = useRef();
+  const clinicRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
 
   const [formData, setFormData] = useState({
+    clinic_id: undefined,
     name: undefined,
     description: undefined,
   });
@@ -61,6 +64,22 @@ const CreatePaymentChannel = ({ modal, fetchPaymentChannels }) => {
             container
             spacing={2}
           >
+            {window.user.role === "Admin" ? (
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <SelectClinic
+                  ref={clinicRef}
+                  required
+                  onChange={(value) =>
+                    setFormData({ ...formData, clinic_id: value?.id })
+                  }
+                />
+              </Grid>
+            ) : null}
             <Grid
               item
               md={6}

@@ -10,6 +10,7 @@ import {
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
+import SelectClinic from "../../../../components/SelectClinic";
 import useFetch from "../../../../hooks/useFetch";
 
 import { throttle } from "../../../../helpers";
@@ -119,15 +120,31 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Active", "Inactive"]}
               clearable
-              value={params.status || null}
+              value={params.status}
               onChange={(value) => setParams({ ...params, status: value })}
             />
           </Grid>
+          {window.user.role === "Admin" ? (
+            <Grid
+              item
+              md={3}
+              sm={12}
+              xs={12}
+            >
+              <SelectClinic
+                clearable
+                onChange={(value) =>
+                  setParams({ ...params, clinic_id: value?.id })
+                }
+              />
+            </Grid>
+          ) : null}
           <Grid
             item
             md={3}
             sm={12}
             xs={12}
+            alignSelf="flex-end"
           >
             <FormControlLabel
               control={

@@ -12,16 +12,16 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
-import Page, { Header as PageHeader } from "../../../../components/Page";
-import Table, { SearchTextField } from "../../../../components/Table";
-import Modal from "../../../../components/Modal";
-import CreateInformationSource from "./CreateInformationSource";
-import EditInformationSource from "./EditInformationSource";
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Table, { SearchTextField } from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import CreateClinic from "./CreateClinic";
+import EditClinic from "./EditClinic";
 
-import { useFetch, useToast } from "../../../../hooks";
-import { formatError, throttle } from "../../../../helpers";
+import { useFetch, useToast } from "../../../hooks";
+import { formatError, throttle } from "../../../helpers";
 
-const InformationSources = () => {
+const Clinics = () => {
   const addToast = useToast();
 
   const modalRef = useRef();
@@ -33,7 +33,7 @@ const InformationSources = () => {
   });
 
   const { data, loading, error, handleFetch } = useFetch(
-    "api/marketing/information-sources",
+    "api/clinics",
     params,
     true,
     {
@@ -45,7 +45,7 @@ const InformationSources = () => {
   );
 
   useEffect(() => {
-    document.title = `Sources of Information - ${window.APP_NAME}`;
+    document.title = `Clinics - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -54,11 +54,11 @@ const InformationSources = () => {
     }
   }, [error]);
 
-  const openCreateInformationSourceModal = () => {
+  const openCreateClinicModal = () => {
     let component = (
-      <CreateInformationSource
+      <CreateClinic
         modal={modalRef.current}
-        fetchInformationSources={() => {
+        fetchClinics={() => {
           if (params.page !== 1) {
             setParams({ ...params, page: 1 });
           } else {
@@ -68,19 +68,19 @@ const InformationSources = () => {
       />
     );
 
-    modalRef.current.open("Create Source of Information", component);
+    modalRef.current.open("Create Clinic", component);
   };
 
-  const openEditInformationSourceModal = (item) => {
+  const openEditClinicModal = (item) => {
     let component = (
-      <EditInformationSource
+      <EditClinic
         item={item}
         modal={modalRef.current}
-        fetchInformationSources={handleFetch}
+        fetchClinics={handleFetch}
       />
     );
 
-    modalRef.current.open("Edit Source of Information", component);
+    modalRef.current.open("Edit Clinic", component);
   };
 
   const getStatusColor = (status) => {
@@ -96,14 +96,13 @@ const InformationSources = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Marketing Management" },
         { title: "Settings" },
-        { title: "Sources of Information" },
+        { title: "Clinics" },
       ]}
     >
       <Card>
         <PageHeader
-          title="Sources of Information"
+          title="Clinics"
           trailing={
             <React.Fragment>
               <SearchTextField
@@ -114,9 +113,9 @@ const InformationSources = () => {
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={openCreateInformationSourceModal}
+                onClick={openCreateClinicModal}
               >
-                New Source of Information
+                New Clinic
               </Button>
             </React.Fragment>
           }
@@ -134,11 +133,19 @@ const InformationSources = () => {
               },
               {
                 field: "name",
-                headerName: "Name",
+                headerName: "Clinic Name",
               },
               {
-                field: "description",
-                headerName: "Description",
+                field: "phone",
+                headerName: "Phone",
+              },
+              {
+                field: "email",
+                headerName: "Email",
+              },
+              {
+                field: "address",
+                headerName: "Address",
               },
               {
                 field: "status",
@@ -150,12 +157,7 @@ const InformationSources = () => {
                     label={item.status}
                   />
                 ),
-              },
-              {
-                field: "clinic_id",
-                headerName: "Clinic",
-                valueGetter: (item) => item.clinic?.name,
-                show: window.user.role === "Admin",
+                show: false,
               },
               {
                 field: "actions",
@@ -175,7 +177,7 @@ const InformationSources = () => {
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
-                        onClick={() => openEditInformationSourceModal(item)}
+                        onClick={() => openEditClinicModal(item)}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -200,4 +202,4 @@ const InformationSources = () => {
   );
 };
 
-export default InformationSources;
+export default Clinics;

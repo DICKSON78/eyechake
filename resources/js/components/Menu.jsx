@@ -26,6 +26,7 @@ import {
   LightbulbRounded as IdeaDevelopmentIcon,
   LibraryBooksRounded as ReportsIcon,
   LocalActivityRounded as OutreachProgrammesIcon,
+  LocalHospitalRounded as ClinicsIcon,
   LocationSearchingRounded as MarketResearchIcon,
   ManageAccountsRounded as UserManagementIcon,
   MessageRounded as MessageIcon,
@@ -752,6 +753,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           icon: <SettingsIcon />,
           to: "/settings/preferences",
           show: user.privileges.settings,
+        },
+        {
+          title: "Clinics",
+          icon: <ClinicsIcon />,
+          to: "/settings/clinics",
+          show: user.privileges.settings && user.role === "Admin",
         },
       ]);
     } else {

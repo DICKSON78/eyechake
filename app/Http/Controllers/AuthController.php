@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\ClinicDetail;
+use App\Models\Clinic;
 use App\Models\Department;
 use App\Models\Preference;
 use App\Models\UserPrivilege;
@@ -76,10 +76,10 @@ class AuthController extends Controller
     public function getAuthUser(Request $request)
     {
         $user = $request->user();
-        $user->department = Department::find($user->department_id);
-        $user->job_title_id = Department::find($user->job_title_id);
-        $user->clinic = ClinicDetail::first() ?? new \stdClass();
-        $user->clinic->preferences = Preference::all();
+        $user->department = $user->department;
+        $user->job_title_id = $user->job_title;
+        $user->clinic = $user->clinic ?? new \stdClass();
+        $user->clinic->preferences = Preference::where('clinic_id', $user->clinic->id ?? 0)->get();
         $user_privileges = UserPrivilege::where('user_id', $user->id)->get();
         $user_privileges = $user_privileges->map(function ($e) {
             return $e->privilege;

@@ -244,7 +244,7 @@ const SelectItems = ({
               options={paymentModes}
               optionsLabel="name"
               isOptionEqualToValue={(option, value) => option.id === value.id}
-              value={paymentMode || null}
+              value={paymentMode}
               onChange={(value) => setPaymentMode(value)}
             />
           </Grid>
@@ -259,7 +259,7 @@ const SelectItems = ({
               label="Consultant"
               clearable
               params={{ designation: "Doctor" }}
-              value={consultant || null}
+              value={consultant}
               onChange={(value) => setConsultant(value)}
             />
           </Grid>

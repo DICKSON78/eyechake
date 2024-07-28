@@ -9,9 +9,12 @@ class Preference extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
-    protected $primaryKey = 'key';
     public $timestamps = false;
 
-    protected $fillable = ['key', 'value'];
+    protected $fillable = ['clinic_id', 'key', 'value'];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
 }

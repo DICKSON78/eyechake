@@ -16,9 +16,9 @@ class PreferencesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Preference::all();
+        $data = Preference::where('clinic_id', $request->user()->clinic_id)->get();
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -37,13 +37,17 @@ class PreferencesController extends Controller
         ]);
 
         $data = [];
+        $preferences = $request->json('preferences');
 
-        foreach ($request->json('preferences') as &$input_preference) {
-            $preference = Preference::find($input_preference['key']);
+        foreach ($preferences as &$input) {
+            $preference = Preference::where('clinic_id', $request->user()->clinic_id)
+                ->where('key', $input['key'])
+                ->first();
             if ($preference) {
-                $preference->update(['value' => $input_preference['value']]);
+                $preference->update(['value' => $input['value']]);
             } else {
-                $preference = Preference::create($input_preference);
+                $input['clinic_id'] = $request->user()->clinic_id;
+                $preference = Preference::create($input);
             }
 
             $data[] = $preference;

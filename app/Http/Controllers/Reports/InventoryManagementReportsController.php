@@ -21,7 +21,9 @@ class InventoryManagementReportsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $q = $request->q;
         $payment_mode_id = $request->payment_mode_id;
         $consultation_type = $request->consultation_type;
@@ -32,6 +34,20 @@ class InventoryManagementReportsController extends Controller
                 $query->where('is_stock_item', 'Yes');
             })
             ->where('status', 'Served');
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($q) {
             $data->whereHas('item', function ($query) use ($q) {

@@ -10,7 +10,12 @@ class JobTitle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'status'];
+    protected $fillable = ['clinic_id', 'name', 'description', 'status'];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
 
     protected function serializeDate(DateTimeInterface $date)
     {

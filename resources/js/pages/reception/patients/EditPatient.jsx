@@ -188,7 +188,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 fullWidth
                 required
                 options={["Male", "Female"]}
-                value={formData.gender || null}
+                value={formData.gender}
                 onChange={(value) =>
                   setFormData({ ...formData, gender: value })
                 }
@@ -311,11 +311,9 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                   options={informationSources}
                   optionsLabel="name"
                   optionsValue="id"
-                  value={
-                    informationSources.find(
-                      (e) => e.id === formData.info_source_id
-                    ) || null
-                  }
+                  value={informationSources.find(
+                    (e) => e.id === formData.info_source_id
+                  )}
                   onChange={(value) =>
                     setFormData({ ...formData, info_source_id: value })
                   }

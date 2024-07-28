@@ -24,7 +24,9 @@ class ItemsController extends Controller
             'page' => 'sometimes|integer|min:1',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $q = $request->q;
         $item_type_id = $request->item_type_id;
@@ -36,6 +38,16 @@ class ItemsController extends Controller
         $is_stock_item = $request->is_stock_item;
         $payment_mode_id = $request->payment_mode_id;
         $data = Item::with(['item_type', 'consultation_type', 'unit_of_measure', 'lens_type']);
+
+        if ($user->is_admin) {
+            $data->with(['clinic']);
+
+            if ($clinic_id) {
+                $data->where('clinic_id', $clinic_id);
+            }
+        } else {
+            $data->where('clinic_id', $user->clinic_id);
+        }
 
         if ($status) {
             $data->where('status', $status);
@@ -100,6 +112,17 @@ class ItemsController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
+        if ($user->is_admin) {
+            $request->validate([
+                'clinic_id' => 'required|exists:clinics,id',
+            ]);
+
+            $clinic_id = $request->clinic_id;
+        } else {
+            $clinic_id = $user->clinic_id;
+        }
+
         $request->validate([
             'name' => 'required',
             'code' => 'nullable|unique:items,code',
@@ -111,11 +134,19 @@ class ItemsController extends Controller
             'is_stock_item' => 'required|in:Yes,No',
         ]);
 
-        $data = Item::create($request->only(
-            'name', 'code', 'item_type_id', 'consultation_type_id',
-            'unit_of_measure_id', 'lens_type_id', 'is_consultation_item', 'is_stock_item',
+        $input = $request->only(
+            'name',
+            'code',
+            'item_type_id',
+            'consultation_type_id',
+            'unit_of_measure_id',
+            'lens_type_id',
+            'is_consultation_item',
+            'is_stock_item',
             'templates',
-        ));
+        );
+        $input['clinic_id'] = $clinic_id;
+        $data = Item::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 

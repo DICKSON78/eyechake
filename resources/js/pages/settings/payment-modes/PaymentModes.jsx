@@ -155,6 +155,12 @@ const PaymentModes = () => {
                 ),
               },
               {
+                field: "clinic_id",
+                headerName: "Clinic",
+                valueGetter: (item) => item.clinic?.name,
+                show: window.user.role === "Admin",
+              },
+              {
                 field: "actions",
                 headerName: "Actions",
                 renderCell: (item) => (

@@ -28,10 +28,13 @@ class PatientPaymentCacheItemsController extends Controller
             'per_page' => 'sometimes|integer|min:0',
             'page' => 'sometimes|integer|min:1',
             'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
+            'end_date' => 'sometimes|date_format:Y-m-d',
+            'sort_direction' => 'sometimes|in:asc,desc',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $q = $request->q;
         $payment_cache_id = $request->payment_cache_id;
@@ -51,11 +54,21 @@ class PatientPaymentCacheItemsController extends Controller
         $end_date = $request->end_date;
         $sort_direction = $request->sort_direction ?? 'asc';
 
-        $request->validate([
-            'sort_direction' => 'nullable|in:asc,desc',
-        ]);
-
         $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($status) {
             $statuses = explode(',', $status);

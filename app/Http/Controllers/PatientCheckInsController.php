@@ -30,7 +30,9 @@ class PatientCheckInsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
         $gender = $request->gender;
@@ -41,6 +43,20 @@ class PatientCheckInsController extends Controller
         $data = PatientCheckIn::with(['patient' => function ($query) {
             $query->with(['region', 'district']);
         }, 'payment_mode', 'creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($patient_name) {
             $data->whereHas('patient', function ($query) use ($patient_name) {

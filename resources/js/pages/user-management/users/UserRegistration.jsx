@@ -24,6 +24,7 @@ import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
+import SelectClinic from "../../../components/SelectClinic";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getPrivileges } from "../../../helpers";
@@ -34,6 +35,7 @@ const UserRegistration = () => {
 
   const modalRef = useRef();
   const formRef = useRef();
+  const clinicRef = useRef();
   const firstNameRef = useRef();
   const middleNameRef = useRef();
   const lastNameRef = useRef();
@@ -72,6 +74,7 @@ const UserRegistration = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
+    clinic_id: undefined,
     first_name: undefined,
     middle_name: undefined,
     last_name: undefined,
@@ -210,6 +213,22 @@ const UserRegistration = () => {
               container
               spacing={2}
             >
+              {window.user.role === "Admin" ? (
+                <Grid
+                  item
+                  md={4}
+                  sm={6}
+                  xs={12}
+                >
+                  <SelectClinic
+                    ref={clinicRef}
+                    required
+                    onChange={(value) =>
+                      setFormData({ ...formData, clinic_id: value?.id })
+                    }
+                  />
+                </Grid>
+              ) : null}
               <Grid
                 item
                 md={4}

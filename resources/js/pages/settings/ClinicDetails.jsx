@@ -13,7 +13,7 @@ import Modal from "../../components/Modal";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
 
-import { usePost, useToast } from "../../hooks";
+import { usePatch, useToast } from "../../hooks";
 import { formatError } from "../../helpers";
 
 const ClinicDetails = () => {
@@ -33,8 +33,8 @@ const ClinicDetails = () => {
     address: window.user.clinic.address,
   });
 
-  const { data, loading, error, handlePost } = usePost(
-    "api/clinic-details",
+  const { data, loading, error, handlePatch } = usePatch(
+    `api/clinics/${window.user.clinic_id}`,
     formData
   );
 
@@ -56,7 +56,7 @@ const ClinicDetails = () => {
 
   const handleSubmit = () => {
     if (formRef.current.validate()) {
-      handlePost();
+      handlePatch();
     }
   };
 

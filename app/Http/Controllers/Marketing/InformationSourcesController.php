@@ -25,10 +25,22 @@ class InformationSourcesController extends Controller
             'page' => 'sometimes|integer|min:1',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $q = $request->q;
         $data = InformationSource::query();
+
+        if ($user->is_admin) {
+            $data->with(['clinic']);
+
+            if ($clinic_id) {
+                $data->where('clinic_id', $clinic_id);
+            }
+        } else {
+            $data->where('clinic_id', $user->clinic_id);
+        }
 
         if ($status) {
             $data->where('status', $status);
@@ -50,11 +62,24 @@ class InformationSourcesController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
+        if ($user->is_admin) {
+            $request->validate([
+                'clinic_id' => 'required|exists:clinics,id',
+            ]);
+
+            $clinic_id = $request->clinic_id;
+        } else {
+            $clinic_id = $user->clinic_id;
+        }
+
         $request->validate([
             'name' => 'required|unique:information_sources,name',
         ]);
 
-        $data = InformationSource::create($request->only('name', 'description'));
+        $input = $request->only('name', 'description');
+        $input['clinic_id'] = $clinic_id;
+        $data = InformationSource::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 

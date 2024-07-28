@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CataractSurgeryRecordsController;
-use App\Http\Controllers\ClinicDetailsController;
+use App\Http\Controllers\ClinicsController;
 use App\Http\Controllers\ConsultationDiagnosesController;
 use App\Http\Controllers\ConsultationsController;
 use App\Http\Controllers\ConsultationTypesController;
@@ -72,7 +72,7 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
 
     $router->get('/dashboard', DashboardController::class);
     $router->get('/notifications', NotificationsController::class);
-    $router->apiResource('/clinic-details', ClinicDetailsController::class);
+    $router->apiResource('/clinics', ClinicsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
     $router->apiResource('/users', UsersController::class);

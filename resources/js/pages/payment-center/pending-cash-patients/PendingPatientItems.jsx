@@ -315,7 +315,7 @@ const PendingPatientItems = () => {
                   required
                   options={paymentChannels}
                   optionsLabel="name"
-                  value={paymentChannel || null}
+                  value={paymentChannel}
                   onChange={(value) => setPaymentChannel(value)}
                 />
               </Grid>

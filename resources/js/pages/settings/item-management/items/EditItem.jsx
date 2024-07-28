@@ -164,9 +164,8 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 required
                 options={itemTypes}
                 optionsLabel="name"
-                value={
-                  itemTypes.find((e) => e.id === formData.item_type_id) || null
-                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={itemType}
                 onChange={(value) => {
                   setItemType(value);
                   setFormData({ ...formData, item_type_id: value.id });
@@ -186,7 +185,8 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 required
                 options={consultationTypes}
                 optionsLabel="name"
-                value={consultationType || null}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={consultationType}
                 onChange={(value) => {
                   setConsultationType(value);
                   setFormData({ ...formData, consultation_type_id: value?.id });
@@ -206,12 +206,11 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 options={unitsOfMeasure}
                 optionsLabel="name"
                 optionsValue="id"
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 clearable
-                value={
-                  unitsOfMeasure.find(
-                    (e) => e.id === formData.unit_of_measure_id
-                  ) || null
-                }
+                value={unitsOfMeasure.find(
+                  (e) => e.id === formData.unit_of_measure_id
+                )}
                 onChange={(value) =>
                   setFormData({
                     ...formData,
@@ -220,13 +219,13 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 }
               />
             </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              {itemType && itemType.name === "Lens" ? (
+            {itemType && itemType.name === "Lens" ? (
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
                 <Select
                   ref={lensTypeRef}
                   label="Lens Type"
@@ -235,6 +234,9 @@ const EditItem = ({ item, modal, fetchItems }) => {
                   optionsLabel="name"
                   optionsValue="id"
                   clearable
+                  isOptionEqualToValue={(option, value) =>
+                    option.id === value.id
+                  }
                   value={
                     lensTypes.find((e) => e.id === formData.lens_type_id) ||
                     null
@@ -243,13 +245,14 @@ const EditItem = ({ item, modal, fetchItems }) => {
                     setFormData({ ...formData, lens_type_id: value || null })
                   }
                 />
-              ) : null}
-            </Grid>
+              </Grid>
+            ) : null}
             <Grid
               item
               md={6}
               sm={12}
               xs={12}
+              alignSelf="flex-end"
             >
               <FormControlLabel
                 control={

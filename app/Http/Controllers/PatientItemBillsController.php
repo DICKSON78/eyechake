@@ -27,7 +27,9 @@ class PatientItemBillsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $id = $request->id;
         $patient_name = $request->patient_name;
@@ -37,7 +39,22 @@ class PatientItemBillsController extends Controller
         $with_items = $request->with_items;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        
         $data = PatientItemBill::with(['first_item', 'creator'])->whereHas('first_item');
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($status) {
             $data->where('status', $status);

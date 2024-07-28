@@ -27,7 +27,7 @@ const SelectUser = ({ params, value, onChange, ...rest }, ref) => {
       options={data}
       optionsLabel="full_name"
       isOptionEqualToValue={(option, value) => option.id === value.id}
-      value={selected || null}
+      value={selected}
       onChange={(value) => {
         setSelected(value);
         if (typeof onChange === "function") {

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\ClinicDetail;
+use App\Models\Clinic;
 use App\Models\ConsultationType;
 use App\Models\ItemType;
 use App\Models\JobTitle;
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 
         $now = Carbon::now()->toDateTimeString();
 
-        ClinicDetail::insert([
+        Clinic::insert([
             [
                 'name' => 'SmartSoft Clinic',
                 'phone' => '076855364',
@@ -41,12 +41,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         JobTitle::insert([
-            ['name' => 'Receptionist', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Doctor', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Cashier', 'created_at' => $now, 'updated_at' => $now],
+            ['clinic_id' => 1, 'name' => 'Receptionist', 'created_at' => $now, 'updated_at' => $now],
+            ['clinic_id' => 1, 'name' => 'Doctor', 'created_at' => $now, 'updated_at' => $now],
+            ['clinic_id' => 1, 'name' => 'Cashier', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         User::insert([
+            'clinic_id' => 1,
+            'first_name' => 'Admin',
+            'last_name' => 'Admin',
             'username' => 'admin',
             'password' => Hash::make('1234'),
             'created_at' => $now,
@@ -64,7 +67,7 @@ class DatabaseSeeder extends Seeder
             ['user_id' => 1, 'privilege' => 'other_dispensing'],
             ['user_id' => 1, 'privilege' => 'inventory_management'],
             ['user_id' => 1, 'privilege' => 'financial_management'],
-            ['user_id' => 1, 'privilege' => 'employee_management'],
+            ['user_id' => 1, 'privilege' => 'user_management'],
             ['user_id' => 1, 'privilege' => 'settings'],
         ]);
 
@@ -75,7 +78,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Others', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
-        PaymentMode::insert(['name' => 'Cash', 'created_at' => $now, 'updated_at' => $now]);
+        PaymentMode::insert(['clinic_id' => 1, 'name' => 'Cash', 'transaction_type' => 'Cash', 'created_at' => $now, 'updated_at' => $now]);
 
         UnitOfMeasure::insert([
             ['name' => 'mg', 'created_at' => $now, 'updated_at' => $now],
@@ -99,12 +102,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Preference::insert([
-            ['key' => 'CONSULTATION_MESSAGE', 'value' => 'Habari {name}, Hongera na asante kwa kupata huduma kwetu. Ni tumaini letu umepata huduma stahiki. Kwa maoni kuhusu huduma zetu tuma ujumbe au piga simu namba 0676 506 323. Karibu sana.'],
-            ['key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya macho yako. Wasiliana nasi 0676 506 323.'],
-            ['key' => 'SEND_MESSAGES', 'value' => 'No'],
-            ['key' => 'SEND_REMINDER_MESSAGES_AT', 'value' => '11:00'],
-            ['key' => 'SMS_SENDER_NAME', 'value' => 'INFO'],
-            ['key' => 'MARKETING_MODULE', 'value' => 'No'],
+            ['clinic_id' => 1, 'key' => 'CONSULTATION_MESSAGE', 'value' => 'Habari {name}, Hongera na asante kwa kupata huduma kwetu. Ni tumaini letu umepata huduma stahiki. Kwa maoni kuhusu huduma zetu tuma ujumbe au piga simu namba 0676 506 323. Karibu sana.'],
+            ['clinic_id' => 1, 'key' => 'PATIENT_TO_RETURN_REMINDER_MESSAGE', 'value' => 'Habari {name}, Tunakukumbusha kurudi kumuona daktari kesho tarehe {date} kwa ajili ya vipimo ili kufuatilia maendeleo ya afya ya macho yako. Wasiliana nasi 0676 506 323.'],
+            ['clinic_id' => 1, 'key' => 'SEND_MESSAGES', 'value' => 'No'],
+            ['clinic_id' => 1, 'key' => 'SEND_REMINDER_MESSAGES_AT', 'value' => '11:00'],
+            ['clinic_id' => 1, 'key' => 'SMS_SENDER_NAME', 'value' => 'INFO'],
+            ['clinic_id' => 1, 'key' => 'MARKETING_MODULE', 'value' => 'No'],
         ]);
     }
 }

@@ -26,7 +26,9 @@ class PatientsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $id = $request->id;
         $name = $request->name;
         $gender = $request->gender;
@@ -39,6 +41,20 @@ class PatientsController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $data = Patient::with(['payment_mode', 'information_source', 'creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($id) {
             $data->where('id', $id);

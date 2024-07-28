@@ -116,7 +116,7 @@ const Filters = ({ params, setParams, ...rest }) => {
               fullWidth
               options={["Pending", "Cancelled", "Completed"]}
               clearable
-              value={params.status || null}
+              value={params.status}
               onChange={(value) => setParams({ ...params, status: value })}
             />
           </Grid>

@@ -11,9 +11,14 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'code', 'item_type_id', 'consultation_type_id', 'unit_of_measure_id', 'lens_type_id',
+        'clinic_id', 'name', 'code', 'item_type_id', 'consultation_type_id', 'unit_of_measure_id', 'lens_type_id',
         'is_consultation_item', 'is_stock_item', 'balance', 'unit_buying_price', 'templates', 'status',
     ];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
 
     public function item_type()
     {

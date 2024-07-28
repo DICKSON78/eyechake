@@ -10,6 +10,7 @@ import {
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
+import SelectClinic from "../../../components/SelectClinic";
 
 import { usePost, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -18,6 +19,7 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
   const addToast = useToast();
 
   const formRef = useRef();
+  const clinicRef = useRef();
   const nameRef = useRef();
   const descriptionRef = useRef();
   const paymentTypeRef = useRef();
@@ -64,6 +66,22 @@ const CreatePaymentMode = ({ modal, fetchPaymentModes }) => {
             container
             spacing={2}
           >
+            {window.user.role === "Admin" ? (
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <SelectClinic
+                  ref={clinicRef}
+                  required
+                  onChange={(value) =>
+                    setFormData({ ...formData, clinic_id: value?.id })
+                  }
+                />
+              </Grid>
+            ) : null}
             <Grid
               item
               md={6}

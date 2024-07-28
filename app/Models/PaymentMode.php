@@ -10,7 +10,12 @@ class PaymentMode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'transaction_type', 'status'];
+    protected $fillable = ['clinic_id', 'name', 'description', 'transaction_type', 'status'];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
 
     protected function serializeDate(DateTimeInterface $date)
     {

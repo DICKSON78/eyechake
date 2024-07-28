@@ -95,7 +95,7 @@ const EditIdea = ({ item, modal, fetchIdeas }) => {
                 fullWidth
                 options={["Pending", "Cancelled", "Implemented"]}
                 required
-                value={formData.status || null}
+                value={formData.status}
                 onChange={(value) =>
                   setFormData({ ...formData, status: value })
                 }

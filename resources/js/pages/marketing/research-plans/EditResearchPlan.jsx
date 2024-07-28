@@ -249,7 +249,7 @@ const EditResearchPlan = ({ item, modal, fetchResearchPlans }) => {
                 fullWidth
                 options={["Pending", "Cancelled", "Completed"]}
                 required
-                value={formData.status || null}
+                value={formData.status}
                 onChange={(value) =>
                   setFormData({ ...formData, status: value })
                 }

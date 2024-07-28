@@ -110,7 +110,7 @@ const EditPaymentMode = ({ item, modal, fetchPaymentModes }) => {
                 fullWidth
                 required
                 options={["Cash", "Credit"]}
-                value={formData.transaction_type || null}
+                value={formData.transaction_type}
                 onChange={(value) =>
                   setFormData({ ...formData, transaction_type: value })
                 }

@@ -23,7 +23,9 @@ class PaymentCenterReportsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $payment_channel_id = $request->payment_channel_id;
         $patient_name = $request->patient_name;
         $patient_id = $request->patient_id;
@@ -44,6 +46,26 @@ class PaymentCenterReportsController extends Controller
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
             ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+
+        if ($user->is_admin) {
+            $item_payments->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+                $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+            $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($payment_channel_id) {
             $item_payments->where('patient_item_payments.channel_id', $payment_channel_id);

@@ -15,6 +15,8 @@ class NotificationsController extends Controller
 
     public function __invoke(Request $request)
     {
+        $user = $request->user();
+        $clinic_id = $request->clinic_id;
         $start_date = Carbon::today()->startOfDay()->format('Y-m-d');
         $end_date = Carbon::today()->endOfDay()->format('Y-m-d');
 
@@ -30,33 +32,53 @@ class NotificationsController extends Controller
             'patients_to_return' => 0,
         ];
 
-        $data['patients_sent_to_cashier'] = PatientPaymentCache::whereHas('items', function ($query) {
-            $query->where('status', 'Pending');
-            $query->whereHas('payment_mode', function ($query2) {
-                $query2->where('transaction_type', 'Cash');
+        $data['patients_sent_to_cashier'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
             });
         })
+            ->whereHas('items', function ($query) {
+                $query->where('status', 'Pending');
+                $query->whereHas('payment_mode', function ($query2) {
+                    $query2->where('transaction_type', 'Cash');
+                });
+            })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['credit_patients_approval'] = PatientPaymentCache::whereHas('items', function ($query) {
-            $query->where('status', 'Pending');
-            $query->whereHas('payment_mode', function ($query2) {
-                $query2->where('transaction_type', 'Credit');
+        $data['credit_patients_approval'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
             });
         })
+            ->whereHas('items', function ($query) {
+                $query->where('status', 'Pending');
+                $query->whereHas('payment_mode', function ($query2) {
+                    $query2->where('transaction_type', 'Credit');
+                });
+            })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['patients_sent_to_doctor'] = Consultation::where('status', 'Pending')
+        $data['patients_sent_to_doctor'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        })
+            ->where('status', 'Pending')
             ->where('patient_direction', 'Direct to Doctor')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['patients_sent_to_optician'] = Consultation::where('require_glass', 'Yes')
+        $data['patients_sent_to_optician'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        })
+            ->where('require_glass', 'Yes')
             ->whereNotNull('sent_to_optician_at')
             ->whereHas('payment_cache.items', function ($query) {
                 $query->whereHas('consultation_type', function ($query2) {
@@ -72,7 +94,12 @@ class NotificationsController extends Controller
             })
             ->count();
 
-        $data['glass_patients'] = Consultation::where('require_glass', 'Yes')
+        $data['glass_patients'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        })
+            ->where('require_glass', 'Yes')
             ->whereNull('sent_to_optician_at')
             ->where(function ($query) use ($start_date, $end_date) {
                 $query->where(function ($query2) use ($start_date, $end_date) {
@@ -91,40 +118,60 @@ class NotificationsController extends Controller
             })
             ->count();
 
-        $data['dispensing_requests'] = PatientPaymentCache::whereHas('items', function ($query) {
-            $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-            $query->whereHas('consultation_type', function ($query2) {
-                $query2->where('name', 'Pharmacy');
+        $data['dispensing_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
             });
         })
+            ->whereHas('items', function ($query) {
+                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
+                $query->whereHas('consultation_type', function ($query2) {
+                    $query2->where('name', 'Pharmacy');
+                });
+            })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['procedure_requests'] = PatientPaymentCache::whereHas('items', function ($query) {
-            $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-            $query->whereHas('consultation_type', function ($query2) {
-                $query2->where('name', 'Procedure');
+        $data['procedure_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
             });
         })
+            ->whereHas('items', function ($query) {
+                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
+                $query->whereHas('consultation_type', function ($query2) {
+                    $query2->where('name', 'Procedure');
+                });
+            })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['other_dispensing_requests'] = PatientPaymentCache::whereHas('items', function ($query) {
-            $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-            $query->whereHas('consultation_type', function ($query2) {
-                $query2->where('name', 'Others');
-            });
-            $query->whereHas('item', function ($query2) {
-                $query2->where('is_stock_item', 'Yes');
+        $data['other_dispensing_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
             });
         })
+            ->whereHas('items', function ($query) {
+                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
+                $query->whereHas('consultation_type', function ($query2) {
+                    $query2->where('name', 'Others');
+                });
+                $query->whereHas('item', function ($query2) {
+                    $query2->where('is_stock_item', 'Yes');
+                });
+            })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        $data['patients_to_return'] = Consultation::where('status', 'Consulted')
+        $data['patients_to_return'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
+            $query->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        })
+            ->where('status', 'Consulted')
             ->whereNotNull('to_return_date')
             ->where('to_return_date', '>=', $start_date)
             ->where('to_return_date', '<=', $end_date)

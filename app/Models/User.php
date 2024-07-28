@@ -16,12 +16,17 @@ class User extends Authenticatable
     protected $appends = ['full_name'];
 
     protected $fillable = [
-        'first_name', 'middle_name', 'last_name', 'designation', 'department_id', 'job_title_id',
-        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'username', 'password',
+        'clinic_id', 'first_name', 'middle_name', 'last_name', 'designation', 'department_id', 'job_title_id',
+        'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'username', 'password', 'role',
         'created_by', 'status',
     ];
 
     protected $hidden = ['password', 'remember_token'];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
 
     public function department()
     {
@@ -52,6 +57,11 @@ class User extends Authenticatable
     public function scopeFullName($query, $value)
     {
         return $query->whereRaw('concat(first_name, coalesce(middle_name, ""), last_name) like ?', [str_replace(' ', '', $value)]);
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->role == 'Admin';
     }
 
     protected function serializeDate(DateTimeInterface $date)

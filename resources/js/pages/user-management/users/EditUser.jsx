@@ -186,7 +186,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                 fullWidth
                 required
                 options={["Male", "Female"]}
-                value={formData.gender || null}
+                value={formData.gender}
                 onChange={(value) =>
                   setFormData({ ...formData, gender: value })
                 }
@@ -219,7 +219,7 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                 label="Designation"
                 fullWidth
                 options={["Doctor", "Other"]}
-                value={formData.designation || null}
+                value={formData.designation}
                 onChange={(value) =>
                   setFormData({ ...formData, designation: value })
                 }
@@ -262,9 +262,8 @@ const EditUser = ({ item, modal, fetchUsers }) => {
                 options={jobTitles}
                 optionsLabel="name"
                 optionsValue="id"
-                value={
-                  jobTitles.find((e) => e.id === formData.job_title_id) || null
-                }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={jobTitles.find((e) => e.id === formData.job_title_id)}
                 onChange={(value) =>
                   setFormData({ ...formData, job_title_id: value })
                 }

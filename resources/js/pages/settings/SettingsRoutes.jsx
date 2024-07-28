@@ -10,6 +10,7 @@ import Departments from "./departments/Departments";
 import JobTitles from "./job-titles/JobTitles";
 import ClinicDetails from "./ClinicDetails";
 import Preferences from "./Preferences";
+import Clinics from "./clinics/Clinics";
 
 const SettingsRoutes = () => {
   return (
@@ -49,6 +50,10 @@ const SettingsRoutes = () => {
       <Route
         path="/preferences"
         element={<Preferences />}
+      />
+      <Route
+        path="/clinics"
+        element={window.user.role === "Admin" ? <Clinics /> : null}
       />
     </Routes>
   );

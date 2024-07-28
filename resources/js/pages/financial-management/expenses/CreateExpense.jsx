@@ -173,7 +173,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                 label="Expense Date"
                 fullWidth
                 required
-                value={formData.expense_date}
+                value={formData.expense_date || null}
                 onChange={(value) =>
                   setFormData({
                     ...formData,

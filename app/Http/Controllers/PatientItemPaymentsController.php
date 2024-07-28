@@ -26,7 +26,9 @@ class PatientItemPaymentsController extends Controller
             'end_date' => 'sometimes|date_format:Y-m-d'
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $payment_channel_id = $request->payment_channel_id;
         $with_patient = $request->with_patient;
         $with_items = $request->with_items;
@@ -38,6 +40,20 @@ class PatientItemPaymentsController extends Controller
         $end_date = $request->end_date;
         $sort_direction = $request->sort_direction ?? 'asc';
         $data = PatientItemPayment::with(['channel', 'creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($payment_channel_id) {
             $data->where('channel_id', $payment_channel_id);

@@ -12,6 +12,7 @@ import {
 import Form from "../../../../components/Form";
 import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
+import SelectClinic from "../../../../components/SelectClinic";
 import FormLabelControl from "../../../../components/FormLabelControl";
 
 import { useFetch, usePost, useToast } from "../../../../hooks";
@@ -21,6 +22,7 @@ const CreateItem = ({ modal, fetchItems }) => {
   const addToast = useToast();
 
   const formRef = useRef();
+  const clinicRef = useRef();
   const nameRef = useRef();
   const codeRef = useRef();
   const itemTypeRef = useRef();
@@ -72,6 +74,7 @@ const CreateItem = ({ modal, fetchItems }) => {
   const [itemType, setItemType] = useState();
   const [consultationType, setConsultationType] = useState();
   const [formData, setFormData] = useState({
+    clinic_id: undefined,
     name: undefined,
     code: undefined,
     item_type_id: undefined,
@@ -119,6 +122,22 @@ const CreateItem = ({ modal, fetchItems }) => {
             container
             spacing={2}
           >
+            {window.user.role === "Admin" ? (
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
+                <SelectClinic
+                  ref={clinicRef}
+                  required
+                  onChange={(value) =>
+                    setFormData({ ...formData, clinic_id: value?.id })
+                  }
+                />
+              </Grid>
+            ) : null}
             <Grid
               item
               md={6}
@@ -203,13 +222,13 @@ const CreateItem = ({ modal, fetchItems }) => {
                 }
               />
             </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              {itemType && itemType.name === "Lens" ? (
+            {itemType && itemType.name === "Lens" ? (
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+              >
                 <Select
                   ref={lensTypeRef}
                   label="Lens Type"
@@ -221,13 +240,14 @@ const CreateItem = ({ modal, fetchItems }) => {
                     setFormData({ ...formData, lens_type_id: value })
                   }
                 />
-              ) : null}
-            </Grid>
+              </Grid>
+            ) : null}
             <Grid
               item
               md={6}
               sm={12}
               xs={12}
+              alignSelf="flex-end"
             >
               <FormControlLabel
                 control={
@@ -251,6 +271,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               md={6}
               sm={12}
               xs={12}
+              alignSelf="flex-end"
             >
               <FormControlLabel
                 control={
@@ -273,6 +294,7 @@ const CreateItem = ({ modal, fetchItems }) => {
                 md={12}
                 sm={12}
                 xs={12}
+                alignSelf="flex-end"
               >
                 <FormLabelControl
                   label="Item Templates"

@@ -26,7 +26,9 @@ class UsersController extends Controller
             'page' => 'sometimes|integer|min:1',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $status = $request->status;
         $name = $request->name;
         $gender = $request->gender;
@@ -37,7 +39,16 @@ class UsersController extends Controller
         $employee_number = $request->employee_number;
         $data = User::with(['department', 'job_title', 'privileges', 'creator']);
 
-        //$data->where('role', '!=', 'Admin');
+        if ($user->is_admin) {
+            $data->with(['clinic']);
+
+            if ($clinic_id) {
+                $data->where('clinic_id', $clinic_id);
+            }
+        } else {
+            $data->where('clinic_id', $user->clinic_id);
+            $data->where('role', '!=', 'Admin');
+        }
 
         if ($status) {
             $data->where('status', $status);
@@ -84,6 +95,17 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
+        if ($user->is_admin) {
+            $request->validate([
+                'clinic_id' => 'required|exists:clinics,id',
+            ]);
+
+            $clinic_id = $request->clinic_id;
+        } else {
+            $clinic_id = $user->clinic_id;
+        }
+
         $request->validate([
             'first_name' => 'required',
             'last_name' => 'required',
@@ -99,6 +121,7 @@ class UsersController extends Controller
         ]);
 
         $input = $request->except('password', 'privileges');
+        $input['clinic_id'] = $clinic_id;
         $input['password'] = Hash::make($request->password);
         $input['created_by'] = $request->user()->id;
         $data = User::create($input);

@@ -23,10 +23,13 @@ class PatientItemBillPaymentsController extends Controller
             'per_page' => 'sometimes|integer|min:0',
             'page' => 'sometimes|integer|min:1',
             'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
+            'end_date' => 'sometimes|date_format:Y-m-d',
+            'sort_direction' => 'sometimes|in:asc,desc',
         ]);
 
+        $user = $request->user();
         $per_page = $request->per_page ?? 25;
+        $clinic_id = $request->clinic_id;
         $bill_id = $request->bill_id;
         $payment_channel_id = $request->payment_channel_id;
         $with_patient = $request->with_patient;
@@ -37,7 +40,22 @@ class PatientItemBillPaymentsController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date;
         $sort_direction = $request->sort_direction ?? 'asc';
+
         $data = PatientItemBillPayment::with(['channel', 'creator']);
+
+        if ($user->is_admin) {
+            $data->with(['creator.clinic']);
+
+            if ($clinic_id) {
+                $data->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+        } else {
+            $data->whereHas('creator', function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            });
+        }
 
         if ($bill_id) {
             $data->where('bill_id', $bill_id);
