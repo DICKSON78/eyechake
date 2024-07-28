@@ -2,7 +2,6 @@
 
 namespace App\Http\Services;
 
-use App\Models\Clinic;
 use App\Models\Message;
 use App\Models\Patient;
 use App\Models\Preference;
@@ -32,6 +31,7 @@ class SmsService
 
         $recipients = [];
         $patient = Patient::find($patient_id);
+        $clinic = $patient->creator?->clinic;
         $phone = $patient->phone;
 
         if ($phone && str_starts_with($phone, '0') && strlen($phone) == 10) {
@@ -42,11 +42,15 @@ class SmsService
             return null;
         }
 
-        $sender_name = Preference::find('SMS_SENDER_NAME');
-        if ($sender_name) {
-            $sender_name = $sender_name->value;
-        } else {
-            $sender_name = 'INFO';
+        $sender_name = 'INFO';
+
+        if ($clinic) {
+            $sender_name = Preference::where('clinic_id', $clinic->id)->where('key', 'SMS_SENDER_NAME')->first();
+            if ($sender_name) {
+                $sender_name = $sender_name->value;
+            } else {
+                $sender_name = 'INFO';
+            }
         }
 
         $body = [
@@ -56,7 +60,7 @@ class SmsService
         ];
 
         $headers = [
-            'x-access-token' => env('SMS_KEY'),
+            'x-access-token' => $clinic?->sms_key,
         ];
 
         try {
@@ -76,12 +80,9 @@ class SmsService
             ]);
 
             $sms_client = $response->client;
-            if ($sms_client) {
-                $clinic = Clinic::where('sms_key', $sms_client->secretKey)->first();
-                if ($clinic) {
-                    $clinic->sms_balance = $sms_client->balance;
-                    $clinic->save();
-                }
+            if ($sms_client && $clinic) {
+                $clinic->sms_balance = $sms_client->balance;
+                $clinic->save();
             }
 
             return $response;
