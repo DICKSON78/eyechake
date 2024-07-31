@@ -38,7 +38,7 @@ const Auth = () => {
             p={2}
           >
             {"© "}
-            {new Date().getFullYear()}
+            {new Date().getFullYear()} Aurora Enterprises Ltd
           </Typography>
         </Card>
       </Box>

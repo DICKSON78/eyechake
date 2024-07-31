@@ -31,34 +31,44 @@ class PatientToReturnReminder extends Command
      */
     public function handle()
     {
-        $send_messages = Preference::find('SEND_MESSAGES');
-        if ($send_messages && $send_messages->value == 'Yes') {
-            $message = Preference::find('PATIENT_TO_RETURN_REMINDER_MESSAGE');
-            if ($message) {
-                $today = Carbon::today();
-                $records = Consultation::where('status', 'Consulted')
-                    ->where('patient_direction', 'Direct to Doctor')
-                    ->where('patient_to_return', 'Yes')
-                    ->whereNotNull('to_return_date')
-                    ->where('to_return_date', '>=', $today)
-                    ->get();
+        $today = Carbon::today();
+        $records = Consultation::where('status', 'Consulted')
+            ->where('patient_direction', 'Direct to Doctor')
+            ->where('patient_to_return', 'Yes')
+            ->whereNotNull('to_return_date')
+            ->where('to_return_date', '>=', $today)
+            ->get();
 
-                if (count($records)) {
-                    $sms_service = new SmsService();
+        if (count($records)) {
+            $sms_service = new SmsService();
 
-                    foreach ($records as &$record) {
-                        $days = Carbon::parse($record->to_return_date)->diffInDays($today);
+            foreach ($records as &$record) {
+                $days = Carbon::parse($record->to_return_date)->diffInDays($today);
 
-                        if ($days == 1) {
-                            $patient = $record->payment_cache_item->payment_cache->check_in->patient;
-                            $message = $message->value;
-                            $message = str_replace('{name}', $patient->first_name, $message);
+                if ($days == 1) {
+                    $clinic = $record->creator?->clinic;
 
-                            $date = Carbon::parse($record->to_return_date);
-                            $date = $date->format('M d, Y');
+                    if ($clinic) {
+                        $send_messages = Preference::where('clinic_id', $clinic->id)
+                            ->where('key', 'SEND_MESSAGES')
+                            ->first();
 
-                            $message = str_replace('{date}', $date, $message);
-                            $sms_service->sendMessage($patient->id, $message);
+                        if ($send_messages?->value == 'Yes') {
+                            $message = Preference::where('clinic_id', $clinic->id)
+                                ->where('key', 'PATIENT_TO_RETURN_REMINDER_MESSAGE')
+                                ->first();
+
+                            if ($message) {
+                                $patient = $record->payment_cache_item->payment_cache->check_in->patient;
+                                $message = $message->value;
+                                $message = str_replace('{name}', $patient->first_name, $message);
+
+                                $date = Carbon::parse($record->to_return_date);
+                                $date = $date->format('M d, Y');
+
+                                $message = str_replace('{date}', $date, $message);
+                                $sms_service->sendMessage($patient->id, $message);
+                            }
                         }
                     }
                 }

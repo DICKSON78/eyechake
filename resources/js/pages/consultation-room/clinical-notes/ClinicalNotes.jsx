@@ -98,6 +98,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [error, setError] = useState();
   const [formData, setFormData] = useState({
     ...consultation,
+    payment_cache_item: undefined,
+    creator: undefined,
     to_return_date: consultation.to_return_date
       ? new Date(consultation.to_return_date)
       : null,
@@ -671,7 +673,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                           }
                         />
                       }
-                      label="Require Glass"
+                      label="Require Spectacle"
                     />
                   </Grid>
                   {marketingEnabled ? (

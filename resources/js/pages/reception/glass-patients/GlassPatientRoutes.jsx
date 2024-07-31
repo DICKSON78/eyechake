@@ -37,7 +37,7 @@ const GlassPatientRoutes = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Reception" },
-        { title: "Glass Patients" },
+        { title: "Spectacle Patients" },
         { title: patientId },
       ]}
     >

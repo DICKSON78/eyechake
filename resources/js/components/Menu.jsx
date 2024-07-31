@@ -211,7 +211,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, notifications, ...rest }) => {
           show: user.privileges.reception,
         },
         {
-          title: "Glass Patients",
+          title: "Spectacle Patients",
           icon: <GlassPatientsIcon />,
           to: "/reception/glass-patients",
           badge: notifications?.glass_patients,

@@ -47,7 +47,7 @@ const GlassPatients = () => {
   );
 
   useEffect(() => {
-    document.title = `Glass Patients - ${window.APP_NAME}`;
+    document.title = `Spectacle Patients - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -61,11 +61,11 @@ const GlassPatients = () => {
       breadcrumbs={[
         { title: "Home" },
         { title: "Reception" },
-        { title: "Glass Patients" },
+        { title: "Spectacle Patients" },
       ]}
     >
       <Card>
-        <PageHeader title="Glass Patients" />
+        <PageHeader title="Spectacle Patients" />
         <Divider />
         <CardContent>
           <Filters

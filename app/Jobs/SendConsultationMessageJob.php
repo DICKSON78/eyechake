@@ -32,17 +32,25 @@ class SendConsultationMessageJob implements ShouldQueue
      */
     public function handle()
     {
-        $send_messages = Preference::find('SEND_MESSAGES');
+        $clinic = $this->consultation->creator?->clinic;
 
-        if ($send_messages && $send_messages->value == 'Yes') {
-            $message = Preference::find('CONSULTATION_MESSAGE');
-            if ($message) {
-                $patient = $this->consultation->payment_cache_item->payment_cache->check_in->patient;
-                $message = $message->value;
-                $message = str_replace('{name}', $patient->first_name, $message);
+        if ($clinic) {
+            $send_messages = Preference::where('clinic_id', $clinic->id)
+                ->where('key', 'SEND_MESSAGES')
+                ->first();
 
-                $sms_service = new SmsService();
-                $sms_service->sendMessage($patient->id, $message);
+            if ($send_messages?->value == 'Yes') {
+                $message = Preference::where('clinic_id', $clinic->id)
+                    ->where('key', 'CONSULTATION_MESSAGE')
+                    ->first();
+
+                if ($message) {
+                    $patient = $this->consultation->payment_cache_item->payment_cache->check_in->patient;
+                    $message = $message->value;
+                    $message = str_replace('{name}', $patient->first_name, $message);
+                    $sms_service = new SmsService();
+                    $sms_service->sendMessage($patient->id, $message);
+                }
             }
         }
     }
