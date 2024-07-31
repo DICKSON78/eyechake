@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Route::get('/sms', function () {
+//     $service = new \App\Http\Services\SmsService();
+//     $service->sendMessage(1, 'Hello Jay, asante kwa kupata huduma kwetu. Karibu tena.');
+//     return response()->json(['message' => 'OK']);
+// });
+
 Route::get('/login', function () {
     return view('app');
 })->name('login');

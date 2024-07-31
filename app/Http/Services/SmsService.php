@@ -4,7 +4,6 @@ namespace App\Http\Services;
 
 use App\Models\Message;
 use App\Models\Patient;
-use App\Models\Preference;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
@@ -42,23 +41,12 @@ class SmsService
             return null;
         }
 
-        $sender_name = 'INFO';
-
-        if ($clinic) {
-            $sender_name = Preference::where('clinic_id', $clinic->id)->where('key', 'SMS_SENDER_NAME')->first();
-            if ($sender_name) {
-                $sender_name = $sender_name->value;
-            } else {
-                $sender_name = 'INFO';
-            }
-        }
-
+        $sender_name = $clinic?->sms_sender_name ?? 'INFO';
         $body = [
             'senderName' => $sender_name,
             'message' => $message,
             'recipients' => $recipients,
         ];
-
         $headers = [
             'x-access-token' => $clinic?->sms_key,
         ];
@@ -92,10 +80,10 @@ class SmsService
         }
     }
 
-    public function getMessageDeliveryReport($request_id, $recipient = null)
+    public function getMessageDeliveryReport($sms_key, $request_id, $recipient = null)
     {
         $headers = [
-            'x-access-token' => env('SMS_KEY'),
+            'x-access-token' => $sms_key,
         ];
 
         try {
@@ -123,10 +111,10 @@ class SmsService
         }
     }
 
-    public function getClient()
+    public function getClient($sms_key)
     {
         $headers = [
-            'x-access-token' => env('SMS_KEY'),
+            'x-access-token' => $sms_key,
         ];
 
         try {
