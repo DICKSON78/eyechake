@@ -6,7 +6,7 @@ An eye care system that includes all aspects of an eye care clinic.
 1. Clone the project and run the following commands
 - <code>cd /path/to/project</code>
 - <code>composer install</code>
-- <code>npm install --legacy-peer-deps</code>
+- <code>npm install</code>
 - <code>php artisan migrate</code>
 - <code>php artisan db:seed</code>
 2. Run the project with the commands
