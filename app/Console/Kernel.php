@@ -16,15 +16,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $send_reminders_at = Preference::find('SEND_REMINDER_MESSAGES_AT');
-        if ($send_reminders_at) {
-            $send_reminders_at = $send_reminders_at->value;
-        } else {
-            $send_reminders_at = '11:00';
-        }
-
-        $schedule->command('sms:patient_to_return_reminder')
-            ->dailyAt($send_reminders_at);
+        $schedule->command('sms:patient_to_return_reminder')->dailyAt('16:00');
     }
 
     /**

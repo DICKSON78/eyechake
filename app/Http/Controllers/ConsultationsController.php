@@ -394,7 +394,7 @@ class ConsultationsController extends Controller
         }
 
         if ($request->refraction) {
-            $data->refraction->updateOrCreate($request->refraction);
+            $data->refraction->update($request->refraction);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
@@ -495,23 +495,23 @@ class ConsultationsController extends Controller
         $data->update($input);
 
         if ($request->visual_acuity) {
-            $data->visual_acuity->updateOrCreate($request->visual_acuity);
+            $data->visual_acuity->update($request->visual_acuity);
         }
 
         if ($request->external_examination) {
-            $data->external_examination->updateOrCreate($request->external_examination);
+            $data->external_examination->update($request->external_examination);
         }
 
         if ($request->functional_tests) {
-            $data->functional_tests->updateOrCreate($request->functional_tests);
+            $data->functional_tests->update($request->functional_tests);
         }
 
         if ($request->refraction) {
-            $data->refraction->updateOrCreate($request->refraction);
+            $data->refraction->update($request->refraction);
         }
 
         if ($request->fundoscopy) {
-            $data->fundoscopy->updateOrCreate($request->fundoscopy);
+            $data->fundoscopy->update($request->fundoscopy);
         }
 
         // update item if it is not dispensable

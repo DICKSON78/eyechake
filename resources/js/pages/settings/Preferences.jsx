@@ -32,7 +32,6 @@ const Preferences = () => {
   const formRef = useRef();
   const consultationMessageRef = useRef();
   const reminderMessageRef = useRef();
-  const reminderMessagesTimeRef = useRef();
 
   const [formData, setFormData] = useState({
     preferences: [
@@ -46,10 +45,6 @@ const Preferences = () => {
       },
       {
         key: "PATIENT_TO_RETURN_REMINDER_MESSAGE",
-        value: "",
-      },
-      {
-        key: "SEND_REMINDER_MESSAGES_AT",
         value: "",
       },
     ],
@@ -74,11 +69,6 @@ const Preferences = () => {
         2,
         data.find((e) => e.key === "PATIENT_TO_RETURN_REMINDER_MESSAGE")
           ?.value || ""
-      );
-      setPreference(
-        3,
-        data.find((e) => e.key === "SEND_REMINDER_MESSAGES_AT")?.value ||
-          "11:00"
       );
       return data;
     }
@@ -196,21 +186,6 @@ const Preferences = () => {
                           required
                           defaultValue={formData.preferences[2].value}
                           onChange={(value) => setPreference(2, value)}
-                        />
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>4</TableCell>
-                      <TableCell>Send Reminder Messages At</TableCell>
-                      <TableCell>
-                        <TextField
-                          ref={reminderMessagesTimeRef}
-                          placeholder="In 24 Hours, eg. 11:00"
-                          fullWidth
-                          required
-                          rules={[validationRules.time]}
-                          defaultValue={formData.preferences[3].value}
-                          onChange={(value) => setPreference(3, value)}
                         />
                       </TableCell>
                     </TableRow>
