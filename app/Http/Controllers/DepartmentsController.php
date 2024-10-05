@@ -38,7 +38,7 @@ class DepartmentsController extends Controller
                 $data->where('clinic_id', $clinic_id);
             }
         } else {
-            $data->where('clinic_id', $user->clinic_id);
+            // $data->where('clinic_id', $user->clinic_id);
         }
 
         if ($status) {

@@ -48,9 +48,9 @@ class EventsController extends Controller
                 });
             }
         } else {
-            $data->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $data->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         }
 
         if ($status) {

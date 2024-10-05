@@ -33,9 +33,9 @@ class NotificationsController extends Controller
         ];
 
         $data['patients_sent_to_cashier'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->whereHas('items', function ($query) {
                 $query->where('status', 'Pending');
@@ -48,9 +48,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['credit_patients_approval'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->whereHas('items', function ($query) {
                 $query->where('status', 'Pending');
@@ -63,9 +63,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['patients_sent_to_doctor'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->where('status', 'Pending')
             ->where('patient_direction', 'Direct to Doctor')
@@ -74,9 +74,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['patients_sent_to_optician'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->where('require_glass', 'Yes')
             ->whereNotNull('sent_to_optician_at')
@@ -95,9 +95,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['glass_patients'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->where('require_glass', 'Yes')
             ->whereNull('sent_to_optician_at')
@@ -119,9 +119,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['dispensing_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->whereHas('items', function ($query) {
                 $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
@@ -134,9 +134,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['procedure_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->whereHas('items', function ($query) {
                 $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
@@ -149,9 +149,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['other_dispensing_requests'] = PatientPaymentCache::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->whereHas('items', function ($query) {
                 $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
@@ -167,9 +167,9 @@ class NotificationsController extends Controller
             ->count();
 
         $data['patients_to_return'] = Consultation::when($clinic_id, function ($query) use ($clinic_id) {
-            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $query->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         })
             ->where('status', 'Consulted')
             ->whereNotNull('to_return_date')

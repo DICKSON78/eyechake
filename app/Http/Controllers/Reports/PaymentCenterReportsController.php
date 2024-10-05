@@ -59,12 +59,12 @@ class PaymentCenterReportsController extends Controller
                 });
             }
         } else {
-            $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
-            $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
-            });
+            // $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
+            // $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
+            //     $query->where('clinic_id', $clinic_id);
+            // });
         }
 
         if ($payment_channel_id) {
