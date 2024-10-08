@@ -51,9 +51,9 @@ class PatientsController extends Controller
                 });
             }
         } else {
-            // $data->whereHas('creator', function ($query) use ($clinic_id) {
-            //     $query->where('clinic_id', $clinic_id);
-            // });
+            $data->whereHas('creator', function ($query) use ($user) {
+                $query->where('clinic_id', $user->clinic_id);
+            });
         }
 
         if ($id) {

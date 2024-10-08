@@ -65,9 +65,9 @@ class PatientPaymentCacheItemsController extends Controller
                 });
             }
         } else {
-            // $data->whereHas('creator', function ($query) use ($clinic_id) {
-            //     $query->where('clinic_id', $clinic_id);
-            // });
+            $data->whereHas('creator', function ($query) use ($user) {
+                $query->where('clinic_id', $user->clinic_id);
+            });
         }
 
         if ($status) {
@@ -458,7 +458,11 @@ class PatientPaymentCacheItemsController extends Controller
     public function show($id)
     {
         $data = PatientPaymentCacheItem::with([
-            'payment_cache.check_in.patient', 'item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator',
+            'payment_cache.check_in.patient',
+            'item.unit_of_measure',
+            'consultation_type',
+            'payment_mode',
+            'creator',
         ])
             ->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');

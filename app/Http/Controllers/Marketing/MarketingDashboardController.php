@@ -53,12 +53,9 @@ class MarketingDashboardController extends Controller
             ],
         ];
 
-        $data['summary']['new_patients'] = Patient::query()
-            // ->when($clinic_id, function ($query) use ($clinic_id) {
-            //     $query->whereHas('creator', function ($query) use ($clinic_id) {
-            //         $query->where('clinic_id', $clinic_id);
-            //     });
-            // })
+        $data['summary']['new_patients'] = Patient::whereHas('creator', function ($query) use ($user) {
+            $query->where('clinic_id', $user->clinic_id);
+        })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
@@ -91,19 +88,15 @@ class MarketingDashboardController extends Controller
                     [
                         'name' => 'total_sales',
                         'amount' => PatientItemPayment::query()
-                            // ->when($clinic_id, function ($query) use ($clinic_id) {
-                            //     $query->whereHas('creator', function ($query) use ($clinic_id) {
-                            //         $query->where('clinic_id', $clinic_id);
-                            //     });
-                            // })
+                            ->whereHas('creator', function ($query) use ($user) {
+                                $query->where('clinic_id', $user->clinic_id);
+                            })
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
                             ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
-                            // ->when($clinic_id, function ($query) use ($clinic_id) {
-                            //     $query->whereHas('creator', function ($query) use ($clinic_id) {
-                            //         $query->where('clinic_id', $clinic_id);
-                            //     });
-                            // })
+                            ->whereHas('creator', function ($query) use ($user) {
+                                $query->where('clinic_id', $user->clinic_id);
+                            })
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
                             ->sum('amount'),
@@ -111,11 +104,9 @@ class MarketingDashboardController extends Controller
                     [
                         'name' => 'new_patients_male',
                         'amount' => Patient::query()
-                            // ->when($clinic_id, function ($query) use ($clinic_id) {
-                            //     $query->whereHas('creator', function ($query) use ($clinic_id) {
-                            //         $query->where('clinic_id', $clinic_id);
-                            //     });
-                            // })
+                            ->whereHas('creator', function ($query) use ($user) {
+                                $query->where('clinic_id', $user->clinic_id);
+                            })
                             ->where('gender', 'Male')
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)
@@ -124,11 +115,9 @@ class MarketingDashboardController extends Controller
                     [
                         'name' => 'new_patients_female',
                         'amount' => Patient::query()
-                            // ->when($clinic_id, function ($query) use ($clinic_id) {
-                            //     $query->whereHas('creator', function ($query) use ($clinic_id) {
-                            //         $query->where('clinic_id', $clinic_id);
-                            //     });
-                            // })
+                            ->whereHas('creator', function ($query) use ($user) {
+                                $query->where('clinic_id', $user->clinic_id);
+                            })
                             ->where('gender', 'Female')
                             ->whereDate('created_at', '>=', $start_date)
                             ->whereDate('created_at', '<=', $end_date)

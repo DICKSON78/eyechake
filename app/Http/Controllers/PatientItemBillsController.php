@@ -39,7 +39,7 @@ class PatientItemBillsController extends Controller
         $with_items = $request->with_items;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
-        
+
         $data = PatientItemBill::with(['first_item', 'creator'])->whereHas('first_item');
 
         if ($user->is_admin) {
@@ -51,9 +51,9 @@ class PatientItemBillsController extends Controller
                 });
             }
         } else {
-            // $data->whereHas('creator', function ($query) use ($clinic_id) {
-            //     $query->where('clinic_id', $clinic_id);
-            // });
+            $data->whereHas('creator', function ($query) use ($user) {
+                $query->where('clinic_id', $user->clinic_id);
+            });
         }
 
         if ($status) {

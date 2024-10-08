@@ -46,8 +46,8 @@ class UsersController extends Controller
                 $data->where('clinic_id', $clinic_id);
             }
         } else {
-            // $data->where('clinic_id', $user->clinic_id);
-            // $data->where('role', '!=', 'Admin');
+            $data->where('clinic_id', $user->clinic_id);
+            $data->where('role', '!=', 'Admin');
         }
 
         if ($status) {
