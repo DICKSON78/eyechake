@@ -77,7 +77,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $user->department = $user->department;
-        $user->job_title_id = $user->job_title;
+        $user->job_title = $user->job_title;
         $user->clinic = $user->clinic ?? new \stdClass();
         $user->clinic->preferences = Preference::where('clinic_id', $user->clinic->id ?? 0)->get();
         $user_privileges = UserPrivilege::where('user_id', $user->id)->get();
