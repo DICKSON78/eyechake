@@ -38,15 +38,16 @@ class PreferencesController extends Controller
 
         $data = [];
         $preferences = $request->json('preferences');
+        $clinic_id = $request->user()->clinic_id;
 
         foreach ($preferences as &$input) {
-            $preference = Preference::where('clinic_id', $request->user()->clinic_id)
+            $preference = Preference::where('clinic_id', $clinic_id)
                 ->where('key', $input['key'])
                 ->first();
             if ($preference) {
                 $preference->update(['value' => $input['value']]);
             } else {
-                $input['clinic_id'] = $request->user()->clinic_id;
+                $input['clinic_id'] = $clinic_id;
                 $preference = Preference::create($input);
             }
 
