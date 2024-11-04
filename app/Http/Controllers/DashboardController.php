@@ -131,7 +131,7 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Glass');
             })
-            ->whereIn('status', ['Paid', 'Served'])
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -146,7 +146,7 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Pharmacy');
             })
-            ->whereIn('status', ['Paid', 'Served'])
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -161,7 +161,7 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Procedure');
             })
-            ->whereIn('status', ['Paid', 'Served'])
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -176,7 +176,7 @@ class DashboardController extends Controller
             ->whereHas('consultation_type', function ($query) {
                 $query->where('name', 'Others');
             })
-            ->whereIn('status', ['Paid', 'Served'])
+            ->whereIn('status', ['Paid', 'Billed', 'Served'])
             ->whereNull('bill_id')
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -189,7 +189,7 @@ class DashboardController extends Controller
                 });
             })
             ->where('consultations.patient_direction', 'Direct to Doctor')
-            ->whereIn('it.status', ['Paid', 'Served'])
+            ->whereIn('it.status', ['Paid', 'Billed', 'Served'])
             ->whereNull('it.bill_id')
             ->whereDate('it.served_at', '>=', $start_date)
             ->whereDate('it.served_at', '<=', $end_date)
