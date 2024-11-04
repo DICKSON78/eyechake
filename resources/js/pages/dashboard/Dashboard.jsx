@@ -132,12 +132,6 @@ const Dashboard = ({ setSmsBalance }) => {
         <Grid
           container
           spacing={{ xs: 2, sm: 2, md: 3 }}
-          justifyContent="stretch"
-          sx={{
-            "& .MuiCard-root": {
-              minHeight: "100%",
-            },
-          }}
         >
           <Grid
             item
@@ -189,199 +183,117 @@ const Dashboard = ({ setSmsBalance }) => {
               />
             </Grid>
           </Grid>
+
           <Grid
             item
             md={6}
             sm={12}
             xs={12}
           >
-            <Grid
-              container
-              spacing={{ xs: 2, sm: 2, md: 3 }}
-            >
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <Card>
-                  <CardHeader title="Expenses by Category" />
-                  <Divider />
-                  <CardContent>
-                    <Chart
-                      options={{
-                        labels: data.statistics.expenses_by_category.map(
-                          (e) => e.name
-                        ),
-                        chart: {
-                          fontFamily: theme.typography.fontFamily,
-                          background: "transparent",
-                          toolbar: {
-                            show: false,
-                          },
-                        },
-                        plotOptions: {
-                          pie: {
-                            dataLabels: {
-                              offset: -16,
-                            },
-                          },
-                        },
-                        colors: [
-                          teal[400],
-                          red[400],
-                          lightBlue[400],
-                          deepOrange[300],
-                          lime[600],
-                          pink[400],
-                          cyan[500],
-                          purple[400],
-                          green[500],
-                          yellow[500],
-                        ],
-                        stroke: {
-                          show: false,
-                          width: 3,
-                          colors: data.statistics.expenses_by_category.map(
-                            (e) => theme.palette.background.paper
-                          ),
-                        },
-                        dataLabels: {
-                          style: {
-                            fontSize: 10,
-                            fontWeight: 400,
-                          },
-                          dropShadow: {
-                            enabled: false,
-                          },
-                        },
-                        tooltip: {
-                          y: {
-                            formatter: (
-                              val,
-                              { series, seriesIndex, dataPointIndex, w }
-                            ) => numberFormat(val),
-                          },
-                        },
-                        legend: {
-                          position: "bottom",
-                          labels: {
-                            colors: data.statistics.expenses_by_category.map(
-                              (e) => theme.palette.text.secondary
-                            ),
-                            useSeriesColors: false,
-                          },
-                          markers: {
-                            width: 14,
-                            height: 8,
-                            radius: 4,
-                          },
-                        },
-                      }}
-                      series={data.statistics.expenses_by_category.map(
-                        (e) => e.amount
-                      )}
-                      type="pie"
-                      height={
-                        data.statistics.expenses_by_category.length ? 288 : 256
-                      }
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <Card>
-                  <CardHeader title="Payments by Channel" />
-                  <Divider />
-                  <CardContent>
-                    <Chart
-                      options={{
-                        labels: data.statistics.payments_by_channel.map(
-                          (e) => e.name
-                        ),
-                        chart: {
-                          fontFamily: theme.typography.fontFamily,
-                          background: "transparent",
-                          toolbar: {
-                            show: false,
-                          },
-                        },
-                        plotOptions: {
-                          pie: {
-                            dataLabels: {
-                              offset: -16,
-                            },
-                          },
-                        },
-                        colors: [
-                          blue[400],
-                          red[400],
-                          cyan[500],
-                          green[500],
-                          indigo[400],
-                          teal[400],
-                          purple[400],
-                          lime[600],
-                          pink[400],
-                          yellow[500],
-                        ],
-                        stroke: {
-                          show: false,
-                          width: 3,
-                          colors: data.statistics.payments_by_channel.map(
-                            (e) => theme.palette.background.paper
-                          ),
-                        },
-                        dataLabels: {
-                          style: {
-                            fontSize: 10,
-                            fontWeight: 400,
-                          },
-                          dropShadow: {
-                            enabled: false,
-                          },
-                        },
-                        tooltip: {
-                          y: {
-                            formatter: (
-                              val,
-                              { series, seriesIndex, dataPointIndex, w }
-                            ) => numberFormat(val),
-                          },
-                        },
-                        legend: {
-                          position: "bottom",
-                          labels: {
-                            colors: data.statistics.payments_by_channel.map(
-                              (e) => theme.palette.text.secondary
-                            ),
-                            useSeriesColors: false,
-                          },
-                          markers: {
-                            width: 14,
-                            height: 8,
-                            radius: 4,
-                          },
-                        },
-                      }}
-                      series={data.statistics.payments_by_channel.map(
-                        (e) => e.amount
-                      )}
-                      type="pie"
-                      height={
-                        data.statistics.payments_by_channel.length ? 288 : 256
-                      }
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+            <Card>
+              <CardHeader title="Sales by Category" />
+              <Divider />
+              <Chart
+                options={{
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    foreColor: theme.palette.text.primary,
+                    background: "transparent",
+                    toolbar: {
+                      show: false,
+                    },
+                  },
+                  plotOptions: {
+                    bar: {
+                      borderRadius: 0,
+                      borderRadiusApplication: "end",
+                      borderRadiusWhenStacked: "last",
+                      distributed: true,
+                    },
+                  },
+                  colors: [
+                    purple[600],
+                    teal[400],
+                    orange[300],
+                    blue[300],
+                    pink[300],
+                    green[400],
+                  ],
+                  stroke: {
+                    show: false,
+                  },
+                  dataLabels: {
+                    enabled: false,
+                    style: {
+                      fontWeight: "400",
+                      fontSize: "10px",
+                    },
+                    dropShadow: {
+                      enabled: false,
+                    },
+                    formatter: (val, opts) => numberFormat(val),
+                  },
+                  grid: {
+                    show: false,
+                    borderColor: theme.palette.divider,
+                  },
+                  xaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      height: 6,
+                    },
+                  },
+                  yaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      width: 6,
+                    },
+                    labels: {
+                      formatter: (val, index) => numberFormat(val),
+                    },
+                  },
+                  tooltip: {
+                    theme: "dark",
+                    fillSeriesColor: true,
+                  },
+                  legend: {
+                    show: false,
+                    markers: {
+                      width: 14,
+                      height: 8,
+                      radius: 4,
+                    },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Sales",
+                    data: [
+                      { x: "Consultation", y: data.summary.consultation },
+                      { x: "Pharmacy", y: data.summary.pharmacy },
+                      { x: "Glass", y: data.summary.glass },
+                      { x: "Procedure", y: data.summary.procedure },
+                      {
+                        x: "Others",
+                        y: data.summary.others - data.summary.consultation,
+                      },
+                    ],
+                  },
+                ]}
+                type="bar"
+                height="272"
+              />
+            </Card>
           </Grid>
 
           <Grid
@@ -389,237 +301,291 @@ const Dashboard = ({ setSmsBalance }) => {
             md={6}
             sm={12}
             xs={12}
-            sx={{ order: { xs: 5, sm: 5, md: 4 } }}
           >
-            <Grid
-              container
-              spacing={{ xs: 2, sm: 2, md: 3 }}
-            >
-              <Grid
-                item
-                md={12}
-                sm={12}
-                xs={12}
-              >
-                <Card>
-                  <CardHeader title="Sales vs Expenses" />
-                  <Divider />
-                  <Chart
-                    options={{
-                      chart: {
-                        fontFamily: theme.typography.fontFamily,
-                        foreColor: theme.palette.text.primary,
-                        background: "transparent",
-                        toolbar: {
-                          show: false,
-                        },
-                      },
-                      plotOptions: {
-                        bar: {
-                          borderRadius: 8,
-                          borderRadiusApplication: "around",
-                          borderRadiusWhenStacked: "all",
-                        },
-                      },
-                      colors: [purple[400], theme.palette.warning.main],
-                      stroke: {
+            <Card>
+              <CardHeader title="Sales vs Expenses" />
+              <Divider />
+              <Chart
+                options={{
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    foreColor: theme.palette.text.primary,
+                    background: "transparent",
+                    toolbar: {
+                      show: false,
+                    },
+                  },
+                  plotOptions: {
+                    bar: {
+                      borderRadius: 8,
+                      borderRadiusApplication: "around",
+                      borderRadiusWhenStacked: "all",
+                    },
+                  },
+                  colors: [purple[400], theme.palette.warning.main],
+                  stroke: {
+                    show: false,
+                  },
+                  dataLabels: {
+                    enabled: false,
+                    style: {
+                      fontSize: 10,
+                      fontWeight: 400,
+                    },
+                    dropShadow: {
+                      enabled: false,
+                    },
+                    formatter: (val, opts) => numberFormat(val),
+                  },
+                  grid: {
+                    show: false,
+                    borderColor: theme.palette.divider,
+                  },
+                  xaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      height: 6,
+                    },
+                  },
+                  yaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      width: 6,
+                    },
+                    labels: {
+                      formatter: (val, index) => numberFormat(val),
+                    },
+                  },
+                  tooltip: {
+                    theme: "dark",
+                    fillSeriesColor: true,
+                  },
+                  legend: {
+                    markers: {
+                      width: 14,
+                      height: 8,
+                      radius: 4,
+                    },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Sales",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find((f) => f.name === "total_sales")
+                          ?.amount || 0,
+                    })),
+                  },
+                  {
+                    name: "Expenses",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find((f) => f.name === "expenses")
+                          ?.amount || 0,
+                    })),
+                  },
+                ]}
+                type="bar"
+                height="272"
+              />
+            </Card>
+          </Grid>
+
+          <Grid
+            item
+            md={3}
+            sm={12}
+            xs={12}
+          >
+            <Card>
+              <CardHeader title="Payments by Channel" />
+              <Divider />
+              <CardContent>
+                <Chart
+                  options={{
+                    labels: data.statistics.payments_by_channel.map(
+                      (e) => e.name
+                    ),
+                    chart: {
+                      fontFamily: theme.typography.fontFamily,
+                      background: "transparent",
+                      toolbar: {
                         show: false,
                       },
-                      dataLabels: {
+                    },
+                    plotOptions: {
+                      pie: {
+                        dataLabels: {
+                          offset: -16,
+                        },
+                      },
+                    },
+                    colors: [
+                      blue[400],
+                      red[400],
+                      cyan[500],
+                      green[500],
+                      indigo[400],
+                      teal[400],
+                      purple[400],
+                      lime[600],
+                      pink[400],
+                      yellow[500],
+                    ],
+                    stroke: {
+                      show: false,
+                      width: 3,
+                      colors: data.statistics.payments_by_channel.map(
+                        (e) => theme.palette.background.paper
+                      ),
+                    },
+                    dataLabels: {
+                      style: {
+                        fontSize: 10,
+                        fontWeight: 400,
+                      },
+                      dropShadow: {
                         enabled: false,
-                        style: {
-                          fontSize: 10,
-                          fontWeight: 400,
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
-                        formatter: (val, opts) => numberFormat(val),
                       },
-                      grid: {
+                    },
+                    tooltip: {
+                      y: {
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
+                      },
+                    },
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: data.statistics.payments_by_channel.map(
+                          (e) => theme.palette.text.secondary
+                        ),
+                        useSeriesColors: false,
+                      },
+                      markers: {
+                        width: 14,
+                        height: 8,
+                        radius: 4,
+                      },
+                    },
+                  }}
+                  series={data.statistics.payments_by_channel.map(
+                    (e) => e.amount
+                  )}
+                  type="pie"
+                  height={
+                    data.statistics.payments_by_channel.length ? 288 : 256
+                  }
+                />
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid
+            item
+            md={3}
+            sm={12}
+            xs={12}
+          >
+            <Card>
+              <CardHeader title="Expenses by Category" />
+              <Divider />
+              <CardContent>
+                <Chart
+                  options={{
+                    labels: data.statistics.expenses_by_category.map(
+                      (e) => e.name
+                    ),
+                    chart: {
+                      fontFamily: theme.typography.fontFamily,
+                      background: "transparent",
+                      toolbar: {
                         show: false,
-                        borderColor: theme.palette.divider,
                       },
-                      xaxis: {
-                        axisBorder: {
-                          show: false,
-                          color: theme.palette.divider,
-                        },
-                        axisTicks: {
-                          show: true,
-                          color: theme.palette.divider,
-                          height: 6,
+                    },
+                    plotOptions: {
+                      pie: {
+                        dataLabels: {
+                          offset: -16,
                         },
                       },
-                      yaxis: {
-                        axisBorder: {
-                          show: false,
-                          color: theme.palette.divider,
-                        },
-                        axisTicks: {
-                          show: true,
-                          color: theme.palette.divider,
-                          width: 6,
-                        },
-                        labels: {
-                          formatter: (val, index) => numberFormat(val),
-                        },
+                    },
+                    colors: [
+                      teal[400],
+                      red[400],
+                      lightBlue[400],
+                      deepOrange[300],
+                      lime[600],
+                      pink[400],
+                      cyan[500],
+                      purple[400],
+                      green[500],
+                      yellow[500],
+                    ],
+                    stroke: {
+                      show: false,
+                      width: 3,
+                      colors: data.statistics.expenses_by_category.map(
+                        (e) => theme.palette.background.paper
+                      ),
+                    },
+                    dataLabels: {
+                      style: {
+                        fontSize: 10,
+                        fontWeight: 400,
                       },
-                      tooltip: {
-                        theme: "dark",
-                        fillSeriesColor: true,
-                      },
-                      legend: {
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
-                        },
-                      },
-                    }}
-                    series={[
-                      {
-                        name: "Sales",
-                        data: data.statistics.yearly.map((e) => ({
-                          x: e.month,
-                          y:
-                            e.statistics.find((f) => f.name === "total_sales")
-                              ?.amount || 0,
-                        })),
-                      },
-                      {
-                        name: "Expenses",
-                        data: data.statistics.yearly.map((e) => ({
-                          x: e.month,
-                          y:
-                            e.statistics.find((f) => f.name === "expenses")
-                              ?.amount || 0,
-                        })),
-                      },
-                    ]}
-                    type="bar"
-                    height="272"
-                  />
-                </Card>
-              </Grid>
-              <Grid
-                item
-                md={12}
-                sm={12}
-                xs={12}
-              >
-                <Card>
-                  <CardHeader title="Patient Registration" />
-                  <Divider />
-                  <Chart
-                    options={{
-                      chart: {
-                        fontFamily: theme.typography.fontFamily,
-                        foreColor: theme.palette.text.primary,
-                        background: "transparent",
-                        toolbar: {
-                          show: false,
-                        },
-                      },
-                      colors: [teal[400], pink[400], theme.palette.info.main],
-                      stroke: {
-                        show: true,
-                        width: [3, 3, 3],
-                        curve: "smooth",
-                      },
-                      dataLabels: {
+                      dropShadow: {
                         enabled: false,
-                        style: {
-                          fontSize: 10,
-                          fontWeight: 400,
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
-                        formatter: (val, opts) => numberFormat(val),
                       },
-                      grid: {
-                        show: false,
-                        borderColor: theme.palette.divider,
+                    },
+                    tooltip: {
+                      y: {
+                        formatter: (
+                          val,
+                          { series, seriesIndex, dataPointIndex, w }
+                        ) => numberFormat(val),
                       },
-                      xaxis: {
-                        axisBorder: {
-                          show: false,
-                          color: theme.palette.divider,
-                        },
-                        axisTicks: {
-                          show: true,
-                          color: theme.palette.divider,
-                          height: 6,
-                        },
+                    },
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: data.statistics.expenses_by_category.map(
+                          (e) => theme.palette.text.secondary
+                        ),
+                        useSeriesColors: false,
                       },
-                      yaxis: {
-                        axisBorder: {
-                          show: false,
-                          color: theme.palette.divider,
-                        },
-                        axisTicks: {
-                          show: true,
-                          color: theme.palette.divider,
-                          width: 6,
-                        },
-                        labels: {
-                          formatter: (val, index) => numberFormat(val),
-                        },
+                      markers: {
+                        width: 14,
+                        height: 8,
+                        radius: 4,
                       },
-                      tooltip: {
-                        theme: "dark",
-                        fillSeriesColor: true,
-                      },
-                      legend: {
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
-                        },
-                      },
-                    }}
-                    series={[
-                      {
-                        name: "Male",
-                        data: data.statistics.yearly.map((e) => ({
-                          x: e.month,
-                          y:
-                            e.statistics.find(
-                              (f) => f.name === "new_patients_male"
-                            )?.amount || 0,
-                        })),
-                      },
-                      {
-                        name: "Female",
-                        data: data.statistics.yearly.map((e) => ({
-                          x: e.month,
-                          y:
-                            e.statistics.find(
-                              (f) => f.name === "new_patients_female"
-                            )?.amount || 0,
-                        })),
-                      },
-                      {
-                        name: "Total",
-                        data: data.statistics.yearly.map((e) => ({
-                          x: e.month,
-                          y:
-                            (e.statistics.find(
-                              (f) => f.name === "new_patients_male"
-                            )?.amount || 0) +
-                            (e.statistics.find(
-                              (f) => f.name === "new_patients_female"
-                            )?.amount || 0),
-                        })),
-                      },
-                    ]}
-                    type="line"
-                    height="272"
-                  />
-                </Card>
-              </Grid>
-            </Grid>
+                    },
+                  }}
+                  series={data.statistics.expenses_by_category.map(
+                    (e) => e.amount
+                  )}
+                  type="pie"
+                  height={
+                    data.statistics.expenses_by_category.length ? 288 : 256
+                  }
+                />
+              </CardContent>
+            </Card>
           </Grid>
 
           <Grid
@@ -627,7 +593,6 @@ const Dashboard = ({ setSmsBalance }) => {
             md={6}
             sm={12}
             xs={12}
-            sx={{ order: { xs: 4, sm: 4, md: 5 } }}
           >
             <Grid
               container
@@ -782,6 +747,7 @@ const Dashboard = ({ setSmsBalance }) => {
                   </CardContent>
                 </Card>
               </Grid>
+
               <Grid
                 item
                 md={12}
@@ -937,6 +903,123 @@ const Dashboard = ({ setSmsBalance }) => {
                 </Card>
               </Grid>
             </Grid>
+          </Grid>
+
+          <Grid
+            item
+            md={6}
+            sm={12}
+            xs={12}
+          >
+            <Card>
+              <CardHeader title="Patient Registration" />
+              <Divider />
+              <Chart
+                options={{
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    foreColor: theme.palette.text.primary,
+                    background: "transparent",
+                    toolbar: {
+                      show: false,
+                    },
+                  },
+                  colors: [teal[400], pink[400], theme.palette.info.main],
+                  stroke: {
+                    show: true,
+                    width: [3, 3, 3],
+                    curve: "smooth",
+                  },
+                  dataLabels: {
+                    enabled: false,
+                    style: {
+                      fontSize: 10,
+                      fontWeight: 400,
+                    },
+                    dropShadow: {
+                      enabled: false,
+                    },
+                    formatter: (val, opts) => numberFormat(val),
+                  },
+                  grid: {
+                    show: false,
+                    borderColor: theme.palette.divider,
+                  },
+                  xaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      height: 6,
+                    },
+                  },
+                  yaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      width: 6,
+                    },
+                    labels: {
+                      formatter: (val, index) => numberFormat(val),
+                    },
+                  },
+                  tooltip: {
+                    theme: "dark",
+                    fillSeriesColor: true,
+                  },
+                  legend: {
+                    markers: {
+                      width: 14,
+                      height: 8,
+                      radius: 4,
+                    },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Male",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find((f) => f.name === "new_patients_male")
+                          ?.amount || 0,
+                    })),
+                  },
+                  {
+                    name: "Female",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0,
+                    })),
+                  },
+                  {
+                    name: "Total",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_male"
+                        )?.amount || 0) +
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0),
+                    })),
+                  },
+                ]}
+                type="line"
+                height="272"
+              />
+            </Card>
           </Grid>
         </Grid>
       ) : null}

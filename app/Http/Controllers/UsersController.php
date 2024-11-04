@@ -117,7 +117,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number',
             'password' => 'required',
-            'privileges' => 'required|array',
+            'privileges' => 'sometimes|array',
         ]);
 
         $input = $request->except('password', 'privileges');
@@ -126,7 +126,7 @@ class UsersController extends Controller
         $input['created_by'] = $request->user()->id;
         $data = User::create($input);
 
-        if ($data) {
+        if ($data && $request->privileges) {
             $privileges = array_map(function ($e) use ($data) {
                 return ['user_id' => $data->id, 'privilege' => $e];
             }, $request->json('privileges'));
@@ -169,7 +169,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'sometimes|required|in:Active,Inactive',
-            'privileges' => 'sometimes|required|array',
+            'privileges' => 'sometimes|array',
         ]);
 
         $data = User::findOrFail($id);
@@ -181,7 +181,7 @@ class UsersController extends Controller
 
         $data->update($input);
 
-        if ($request->privileges) {
+        if ($request->privileges !== null) {
             // delete and reinsert privileges
             UserPrivilege::where('user_id', $data->id)->delete();
             $privileges = array_map(function ($e) use ($data) {
