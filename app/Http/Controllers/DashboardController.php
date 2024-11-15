@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\ExpensePayment;
 use App\Models\Patient;
+use App\Models\PatientCheckIn;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCacheItem;
@@ -43,6 +44,7 @@ class DashboardController extends Controller
                 'discount' => 0,
                 'expenses' => 0,
                 'new_patients' => 0,
+                'patient_visits' => 0,
                 'consulted_patients' => 0,
                 'glass' => 0,
                 'pharmacy' => 0,
@@ -107,6 +109,25 @@ class DashboardController extends Controller
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
             ->count();
+
+        $data['summary']['patient_visits'] = PatientCheckIn::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->groupBy('patient_id', DB::raw('date(created_at)'));
+
+        $data['summary']['patient_visits'] = DB::selectOne(sprintf('select count(id) as visits from (%s) as patient_check_ins', $data['summary']['patient_visits']->toSql()), $data['summary']['patient_visits']->getBindings());
+
+        if ($data['summary']['patient_visits']) {
+            $data['summary']['patient_visits'] = $data['summary']['patient_visits']->visits;
+        } else {
+            $data['summary']['patient_visits'] = 0;
+        }
+
         $data['summary']['consulted_patients'] = Consultation::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {

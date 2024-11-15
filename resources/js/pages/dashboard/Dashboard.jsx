@@ -11,11 +11,17 @@ import {
 import {
   Person2Rounded as PersonIcon,
   AccountBalanceRounded as SalesIcon,
+  CenterFocusStrongRounded as GlassIcon,
   DiscountRounded as DiscountIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
+  MedicalInformationRounded as PharmacyIcon,
+  MeetingRoomRounded as ConsultationsIcon,
   MoneyRounded as NetProfitIcon,
   TrendingDownRounded as ExpensesIcon,
+  PersonAddRounded as NewPatientsIcon,
+  ChecklistRounded as ProcedureIcon,
+  AltRouteRounded as OthersIcon,
 } from "@mui/icons-material";
 
 import Page from "../../components/Page";
@@ -133,56 +139,82 @@ const Dashboard = ({ setSmsBalance }) => {
           container
           spacing={{ xs: 2, sm: 2, md: 3 }}
         >
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Grid
-              container
-              spacing={{ xs: 2, sm: 2, md: 3 }}
-            >
-              <InfoCard
-                title="Total Sales"
-                count={numberFormat(data.summary.total_sales)}
-                icon={<SalesIcon />}
-                color={purple[400]}
-              />
-              <InfoCard
-                title="Expenses"
-                count={numberFormat(data.summary.expenses)}
-                icon={<ExpensesIcon />}
-                color={theme.palette.warning.main}
-              />
-              <InfoCard
-                title="Net Profit"
-                count={numberFormat(
-                  data.summary.total_sales - data.summary.expenses
-                )}
-                icon={<NetProfitIcon />}
-                color={cyan[500]}
-              />
-              <InfoCard
-                title="Total Discount"
-                count={numberFormat(data.summary.discount)}
-                icon={<DiscountIcon />}
-                color={pink[400]}
-              />
-              <InfoCard
-                title="Registered Patients"
-                count={numberFormat(data.summary.new_patients)}
-                icon={<PersonIcon />}
-                color={blue[400]}
-              />
-              <InfoCard
-                title="Consulted Patients"
-                count={numberFormat(data.summary.consulted_patients)}
-                icon={<DoneIcon />}
-                color={green[500]}
-              />
-            </Grid>
-          </Grid>
+          <InfoCard
+            title="Total Sales"
+            count={numberFormat(data.summary.total_sales)}
+            icon={<SalesIcon />}
+            color={purple[400]}
+          />
+          <InfoCard
+            title="Expenses"
+            count={numberFormat(data.summary.expenses)}
+            icon={<ExpensesIcon />}
+            color={theme.palette.warning.main}
+          />
+          <InfoCard
+            title="Net Profit"
+            count={numberFormat(
+              data.summary.total_sales - data.summary.expenses
+            )}
+            icon={<NetProfitIcon />}
+            color={cyan[500]}
+          />
+          <InfoCard
+            title="Total Discount"
+            count={numberFormat(data.summary.discount)}
+            icon={<DiscountIcon />}
+            color={pink[400]}
+          />
+          <InfoCard
+            title="Consultation"
+            count={numberFormat(data.summary.consultation)}
+            icon={<ConsultationsIcon />}
+            color={green[400]}
+          />
+          <InfoCard
+            title="Pharmacy"
+            count={numberFormat(data.summary.pharmacy)}
+            icon={<PharmacyIcon />}
+            color={teal[400]}
+          />
+          <InfoCard
+            title="Glass"
+            count={numberFormat(data.summary.glass)}
+            icon={<GlassIcon />}
+            color={purple[300]}
+          />
+          <InfoCard
+            title="Procedure"
+            count={numberFormat(data.summary.procedure)}
+            icon={<ProcedureIcon />}
+            color={lime[600]}
+          />
+          <InfoCard
+            title="Others"
+            count={numberFormat(
+              data.summary.others - data.summary.consultation
+            )}
+            icon={<OthersIcon />}
+            color={pink[300]}
+          />
+          <InfoCard
+            title="Registered Patients"
+            count={numberFormat(data.summary.new_patients)}
+            icon={<NewPatientsIcon />}
+            color={theme.palette.warning.main}
+          />
+          <InfoCard
+            title="Total Patients"
+            count={numberFormat(data.summary.patient_visits)}
+            icon={<PersonIcon />}
+            color={blue[400]}
+          />
+          <InfoCard
+            title="Consulted Patients"
+            count={numberFormat(data.summary.consulted_patients)}
+            icon={<DoneIcon />}
+            color={green[500]}
+          />
 
           <Grid
             item
@@ -594,6 +626,123 @@ const Dashboard = ({ setSmsBalance }) => {
             sm={12}
             xs={12}
           >
+            <Card>
+              <CardHeader title="Patient Registration" />
+              <Divider />
+              <Chart
+                options={{
+                  chart: {
+                    fontFamily: theme.typography.fontFamily,
+                    foreColor: theme.palette.text.primary,
+                    background: "transparent",
+                    toolbar: {
+                      show: false,
+                    },
+                  },
+                  colors: [teal[400], pink[400], theme.palette.info.main],
+                  stroke: {
+                    show: true,
+                    width: [3, 3, 3],
+                    curve: "smooth",
+                  },
+                  dataLabels: {
+                    enabled: false,
+                    style: {
+                      fontSize: 10,
+                      fontWeight: 400,
+                    },
+                    dropShadow: {
+                      enabled: false,
+                    },
+                    formatter: (val, opts) => numberFormat(val),
+                  },
+                  grid: {
+                    show: false,
+                    borderColor: theme.palette.divider,
+                  },
+                  xaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      height: 6,
+                    },
+                  },
+                  yaxis: {
+                    axisBorder: {
+                      show: false,
+                      color: theme.palette.divider,
+                    },
+                    axisTicks: {
+                      show: true,
+                      color: theme.palette.divider,
+                      width: 6,
+                    },
+                    labels: {
+                      formatter: (val, index) => numberFormat(val),
+                    },
+                  },
+                  tooltip: {
+                    theme: "dark",
+                    fillSeriesColor: true,
+                  },
+                  legend: {
+                    markers: {
+                      width: 14,
+                      height: 8,
+                      radius: 4,
+                    },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Male",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find((f) => f.name === "new_patients_male")
+                          ?.amount || 0,
+                    })),
+                  },
+                  {
+                    name: "Female",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0,
+                    })),
+                  },
+                  {
+                    name: "Total",
+                    data: data.statistics.yearly.map((e) => ({
+                      x: e.month,
+                      y:
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_male"
+                        )?.amount || 0) +
+                        (e.statistics.find(
+                          (f) => f.name === "new_patients_female"
+                        )?.amount || 0),
+                    })),
+                  },
+                ]}
+                type="line"
+                height="272"
+              />
+            </Card>
+          </Grid>
+
+          <Grid
+            item
+            md={6}
+            sm={12}
+            xs={12}
+          >
             <Grid
               container
               spacing={{ xs: 2, sm: 2, md: 3 }}
@@ -903,123 +1052,6 @@ const Dashboard = ({ setSmsBalance }) => {
                 </Card>
               </Grid>
             </Grid>
-          </Grid>
-
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Card>
-              <CardHeader title="Patient Registration" />
-              <Divider />
-              <Chart
-                options={{
-                  chart: {
-                    fontFamily: theme.typography.fontFamily,
-                    foreColor: theme.palette.text.primary,
-                    background: "transparent",
-                    toolbar: {
-                      show: false,
-                    },
-                  },
-                  colors: [teal[400], pink[400], theme.palette.info.main],
-                  stroke: {
-                    show: true,
-                    width: [3, 3, 3],
-                    curve: "smooth",
-                  },
-                  dataLabels: {
-                    enabled: false,
-                    style: {
-                      fontSize: 10,
-                      fontWeight: 400,
-                    },
-                    dropShadow: {
-                      enabled: false,
-                    },
-                    formatter: (val, opts) => numberFormat(val),
-                  },
-                  grid: {
-                    show: false,
-                    borderColor: theme.palette.divider,
-                  },
-                  xaxis: {
-                    axisBorder: {
-                      show: false,
-                      color: theme.palette.divider,
-                    },
-                    axisTicks: {
-                      show: true,
-                      color: theme.palette.divider,
-                      height: 6,
-                    },
-                  },
-                  yaxis: {
-                    axisBorder: {
-                      show: false,
-                      color: theme.palette.divider,
-                    },
-                    axisTicks: {
-                      show: true,
-                      color: theme.palette.divider,
-                      width: 6,
-                    },
-                    labels: {
-                      formatter: (val, index) => numberFormat(val),
-                    },
-                  },
-                  tooltip: {
-                    theme: "dark",
-                    fillSeriesColor: true,
-                  },
-                  legend: {
-                    markers: {
-                      width: 14,
-                      height: 8,
-                      radius: 4,
-                    },
-                  },
-                }}
-                series={[
-                  {
-                    name: "Male",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        e.statistics.find((f) => f.name === "new_patients_male")
-                          ?.amount || 0,
-                    })),
-                  },
-                  {
-                    name: "Female",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        e.statistics.find(
-                          (f) => f.name === "new_patients_female"
-                        )?.amount || 0,
-                    })),
-                  },
-                  {
-                    name: "Total",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        (e.statistics.find(
-                          (f) => f.name === "new_patients_male"
-                        )?.amount || 0) +
-                        (e.statistics.find(
-                          (f) => f.name === "new_patients_female"
-                        )?.amount || 0),
-                    })),
-                  },
-                ]}
-                type="line"
-                height="272"
-              />
-            </Card>
           </Grid>
         </Grid>
       ) : null}
