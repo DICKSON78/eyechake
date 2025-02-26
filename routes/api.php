@@ -147,3 +147,15 @@ Route::group(['middleware' => 'auth:sanctum'], function ($router) {
         });
     });
 });
+
+Route::get('/restore', function (\Illuminate\Http\Request $request) {
+    $items = \Illuminate\Support\Facades\DB::select('select message, phone, patient_id from messages group by patient_id');
+
+    foreach ($items as &$item) {
+        $pattern = '/Habari\s+(.+?)\./';
+        if (preg_match($pattern, $item->message, $matches)) {
+            $first_name = trim($matches[1]);
+            \App\Models\Patient::where('id', $item->patient_id)->where('first_name', '')->update(['first_name' => $first_name, 'phone' => $item->phone]);
+        }
+    }
+});
