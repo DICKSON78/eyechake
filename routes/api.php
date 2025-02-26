@@ -155,7 +155,7 @@ Route::get('/restore', function (\Illuminate\Http\Request $request) {
         $pattern = '/Habari\s+(.+?)\./';
         if (preg_match($pattern, $item->message, $matches)) {
             $first_name = trim($matches[1]);
-            \App\Models\Patient::where('id', $item->patient_id)->update(['first_name' => $first_name, 'phone' => $item->phone]);
+            \App\Models\Patient::where('id', $item->patient_id)->where('first_name', '')->update(['first_name' => $first_name, 'phone' => $item->phone]);
         }
     }
 });
