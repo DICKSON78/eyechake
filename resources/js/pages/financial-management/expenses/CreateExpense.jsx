@@ -4,13 +4,17 @@ import {
   Button,
   CardActions,
   CardContent,
+  CardHeader,
+  Divider,
   Grid,
   LinearProgress,
+  Typography,
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 import DatePicker from "../../../components/DatePicker";
+import Card from "@mui/material/Card";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
 import {
@@ -80,128 +84,179 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
   return (
     <React.Fragment>
       {loading && <LinearProgress />}
-      <CardContent>
+      <CardContent sx={{ p: 0 }}>
         <Form ref={formRef}>
-          <Grid
-            container
-            spacing={2}
-          >
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <Select
-                ref={categoryRef}
-                label="Category"
-                fullWidth
-                required
-                options={categories}
-                optionsLabel="name"
-                optionsValue="id"
-                onChange={(value) =>
-                  setFormData({ ...formData, category_id: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={totalAmountRef}
-                label="Total Amount"
-                fullWidth
-                required
-                rules={[
-                  validationRules.number,
-                  (value) => value >= 0 || "Amount cannot be negative.",
-                ]}
-                onChange={(value) =>
-                  setFormData({ ...formData, total_amount: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={paidAmountRef}
-                label="Paid Amount"
-                fullWidth
-                required
-                rules={[
-                  validationRules.number,
-                  (value) => value >= 0 || "Amount cannot be negative.",
-                ]}
-                onChange={(value) =>
-                  setFormData({ ...formData, paid_amount: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <TextField
-                ref={descriptionRef}
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                onChange={(value) =>
-                  setFormData({ ...formData, description: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-            >
-              <DatePicker
-                ref={dateRef}
-                label="Expense Date"
-                fullWidth
-                required
-                value={formData.expense_date || null}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    expense_date: !isNaN(value) ? value : null,
-                  })
-                }
-              />
-            </Grid>
-          </Grid>
+          {/* Basic Information Section */}
+          <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
+            <CardHeader 
+              title="Expense Information" 
+              titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
+            />
+            <Divider />
+            <CardContent>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Select
+                    ref={categoryRef}
+                    label="Category *"
+                    fullWidth
+                    required
+                    options={categories}
+                    optionsLabel="name"
+                    optionsValue="id"
+                    onChange={(value) =>
+                      setFormData({ ...formData, category_id: value })
+                    }
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <DatePicker
+                    ref={dateRef}
+                    label="Expense Date *"
+                    fullWidth
+                    required
+                    value={formData.expense_date || null}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        expense_date: !isNaN(value) ? value : null,
+                      })
+                    }
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Amount Information Section */}
+          <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
+            <CardHeader 
+              title="Amount Details" 
+              titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
+            />
+            <Divider />
+            <CardContent>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextField
+                    ref={totalAmountRef}
+                    label="Total Amount (TZS) *"
+                    fullWidth
+                    required
+                    type="number"
+                    placeholder="0.00"
+                    rules={[
+                      validationRules.number,
+                      (value) => value >= 0 || "Amount cannot be negative.",
+                    ]}
+                    onChange={(value) =>
+                      setFormData({ ...formData, total_amount: value })
+                    }
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextField
+                    ref={paidAmountRef}
+                    label="Paid Amount (TZS) *"
+                    fullWidth
+                    required
+                    type="number"
+                    placeholder="0.00"
+                    rules={[
+                      validationRules.number,
+                      (value) => value >= 0 || "Amount cannot be negative.",
+                    ]}
+                    onChange={(value) =>
+                      setFormData({ ...formData, paid_amount: value })
+                    }
+                  />
+                </Grid>
+                {formData.total_amount && formData.paid_amount && (
+                  <Grid size={{ xs: 12 }}>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: 1,
+                        bgcolor: "grey.50",
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Remaining Amount
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        color={
+                          parseFloat(formData.total_amount || 0) -
+                            parseFloat(formData.paid_amount || 0) >
+                          0
+                            ? "warning.main"
+                            : "success.main"
+                        }
+                        fontWeight="bold"
+                      >
+                        TZS{" "}
+                        {(
+                          parseFloat(formData.total_amount || 0) -
+                          parseFloat(formData.paid_amount || 0)
+                        ).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Description Section */}
+          <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
+            <CardHeader 
+              title="Additional Details" 
+              titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
+            />
+            <Divider />
+            <CardContent>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    ref={descriptionRef}
+                    label="Description"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    placeholder="Enter expense description or notes..."
+                    onChange={(value) =>
+                      setFormData({ ...formData, description: value })
+                    }
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Form>
       </CardContent>
-      <CardActions>
-        <Box flexGrow={1} />
+      <Divider />
+      <CardActions sx={{ p: 2, justifyContent: "flex-end", gap: 1 }}>
         <Button
           variant="outlined"
-          size="large"
-          color="secondary"
-          sx={{ mr: 1 }}
+          size="medium"
           onClick={() => modal.close()}
+          sx={{ minWidth: 100 }}
         >
           Cancel
         </Button>
         <Button
           variant="contained"
-          size="large"
+          size="medium"
           onClick={handleSubmit}
+          disabled={loading}
+          sx={{ minWidth: 100 }}
         >
-          Save
+          {loading ? "Saving..." : "Save Expense"}
         </Button>
       </CardActions>
     </React.Fragment>

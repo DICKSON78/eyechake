@@ -18,7 +18,7 @@ const GlassPatientRoutes = () => {
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
 
-  const { data: consultation, loading: loadingConsultation } = useFetch(
+  const { data: consultation, loading: loadingConsultation, error: consultationError } = useFetch(
     `api/consultations/${consultationId}`,
     null,
     true,
@@ -28,15 +28,28 @@ const GlassPatientRoutes = () => {
 
   useEffect(() => {
     if (!patientId || !consultationId) {
-      navigate("/reception/glass-patients");
+      navigate("/sales-management/glass-patients");
     }
   }, []);
+
+  useEffect(() => {
+    if (consultationError) {
+      console.error('Consultation error:', consultationError);
+      console.log('Error status:', consultationError.response?.status);
+      console.log('Error response:', consultationError.response);
+      // If consultation not found (404) or server error (500), redirect back to glass patients list
+      if (consultationError.response?.status === 404 || consultationError.response?.status === 500) {
+        console.log('Redirecting due to error status:', consultationError.response?.status);
+        navigate("/sales-management/glass-patients");
+      }
+    }
+  }, [consultationError, navigate]);
 
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Reception" },
+        { title: "Sales Table" },
         { title: "Spectacle Patients" },
         { title: patientId },
       ]}

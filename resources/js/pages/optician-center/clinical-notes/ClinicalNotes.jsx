@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  Box,
   Button,
   Card,
   CardContent,
@@ -273,36 +274,58 @@ const ClinicalNotes = ({ patient, consultation }) => {
               items={items}
               hidePaginationFooter
               checkboxSelection={(item, index) =>
-                item.status === "Paid" || item.status === "Billed"
+                item.status === "Paid" || item.status === "Billed" || item.status === "Pending"
               }
               checked={selectedItems}
               setChecked={setSelectedItems}
             />
 
+            {/* Lens Types Display */}
+            {consultation.lens_types && (
+              <Box sx={{ mb: 2 }}>
+                <Subheader title="Lens Selection" />
+                <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {(typeof consultation.lens_types === 'string' 
+                      ? JSON.parse(consultation.lens_types) 
+                      : Array.isArray(consultation.lens_types) 
+                        ? consultation.lens_types 
+                        : []
+                    ).map((lensType, index) => (
+                      <Chip
+                        key={index}
+                        label={lensType}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              </Box>
+            )}
+
             <Subheader title="Remarks" />
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <TextField
-                  disabled
-                  ref={remarksRef}
-                  fullWidth
-                  placeholder="Type remarks..."
-                  multiline
-                  rows={3}
-                  horizontal
-                  defaultValue={remarks}
-                  onChange={(value) => autoSave("remarks", value)}
-                />
-              </Grid>
-            </Grid>
+            <TextField
+              disabled
+              ref={remarksRef}
+              fullWidth
+              placeholder="Type remarks..."
+              multiline
+              rows={6}
+              horizontal
+              defaultValue={remarks}
+              onChange={(value) => autoSave("remarks", value)}
+              sx={{
+                width: '100%',
+                '& .MuiInputBase-root': {
+                  width: '100%',
+                },
+                '& .MuiInputBase-input': {
+                  width: '100%',
+                }
+              }}
+            />
           </CardContent>
         </Form>
         <Divider />

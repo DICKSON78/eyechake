@@ -96,7 +96,6 @@ const SelectItems = ({
       per_page: 5000,
       q: itemName,
       consultation_type: consultationType,
-      is_consultation_item: "No",
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       item_type: itemType,
       lens_type_id: lensTypeId,
@@ -456,6 +455,8 @@ const SelectItems = ({
                         ref={commentsRef}
                         label="Comments"
                         fullWidth
+                        multiline
+                        rows={4}
                         onChange={(value) => setComments(value)}
                       />
                     </Grid>

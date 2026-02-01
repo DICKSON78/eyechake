@@ -23,7 +23,7 @@ const Report = ({
   nestedColumns,
   summationFooterColumns,
 }) => {
-  columns = columns.filter((e) => typeof e.show === "undefined" || e.show);
+  columns = Array.isArray(columns) ? columns.filter((e) => typeof e.show === "undefined" || e.show) : [];
 
   const addToast = useToast();
   const [perPage, setPerPage] = useState(25);
@@ -54,10 +54,13 @@ const Report = ({
 
   const getFooterItems = () => {
     let footerColumns = [];
-    if (summationFooterColumns) {
+    if (Array.isArray(summationFooterColumns)) {
       footerColumns = summationFooterColumns.map((col) => {
         if (typeof col.reducer === "function") {
-          col.value = numberFormat(data.data.reduce(col.reducer, 0));
+          const total = Array.isArray(data.data) ? data.data.reduce(col.reducer, 0) : 0;
+          // Ensure the total is a valid number before formatting
+          const numericTotal = typeof total === 'number' && !isNaN(total) ? total : 0;
+          col.value = numberFormat(numericTotal);
         }
 
         if (typeof col.span === "number") {
@@ -81,10 +84,10 @@ const Report = ({
             <PDFReport
               title={title}
               subtitle={subtitle}
-              columns={columns.filter(
+              columns={Array.isArray(columns) ? columns.filter(
                 (col) => typeof col.webOnly === "undefined" || !col.webOnly
-              )}
-              items={data.data}
+              ) : []}
+              items={Array.isArray(data.data) ? data.data : []}
               orientation={pdfOrientation}
               nestedObject={nestedObject}
               nestedColumns={nestedColumns}
@@ -92,10 +95,10 @@ const Report = ({
             />
             <SpreadsheetReport
               title={title}
-              columns={columns.filter(
+              columns={Array.isArray(columns) ? columns.filter(
                 (col) => typeof col.webOnly === "undefined" || !col.webOnly
-              )}
-              items={data.data}
+              ) : []}
+              items={Array.isArray(data.data) ? data.data : []}
               format="xlsx"
             />
           </React.Fragment>
@@ -114,7 +117,7 @@ const Report = ({
             },
             ...(columns || []),
           ]}
-          items={data.data}
+          items={Array.isArray(data.data) ? data.data : []}
           itemCount={data.total}
           page={page}
           pageSize={perPage}
@@ -136,7 +139,7 @@ const Report = ({
                       ...(nestedColumns || []),
                     ]}
                     items={
-                      data.data[index] ? data.data[index][nestedObject] : []
+                      Array.isArray(data.data) && data.data[index] ? data.data[index][nestedObject] : []
                     }
                     hidePaginationFooter
                   />

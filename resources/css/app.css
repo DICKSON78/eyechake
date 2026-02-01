@@ -1,0 +1,154 @@
+/* Global font size reduction by 10% */
+html {
+  font-size: 90%;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f0f4f8;
+  margin: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Text Justify for all paragraphs and body text */
+p, 
+.MuiTypography-body1, 
+.MuiTypography-body2, 
+.MuiTypography-paragraph,
+body p,
+.paragraph,
+.content-text {
+  text-align: justify !important;
+  text-justify: inter-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
+
+/* Ensure responsive text justify */
+@media (max-width: 600px) {
+  p, 
+  .MuiTypography-body1, 
+  .MuiTypography-body2,
+  body p {
+    text-align: justify !important;
+    text-justify: inter-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    word-break: break-word;
+  }
+}
+
+/* Ensure all elements inherit the reduced font size */
+* {
+  font-size: inherit;
+}
+
+/* Elevated design styles - only apply to non-auth pages */
+body:not(.auth-page) {
+  background-image: linear-gradient(to right bottom, #0d47a1, #1976d2);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  padding: 40px;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.feature-section {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+
+.feature-section:hover {
+  transform: scale(1.05);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.3);
+}
+
+.feature-title {
+  font-size: 2.2em;
+  color: #1a237e;
+  text-transform: uppercase;
+  background: linear-gradient(to right, #651fff, #2196f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.feature-list li {
+  position: relative;
+  font-size: 1.2em;
+  color: #666;
+  transition: color 0.3s ease-in-out;
+  margin: 15px 0;
+
+}
+
+.feature-list li::before {
+  content: "★";
+  position: absolute;
+  left: -30px;
+  color: #f50057;
+  font-size: 1.5em;
+  transition: transform 0.3s;
+  transform: scale(0);
+}
+
+.feature-list li:hover::before {
+  transform: scale(1);
+}
+
+.feature-image {
+  filter: brightness(0.9);
+  transition: filter 0.5s;
+}
+
+.feature-image:hover {
+  filter: brightness(1.1);
+}
+
+/* New style for feature content */
+.feature-content {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-content h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.5em;
+  color: #1e40af;
+}
+
+.feature-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.feature-items {
+  text-align: left;
+  padding: 20px;
+}

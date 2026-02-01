@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, CardContent, Chip, Divider, Stack } from "@mui/material";
+import { Card, CardContent, Chip, Divider, Stack, IconButton, Tooltip } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/VisibilityRounded";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import PatientFilePDF from "./PatientFilePDF";
+import PatientFileView from "./PatientFileView";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatError } from "../../../helpers";
@@ -15,8 +17,15 @@ const PatientFile = ({ patient }) => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    patient_id: patient.id,
+    patient_id: patient?.id,
   });
+
+  // Update params when patient changes
+  useEffect(() => {
+    if (patient?.id) {
+      setParams(prev => ({ ...prev, patient_id: patient.id }));
+    }
+  }, [patient?.id]);
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/consultations",
@@ -27,7 +36,16 @@ const PatientFile = ({ patient }) => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      // Handle paginated response from Laravel
+      const paginatedData = response?.data?.data || response?.data || {};
+      return {
+        data: paginatedData.data || [],
+        total: paginatedData.total || 0,
+        page: paginatedData.current_page || paginatedData.page || 1,
+        per_page: paginatedData.per_page || 25,
+      };
+    }
   );
 
   useEffect(() => {
@@ -51,8 +69,13 @@ const PatientFile = ({ patient }) => {
 
   return (
     <React.Fragment>
-      <Card sx={{ borderTopLeftRadius: 0 }}>
-        <CardContent>
+      <Card sx={{ 
+        borderTopLeftRadius: 0,
+        width: "100%",
+        bgcolor: "background.paper",
+        boxShadow: 1,
+      }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <Table
             loading={loading}
             columns={[
@@ -105,6 +128,24 @@ const PatientFile = ({ patient }) => {
                     }
                     spacing={1}
                   >
+                    <Tooltip title="View">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          modalRef.current?.open(
+                            `Patient File - ${patient.full_name}`,
+                            <PatientFileView
+                              patient={patient}
+                              consultationId={item.id}
+                            />,
+                            "lg"
+                          );
+                        }}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </Tooltip>
                     <PatientFilePDF
                       size="small"
                       patient={patient}
@@ -114,8 +155,8 @@ const PatientFile = ({ patient }) => {
                 ),
               },
             ]}
-            items={data.data}
-            itemCount={data.total}
+            items={Array.isArray(data?.data) ? data.data : []}
+            itemCount={data?.total || 0}
             page={params.page}
             pageSize={params.per_page}
             onPageChange={(page) => setParams({ ...params, page })}

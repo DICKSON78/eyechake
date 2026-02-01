@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Box,
   Button,
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import {
   LinearProgress,
   Paper,
   Stack,
+  Typography,
 } from "@mui/material";
 import {
   Visibility as VisibilityIcon,
@@ -135,63 +137,117 @@ const UserRegistration = () => {
           <Paper
             key={e.value}
             variant="outlined"
-            sx={{ my: 1, px: 2, py: 1 }}
+            sx={{
+              my: 1.5,
+              p: 2,
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.03)"
+                  : "rgba(0, 0, 0, 0.02)",
+              border: (theme) =>
+                `1px solid ${
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.12)"
+                    : "rgba(0, 0, 0, 0.12)"
+                }`,
+              borderRadius: 2,
+            }}
           >
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={3}
-                sm={6}
-                xs={12}
-              >
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.privileges.indexOf(e.value) !== -1}
-                      onChange={(event) =>
-                        setFormData({
-                          ...formData,
-                          privileges: event.target.checked
-                            ? [...formData.privileges, e.value]
-                            : formData.privileges.filter((f) => f !== e.value),
-                        })
-                      }
-                    />
-                  }
-                  label={e.label}
-                />
-              </Grid>
-              <Grid
-                item
-                md={9}
-                sm={12}
-                xs={12}
-              >
-                {getPrivilegesTree(e.children)}
-              </Grid>
-            </Grid>
-          </Paper>
-        ) : (
-          <FormControlLabel
-            key={e.value}
-            control={
-              <Checkbox
-                checked={formData.privileges.indexOf(e.value) !== -1}
-                onChange={(event) =>
-                  setFormData({
-                    ...formData,
-                    privileges: event.target.checked
-                      ? [...formData.privileges, e.value]
-                      : formData.privileges.filter((f) => f !== e.value),
-                  })
+            <Box sx={{ mb: 1.5 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.privileges.indexOf(e.value) !== -1}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        privileges: event.target.checked
+                          ? [...formData.privileges, e.value]
+                          : formData.privileges.filter((f) => f !== e.value),
+                      })
+                    }
+                    sx={{
+                      "&.Mui-checked": {
+                        color: "primary.main",
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      color: "text.primary",
+                    }}
+                  >
+                    {e.label}
+                  </Typography>
                 }
               />
-            }
-            label={e.label}
-          />
+            </Box>
+            <Box
+              sx={{
+                pl: 4,
+                borderLeft: (theme) =>
+                  `2px solid ${
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.1)"
+                  }`,
+                ml: 1,
+              }}
+            >
+              <Grid container spacing={1.5}>
+                {getPrivilegesTree(e.children)}
+              </Grid>
+            </Box>
+          </Paper>
+        ) : (
+          <Grid item xs={12} sm={6} md={4} key={e.value}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.privileges.indexOf(e.value) !== -1}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      privileges: event.target.checked
+                        ? [...formData.privileges, e.value]
+                        : formData.privileges.filter((f) => f !== e.value),
+                    })
+                  }
+                  sx={{
+                    "&.Mui-checked": {
+                      color: "primary.main",
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
+                  {e.label}
+                </Typography>
+              }
+              sx={{
+                width: "100%",
+                py: 0.5,
+                px: 1,
+                borderRadius: 1,
+                "&:hover": {
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.03)",
+                },
+              }}
+            />
+          </Grid>
         );
       });
   };
@@ -463,14 +519,83 @@ const UserRegistration = () => {
 
             <Card
               variant="outlined"
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 3,
+                border: (theme) =>
+                  `1px solid ${
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.12)"
+                      : "rgba(0, 0, 0, 0.12)"
+                  }`,
+                borderRadius: 2,
+              }}
             >
-              <CardHeader title="Access Privileges" />
-              <Divider />
-              <CardContent>
-                {getPrivilegesTree(
-                  getPrivileges(window.user?.clinic?.preferences || [])
-                )}
+              <CardHeader
+                title={
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: "text.primary",
+                    }}
+                  >
+                    Access Privileges
+                  </Typography>
+                }
+                sx={{
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "rgba(0, 0, 0, 0.02)",
+                  borderBottom: (theme) =>
+                    `1px solid ${
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.12)"
+                        : "rgba(0, 0, 0, 0.12)"
+                    }`,
+                }}
+              />
+              <CardContent
+                sx={{
+                  pt: 3,
+                  pb: 3,
+                  px: 3,
+                }}
+              >
+                <Box
+                  sx={{
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                    pr: 1,
+                    "&::-webkit-scrollbar": {
+                      width: "8px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "rgba(0, 0, 0, 0.05)",
+                      borderRadius: "4px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.2)"
+                          : "rgba(0, 0, 0, 0.2)",
+                      borderRadius: "4px",
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.3)"
+                            : "rgba(0, 0, 0, 0.3)",
+                      },
+                    },
+                  }}
+                >
+                  {getPrivilegesTree(
+                    getPrivileges(window.user?.clinic?.preferences || [])
+                  )}
+                </Box>
               </CardContent>
             </Card>
           </Form>

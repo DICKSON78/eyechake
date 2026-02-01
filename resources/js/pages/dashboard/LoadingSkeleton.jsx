@@ -9,20 +9,14 @@ const LoadingSkeleton = () => {
       spacing={{ xs: 2, sm: 2, md: 3 }}
     >
       <Grid
-        item
-        md={6}
-        sm={12}
-        xs={12}
+        size={{ xs: 12, sm: 12, md: 6 }}
       >
         <Grid
           container
           spacing={{ xs: 2, sm: 2, md: 3 }}
         >
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -30,10 +24,7 @@ const LoadingSkeleton = () => {
             />
           </Grid>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -41,10 +32,7 @@ const LoadingSkeleton = () => {
             />
           </Grid>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -52,10 +40,7 @@ const LoadingSkeleton = () => {
             />
           </Grid>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -63,10 +48,7 @@ const LoadingSkeleton = () => {
             />
           </Grid>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -74,10 +56,7 @@ const LoadingSkeleton = () => {
             />
           </Grid>
           <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
+            size={{ xs: 12, sm: 12, md: 6 }}
           >
             <Skeleton
               variant="rounded"
@@ -87,10 +66,7 @@ const LoadingSkeleton = () => {
         </Grid>
       </Grid>
       <Grid
-        item
-        md={3}
-        sm={12}
-        xs={12}
+        size={{ xs: 12, sm: 12, md: 3 }}
       >
         <Skeleton
           variant="rounded"
@@ -98,10 +74,7 @@ const LoadingSkeleton = () => {
         />
       </Grid>
       <Grid
-        item
-        md={3}
-        sm={12}
-        xs={12}
+        size={{ xs: 12, sm: 12, md: 3 }}
       >
         <Skeleton
           variant="rounded"
@@ -109,10 +82,7 @@ const LoadingSkeleton = () => {
         />
       </Grid>
       <Grid
-        item
-        md={6}
-        sm={12}
-        xs={12}
+        size={{ xs: 12, sm: 12, md: 6 }}
       >
         <Skeleton
           variant="rounded"
@@ -120,10 +90,7 @@ const LoadingSkeleton = () => {
         />
       </Grid>
       <Grid
-        item
-        md={6}
-        sm={12}
-        xs={12}
+        size={{ xs: 12, sm: 12, md: 6 }}
       >
         <Skeleton
           variant="rounded"

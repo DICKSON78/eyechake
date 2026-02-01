@@ -127,11 +127,11 @@ const Expenses = ({ module, createdBy }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 3, index: 1 },
-          { reducer: (acc, item, index) => acc + item.total_amount, index: 2 },
-          { reducer: (acc, item, index) => acc + item.paid_amount, index: 3 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.total_amount) || 0), index: 2 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.paid_amount) || 0), index: 3 },
           {
             reducer: (acc, item, index) =>
-              acc + (item.total_amount - item.paid_amount),
+              acc + ((parseFloat(item.total_amount) || 0) - (parseFloat(item.paid_amount) || 0)),
             index: 4,
           },
         ]}

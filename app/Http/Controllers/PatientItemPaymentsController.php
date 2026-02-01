@@ -65,7 +65,12 @@ class PatientItemPaymentsController extends Controller
 
         if ($with_items == 'Yes') {
             $data->with(['items' => function ($query) {
-                $query->with(['item.unit_of_measure', 'payment_mode', 'creator']);
+                $query->with([
+                    'item.unit_of_measure', 
+                    'payment_mode', 
+                    'payment_cache.check_in.patient',
+                    'creator'
+                ]);
             }]);
         }
 
@@ -125,7 +130,78 @@ class PatientItemPaymentsController extends Controller
      */
     public function show($id)
     {
-        //
+        try {
+            $data = PatientItemPayment::with([
+                'channel',
+                'creator',
+                'first_item.payment_cache.check_in.patient', // Ensure patient data is loaded
+                'items' => function ($query) {
+                    $query->with([
+                        'item' => function ($itemQuery) {
+                            $itemQuery->with('unit_of_measure');
+                        },
+                        'payment_mode',
+                        'payment_cache.check_in.patient', // Ensure patient data is loaded for each item
+                        'payment_cache.consultation',
+                        'creator'
+                    ]);
+                }
+            ])->find($id);
+
+            if (!$data) {
+                return $this->sendError('Invoice not found.', Response::HTTP_NOT_FOUND);
+            }
+
+            // Additional validation: ensure we have patient data
+            $patientData = null;
+            if ($data->first_item && $data->first_item->payment_cache && $data->first_item->payment_cache->check_in) {
+                $patientData = $data->first_item->payment_cache->check_in->patient;
+            }
+
+            if (!$patientData && $data->items && $data->items->count() > 0) {
+                // Try to get patient from first item
+                $firstItem = $data->items->first();
+                if ($firstItem && $firstItem->payment_cache && $firstItem->payment_cache->check_in) {
+                    $patientData = $firstItem->payment_cache->check_in->patient;
+                }
+            }
+
+            // If still no patient, try to get from any item
+            if (!$patientData && $data->items && $data->items->count() > 0) {
+                foreach ($data->items as $item) {
+                    if ($item && $item->payment_cache && $item->payment_cache->check_in && $item->payment_cache->check_in->patient) {
+                        $patientData = $item->payment_cache->check_in->patient;
+                        break;
+                    }
+                }
+            }
+
+            if (!$patientData) {
+                \Log::warning('Invoice missing patient data', [
+                    'payment_id' => $id,
+                    'items_count' => $data->items ? $data->items->count() : 0,
+                    'first_item_exists' => $data->first_item ? true : false
+                ]);
+            }
+
+            // Ensure all relationships are loaded for the response
+            $data->loadMissing([
+                'channel',
+                'creator',
+                'items.item.unit_of_measure',
+                'items.payment_mode',
+                'items.payment_cache.check_in.patient'
+            ]);
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Exception $e) {
+            \Log::error('Error fetching invoice', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->sendError('Failed to load invoice. Please try again.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

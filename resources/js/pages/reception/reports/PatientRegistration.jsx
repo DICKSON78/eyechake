@@ -232,6 +232,21 @@ const PatientRegistration = () => {
             headerName: "Address",
           },
           {
+            field: "region_id",
+            headerName: "Region",
+            valueGetter: (item, index) => item.region?.name || "Not provided",
+          },
+          {
+            field: "district_id",
+            headerName: "District",
+            valueGetter: (item, index) => item.district?.name || "Not provided",
+          },
+          {
+            field: "ward_id",
+            headerName: "Ward",
+            valueGetter: (item, index) => item.ward?.name || "Not provided",
+          },
+          {
             field: "payment_mode_id",
             headerName: "Payment Mode",
             valueGetter: (item, index) => item.payment_mode?.name,

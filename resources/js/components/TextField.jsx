@@ -27,13 +27,16 @@ const TextField = (
   const inputRef = useRef();
 
   const [state, setState] = useState({
-    value: defaultValue,
+    value: value !== undefined ? value : (defaultValue !== undefined ? defaultValue : ''),
     error: null,
     validate: false,
   });
 
   useEffect(() => {
-    setState({ ...state, value: defaultValue || value });
+    const newValue = value !== undefined ? value : (defaultValue !== undefined ? defaultValue : '');
+    if (newValue !== state.value) {
+      setState((prevState) => ({ ...prevState, value: newValue }));
+    }
   }, [defaultValue, value]);
 
   useEffect(() => {
@@ -48,10 +51,10 @@ const TextField = (
     }
 
     if (onChange) {
-      onChange(value);
+      onChange(value || "");
     }
 
-    setState({ ...state, value, validate });
+    setState({ ...state, value: value || "", validate });
   };
 
   const _validate = () => {
@@ -75,7 +78,9 @@ const TextField = (
   };
 
   const _setValue = (value, validate = false) => {
-    inputRef.current.value = value;
+    if (inputRef.current) {
+      inputRef.current.value = value || "";
+    }
     _onChange(value, validate);
   };
 
@@ -130,11 +135,12 @@ const TextField = (
           margin="none"
           autoComplete="off"
           {...rest}
-          defaultValue={defaultValue}
-          value={value}
+          {...(value !== undefined ? { value: state.value } : { defaultValue: defaultValue })}
           required={required}
           error={!!state.error}
-          onChange={(event) => _onChange(event.target.value, true)}
+          onChange={(event) => _onChange(event?.target?.value || "", true)}
+          id={rest.id || rest.name || `field-${Math.random().toString(36).substr(2, 9)}`}
+          name={rest.name || rest.id || `field-${Math.random().toString(36).substr(2, 9)}`}
         />
         {state.error ? (
           <Typography

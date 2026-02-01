@@ -17,6 +17,7 @@ import {
   getFullName,
   numberFormat,
   throttle,
+  getWeekStartDate,
 } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
@@ -37,7 +38,7 @@ const DailyCashCollection = ({ module }) => {
     patient_gender: undefined,
     patient_phone: undefined,
     payment_channel_id: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
   });
 
   useEffect(() => {
@@ -199,7 +200,7 @@ const DailyCashCollection = ({ module }) => {
             field: "subtotal",
             headerName: "Subtotal",
             valueGetter: (item, index) =>
-              numberFormat(item.amount - item.discount),
+              numberFormat(Math.max(0, (item.amount || 0) - (item.discount || 0))),
           },
           {
             field: "channel",
@@ -222,10 +223,10 @@ const DailyCashCollection = ({ module }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 4, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 4 },
-          { reducer: (acc, item, index) => acc + item.discount, index: 5 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.amount) || 0), index: 4 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.discount) || 0), index: 5 },
           {
-            reducer: (acc, item, index) => acc + (item.amount - item.discount),
+            reducer: (acc, item, index) => acc + Math.max(0, (parseFloat(item.amount) || 0) - (parseFloat(item.discount) || 0)),
             index: 6,
           },
         ]}

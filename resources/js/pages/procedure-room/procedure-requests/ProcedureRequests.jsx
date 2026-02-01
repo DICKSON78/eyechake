@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Divider, Stack, IconButton, Tooltip } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/RefreshRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -14,6 +15,11 @@ const ProcedureRequests = () => {
   const addToast = useToast();
   const navigate = useNavigate();
   const modalRef = useRef();
+  // Notification context removed - using stable useDynamicNotifications in Menu component
+
+  // Use 3-day window to match notification API (last 3 days)
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
   const [params, setParams] = useState({
     page: 1,
@@ -25,18 +31,33 @@ const ProcedureRequests = () => {
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: undefined,
-    start_date: new Date(),
-    end_date: undefined,
+    start_date: threeDaysAgo, // Last 3 days to match notifications
+    end_date: new Date(), // Today
+  });
+
+  // Use separate state for actual query params to avoid auto-refetch on every params change
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    per_page: 25,
+    item_status: "Pending,Paid,Billed",
+    item_consultation_type: "Procedure",
+    patient_id: undefined,
+    patient_name: undefined,
+    patient_gender: undefined,
+    patient_phone: undefined,
+    item_payment_mode_id: undefined,
+    start_date: threeDaysAgo, // Last 3 days to match notifications
+    end_date: new Date(), // Today
   });
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/patient-payment-cache",
     {
-      ...params,
-      start_date: params.start_date
+      ...queryParams,
+      start_date: queryParams.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
-      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+      end_date: queryParams.end_date ? formatDateForDb(params.end_date) : undefined,
     },
     true,
     {
@@ -51,11 +72,15 @@ const ProcedureRequests = () => {
     document.title = `Procedure Requests - ${window.APP_NAME}`;
   }, []);
 
+  // Lock/unlock functionality removed - using stable useDynamicNotifications in Menu component
+
   useEffect(() => {
     if (error) {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
+
+  // Notification badges are now handled by the stable useDynamicNotifications hook in Menu component
 
   return (
     <Page
@@ -66,7 +91,17 @@ const ProcedureRequests = () => {
       ]}
     >
       <Card>
-        <PageHeader title="Procedure Requests" />
+        <PageHeader 
+          title="Procedure Requests" 
+          subtitle={`${(data && typeof data.total === 'number') ? data.total : 0} pending (last 3 days)`} 
+          trailing={
+            <Tooltip title="Refresh List">
+              <IconButton onClick={() => { setQueryParams({ ...params }); handleFetch(); }} disabled={loading}>
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          }
+        />
         <Divider />
         <CardContent>
           <Filters
@@ -152,10 +187,8 @@ const ProcedureRequests = () => {
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
-            onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) =>
-              setParams({ ...params, per_page: value, page: 1 })
-            }
+            onPageChange={(page) => { setParams({ ...params, page }); setQueryParams((prev) => ({ ...prev, page })); handleFetch(); }}
+            onPageSizeChange={(value) => { const next = { ...params, per_page: value, page: 1 }; setParams(next); setQueryParams((prev) => ({ ...prev, per_page: value, page: 1 })); handleFetch(); }}
           />
         </CardContent>
       </Card>

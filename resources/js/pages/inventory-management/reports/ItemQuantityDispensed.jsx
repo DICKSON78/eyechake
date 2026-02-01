@@ -36,24 +36,40 @@ const ItemQuantityDispensed = () => {
     q: undefined,
     start_date: undefined,
     end_date: undefined,
+    report_period: "weekly",
   });
 
   useEffect(() => {
     document.title = `Quantity Dispensed Report - ${window.APP_NAME}`;
   }, []);
 
+  const getReportPeriodTitle = () => {
+    switch (params.report_period) {
+      case "daily":
+        return "Daily Report";
+      case "weekly":
+        return "Weekly Report";
+      case "monthly":
+        return "Monthly Report";
+      case "yearly":
+        return "Yearly Report";
+      default:
+        return "";
+    }
+  };
+
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Inventory Management" },
+        { title: "Stock Management" },
         { title: "Reports" },
         { title: "Quantity Dispensed Report" },
       ]}
     >
       <Report
-        title="Quantity Dispensed Report"
-        subtitle={getDateRangeTitle(params.start_date, params.end_date)}
+        title={`Quantity Dispensed Report - ${getReportPeriodTitle()}`}
+        subtitle={`${getDateRangeTitle(params.start_date, params.end_date)} • Note: Negative values indicate stock shortages (more dispensed than available)`}
         uri="api/reports/inventory-management/item-quantity-dispensed"
         params={{
           ...params,
@@ -80,7 +96,30 @@ const ItemQuantityDispensed = () => {
                 >
                   <Grid
                     item
-                    md
+                    md={2}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      label="Report Period"
+                      fullWidth
+                      options={[
+                        { id: "daily", name: "Daily" },
+                        { id: "weekly", name: "Weekly" },
+                        { id: "monthly", name: "Monthly" },
+                        { id: "yearly", name: "Yearly" },
+                      ]}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      value={params.report_period}
+                      onChange={(value) =>
+                        setParams({ ...params, report_period: value })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -98,7 +137,7 @@ const ItemQuantityDispensed = () => {
                   </Grid>
                   <Grid
                     item
-                    md
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -116,7 +155,7 @@ const ItemQuantityDispensed = () => {
                   </Grid>
                   <Grid
                     item
-                    md
+                    md={3}
                     sm={6}
                     xs={12}
                   >
@@ -138,7 +177,7 @@ const ItemQuantityDispensed = () => {
                   </Grid>
                   <Grid
                     item
-                    md
+                    md={3}
                     sm={6}
                     xs={12}
                   >
@@ -183,8 +222,36 @@ const ItemQuantityDispensed = () => {
           },
           {
             field: "balance",
-            headerName: "Balance",
-            valueGetter: (item, index) => numberFormat(item.item.balance || 0),
+            headerName: "Current Balance",
+            valueGetter: (item, index) => {
+              const balance = parseFloat(item.item.balance) || 0;
+              // Display 0 instead of negative values to avoid confusion during inspections
+              return numberFormat(balance < 0 ? 0 : balance);
+            },
+          },
+          {
+            field: "new_balance",
+            headerName: "Remaining Stock",
+            valueGetter: (item, index) => {
+              const currentBalance = parseFloat(item.item.balance) || 0;
+              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
+              const newBalance = currentBalance - dispensedQuantity;
+              
+              // Display 0 instead of negative values to avoid confusion during inspections
+              return numberFormat(newBalance < 0 ? 0 : newBalance);
+            },
+          },
+          {
+            field: "total_balance",
+            headerName: "Final Stock Level",
+            valueGetter: (item, index) => {
+              const currentBalance = parseFloat(item.item.balance) || 0;
+              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
+              const newBalance = currentBalance - dispensedQuantity;
+              
+              // Display 0 instead of negative values to avoid confusion during inspections
+              return numberFormat(newBalance < 0 ? 0 : newBalance);
+            },
           },
           {
             field: "dispensed_value",
@@ -194,10 +261,41 @@ const ItemQuantityDispensed = () => {
           },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 6, index: 1 },
+          { value: "TOTAL", span: 5, index: 0 },
           {
-            reducer: (acc, item, index) => acc + (item.dispensed_value || 0),
+            reducer: (acc, item, index) => {
+              const balance = parseFloat(item.item.balance) || 0;
+              // Use 0 for negative balances to avoid confusion during inspections
+              const effectiveBalance = balance < 0 ? 0 : balance;
+              return acc + effectiveBalance;
+            },
+            index: 5,
+          },
+          {
+            reducer: (acc, item, index) => {
+              const currentBalance = parseFloat(item.item.balance) || 0;
+              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
+              const newBalance = currentBalance - dispensedQuantity;
+              // Use 0 for negative balances to avoid confusion during inspections
+              const effectiveBalance = newBalance < 0 ? 0 : newBalance;
+              return acc + effectiveBalance;
+            },
             index: 6,
+          },
+          {
+            reducer: (acc, item, index) => {
+              const currentBalance = parseFloat(item.item.balance) || 0;
+              const dispensedQuantity = parseFloat(item.quantity_dispensed) || 0;
+              const newBalance = currentBalance - dispensedQuantity;
+              // Use 0 for negative balances to avoid confusion during inspections
+              const effectiveBalance = newBalance < 0 ? 0 : newBalance;
+              return acc + effectiveBalance;
+            },
+            index: 7,
+          },
+          {
+            reducer: (acc, item, index) => acc + (parseFloat(item.dispensed_value) || 0),
+            index: 8,
           },
         ]}
       />

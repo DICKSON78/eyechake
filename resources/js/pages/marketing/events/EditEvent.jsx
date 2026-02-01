@@ -143,7 +143,7 @@ const EditEvent = ({ eventType, item, modal, fetchEvents }) => {
                 label="Description"
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 defaultValue={formData.description}
                 onChange={(value) =>
                   setFormData({ ...formData, description: value })
@@ -180,7 +180,7 @@ const EditEvent = ({ eventType, item, modal, fetchEvents }) => {
                   label="Remarks"
                   fullWidth
                   multiline
-                  rows={3}
+                  rows={4}
                   required
                   defaultValue={formData.remarks}
                   onChange={(value) =>

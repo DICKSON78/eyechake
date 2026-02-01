@@ -11,6 +11,7 @@ import Select from "../../../components/Select";
 import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
+  console.log('Filters - params:', params);
   return (
     <Card
       variant="outlined"
@@ -27,20 +28,52 @@ const Filters = ({ params, setParams, ...rest }) => {
         >
           <Grid
             item
-            md
+            md={3}
+            sm={6}
+            xs={12}
+          >
+            <Select
+              fullWidth
+              label="View Period"
+              options={["Daily", "Weekly", "Monthly"]}
+              value={params.view_period === 'daily' ? 'Daily' : params.view_period === 'weekly' ? 'Weekly' : 'Monthly'}
+              onChange={(value) => {
+                console.log('View Period Select - onChange called with value:', value);
+                const periodMap = {
+                  'Daily': 'daily',
+                  'Weekly': 'weekly', 
+                  'Monthly': 'monthly'
+                };
+                const newParams = {
+                  ...params,
+                  view_period: periodMap[value],
+                  to_return_date: null, // Always clear date when changing view period
+                };
+                console.log('View Period Select - newParams:', newParams);
+                setParams(newParams);
+              }}
+            />
+          </Grid>
+          <Grid
+            item
+            md={3}
             sm={6}
             xs={12}
           >
             <DatePicker
               fullWidth
-              label="Return Date"
+              label="Select Return Date"
               value={params.to_return_date || null}
-              onChange={(value) =>
-                setParams({
+              onChange={(value) => {
+                console.log('Date Picker - onChange called with value:', value);
+                const newParams = {
                   ...params,
                   to_return_date: !isNaN(value) ? value : null,
-                })
-              }
+                  view_period: !isNaN(value) ? 'daily' : params.view_period, // Set to daily when specific date is selected
+                };
+                console.log('Date Picker - newParams:', newParams);
+                setParams(newParams);
+              }}
             />
           </Grid>
           <Grid

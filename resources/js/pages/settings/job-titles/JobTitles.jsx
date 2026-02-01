@@ -154,7 +154,7 @@ const JobTitles = () => {
                 field: "clinic_id",
                 headerName: "Clinic",
                 valueGetter: (item) => item.clinic?.name,
-                show: window.user.role === "Admin",
+                show: window.user && window.user.role === "Admin",
               },
               {
                 field: "actions",

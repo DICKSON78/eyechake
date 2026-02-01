@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('sms:patient_to_return_reminder')->dailyAt('16:00');
+        $schedule->command('report:generateBalanceSheet')->monthly();
     }
 
     /**

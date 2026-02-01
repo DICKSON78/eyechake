@@ -14,6 +14,12 @@ import {
   TableRow,
   Tooltip,
   Typography,
+  Card,
+  CardContent,
+  Divider,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   ArrowDropDownRounded as ArrowDropDownIcon,
@@ -201,9 +207,21 @@ const Table = ({
   renderExpanded,
   repeatHead,
 }) => {
-  columns = columns.filter(
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  // Filter columns and hide less important ones on mobile
+  let visibleColumns = columns.filter(
     (col) => typeof col.show === "undefined" || col.show
   );
+  
+  // On mobile, only show columns that don't have hideOnMobile flag
+  if (isMobile) {
+    visibleColumns = visibleColumns.filter(
+      (col) => !col.hideOnMobile
+    );
+  }
+  
   checked = checked || [];
 
   const [state, setState] = useState({
@@ -258,7 +276,7 @@ const Table = ({
             />
           </TableCell>
         ) : null}
-        {columns.map((col, index) => (
+        {visibleColumns.map((col, index) => (
           <TableCell
             key={index}
             component="th"
@@ -276,14 +294,40 @@ const Table = ({
   };
 
   return (
-    <Box sx={{ minWidth: 300, overflowX: "auto" }}>
-      <MuiTable {...(footerItems ? { className: "has-footer" } : null)}>
+    <Box sx={{ 
+      width: '100%', 
+      overflowX: "auto",
+      "& .MuiTableCell-root": {
+        fontSize: { xs: "0.75rem", sm: "0.875rem" },
+        padding: { xs: "8px 4px", sm: "16px" },
+        whiteSpace: { xs: "nowrap", md: "normal" },
+      },
+      "& .MuiTableHead-root .MuiTableCell-root": {
+        fontWeight: 600,
+        fontSize: { xs: "0.7rem", sm: "0.875rem" },
+      },
+    }}>
+      <Box
+        sx={{
+          width: '100%',
+          overflowX: 'auto',
+          overflowY: 'visible',
+        }}
+      >
+        <MuiTable 
+          {...(footerItems ? { className: "has-footer" } : null)} 
+          sx={{ 
+            width: '100%',
+            minWidth: { xs: "600px", sm: "auto" },
+            tableLayout: { xs: 'auto', sm: 'auto' },
+          }}
+        >
         <TableHead>{renderTableHeadRow()}</TableHead>
         <TableBody>
           {loading ? (
             <TableRow>
               <TableCell
-                colSpan={columns.length + (checkboxSelection ? 1 : 0)}
+                colSpan={visibleColumns.length + (checkboxSelection ? 1 : 0)}
                 sx={{ p: 0, borderBottom: "none" }}
               >
                 <LinearProgress />
@@ -314,7 +358,7 @@ const Table = ({
                         />
                       </TableCell>
                     ) : null}
-                    {columns.map((col, colIndex) => (
+                    {visibleColumns.map((col, colIndex) => (
                       <Tooltip
                         key={colIndex}
                         title={
@@ -339,7 +383,7 @@ const Table = ({
                       className="expanded"
                     >
                       {checkboxSelection ? <TableCell /> : null}
-                      <TableCell colSpan={columns.length}>
+                      <TableCell colSpan={visibleColumns.length}>
                         {renderExpanded(item, index, array)}
                       </TableCell>
                     </TableRow>
@@ -352,7 +396,7 @@ const Table = ({
             </React.Fragment>
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length + (checkboxSelection ? 1 : 0)}>
+              <TableCell colSpan={visibleColumns.length + (checkboxSelection ? 1 : 0)}>
                 <NoItemsOverlay
                   message={noItemsOverlayMessage}
                   hideIcon={hideNoItemsOverlayIcon}
@@ -378,32 +422,57 @@ const Table = ({
             ))}
           </TableFooter>
         ) : null}
-      </MuiTable>
+        </MuiTable>
+      </Box>
       {!hidePaginationFooter ? (
-        <TablePagination
-          component="div"
-          count={itemCount}
-          page={page - 1}
-          onPageChange={(event, page1) => {
-            if (typeof onPageChange === "function") {
-              onPageChange(page1 + 1);
-            }
-          }}
-          rowsPerPageOptions={[25, 50, 100, 250, 500, 1000]}
-          rowsPerPage={pageSize}
-          onRowsPerPageChange={(event) => {
-            if (typeof onPageSizeChange === "function") {
-              onPageSizeChange(event.target.value);
-            }
-          }}
-          slotProps={{
-            select: {
-              IconComponent: ArrowDropDownIcon,
-              MenuProps: { PaperProps: { variant: "outlined-elevation" } },
-            },
-          }}
-          ActionsComponent={TablePaginationActions}
-        />
+        <Box sx={{ 
+          overflowX: "auto",
+          "& .MuiTablePagination-root": {
+            flexWrap: { xs: "wrap", sm: "nowrap" },
+          },
+          "& .MuiTablePagination-toolbar": {
+            paddingLeft: { xs: 1, sm: 2 },
+            paddingRight: { xs: 1, sm: 2 },
+            flexWrap: { xs: "wrap", sm: "nowrap" },
+            gap: { xs: 1, sm: 0 },
+          },
+          "& .MuiTablePagination-spacer": {
+            flex: { xs: "0 0 100%", sm: "1 1 100%" },
+            order: { xs: 3, sm: 0 },
+          },
+          "& .MuiTablePagination-selectLabel": {
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+          },
+          "& .MuiTablePagination-displayedRows": {
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+          },
+        }}>
+          <TablePagination
+            component="div"
+            count={itemCount}
+            page={page - 1}
+            onPageChange={(event, page1) => {
+              if (typeof onPageChange === "function") {
+                onPageChange(page1 + 1);
+              }
+            }}
+            rowsPerPageOptions={isMobile ? [10, 25, 50] : [25, 50, 100, 250, 500, 1000]}
+            rowsPerPage={pageSize || 25}
+            onRowsPerPageChange={(event) => {
+              if (typeof onPageSizeChange === "function") {
+                onPageSizeChange(event.target.value);
+              }
+            }}
+            slotProps={{
+              select: {
+                IconComponent: ArrowDropDownIcon,
+                MenuProps: { PaperProps: { variant: "outlined-elevation" } },
+              },
+            }}
+            ActionsComponent={TablePaginationActions}
+            labelRowsPerPage={isMobile ? "Rows:" : "Rows per page:"}
+          />
+        </Box>
       ) : null}
     </Box>
   );

@@ -100,14 +100,30 @@ const Page = ({ breadcrumbs, children }) => {
             square
             variant="elevation"
             elevation={0}
-            sx={{ px: { xs: 2, sm: 2, md: 3 }, py: 1 }}
+            sx={{ 
+              px: { xs: 2, sm: 2, md: 3 }, 
+              py: 1,
+              width: '100%',
+              maxWidth: '100%',
+            }}
           >
             {getBreadcrumbs()}
           </Paper>
           <Divider />
         </React.Fragment>
       ) : null}
-      <Box m={{ xs: 2, sm: 2, md: 3 }}>{children}</Box>
+      <Box 
+        sx={{ 
+          width: '100%',
+          maxWidth: '100%',
+          m: 0,
+          p: { xs: 2, sm: 2, md: 3 },
+          pt: { xs: 3, sm: 3, md: 4 },
+          boxSizing: 'border-box',
+        }}
+      >
+        {children}
+      </Box>
     </React.Fragment>
   );
 };

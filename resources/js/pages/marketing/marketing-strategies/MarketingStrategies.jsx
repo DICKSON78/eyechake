@@ -180,10 +180,6 @@ const MarketingStrategies = () => {
                 ),
               },
               {
-                field: "remarks",
-                headerName: "Remarks",
-              },
-              {
                 field: "actions",
                 headerName: "Actions",
                 renderCell: (item) => (
@@ -200,13 +196,6 @@ const MarketingStrategies = () => {
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => openMarketingStrategyDetailsModal(item)}
-                    >
-                      View Details
-                    </Button>
                   </Stack>
                 ),
               },

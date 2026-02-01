@@ -6,9 +6,13 @@ import {
   Button,
   CardActions,
   CardContent,
+  Divider,
   Grid,
   LinearProgress,
   Stack,
+  FormControlLabel,
+  Checkbox,
+  Typography,
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
@@ -39,12 +43,13 @@ const CreatePatient = ({ modal, fetchPatients }) => {
   const addressRef = useRef();
   const nationalIdRef = useRef();
   const phoneRef = useRef();
+  const emailRef = useRef();
   const occupationRef = useRef();
   const paymentModeRef = useRef();
   const informationSourceRef = useRef();
 
   const marketingEnabled =
-    window.user.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
+    window.user?.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
       ?.value === "Yes";
 
   const { data: paymentModes } = useFetch(
@@ -70,6 +75,17 @@ const CreatePatient = ({ modal, fetchPatients }) => {
       (response) => response.data.data.data
     );
 
+  const { data: occupations } = useFetch(
+    "api/occupations",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+      [],
+      (response) => response.data.data.data
+    );
+
   const [formData, setFormData] = useState({
     first_name: undefined,
     middle_name: undefined,
@@ -82,9 +98,15 @@ const CreatePatient = ({ modal, fetchPatients }) => {
     address: undefined,
     national_id: undefined,
     phone: undefined,
+    email: undefined,
     occupation: undefined,
     payment_mode_id: undefined,
     info_source_id: undefined,
+    is_vip: false,
+    is_student: false,
+    is_businessperson: false,
+    is_outreach: false,
+    is_employee: false,
   });
 
   const { data, loading, error, handlePost } = usePost("api/patients", {
@@ -102,10 +124,22 @@ const CreatePatient = ({ modal, fetchPatients }) => {
 
   useEffect(() => {
     if (data) {
-      addToast({ message: data.message, severity: "success" });
-      window.setTimeout(() => {
-        navigate(`/reception/patients/${data.data.id}/check-in`);
-      }, 1000);
+      const createdId = data?.data?.id;
+      if (createdId) {
+        addToast({ message: data.message, severity: "success" });
+        // Refresh the patients list
+        if (fetchPatients) {
+          fetchPatients();
+        }
+        window.setTimeout(() => {
+          navigate(`/reception/patients/${createdId}/check-in`);
+        }, 1000);
+      } else {
+        addToast({
+          message: data?.data?.error || "Registration failed. Please try again.",
+          severity: "error",
+        });
+      }
     }
   }, [data]);
 
@@ -271,6 +305,21 @@ const CreatePatient = ({ modal, fetchPatients }) => {
               xs={12}
             >
               <TextField
+                ref={emailRef}
+                label="Email Address"
+                fullWidth
+                type="email"
+                rules={[validationRules.optionalEmail]}
+                onChange={(value) => setFormData({ ...formData, email: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
                 ref={nationalIdRef}
                 label="National ID"
                 fullWidth
@@ -285,10 +334,14 @@ const CreatePatient = ({ modal, fetchPatients }) => {
               sm={6}
               xs={12}
             >
-              <TextField
+              <Select
                 ref={occupationRef}
                 label="Occupation"
                 fullWidth
+                clearable
+                options={occupations}
+                optionsLabel="name"
+                optionsValue="name"
                 onChange={(value) =>
                   setFormData({ ...formData, occupation: value })
                 }
@@ -334,6 +387,74 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                 />
               </Grid>
             ) : null}
+            
+            {/* Client Type Checkboxes */}
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                Client Type
+              </Typography>
+              <Stack direction="row" spacing={3} flexWrap="wrap">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_student}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_student: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Student"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_businessperson}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          is_businessperson: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="Businessperson"
+                />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.is_vip}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_vip: e.target.checked })
+                    }
+                  />
+                }
+                  label="Prestige"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_outreach}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_outreach: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Outreach Client"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.is_employee}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_employee: e.target.checked })
+                    }
+                  />
+                }
+                label="Employee"
+              />
+              </Stack>
+            </Grid>
           </Grid>
         </Form>
       </CardContent>

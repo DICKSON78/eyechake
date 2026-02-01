@@ -17,8 +17,20 @@ return new class extends Migration
         DB::statement('rename table clinic_details to clinics');
 
         Schema::table('clinics', function (Blueprint $table) {
-            $table->string('sms_key')->nullable()->after('sms_balance');
-            $table->string('logo')->nullable()->after('sms_key');
+            if (!Schema::hasColumn('clinics', 'sms_key')) {
+                if (Schema::hasColumn('clinics', 'sms_balance')) {
+                    $table->string('sms_key')->nullable()->after('sms_balance');
+                } else {
+                    $table->string('sms_key')->nullable();
+                }
+            }
+            if (!Schema::hasColumn('clinics', 'logo')) {
+                if (Schema::hasColumn('clinics', 'sms_key')) {
+                    $table->string('logo')->nullable()->after('sms_key');
+                } else {
+                    $table->string('logo')->nullable();
+                }
+            }
         });
 
         $sms_key = env('SMS_KEY');
@@ -28,24 +40,29 @@ return new class extends Migration
 
         // DB::statement('alter table preferences drop primary key');
 
-        Schema::table('preferences', function (Blueprint $table) {
-            $table->dropPrimary();
-        });
-        Schema::table('preferences', function (Blueprint $table) {
-            $table->id()->autoIncrement()->first();
-        });
+        // Only modify preferences table if it doesn't already have an id column
+        if (!Schema::hasColumn('preferences', 'id')) {
+            Schema::table('preferences', function (Blueprint $table) {
+                $table->dropPrimary();
+            });
+            Schema::table('preferences', function (Blueprint $table) {
+                $table->id()->autoIncrement()->first();
+            });
+        }
 
         $table_names = ['departments', 'users', 'expense_categories', 'information_sources', 'items', 'job_titles', 'payment_channels', 'payment_modes', 'preferences'];
 
         foreach ($table_names as $table_name) {
-            Schema::table($table_name, function (Blueprint $table) {
-                $table->foreignId('clinic_id')->nullable()->after('id');
+            Schema::table($table_name, function (Blueprint $table) use ($table_name) {
+                if (!Schema::hasColumn($table_name, 'clinic_id')) {
+                    $table->foreignId('clinic_id')->nullable()->after('id');
 
-                $table->foreign('clinic_id')
-                    ->references('id')
-                    ->on('clinics')
-                    ->cascadeOnUpdate()
-                    ->nullOnDelete();
+                    $table->foreign('clinic_id')
+                        ->references('id')
+                        ->on('clinics')
+                        ->cascadeOnUpdate()
+                        ->nullOnDelete();
+                }
             });
         }
     }

@@ -10,7 +10,7 @@ class PatientCheckIn extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['patient_id', 'payment_mode_id', 'created_by'];
+    protected $fillable = ['patient_id', 'payment_mode_id', 'created_by', 'mode'];
 
     public function patient()
     {
@@ -25,6 +25,11 @@ class PatientCheckIn extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function payment_cache()
+    {
+        return $this->hasOne(PatientPaymentCache::class, 'check_in_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

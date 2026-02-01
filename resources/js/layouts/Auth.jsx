@@ -1,51 +1,206 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
-import logo from "../../images/logo.png";
+import { usePost } from "../hooks";
+import { formatError } from "../helpers";
+import { getDefaultRoute } from "../helpers/privileges";
+
+// Use clinic logo from public folder for reliable serving
+const publicLogoUrl = "/logo.png";
 
 const Auth = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
+  const { data, loading, error, handlePost } = usePost(
+    "/api/auth/login"
+  );
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    document.title = `Login - ${window.APP_NAME}`;
+  }, []);
+
+  useEffect(() => {
+    if (data && data.data && data.data.user && data.data.token) {
+      window.user = data.data.user;
+      window.localStorage.removeItem("token");
+      window.localStorage.setItem("token", data.data.token);
+
+      const u = data.data.user || {};
+      
+      // Use the centralized privilege utility to get default route
+      const defaultRoute = getDefaultRoute(u);
+
+      navigate(defaultRoute, { replace: true });
+    }
+  }, [data, navigate]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (formData.username && formData.password) {
+      handlePost("/api/auth/login", formData);
+    }
+  };
+
+  const handleFeedback = () => {
+    if (data || error) {
+      return (
+        <Alert
+          sx={{
+            mb: 2,
+            border: "none",
+          }}
+          severity={error ? "error" : "success"}
+        >
+          {error ? formatError(error) : data ? data.message : null}
+        </Alert>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Container
-      component="main"
-      maxWidth="xs"
-    >
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Box
-        py={2}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        minHeight="100vh"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 4,
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundColor: '#ffffff',
+        }}
       >
-        <Card>
-          <Box
-            component="img"
-            display="block"
-            width={160}
-            mt={2}
-            mx="auto"
-            alt="Logo"
-            src={logo}
-          />
-          <Outlet />
-        </Card>
-        <Card sx={{ mt: 1 }}>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            align="center"
-            p={2}
-          >
-            {"© "}
-            {new Date().getFullYear()} Aurora Enterprises Ltd
-          </Typography>
-        </Card>
+        <Container
+          component="main"
+          maxWidth="xs"
+          sx={{ position: 'relative', zIndex: 2 }}
+        >
+          <Card sx={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3)', p: 3 }}>
+            <Box
+              component="img"
+              display="block"
+              width={160}
+              height={48}
+              sx={{ objectFit: 'contain' }}
+              mx="auto"
+              mb={3}
+              alt="SIKAF Eye Care Logo"
+              src={publicLogoUrl}
+              onError={(e) => {
+                // Fallback: show text logo if image fails to load
+                e.target.style.display = 'none';
+                const textLogo = document.createElement('div');
+                textLogo.innerHTML = '<h2 style="color: #1E88E5; text-align: center; margin: 16px 0; font-weight: bold;">SIKAF Eye Care</h2>';
+                e.target.parentNode.insertBefore(textLogo, e.target.nextSibling);
+              }}
+              onLoad={(e) => {
+                // Ensure any fallback text is removed when image loads
+                const fallback = e.target.nextElementSibling;
+                if (fallback && fallback.tagName === 'DIV') {
+                  fallback.remove();
+                }
+              }}
+            />
+
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  color: '#1C1C1C',
+                }}
+              >
+                Welcome Back
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#6C757D',
+                  lineHeight: 1.6,
+                }}
+              >
+                Sign in to access your account and continue managing your eye care services.
+              </Typography>
+            </Box>
+
+            {handleFeedback()}
+
+            <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+              <div style={{ marginBottom: '15px' }}>
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d0d0d0',
+                    borderRadius: '4px',
+                    backgroundColor: '#ffffff',
+                    color: '#1C1C1C',
+                    fontSize: '16px',
+                    boxSizing: 'border-box'
+                  }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d0d0d0',
+                    borderRadius: '4px',
+                    backgroundColor: '#ffffff',
+                    color: '#1C1C1C',
+                    fontSize: '16px',
+                    boxSizing: 'border-box'
+                  }}
+                  required
+                />
+              </div>
+              <Button
+                disabled={loading}
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                sx={{
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }}
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+          </Card>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

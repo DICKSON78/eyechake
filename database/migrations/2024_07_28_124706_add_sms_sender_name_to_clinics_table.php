@@ -14,7 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('clinics', function (Blueprint $table) {
-            $table->string('sms_sender_name')->nullable()->default('INFO')->after('sms_key');
+            if (!Schema::hasColumn('clinics', 'sms_sender_name')) {
+                $table->string('sms_sender_name')->nullable()->default('INFO')->after('sms_key');
+            }
         });
     }
 
@@ -26,7 +28,9 @@ return new class extends Migration
     public function down()
     {
         Schema::table('clinics', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('clinics', 'sms_sender_name')) {
+                $table->dropColumn('sms_sender_name');
+            }
         });
     }
 };

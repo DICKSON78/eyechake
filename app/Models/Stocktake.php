@@ -10,7 +10,7 @@ class Stocktake extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['created_by', 'reason'];
+    protected $fillable = ['created_by', 'reason', 'status'];
 
     public function items()
     {

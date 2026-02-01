@@ -1,4 +1,4 @@
-window.APP_NAME = "EyeCare";
+window.APP_NAME = "SIKAF Eye Care";
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
@@ -9,9 +9,24 @@ window.APP_NAME = "EyeCare";
 import axios from "axios";
 window.axios = axios;
 
+// Set the base URL for API calls
+// For local development: use localhost:8000
+// For production: use the live server URL
+// Always use the current origin to avoid DNS resolution issues and ensure
+// consistent behavior behind proxies and during local development
+window.axios.defaults.baseURL = window.location.origin;
+
+// Add timeout configuration to prevent hanging requests
+window.axios.defaults.timeout = 45000; // 45 seconds timeout for complex operations like clinical notes
+
 window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+window.axios.defaults.headers.common["Accept"] = "application/json";
+window.axios.defaults.headers.common["Content-Type"] = "application/json";
 window.axios.interceptors.request.use((config) => {
-  config.headers.Authorization = `Bearer ${localStorage.getItem("token") || null}`;
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 window.axios.interceptors.response.use(
@@ -19,11 +34,19 @@ window.axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (
-      error?.response?.status === 401 &&
-      window.location.href.indexOf("/login") === -1
-    ) {
-      return (window.location.href = "/login");
+    if (error?.response?.status === 401) {
+      // Define public routes that don't require authentication
+      const publicRoutes = ["/", "/about", "/features", "/appointment", "/contact", "/login"];
+      const currentPath = window.location.pathname;
+      const isPublicRoute = publicRoutes.some(route => currentPath === route);
+      
+      // Only redirect to login if we're not already on a public route
+      if (!isPublicRoute && window.location.href.indexOf("/login") === -1) {
+        // Clear the invalid token
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return Promise.reject(error);
+      }
     }
 
     return Promise.reject(error);

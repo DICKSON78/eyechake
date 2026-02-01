@@ -8,6 +8,7 @@ import Diseases from "./diseases/Diseases";
 import ExpenseCategories from "./expense-categories/ExpenseCategories";
 import Departments from "./departments/Departments";
 import JobTitles from "./job-titles/JobTitles";
+import Occupations from "./occupations/Occupations";
 import ClinicDetails from "./ClinicDetails";
 import Preferences from "./Preferences";
 import Clinics from "./clinics/Clinics";
@@ -44,6 +45,10 @@ const SettingsRoutes = () => {
         element={<JobTitles />}
       />
       <Route
+        path="/occupations"
+        element={<Occupations />}
+      />
+      <Route
         path="/clinic-details"
         element={<ClinicDetails />}
       />
@@ -53,7 +58,7 @@ const SettingsRoutes = () => {
       />
       <Route
         path="/clinics"
-        element={window.user.role === "Admin" ? <Clinics /> : null}
+        element={window.user && window.user.role === "Admin" ? <Clinics /> : null}
       />
     </Routes>
   );

@@ -11,7 +11,7 @@ import SelectDisease from "../../components/SelectDisease";
 import SelectUser from "../../components/SelectUser";
 import useFetch from "../../hooks/useFetch";
 
-import { throttle } from "../../helpers";
+import { throttle, safeExtractArray } from "../../helpers";
 
 const PatientFilters = ({
   params,
@@ -29,7 +29,7 @@ const PatientFilters = ({
     },
     true,
     [],
-    (response) => response.data.data.data
+    (response) => safeExtractArray(response, 'data.data.data', [])
   );
 
   return (
@@ -38,13 +38,21 @@ const PatientFilters = ({
       {...rest}
       sx={{
         bgcolor: "background.default",
+        width: "100%",
         ...(rest && rest.sx),
       }}
     >
-      <CardContent>
+      <CardContent
+        sx={{
+          p: { xs: 1.5, sm: 2, md: 3 },
+          "&:last-child": {
+            pb: { xs: 1.5, sm: 2, md: 3 },
+          },
+        }}
+      >
         <Grid
           container
-          spacing={2}
+          spacing={{ xs: 1.5, sm: 2, md: 2 }}
         >
           <Grid
             item

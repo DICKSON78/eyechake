@@ -64,7 +64,7 @@ const CreateExpenseCategory = ({ modal, fetchExpenseCategories }) => {
             container
             spacing={2}
           >
-            {window.user.role === "Admin" ? (
+            {window.user && window.user.role === "Admin" ? (
               <Grid
                 item
                 md={6}

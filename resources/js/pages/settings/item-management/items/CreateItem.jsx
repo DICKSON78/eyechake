@@ -14,6 +14,7 @@ import TextField from "../../../../components/TextField";
 import Select from "../../../../components/Select";
 import SelectClinic from "../../../../components/SelectClinic";
 import FormLabelControl from "../../../../components/FormLabelControl";
+import DatePicker from "../../../../components/DatePicker";
 
 import { useFetch, usePost, useToast } from "../../../../hooks";
 import { formatError } from "../../../../helpers";
@@ -77,6 +78,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     clinic_id: undefined,
     name: undefined,
     code: undefined,
+    category: undefined,
     item_type_id: undefined,
     consultation_type_id: undefined,
     unit_of_measure_id: undefined,
@@ -84,6 +86,8 @@ const CreateItem = ({ modal, fetchItems }) => {
     is_consultation_item: "No",
     is_stock_item: "No",
     templates: [],
+    selling_price: undefined,
+    expiration_date: undefined,
   });
 
   const { data, loading, error, handlePost } = usePost("api/items", formData);
@@ -122,12 +126,9 @@ const CreateItem = ({ modal, fetchItems }) => {
             container
             spacing={2}
           >
-            {window.user.role === "Admin" ? (
+            {window.user && window.user.role === "Admin" ? (
               <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
+                size={{ xs: 12, sm: 12, md: 6 }}
               >
                 <SelectClinic
                   ref={clinicRef}
@@ -139,10 +140,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               </Grid>
             ) : null}
             <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
+              size={{ xs: 12, sm: 12, md: 6 }}
             >
               <TextField
                 ref={nameRef}
@@ -153,10 +151,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               />
             </Grid>
             <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
+              size={{ xs: 12, sm: 12, md: 6 }}
             >
               <TextField
                 ref={codeRef}
@@ -166,10 +161,18 @@ const CreateItem = ({ modal, fetchItems }) => {
               />
             </Grid>
             <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
+              size={{ xs: 12, sm: 12, md: 6 }}
+            >
+              <TextField
+                label="Category"
+                fullWidth
+                placeholder="e.g., Antibiotics, Designer Frames, Progressive Lenses"
+                onChange={(value) => setFormData({ ...formData, category: value })}
+                helperText="Optional: Categorize this item for better organization"
+              />
+            </Grid>
+            <Grid
+              size={{ xs: 12, sm: 12, md: 6 }}
             >
               <Select
                 ref={itemTypeRef}
@@ -185,10 +188,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               />
             </Grid>
             <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
+              size={{ xs: 12, sm: 12, md: 6 }}
             >
               <Select
                 ref={consultationTypeRef}
@@ -204,10 +204,7 @@ const CreateItem = ({ modal, fetchItems }) => {
               />
             </Grid>
             <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
+              size={{ xs: 12, sm: 12, md: 6 }}
             >
               <Select
                 ref={unitOfMeasureRef}
@@ -224,10 +221,7 @@ const CreateItem = ({ modal, fetchItems }) => {
             </Grid>
             {itemType && itemType.name === "Lens" ? (
               <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
+                size={{ xs: 12, sm: 12, md: 6 }}
               >
                 <Select
                   ref={lensTypeRef}
@@ -288,12 +282,30 @@ const CreateItem = ({ modal, fetchItems }) => {
                 label="Stock Item"
               />
             </Grid>
+            <Grid
+              size={{ xs: 12, sm: 12, md: 6 }}
+            >
+              <TextField
+                label="Selling Price"
+                fullWidth
+                type="number"
+                placeholder="0.00"
+                onChange={(value) => setFormData({ ...formData, selling_price: value })}
+              />
+            </Grid>
+            <Grid
+              size={{ xs: 12, sm: 12, md: 6 }}
+            >
+              <DatePicker
+                label="Expiration Date"
+                fullWidth
+                value={formData.expiration_date}
+                onChange={(value) => setFormData({ ...formData, expiration_date: value })}
+              />
+            </Grid>
             {consultationType && consultationType.name === "Procedure" ? (
               <Grid
-                item
-                md={12}
-                sm={12}
-                xs={12}
+                size={{ xs: 12, sm: 12, md: 12 }}
                 alignSelf="flex-end"
               >
                 <FormLabelControl

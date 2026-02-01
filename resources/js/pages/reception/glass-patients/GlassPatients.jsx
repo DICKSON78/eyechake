@@ -1,14 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, Stack, IconButton, Tooltip } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/RefreshRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
-import Filters from "../../consultation-room/PatientFilters";
+import GlassPatientFilters from "./GlassPatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge } from "../../../helpers";
+
+// Helper functions for weekly date ranges
+const getWeekStartDate = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+};
+
+const getWeekEndDate = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? 0 : 7); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+};
 
 const GlassPatients = () => {
   const addToast = useToast();
@@ -24,8 +40,8 @@ const GlassPatients = () => {
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: undefined,
-    start_date: new Date(),
-    end_date: undefined,
+    start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // Last 3 days
+    end_date: new Date(),   // Today
   });
 
   const { data, loading, error, handleFetch } = useFetch(
@@ -43,7 +59,16 @@ const GlassPatients = () => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      // Handle paginated response from Laravel
+      const paginatedData = response.data?.data || response.data || {};
+      return {
+        data: paginatedData.data || [],
+        total: paginatedData.total || 0,
+        page: paginatedData.current_page || paginatedData.page || 1,
+        per_page: paginatedData.per_page || 25,
+      };
+    }
   );
 
   useEffect(() => {
@@ -60,15 +85,28 @@ const GlassPatients = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Reception" },
+        { title: "Sales Table" },
         { title: "Spectacle Patients" },
       ]}
     >
       <Card>
-        <PageHeader title="Spectacle Patients" />
+        <PageHeader 
+          title="Spectacle Patients"
+          trailing={
+            <Tooltip title="Refresh List">
+              <IconButton
+                onClick={handleFetch}
+                disabled={loading}
+                sx={{ mr: 1 }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          }
+        />
         <Divider />
         <CardContent>
-          <Filters
+          <GlassPatientFilters
             params={params}
             setParams={setParams}
             sx={{ mb: 2 }}
@@ -117,6 +155,32 @@ const GlassPatients = () => {
                   item.payment_cache_item.payment_cache.check_in.patient.phone,
               },
               {
+                field: "require_glass",
+                headerName: "Spectacle Required",
+                renderCell: (item) => {
+                  const requireGlass = item.require_glass;
+                  if (requireGlass === 'Yes') {
+                    return (
+                      <Chip
+                        label="Yes"
+                        color="success"
+                        size="small"
+                        variant="outlined"
+                      />
+                    );
+                  } else {
+                    return (
+                      <Chip
+                        label="No"
+                        color="error"
+                        size="small"
+                        variant="outlined"
+                      />
+                    );
+                  }
+                },
+              },
+              {
                 field: "created_by",
                 headerName: "Sent By",
                 valueGetter: (item, index) =>
@@ -127,10 +191,16 @@ const GlassPatients = () => {
               {
                 field: "created_at",
                 headerName: "Date Sent",
-                valueGetter: (item, index) =>
-                  item.patient_direction === "Direct to Doctor"
-                    ? item.payment_cache_item.served_at
-                    : item.created_at,
+                valueGetter: (item, index) => {
+                  if (item.patient_direction === "Direct to Doctor") {
+                    // For Direct to Doctor patients, show when consultation was completed
+                    // If served_at is available, use it, otherwise use consultation updated_at
+                    return item.payment_cache_item.served_at || item.updated_at;
+                  } else {
+                    // For Direct to Optician patients, show when consultation was created
+                    return item.created_at;
+                  }
+                },
               },
               {
                 field: "actions",
@@ -152,7 +222,7 @@ const GlassPatients = () => {
                       size="small"
                       onClick={() =>
                         navigate(
-                          `/reception/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`
+                          `/sales-management/glass-patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/${item.id}/clinical-notes`
                         )
                       }
                     >

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use App\Models\UserPrivilege;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
@@ -21,23 +23,30 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-            'per_page' => 'sometimes|integer|min:0',
-            'page' => 'sometimes|integer|min:1',
-        ]);
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:0',
+                'page' => 'sometimes|integer|min:1',
+            ]);
 
-        $user = $request->user();
-        $per_page = $request->per_page ?? 25;
-        $clinic_id = $request->clinic_id;
-        $status = $request->status;
-        $name = $request->name;
-        $gender = $request->gender;
-        $phone = $request->phone;
-        $designation = $request->designation;
-        $department_id = $request->department_id;
-        $job_title_id = $request->job_title_id;
-        $employee_number = $request->employee_number;
-        $data = User::with(['department', 'job_title', 'privileges', 'creator']);
+            $user = $request->user();
+            if (!$user) {
+                return $this->sendError('Unauthorized', Response::HTTP_UNAUTHORIZED);
+            }
+
+            $per_page = $request->per_page ?? 25;
+            $clinic_id = $request->clinic_id;
+            $status = $request->status;
+            $name = $request->name;
+            $gender = $request->gender;
+            $phone = $request->phone;
+            $designation = $request->designation;
+            $department_id = $request->department_id;
+            $job_title_id = $request->job_title_id;
+            $employee_number = $request->employee_number;
+            // Don't load 'privileges' relationship - use the accessor instead
+            // The getPrivilegesAttribute() accessor returns privileges as an array
+            $data = User::with(['department', 'job_title', 'creator']);
 
         if ($user->is_admin) {
             $data->with(['clinic']);
@@ -84,7 +93,74 @@ class UsersController extends Controller
 
         $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        
+        // Ensure privileges are returned as arrays (not relationship collections)
+        // The User model's getPrivilegesAttribute accessor handles this automatically
+        // But we need to make sure it's not overridden by the relationship
+
+        // Add sales performance data for each user
+        if ($data->count() > 0) {
+            $start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
+
+            $data->getCollection()->transform(function ($user) use ($start_date, $end_date, $clinic_id) {
+                // Initiated deals count
+                $initiatedCount = \App\Models\PatientPaymentCacheItem::query()
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereHas('payment_cache.check_in.creator', function ($q) use ($clinic_id) {
+                            $q->where('clinic_id', $clinic_id);
+                        });
+                    })
+                    ->where('created_by', $user->id)
+                    ->whereDate('created_at', '>=', $start_date)
+                    ->whereDate('created_at', '<=', $end_date)
+                    ->count();
+
+                // Closed deals count
+                $closedCount = \App\Models\PatientItemPayment::query()
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereHas('creator', function ($q) use ($clinic_id) {
+                            $q->where('clinic_id', $clinic_id);
+                        });
+                    })
+                    ->where('created_by', $user->id)
+                    ->whereDate('created_at', '>=', $start_date)
+                    ->whereDate('created_at', '<=', $end_date)
+                    ->count();
+
+                $closedBillCount = \App\Models\PatientItemBillPayment::query()
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereHas('creator', function ($q) use ($clinic_id) {
+                            $q->where('clinic_id', $clinic_id);
+                        });
+                    })
+                    ->where('created_by', $user->id)
+                    ->whereDate('created_at', '>=', $start_date)
+                    ->whereDate('created_at', '<=', $end_date)
+                    ->count();
+
+                $user->sales_performance = [
+                    'initiated_deals' => $initiatedCount,
+                    'closed_deals' => $closedCount + $closedBillCount,
+                ];
+
+                return $user;
+            });
+        }
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Exception $e) {
+            \Log::error('UsersController index error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+            
+            return $this->sendError(
+                'An error occurred while fetching users. Please try again later.',
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     /**
@@ -126,12 +202,9 @@ class UsersController extends Controller
         $input['created_by'] = $request->user()->id;
         $data = User::create($input);
 
-        if ($data && $request->privileges) {
-            $privileges = array_map(function ($e) use ($data) {
-                return ['user_id' => $data->id, 'privilege' => $e];
-            }, $request->json('privileges'));
-
-            UserPrivilege::insert($privileges);
+        if ($data && $request->has('privileges')) {
+            // Set privileges for new user using the boolean column structure
+            UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -145,7 +218,9 @@ class UsersController extends Controller
      */
     public function show($id)
     {
-        $data = User::with(['job_title', 'privileges', 'creator'])->findOrFail($id);
+        $data = User::with(['job_title', 'creator'])->findOrFail($id);
+        // Privileges are returned as array via the getPrivilegesAttribute accessor
+        // Don't load the relationship as it conflicts with the accessor
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -181,14 +256,9 @@ class UsersController extends Controller
 
         $data->update($input);
 
-        if ($request->privileges !== null) {
-            // delete and reinsert privileges
-            UserPrivilege::where('user_id', $data->id)->delete();
-            $privileges = array_map(function ($e) use ($data) {
-                return ['user_id' => $data->id, 'privilege' => $e];
-            }, $request->json('privileges'));
-
-            UserPrivilege::insert($privileges);
+        if ($request->has('privileges')) {
+            // Update privileges using the new boolean column structure
+            UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

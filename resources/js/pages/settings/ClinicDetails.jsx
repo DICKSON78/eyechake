@@ -27,14 +27,14 @@ const ClinicDetails = () => {
   const addressRef = useRef();
 
   const [formData, setFormData] = useState({
-    name: window.user.clinic.name,
-    phone: window.user.clinic.phone,
-    email: window.user.clinic.email,
-    address: window.user.clinic.address,
+    name: window.user?.clinic?.name || "",
+    phone: window.user?.clinic?.phone || "",
+    email: window.user?.clinic?.email || "",
+    address: window.user?.clinic?.address || "",
   });
 
   const { data, loading, error, handlePatch } = usePatch(
-    `api/clinics/${window.user.clinic_id}`,
+    `api/clinics/${window.user?.clinic_id || ""}`,
     formData
   );
 
@@ -79,8 +79,8 @@ const ClinicDetails = () => {
             >
               <Grid
                 item
-                md={4}
-                sm={6}
+                md={6}
+                sm={12}
                 xs={12}
               >
                 <TextField
@@ -96,8 +96,8 @@ const ClinicDetails = () => {
               </Grid>
               <Grid
                 item
-                md={4}
-                sm={6}
+                md={6}
+                sm={12}
                 xs={12}
               >
                 <TextField
@@ -113,8 +113,8 @@ const ClinicDetails = () => {
               </Grid>
               <Grid
                 item
-                md={4}
-                sm={6}
+                md={6}
+                sm={12}
                 xs={12}
               >
                 <TextField
@@ -129,8 +129,8 @@ const ClinicDetails = () => {
               </Grid>
               <Grid
                 item
-                md={4}
-                sm={6}
+                md={6}
+                sm={12}
                 xs={12}
               >
                 <TextField

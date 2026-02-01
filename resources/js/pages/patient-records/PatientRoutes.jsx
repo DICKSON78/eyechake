@@ -10,6 +10,7 @@ import {
 import Skeleton from "@mui/material/Skeleton";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
 
 import Page from "../../components/Page";
 import Modal from "../../components/Modal";
@@ -31,7 +32,7 @@ const PatientRoutes = () => {
 
   useEffect(() => {
     if (!patientId) {
-      return navigate("/patient-records/patients");
+      return navigate("/reception/patients");
     }
 
     document.title = `Patient Records - ${window.APP_NAME}`;
@@ -69,10 +70,24 @@ const PatientRoutes = () => {
       ) : null}
 
       {patient ? (
-        <React.Fragment>
+        <Box sx={{ width: "100%" }}>
           <Tabs
             value={selectedTab}
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: 2,
+              mb: 2,
+              "& .MuiTab-root": {
+                fontWeight: 600,
+                fontSize: "0.7875rem",
+                textTransform: "none",
+                minHeight: 48,
+              },
+              "& .Mui-selected": {
+                color: "primary.main",
+              },
+            }}
+            indicatorColor="primary"
+            textColor="primary"
           >
             <Tab
               label="Patient File"
@@ -101,7 +116,7 @@ const PatientRoutes = () => {
               element={<PatientAttachments patient={patient} />}
             />
           </Routes>
-        </React.Fragment>
+        </Box>
       ) : null}
       <Modal ref={modalRef} />
     </Page>

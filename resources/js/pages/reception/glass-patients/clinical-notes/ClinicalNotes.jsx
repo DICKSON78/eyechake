@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  Box,
   Button,
   Card,
   CardContent,
+  Chip,
   Divider,
   Grid,
   LinearProgress,
@@ -99,7 +101,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       setData(dataSendToOptician);
 
       window.setTimeout(() => {
-        navigate("/reception/glass-patients");
+        navigate("/sales-management/glass-patients");
       }, 1500);
     }
   }, [dataSendToOptician]);
@@ -107,8 +109,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
   useEffect(() => {
     if (errorSendToOptician) {
       setError(errorSendToOptician);
+      // Show error message if unauthorized
+      if (errorSendToOptician?.response?.status === 403) {
+        addToast({
+          message: errorSendToOptician?.response?.data?.message || "Only cashiers are authorized to send clients to the optician.",
+          severity: "error",
+        });
+      }
     }
-  }, [errorSendToOptician]);
+  }, [errorSendToOptician, addToast]);
 
   useEffect(() => {
     if (data) {
@@ -204,12 +213,16 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Grid
               container
               spacing={2}
+              sx={{ width: '100%', maxWidth: '100%' }}
             >
               <Grid
                 item
                 md={6}
+                lg={6}
+                xl={6}
                 sm={12}
                 xs={12}
+                sx={{ width: '100%' }}
               >
                 <ConsultationItemsCard
                   title="Glass"
@@ -225,8 +238,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Grid
                 item
                 md={6}
+                lg={6}
+                xl={6}
                 sm={12}
                 xs={12}
+                sx={{ width: '100%' }}
               >
                 <ConsultationItemsCard
                   title="Others"
@@ -241,34 +257,49 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Grid>
             </Grid>
 
+            {/* Lens Types Display */}
+            {consultation.lens_types && (
+              <Box sx={{ mb: 2 }}>
+                <Subheader title="Lens Selection" />
+                <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                  <Stack direction="row" spacing={1} flexWrap="wrap">
+                    {(typeof consultation.lens_types === 'string' 
+                      ? JSON.parse(consultation.lens_types) 
+                      : Array.isArray(consultation.lens_types) 
+                        ? consultation.lens_types 
+                        : []
+                    ).map((lensType, index) => (
+                      <Chip
+                        key={index}
+                        label={lensType}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              </Box>
+            )}
+
             <Subheader title="Remarks" />
-            <Grid
-              container
-              spacing={2}
-            >
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-              >
-                <TextField
-                  ref={remarksRef}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  defaultValue={consultation.remarks}
-                  onChange={(value) => {
-                    setFormData({ ...formData, remarks: value });
-                    autoSave("remarks", value);
-                  }}
-                />
-              </Grid>
-            </Grid>
+            <TextField
+              ref={remarksRef}
+              fullWidth
+              multiline
+              rows={6}
+              defaultValue={consultation.remarks}
+              onChange={(value) => {
+                setFormData({ ...formData, remarks: value });
+                autoSave("remarks", value);
+              }}
+            />
           </CardContent>
         </Form>
         <Divider />
         {loadingSendToOptician && <LinearProgress />}
+        {/* Only show "Send to Optician" button if user has payment_center privilege (cashier) */}
+        {window.user?.privileges?.payment_center && (
         <Stack
           direction="row"
           spacing={2}
@@ -285,6 +316,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             Send to Optician
           </Button>
         </Stack>
+        )}
       </Card>
       <Modal ref={modalRef} />
     </React.Fragment>

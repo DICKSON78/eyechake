@@ -1,15 +1,17 @@
 import React from "react";
 import { Document, Font, Page } from "@react-pdf/renderer";
 
-import fontRegular from "../../../../fonts/Custom-Regular.ttf";
-import fontItalic from "../../../../fonts/Custom-Italic.ttf";
-import fontBold from "../../../../fonts/Custom-Bold.ttf";
+// Use system fonts as fallback to avoid font loading issues
+const fontRegular = "Helvetica";
+const fontItalic = "Helvetica-Oblique";
+const fontBold = "Helvetica-Bold";
 
 import Header from "../../../components/pdf/Header";
 import Descriptions from "../../../components/pdf/Descriptions";
 import Table from "../../../components/pdf/Table";
 import { numberFormat } from "../../../helpers";
 
+// Register fonts with system fonts to avoid loading issues
 Font.register({
   family: "Custom",
   fonts: [
@@ -104,7 +106,7 @@ const PDFReportDocument = ({ receipt, items, patient }) => {
           items={[
             {
               label: "GRAND TOTAL",
-              value: numberFormat(getTotalAmount() - receipt.discount),
+              value: numberFormat(Math.max(0, getTotalAmount() - (receipt.discount || 0))),
             },
           ]}
           valueStyle={{ fontWeight: "bold" }}

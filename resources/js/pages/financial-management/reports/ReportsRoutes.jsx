@@ -1,11 +1,12 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Expenses from "./Expenses";
 import ExpensePayments from "./ExpensePayments";
 import CashCollection from "../../payment-center/reports/CashCollection";
 import CreditCollection from "../../payment-center/reports/CreditCollection";
 import PatientBills from "../../payment-center/reports/PatientBills";
 import BillPayments from "../../payment-center/reports/BillPayments";
+import BalanceSheet from "./BalanceSheet";
 
 const ReportsRoutes = () => {
   return (
@@ -47,6 +48,14 @@ const ReportsRoutes = () => {
       <Route
         path="/expense-payments"
         element={<ExpensePayments />}
+      />
+      <Route
+        path="/balance-sheet"
+        element={<BalanceSheet />}
+      />
+      <Route
+        path=""
+        element={<Navigate to="/cash-collection" />}
       />
     </Routes>
   );

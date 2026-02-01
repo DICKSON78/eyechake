@@ -13,18 +13,21 @@ const Descriptions = ({
   columns = columns || 3;
 
   return (
-    <Paper {...containerProps}>
+    <Paper {...containerProps} sx={{ width: "100%", ...containerProps?.sx }}>
       <Grid
         container
         spacing={itemSpacing}
+        sx={{ width: "100%" }}
       >
         {items.map((e, i) => (
           <Grid
             key={i}
-            item
-            md={Math.ceil(12 / columns)}
-            sm={6}
-            xs={12}
+            size={{ 
+              md: Math.ceil(12 / columns), 
+              sm: 6, 
+              xs: 12 
+            }}
+            sx={{ width: "100%" }}
             {...itemProps}
           >
             <Typography

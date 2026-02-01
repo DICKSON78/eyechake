@@ -62,7 +62,7 @@ const RefractionDetails = (
 
   return (
     <React.Fragment>
-      <Table sx={{ mb: 2 }}>
+      <Table sx={{ mb: 2, width: '100%' }}>
         <TableHead>
           <TableRow>
             <TableCell colSpan={8}>Objective Refraction</TableCell>
@@ -175,7 +175,7 @@ const RefractionDetails = (
           </TableRow>
         </TableBody>
       </Table>
-      <Table>
+      <Table sx={{ width: '100%' }}>
         <TableHead>
           <TableRow>
             <TableCell colSpan={8}>Subjective Refraction</TableCell>

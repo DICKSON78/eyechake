@@ -207,7 +207,7 @@ const EditMarketingStrategy = ({ item, modal, fetchMarketingStrategies }) => {
                   label="Remarks"
                   fullWidth
                   multiline
-                  rows={3}
+                  rows={4}
                   required
                   defaultValue={formData.remarks}
                   onChange={(value) =>

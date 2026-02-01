@@ -2,9 +2,10 @@ import React, { useCallback, useState } from "react";
 import { Button } from "@mui/material";
 import { Document, Font, Page, pdf, StyleSheet } from "@react-pdf/renderer";
 
-import fontRegular from "../../../../fonts/Custom-Regular.ttf";
-import fontItalic from "../../../../fonts/Custom-Italic.ttf";
-import fontBold from "../../../../fonts/Custom-Bold.ttf";
+// Use public path for fonts to avoid build issues
+const fontRegular = "/fonts/Custom-Regular.ttf";
+const fontItalic = "/fonts/Custom-Italic.ttf";
+const fontBold = "/fonts/Custom-Bold.ttf";
 
 import Header from "../../../components/pdf/Header";
 import Footer from "../../../components/pdf/Footer";
@@ -64,7 +65,7 @@ const PDFReportDocument = ({ bill, items, patient }) => {
             {
               label: "Amount Remaining",
               value: numberFormat(
-                bill.amount - bill.discount - (bill.amount_paid || 0)
+                Math.max(0, (bill.amount || 0) - (bill.discount || 0) - (bill.amount_paid || 0))
               ),
             },
             { label: "Created By", value: bill.creator?.full_name },

@@ -43,37 +43,41 @@ const theme = createTheme({
       main: purple[400],
       contrastText: "#fff",
     },
-    background: {
-      default: "#20222c",
-      paper: "#20222c",
+    text: {
+      primary: "rgba(0, 0, 0, 0.87)",
+      secondary: "rgba(0, 0, 0, 0.58)",
     },
-    divider: "rgba(255, 255, 255, 0.08)",
+    background: {
+      default: "#fafafa",
+      paper: "#fff",
+    },
+    divider: "#e3f2fd",
   },
   typography: {
     fontFamily: "Custom, sans-serif",
     h4: {
-      fontSize: 22,
-    },
-    h5: {
-      fontSize: 20,
-    },
-    h6: {
       fontSize: 18,
     },
+    h5: {
+      fontSize: 16.2,
+    },
+    h6: {
+      fontSize: 14.4,
+    },
     subtitle1: {
-      fontSize: 15,
+      fontSize: 12.6,
     },
     subtitle2: {
-      fontSize: 13,
+      fontSize: 11.7,
     },
     body1: {
-      fontSize: 13,
+      fontSize: 11.7,
     },
     body2: {
-      fontSize: 12,
+      fontSize: 10.8,
     },
     button: {
-      fontSize: 12,
+      fontSize: 10.8,
     },
   },
   shape: {
@@ -83,7 +87,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#20222c",
+          backgroundColor: "#fff",
           boxShadow: "none",
         },
       },
@@ -117,7 +121,7 @@ const theme = createTheme({
           props: { variant: "outlined-elevation" },
           style: {
             boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.15)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            border: "1px solid #dae2ed",
           },
         },
       ],
@@ -125,7 +129,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid #dae2ed",
           "&:not(.MuiModalContent-root) > .MuiCardHeader-root + .MuiCardContent-root":
             {
               paddingTop: 0,
@@ -154,6 +158,9 @@ const theme = createTheme({
         root: {
           "&:last-child": {
             paddingBottom: 16,
+          },
+          "&.MuiCardContent-root": {
+            color: "rgba(0, 0, 0, 0.87)",
           },
         },
       },
@@ -211,11 +218,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid #dae2ed",
           borderBottomWidth: 0,
           borderRadius: "5px 5px 0 0",
           marginRight: "8px",
-          backgroundColor: "#20222c",
+          backgroundColor: "#fff",
           minHeight: "auto",
         },
       },
@@ -225,11 +232,11 @@ const theme = createTheme({
         root: {
           "&:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
-              borderColor: "rgba(255, 255, 255, 0.08) !important",
+              borderColor: "#dae2ed !important",
             },
           "&:hover:not(.Mui-focused):not(.Mui-error) .MuiOutlinedInput-notchedOutline":
             {
-              borderColor: "rgba(255, 255, 255, 0.25) !important",
+              borderColor: "#ddd !important",
             },
         },
       },
@@ -249,9 +256,9 @@ const theme = createTheme({
           borderSpacing: 0,
           "&:not(.no-hover-highlight) > .MuiTableBody-root > .MuiTableRow-root":
             {
-              "&:hover > .MuiTableCell-root": {
-                backgroundColor: "#rgba(255, 255, 255, 0.075)",
-              },
+            "&:hover > .MuiTableCell-root": {
+              backgroundColor: "#f1f3f4",
+            },
             },
           "&.no-table-head > .MuiTableBody-root > .MuiTableRow-root:first-of-type > .MuiTableCell-root":
             {
@@ -278,7 +285,7 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid #dae2ed",
           padding: "8px 12px",
           "&:not(:last-child)": {
             borderRightWidth: 0,
@@ -290,11 +297,11 @@ const theme = createTheme({
         },
         head: {
           padding: "12px",
-          backgroundColor: "#20222c",
+          backgroundColor: "#f1f3f4",
         },
         footer: {
           padding: "12px",
-          backgroundColor: "#20222c",
+          backgroundColor: "#f1f3f4",
           fontSize: "0.75rem",
           fontWeight: 700,
         },
@@ -328,11 +335,11 @@ const theme = createTheme({
         root: {
           "& > .MuiTableRow-root": {
             "&:hover": {
-              backgroundColor: "#292b38",
+              backgroundColor: "#f1f3f4",
             },
             "& > th": {
               padding: "12px",
-              backgroundColor: "#20222c",
+              backgroundColor: "#f1f3f4",
               fontWeight: 500,
             },
             "&:last-child > .MuiTableCell-root": {

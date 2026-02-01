@@ -53,6 +53,7 @@ const PatientItems = ({
     q: undefined,
     start_date: undefined,
     end_date: undefined,
+    report_period: "weekly",
     sort_direction: "desc",
   });
 
@@ -93,6 +94,21 @@ const PatientItems = ({
     return status;
   };
 
+  const getReportPeriodTitle = () => {
+    switch (params.report_period) {
+      case "daily":
+        return "Daily Report";
+      case "weekly":
+        return "Weekly Report";
+      case "monthly":
+        return "Monthly Report";
+      case "yearly":
+        return "Yearly Report";
+      default:
+        return "";
+    }
+  };
+
   return (
     <Page
       breadcrumbs={[
@@ -103,7 +119,7 @@ const PatientItems = ({
       ]}
     >
       <Report
-        title={title}
+        title={`${title} - ${getReportPeriodTitle()}`}
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
         uri="api/patient-payment-cache-items"
         params={{
@@ -135,7 +151,30 @@ const PatientItems = ({
                 >
                   <Grid
                     item
-                    md={3}
+                    md={2}
+                    sm={6}
+                    xs={12}
+                  >
+                    <Select
+                      label="Report Period"
+                      fullWidth
+                      options={[
+                        { id: "daily", name: "Daily" },
+                        { id: "weekly", name: "Weekly" },
+                        { id: "monthly", name: "Monthly" },
+                        { id: "yearly", name: "Yearly" },
+                      ]}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      value={params.report_period}
+                      onChange={(value) =>
+                        setParams({ ...params, report_period: value })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -153,7 +192,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -171,7 +210,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -196,7 +235,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -221,7 +260,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -246,7 +285,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -262,7 +301,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -280,7 +319,7 @@ const PatientItems = ({
                   </Grid>
                   <Grid
                     item
-                    md={3}
+                    md={2}
                     sm={6}
                     xs={12}
                   >
@@ -339,6 +378,11 @@ const PatientItems = ({
             field: "quantity",
             headerName: "Quantity",
             valueGetter: (item, index) => numberFormat(item.quantity),
+          },
+          {
+            field: "selling_price",
+            headerName: "Selling Price",
+            valueGetter: (item, index) => numberFormat(item.unit_price || 0),
           },
           {
             field: "dosage",

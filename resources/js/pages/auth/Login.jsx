@@ -7,6 +7,8 @@ import {
   Button,
   InputAdornment,
   LinearProgress,
+  Typography,
+  Divider,
 } from "@mui/material";
 import {
   LockRounded as LockIcon,
@@ -19,6 +21,7 @@ import TextField from "../../components/TextField";
 
 import { usePost } from "../../hooks";
 import { formatError } from "../../helpers";
+import { getDefaultRoute } from "../../helpers/privileges";
 
 const LogIn = () => {
   const navigate = useNavigate();
@@ -32,8 +35,7 @@ const LogIn = () => {
     password: undefined,
   });
   const { data, loading, error, handlePost } = usePost(
-    "api/auth/login",
-    formData
+    "/api/auth/login"
   );
 
   const [showPassword, setShowPassword] = useState(false);
@@ -47,16 +49,21 @@ const LogIn = () => {
       window.user = data.data.user;
       window.localStorage.removeItem("token");
       window.localStorage.setItem("token", data.data.token);
-      window.setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+
+      const u = data.data.user || {};
+      
+      // Use the centralized privilege utility to get default route
+      const defaultRoute = getDefaultRoute(u);
+
+      // Navigate to default route using React Router
+      navigate(defaultRoute, { replace: true });
     }
-  }, [data]);
+  }, [data, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (formRef.current.validate()) {
-      handlePost();
+      handlePost("/api/auth/login", formData);
     }
   };
 
@@ -79,75 +86,87 @@ const LogIn = () => {
   };
 
   return (
-    <React.Fragment>
-      <Box p={2}>
-        {handleFeedback()}
-        <Form
-          ref={formRef}
-          onSubmit={handleSubmit}
-        >
-          <TextField
-            ref={usernameRef}
-            placeholder="Username"
-            fullWidth
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <UsernameIcon />
-                </InputAdornment>
-              ),
-            }}
-            containerProps={{ sx: { mb: 2 } }}
-            onChange={(value) => setFormData({ ...formData, username: value })}
-          />
-          <TextField
-            ref={passwordRef}
-            placeholder="Password"
-            type={showPassword ? "text" : "password"}
-            fullWidth
-            required
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment
-                  position="end"
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                </InputAdornment>
-              ),
-            }}
-            containerProps={{ sx: { mb: 2 } }}
-            onChange={(value) => setFormData({ ...formData, password: value })}
-          />
-          <Button
-            disabled={loading}
-            fullWidth
-            variant="contained"
-            color="primary"
-            size="large"
-            type="submit"
-            onClick={handleSubmit}
-          >
-            Login
-          </Button>
-        </Form>
-      </Box>
-      {loading && (
-        <LinearProgress
+    <Box p={2}>
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Typography
+          variant="h5"
           sx={{
-            borderBottomLeftRadius: (theme) => theme.shape.borderRadius,
-            borderBottomRightRadius: (theme) => theme.shape.borderRadius,
+            fontWeight: 700,
+            mb: 1,
+            color: '#1C1C1C',
           }}
+        >
+          Welcome Back
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#6C757D',
+            lineHeight: 1.6,
+          }}
+        >
+          Sign in to access your account and continue managing your eye care services.
+        </Typography>
+      </Box>
+      <Divider sx={{ mb: 3 }} />
+      {handleFeedback()}
+      <Form
+        ref={formRef}
+        onSubmit={handleSubmit}
+      >
+        <TextField
+          ref={usernameRef}
+          placeholder="Username"
+          fullWidth
+          required
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <UsernameIcon />
+              </InputAdornment>
+            ),
+          }}
+          containerProps={{ sx: { mb: 2 } }}
+          onChange={(value) => setFormData({ ...formData, username: value })}
         />
-      )}
-    </React.Fragment>
+        <TextField
+          ref={passwordRef}
+          placeholder="Password"
+          type={showPassword ? "text" : "password"}
+          fullWidth
+          required
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <LockIcon />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment
+                position="end"
+                sx={{ cursor: "pointer" }}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+              </InputAdornment>
+            ),
+          }}
+          containerProps={{ sx: { mb: 2 } }}
+          onChange={(value) => setFormData({ ...formData, password: value })}
+        />
+        <Button
+          disabled={loading}
+          fullWidth
+          variant="contained"
+          color="primary"
+          size="large"
+          type="submit"
+          onClick={handleSubmit}
+        >
+          Login
+        </Button>
+      </Form>
+    </Box>
   );
 };
 

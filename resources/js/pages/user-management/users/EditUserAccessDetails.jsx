@@ -34,10 +34,26 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // Normalize privileges to always be an array
+  const normalizePrivileges = (privileges) => {
+    if (!privileges) return [];
+    if (Array.isArray(privileges)) return privileges;
+    if (typeof privileges === 'object') {
+      // Convert object format { dashboard: true, reception: true } to array
+      return Object.keys(privileges).filter(key => 
+        privileges[key] === true || 
+        privileges[key] === 1 || 
+        privileges[key] === "1" ||
+        privileges[key] === "true"
+      );
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     username: item.username,
     password: undefined,
-    privileges: item.privileges.map((e) => e.privilege),
+    privileges: normalizePrivileges(item.privileges), // Normalize to array format
     status: item.status,
   });
 
@@ -49,6 +65,27 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
+      
+      // If updating current user's privileges, refresh window.user
+      if (item.id && window.user && window.user.id === item.id) {
+        // Reload user data to get updated privileges
+        if (window.axios) {
+          window.axios.get('/api/auth/user')
+            .then(response => {
+              if (response.data && response.data.data) {
+                window.user = response.data.data;
+                // Trigger a page refresh or menu update
+                if (window.location) {
+                  window.location.reload();
+                }
+              }
+            })
+            .catch(err => {
+              console.error('Failed to refresh user data:', err);
+            });
+        }
+      }
+      
       window.setTimeout(() => {
         fetchUsers();
         modal.close();
@@ -99,7 +136,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                         setFormData({
                           ...formData,
                           privileges: event.target.checked
-                            ? [...formData.privileges, e.value]
+                            ? [...new Set([...formData.privileges, e.value])]
                             : formData.privileges.filter((f) => f !== e.value),
                         })
                       }
@@ -128,7 +165,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                   setFormData({
                     ...formData,
                     privileges: event.target.checked
-                      ? [...formData.privileges, e.value]
+                      ? [...new Set([...formData.privileges, e.value])]
                       : formData.privileges.filter((f) => f !== e.value),
                   })
                 }

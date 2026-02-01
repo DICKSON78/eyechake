@@ -5,21 +5,89 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\Consultation;
 use App\Models\PatientPaymentCache;
+use App\Models\PatientPaymentCacheItem;
+use App\Models\PatientWaitingTime;
+use App\Models\Patient;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationsController extends Controller
 {
     use ApiResponse;
 
+    /**
+     * Clear notification cache for a specific user
+     */
+    private function clearNotificationCache($userId = null, $clinicId = null)
+    {
+        if ($userId) {
+            // Clear cache for specific user
+            $cacheKey = "notifications_user_{$userId}_clinic_" . ($clinicId ?? 'null');
+            cache()->forget($cacheKey);
+        } else {
+            // Clear all notification caches (fallback, but expensive)
+            // This would only be used in rare cases
+            cache()->flush();
+        }
+    }
+
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $start_date = Carbon::today()->startOfDay()->format('Y-m-d');
-        $end_date = Carbon::today()->endOfDay()->format('Y-m-d');
+        
+        if (!$user) {
+            return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
+        }
 
-        $data = [
+        $clinic_id = $user->is_admin ? ($request->clinic_id ?? null) : ($user->clinic_id ?? null);
+
+        // Add simple caching for 10 seconds to reduce database load while maintaining real-time feel
+        $cacheKey = "notifications_user_{$user->id}_clinic_" . ($clinic_id ?? 'null');
+        $cachedData = cache()->get($cacheKey);
+
+        // In local environment, always fetch fresh data for testing
+        // In production, use cache but with shorter TTL for real-time updates
+        if ($cachedData && !app()->environment('local')) {
+            return $this->sendResponse($cachedData, Response::HTTP_OK, 'Success (cached).');
+        }
+
+        try {
+            $data = [
+                'patients_sent_to_cashier' => $this->getPatientsSentToCashierCount($clinic_id),
+                'credit_patients_approval' => $this->getCreditPatientsApprovalCount($clinic_id),
+                'patients_sent_to_doctor' => $this->getPatientsSentToDoctorCount($clinic_id),
+                'patients_sent_to_optician' => $this->getPatientsSentToOpticianCount($clinic_id),
+                'glass_patients' => $this->getGlassPatientsCount($clinic_id),
+                'dispensing_requests' => $this->getDispensingRequestsCount($clinic_id),
+                'procedure_requests' => $this->getProcedureRequestsCount($clinic_id),
+                'other_dispensing_requests' => $this->getOtherDispensingRequestsCount($clinic_id),
+                'patients_to_return' => $this->getPatientsToReturnCount($clinic_id),
+                'glass_dispensing_requests' => $this->getGlassDispensingRequestsCount($clinic_id),
+                'vip_patients' => $this->getVipPatientsCount($clinic_id),
+                'spectacle_patients' => $this->getSpectaclePatientsCount($clinic_id),
+                'waiting_patients' => $this->getWaitingPatientsCount($clinic_id),
+                'patients_sent_to_sales' => $this->getPatientsSentToSalesCount($clinic_id),
+            ];
+
+            // Cache for 10 seconds (reduced for more real-time updates)
+            cache()->put($cacheKey, $data, 10);
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Throwable $e) {
+            Log::error('NotificationsController: Failed to calculate notifications: ' . $e->getMessage());
+            Log::error('NotificationsController: Stack trace: ' . $e->getTraceAsString());
+
+            // Return default data on error, but don't cache errors
+            return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
+        }
+    }
+
+    private function getDefaultData()
+    {
+        return [
             'patients_sent_to_cashier' => 0,
             'credit_patients_approval' => 0,
             'patients_sent_to_doctor' => 0,
@@ -29,135 +97,460 @@ class NotificationsController extends Controller
             'procedure_requests' => 0,
             'other_dispensing_requests' => 0,
             'patients_to_return' => 0,
+            'glass_dispensing_requests' => 0,
+            'vip_patients' => 0,
+            'spectacle_patients' => 0,
+            'waiting_patients' => 0,
+            'patients_sent_to_sales' => 0,
         ];
+    }
 
-        $data['patients_sent_to_cashier'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->whereHas('items', function ($query) {
-                $query->where('status', 'Pending');
-                $query->whereHas('payment_mode', function ($query2) {
-                    $query2->where('transaction_type', 'Cash');
+    /**
+     * Count payment caches that are "sent to sales" (consulted, with Pending/Billed items) - matches Patients Sent to Sales list.
+     */
+    private function getPatientsSentToSalesCount($clinic_id)
+    {
+        try {
+            $query = PatientPaymentCache::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('consultation', function ($q) {
+                    $q->where('status', 'Consulted');
+                })
+                ->whereHas('items', function ($q) {
+                    $q->whereIn('status', ['Pending', 'Billed']);
                 });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
+            return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
+        } catch (\Exception $e) {
+            Log::error('Error counting patients_sent_to_sales: ' . $e->getMessage());
+            return 0;
+        }
+    }
 
-        $data['credit_patients_approval'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->whereHas('items', function ($query) {
-                $query->where('status', 'Pending');
-                $query->whereHas('payment_mode', function ($query2) {
-                    $query2->where('transaction_type', 'Credit');
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
+    private function getPatientsSentToCashierCount($clinic_id)
+    {
+        try {
+            // Count patients with pending cash items (matches pending cash patients page)
+            // Include both Pending and Served items for billing workflow
+            $query = PatientPaymentCache::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('items', function ($query) {
+                    $query->whereIn('status', ['Pending', 'Served'])
+                        ->whereHas('payment_mode', function ($q) {
+                            $q->where('payment_type', 'Cash');
+                        });
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
-        $data['patients_sent_to_doctor'] = Consultation::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->where('status', 'Pending')
-            ->where('patient_direction', 'Direct to Doctor')
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
+            return $query->distinct('patient_payment_cache.id')->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting patients_sent_to_cashier: ' . $e->getMessage());
+            return 0;
+        }
+    }
 
-        $data['patients_sent_to_optician'] = Consultation::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->where('require_glass', 'Yes')
-            ->whereNotNull('sent_to_optician_at')
-            ->whereHas('payment_cache.items', function ($query) {
-                $query->whereHas('consultation_type', function ($query2) {
-                    $query2->where('name', 'Glass');
-                });
+    private function getCreditPatientsApprovalCount($clinic_id)
+    {
+        try {
+            // Count patients with pending credit items
+            $query = PatientPaymentCache::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('items', function ($query) {
+                    $query->where('status', 'Pending')
+                        ->whereHas('payment_mode', function ($q) {
+                            $q->where('payment_type', 'Credit');
+                        });
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::now()->startOfWeek()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
-                $query->where('status', '!=', 'Served');
-            })
-            ->where(function ($query) use ($start_date, $end_date) {
-                $query->whereNotNull('sent_to_optician_at');
-                $query->whereDate('sent_to_optician_at', '>=', $start_date);
-                $query->whereDate('sent_to_optician_at', '<=', $end_date);
-            })
-            ->count();
+            return $query->distinct()->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting credit_patients_approval: ' . $e->getMessage());
+            return 0;
+        }
+    }
 
-        $data['glass_patients'] = Consultation::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->where('require_glass', 'Yes')
-            ->whereNull('sent_to_optician_at')
-            ->where(function ($query) use ($start_date, $end_date) {
-                $query->where(function ($query2) use ($start_date, $end_date) {
-                    $query2->where('patient_direction', 'Direct to Optician');
-                    $query2->whereDate('created_at', '>=', $start_date);
-                    $query2->whereDate('created_at', '<=', $end_date);
-                });
-                $query->orWhere(function ($query2) use ($start_date, $end_date) {
-                    $query2->where('patient_direction', 'Direct to Doctor');
-                    $query2->whereHas('payment_cache_item', function ($query3) use ($start_date, $end_date) {
-                        $query3->whereNotNull('served_at');
-                        $query3->whereDate('served_at', '>=', $start_date);
-                        $query3->whereDate('served_at', '<=', $end_date);
+    private function getPatientsSentToDoctorCount($clinic_id)
+    {
+        try {
+            // Count consultations with status 'Pending'
+            $query = Consultation::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Pending')
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+
+            return $query->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting patients_sent_to_doctor: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getPatientsSentToOpticianCount($clinic_id)
+    {
+        try {
+            // Count consultations sent to optician
+            $query = Consultation::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('require_glass', 'Yes')
+                ->where(function ($q) {
+                    $q->where('send_to_optician', 'Yes')
+                      ->orWhereNotNull('sent_to_optician_at');
+                })
+                ->whereNull('optician_completed_at')
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+
+            return $query->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting patients_sent_to_optician: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getGlassPatientsCount($clinic_id)
+    {
+        try {
+            // Count patients with Glass consultation type
+            $query = PatientPaymentCache::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('items', function ($query) {
+                    $query->whereHas('consultation_type', function ($q) {
+                        $q->where('name', 'Glass');
+                    });
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+
+            return $query->distinct('patient_payment_cache.id')->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting glass_patients: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getDispensingRequestsCount($clinic_id)
+    {
+        try {
+            // Count pharmacy items with status Paid/Billed (pending dispensing)
+            $query = PatientPaymentCacheItem::query()
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->where('users.clinic_id', $clinic_id);
+                })
+                ->where('consultation_types.name', 'Pharmacy')
+                ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
+                ->whereNotNull('patient_payment_cache.created_at')
+                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(3)->format('Y-m-d') . ' 00:00:00')
+                ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+
+            return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
+        } catch (\Exception $e) {
+            Log::error('Error counting dispensing_requests: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getProcedureRequestsCount($clinic_id)
+    {
+        try {
+            // Count procedure items with pending status
+            $query = PatientPaymentCacheItem::query()
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->where('users.clinic_id', $clinic_id);
+                })
+                ->where('consultation_types.name', 'Procedure')
+                ->whereIn('patient_payment_cache_items.status', ['Pending', 'Paid', 'Billed'])
+                ->whereNotNull('patient_payment_cache.created_at')
+                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+
+            return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
+        } catch (\Exception $e) {
+            Log::error('Error counting procedure_requests: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getOtherDispensingRequestsCount($clinic_id)
+    {
+        try {
+            // Count other dispensing requests (non-pharmacy, non-procedure items)
+            $query = PatientPaymentCacheItem::query()
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->where('users.clinic_id', $clinic_id);
+                })
+                ->whereNotIn('consultation_types.name', ['Pharmacy', 'Procedure', 'Glass'])
+                ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
+                ->whereNotNull('patient_payment_cache.created_at')
+                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(3)->format('Y-m-d') . ' 00:00:00');
+
+            return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
+        } catch (\Exception $e) {
+            Log::error('Error counting other_dispensing_requests: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getPatientsToReturnCount($clinic_id)
+    {
+        try {
+            // Count consultations with patient_to_return = 'Yes'
+            $query = Consultation::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Consulted')
+                ->where('patient_to_return', 'Yes')
+                ->whereNotNull('to_return_date')
+                ->whereBetween('to_return_date', [Carbon::today(), Carbon::now()->endOfWeek()]);
+
+            return $query->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting patients_to_return: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getGlassDispensingRequestsCount($clinic_id)
+    {
+        try {
+            // Count glass items ready for dispensing
+            $query = PatientPaymentCacheItem::query()
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->where('users.clinic_id', $clinic_id);
+                })
+                ->where('consultation_types.name', 'Glass')
+                ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
+                ->whereNotNull('patient_payment_cache.created_at')
+                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+
+            return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
+        } catch (\Exception $e) {
+            Log::error('Error counting glass_dispensing_requests: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getVipPatientsCount($clinic_id)
+    {
+        try {
+            // Count VIP patients registered today who haven't checked in
+            $query = Patient::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where(function ($q) {
+                    $q->where('is_vip', 'Yes')
+                      ->orWhere('is_vip', true)
+                      ->orWhere('is_vip', 1);
+                })
+                ->whereDoesntHave('check_ins', function ($query) {
+                    $query->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                          ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+
+            return $query->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting vip_patients: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getSpectaclePatientsCount($clinic_id)
+    {
+        try {
+            // Count patients with Glass consultation type today
+            $query = PatientPaymentCache::query()
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereHas('items', function ($query) {
+                    $query->whereHas('consultation_type', function ($q) {
+                        $q->where('name', 'Glass');
+                    });
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+
+            return $query->distinct('patient_payment_cache.id')->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting spectacle_patients: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    private function getWaitingPatientsCount($clinic_id)
+    {
+        try {
+            // Count patients waiting in consultation room
+            $query = PatientWaitingTime::query()
+                ->whereIn('status', ['waiting', 'in_treatment'])
+                ->where('current_department', 'consultation')
+                ->when($clinic_id, function ($q) use ($clinic_id) {
+                    $q->whereHas('patient.check_ins', function ($subQuery) use ($clinic_id) {
+                        $subQuery->whereHas('payment_cache', function ($pcQuery) use ($clinic_id) {
+                            $pcQuery->whereHas('items', function ($itemQuery) use ($clinic_id) {
+                                $itemQuery->whereHas('creator', function ($userQuery) use ($clinic_id) {
+                                    $userQuery->where('clinic_id', $clinic_id);
+                                });
+                            });
+                        });
                     });
                 });
+
+            return $query->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting waiting_patients: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get dynamic notifications based on view period
+     */
+    public function getDynamicNotifications(Request $request)
+    {
+        $request->validate([
+            'view_period' => 'required|in:daily,weekly,monthly',
+            'date' => 'nullable|date_format:Y-m-d'
+        ]);
+
+        $user = $request->user();
+        
+        // Return empty data if user is not authenticated
+        if (!$user) {
+            return $this->sendResponse([
+                'waiting_patients' => 0,
+                'vip_patients' => 0,
+                'patients_to_return' => 0,
+                'spectacle_patients' => 0,
+                'completed_patients' => 0,
+                'procedure_requests' => 0,
+                'other_dispensing_requests' => 0,
+            ], Response::HTTP_OK, 'Dynamic notifications retrieved successfully.');
+        }
+        
+        $view_period = $request->view_period;
+        $selected_date = $request->date ? Carbon::parse($request->date) : Carbon::today();
+
+        $data = [
+            'waiting_patients' => 0,
+            'vip_patients' => 0,
+            'patients_to_return' => 0,
+            'spectacle_patients' => 0,
+            'completed_patients' => 0,
+            'procedure_requests' => 0,
+            'other_dispensing_requests' => 0,
+        ];
+
+        // Calculate date range based on view period - use same logic as ConsultationsController
+        $now = Carbon::now()->format('Y-m-d');
+        
+        if ($request->date) {
+            // When specific date is selected, use that date regardless of view_period
+            $start_date = $selected_date->copy();
+            $end_date = $selected_date->copy();
+        } else {
+            // Apply view period filtering only when no specific date is selected
+            switch ($view_period) {
+                case 'daily':
+                    $start_date = Carbon::now();
+                    $end_date = Carbon::now();
+                    break;
+                case 'weekly':
+                    $start_date = Carbon::now()->startOfWeek();
+                    $end_date = Carbon::now()->endOfWeek();
+                    break;
+                case 'monthly':
+                    $start_date = Carbon::now()->startOfMonth();
+                    $end_date = Carbon::now()->endOfMonth();
+                    break;
+                default:
+                    $start_date = Carbon::now();
+                    $end_date = Carbon::now();
+            }
+        }
+
+        // Patients to return based on view period
+        try {
+            $data['patients_to_return'] = Consultation::whereHas('creator', function ($query) use ($user) {
+                if (!$user->is_admin && $user->clinic_id) {
+                    $query->where('clinic_id', $user->clinic_id);
+                }
             })
-            ->count();
+                ->where('status', 'Consulted')
+                ->where('patient_to_return', 'Yes')
+                ->whereNotNull('to_return_date')
+                ->whereBetween('to_return_date', [$start_date->format('Y-m-d'), $end_date->format('Y-m-d')])
+                ->count();
+        } catch (\Exception $e) {
+            Log::error('Error in getDynamicNotifications: ' . $e->getMessage());
+            $data['patients_to_return'] = 0;
+        }
 
-        $data['dispensing_requests'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->whereHas('items', function ($query) {
-                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-                $query->whereHas('consultation_type', function ($query2) {
-                    $query2->where('name', 'Pharmacy');
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
+        // Debug logging
+        Log::info('Dynamic Notifications Debug', [
+            'view_period' => $view_period,
+            'selected_date' => $selected_date->format('Y-m-d'),
+            'start_date' => $start_date->format('Y-m-d'),
+            'end_date' => $end_date->format('Y-m-d'),
+            'patients_to_return' => $data['patients_to_return'],
+            'has_specific_date' => $request->has('date'),
+            'current_week_start' => Carbon::now()->startOfWeek()->format('Y-m-d'),
+            'current_week_end' => Carbon::now()->endOfWeek()->format('Y-m-d')
+        ]);
 
-        $data['procedure_requests'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->whereHas('items', function ($query) {
-                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-                $query->whereHas('consultation_type', function ($query2) {
-                    $query2->where('name', 'Procedure');
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
-
-        $data['other_dispensing_requests'] = PatientPaymentCache::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->whereHas('items', function ($query) {
-                $query->whereIn('status', ['Pending', 'Paid', 'Billed']);
-                $query->whereHas('consultation_type', function ($query2) {
-                    $query2->where('name', 'Others');
-                });
-                $query->whereHas('item', function ($query2) {
-                    $query2->where('is_stock_item', 'Yes');
-                });
-            })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->count();
-
-        $data['patients_to_return'] = Consultation::whereHas('creator', function ($query) use ($user) {
-            $query->where('clinic_id', $user->clinic_id);
-        })
-            ->where('status', 'Consulted')
-            ->whereNotNull('to_return_date')
-            ->where('to_return_date', '>=', $start_date)
-            ->where('to_return_date', '<=', $end_date)
-            ->count();
-
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        return $this->sendResponse($data, Response::HTTP_OK, 'Dynamic notifications retrieved successfully.');
     }
 }

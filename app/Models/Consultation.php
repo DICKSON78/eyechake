@@ -12,9 +12,11 @@ class Consultation extends Model
 
     protected $fillable = [
         'payment_cache_item_id', 'patient_direction', 'chief_complaint', 'history_present_illness',
-        'family_history', 'general_health', 'family_ocular_history', 'family_general_history', 'pupils',
-        'extra_ocular_muscles', 'patient_to_return', 'to_return_date', 'remarks', 'created_by',
-        'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by',
+        'family_history', 'general_health',
+        // Note: family_ocular_history and family_general_history removed - columns don't exist in database
+        'patient_to_return', 'to_return_date', 'return_reason', 'remarks', 'created_by',
+        'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by', 'lens_types',
+        'doctor_recommendations', 'doctor_comments_remarks',
     ];
 
     protected $casts = [
@@ -69,6 +71,11 @@ class Consultation extends Model
     public function to_optician_sender()
     {
         return $this->belongsTo(User::class, 'sent_to_optician_by');
+    }
+
+    public function doctor_tasks()
+    {
+        return $this->hasMany(DoctorTask::class, 'consultation_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

@@ -1,13 +1,19 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import Dashboard from "./dashboard/Dashboard";
 import ConsultationPatients from "./GlassPatients";
 import ConsultationPatientRoutes from "./GlassPatientRoutes";
 import DispensingRoutes from "../dispensing/DispensingRoutes";
 import ReportsRoutes from "./ReportsRoutes";
+import LensStock from "./lens-stock/LensStock";
 
 const OpticianCenterRoutes = () => {
   return (
     <Routes>
+      <Route
+        path="/dashboard"
+        element={<Dashboard />}
+      />
       <Route
         path="/glass-patients"
         exact
@@ -18,12 +24,12 @@ const OpticianCenterRoutes = () => {
         element={<ConsultationPatientRoutes />}
       />
       <Route
-        path="dispensing-requests/*"
-        element={<DispensingRoutes consultationType="Glass" />}
-      />
-      <Route
         path="reports/*"
         element={<ReportsRoutes />}
+      />
+      <Route
+        path="lens-stock"
+        element={<LensStock />}
       />
     </Routes>
   );

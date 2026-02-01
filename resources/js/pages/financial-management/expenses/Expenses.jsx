@@ -18,7 +18,7 @@ import Modal from "../../../components/Modal";
 import Filters from "./Filters";
 import CreateExpense from "./CreateExpense";
 import EditExpense from "./EditExpense";
-import ExpensePayments from "./ExpensePayments";
+import ExpensePaymentsModal from "./ExpensePaymentsModal";
 
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, numberFormat } from "../../../helpers";
@@ -41,7 +41,7 @@ const Expenses = ({ module, createdBy }) => {
     "api/expenses",
     {
       ...params,
-      created_by: createdBy,
+      created_by: createdBy ?? undefined,
       start_date: params.start_date
         ? formatDateForDb(params.start_date)
         : undefined,
@@ -53,7 +53,14 @@ const Expenses = ({ module, createdBy }) => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      const raw = response?.data?.data;
+      if (!raw || typeof raw !== 'object') return { data: [], total: 0 };
+      return {
+        data: Array.isArray(raw.data) ? raw.data : (raw.data || []),
+        total: parseInt(raw.total, 10) || 0,
+      };
+    }
   );
 
   useEffect(() => {
@@ -97,7 +104,7 @@ const Expenses = ({ module, createdBy }) => {
 
   const openExpensePaymentsModal = (item) => {
     let component = (
-      <ExpensePayments
+      <ExpensePaymentsModal
         expense={item}
         modal={modalRef.current}
         fetchExpenses={handleFetch}
@@ -247,7 +254,7 @@ const Expenses = ({ module, createdBy }) => {
                 ),
               },
             ]}
-            items={data.data}
+            items={Array.isArray(data.data) ? data.data : []}
             itemCount={data.total}
             page={params.page}
             pageSize={params.per_page}
@@ -260,21 +267,21 @@ const Expenses = ({ module, createdBy }) => {
                 { value: "TOTAL", tableCellProps: { colSpan: 3 } },
                 {
                   value: numberFormat(
-                    data.data.reduce((acc, item) => acc + item.total_amount, 0)
+                    Array.isArray(data.data) ? data.data.reduce((acc, item) => acc + (parseFloat(item.total_amount) || 0), 0) : 0
                   ),
                 },
                 {
                   value: numberFormat(
-                    data.data.reduce((acc, item) => acc + item.paid_amount, 0)
+                    Array.isArray(data.data) ? data.data.reduce((acc, item) => acc + (parseFloat(item.paid_amount) || 0), 0) : 0
                   ),
                 },
                 {
                   value: numberFormat(
-                    data.data.reduce(
+                    Array.isArray(data.data) ? data.data.reduce(
                       (acc, item) =>
-                        acc + (item.total_amount - item.paid_amount),
+                        acc + ((parseFloat(item.total_amount) || 0) - (parseFloat(item.paid_amount) || 0)),
                       0
-                    )
+                    ) : 0
                   ),
                 },
               ],

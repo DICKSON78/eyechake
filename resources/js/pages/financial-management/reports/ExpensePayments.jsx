@@ -174,7 +174,7 @@ const ExpensePayments = ({ module, createdBy }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 4, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 4 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.amount) || 0), index: 4 },
         ]}
       />
     </Page>

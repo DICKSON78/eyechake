@@ -106,7 +106,7 @@ const EditResearchPlan = ({ item, modal, fetchResearchPlans }) => {
                 label="Overview"
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 defaultValue={formData.overview}
                 onChange={(value) =>
                   setFormData({ ...formData, overview: value })
@@ -124,7 +124,7 @@ const EditResearchPlan = ({ item, modal, fetchResearchPlans }) => {
                 label="Goals"
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 defaultValue={formData.goals}
                 onChange={(value) => setFormData({ ...formData, goals: value })}
               />
@@ -140,7 +140,7 @@ const EditResearchPlan = ({ item, modal, fetchResearchPlans }) => {
                 label="Deliverables"
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 defaultValue={formData.deliverables}
                 onChange={(value) =>
                   setFormData({ ...formData, deliverables: value })
@@ -267,7 +267,7 @@ const EditResearchPlan = ({ item, modal, fetchResearchPlans }) => {
                   label="Remarks"
                   fullWidth
                   multiline
-                  rows={3}
+                  rows={4}
                   required
                   defaultValue={formData.remarks}
                   onChange={(value) =>

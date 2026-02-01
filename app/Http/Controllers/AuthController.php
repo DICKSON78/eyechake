@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB; // Added DB facade
+use App\Models\User; // Added User model
 
 class AuthController extends Controller
 {
@@ -23,29 +25,107 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('username', 'password');
+        // Set very aggressive timeout to prevent hanging
+        set_time_limit(15);
+        ini_set('max_execution_time', 15);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            if ($user->status == 'Inactive') {
+        try {
+            // Quick database connection test with timeout
+            $pdo = null;
+            try {
+                $pdo = DB::connection()->getPdo();
+                if (!$pdo) {
+                    throw new \Exception('Database connection failed');
+                }
+            } catch (\Exception $e) {
                 return $this->sendResponse(
                     null,
-                    Response::HTTP_FORBIDDEN,
-                    'You do not have access to the system.'
+                    Response::HTTP_SERVICE_UNAVAILABLE,
+                    'Database connection failed. Please check your database configuration.'
                 );
             }
 
-            $token = $user->createToken('MyApp')->plainTextToken;
+            $credentials = $request->only('username', 'password');
+
+            // Use a more direct approach to check user
+            $user = User::where('username', $credentials['username'])
+                       ->where('status', 'Active')
+                       ->first();
+
+            if (!$user) {
+                return $this->sendResponse(
+                    null,
+                    Response::HTTP_UNAUTHORIZED,
+                    'User not found or inactive.'
+                );
+            }
+
+            // Check password manually
+            if (!Hash::check($credentials['password'], $user->password)) {
+                return $this->sendResponse(
+                    null,
+                    Response::HTTP_UNAUTHORIZED,
+                    'Incorrect password.'
+                );
+            }
+
+            // Login the user
+            Auth::login($user);
+
+            // Create token
+            $token = $user->createToken('MyApp', ['*'], now()->addDays(7))->plainTextToken;
+
+            // Eager-load relations commonly needed on the client
+            $user->load(['department', 'job_title', 'clinic']);
+
+            // Attach clinic preferences if clinic exists
+            if ($user->clinic) {
+                $user->clinic->preferences = Preference::where('clinic_id', $user->clinic->id)
+                    ->get(['id', 'clinic_id', 'key', 'value']);
+            } else {
+                $user->clinic = new \stdClass();
+                $user->clinic->preferences = collect();
+            }
+
+            // Build normalized privileges object: { key: true }
+            // Use the new UserPrivilege model methods that handle the boolean column structure
+            $normalized = new \stdClass();
+
+            try {
+                $privilegesArray = UserPrivilege::getPrivilegesAsArray($user->id);
+                foreach ($privilegesArray as $privilege) {
+                    $normalized->$privilege = true;
+                }
+            } catch (\Exception $privEx) {
+                // If privilege loading fails completely, set empty privileges
+                \Log::error('Error loading user privileges: ' . $privEx->getMessage(), [
+                    'user_id' => $user->id,
+                    'trace' => $privEx->getTraceAsString()
+                ]);
+                $normalized = new \stdClass();
+            }
+            
+            // Set privileges using setAttribute to override the accessor
+            $user->setAttribute('privileges', $normalized);
 
             return $this->sendResponse([
                 'token' => $token,
                 'user' => $user
             ], Response::HTTP_OK, 'Logged in successfully.');
-        } else {
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Database error during login: ' . $e->getMessage());
             return $this->sendResponse(
                 null,
-                Response::HTTP_UNAUTHORIZED,
-                'Incorrect username/password combination.'
+                Response::HTTP_SERVICE_UNAVAILABLE,
+                'Database error. Please try again.'
+            );
+        } catch (\Exception $e) {
+            \Log::error('Login error: ' . $e->getMessage());
+            return $this->sendResponse(
+                null,
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                'An error occurred during login. Please try again.'
             );
         }
     }
@@ -76,19 +156,38 @@ class AuthController extends Controller
     public function getAuthUser(Request $request)
     {
         $user = $request->user();
-        $user->department = $user->department;
-        $user->job_title = $user->job_title;
-        $user->clinic = $user->clinic ?? new \stdClass();
-        $user->clinic->preferences = Preference::where('clinic_id', $user->clinic->id ?? 0)->get();
-        $user_privileges = UserPrivilege::where('user_id', $user->id)->get();
-        $user_privileges = $user_privileges->map(function ($e) {
-            return $e->privilege;
-        });
-
-        $user->privileges = new \stdClass();
-        foreach ($user_privileges as $privilege) {
-            $user->privileges->$privilege = true;
+        
+        // Use eager loading to reduce database queries
+        $user->load(['department', 'job_title', 'clinic']);
+        
+        // Load clinic preferences only if clinic exists
+        if ($user->clinic) {
+            $user->clinic->preferences = Preference::where('clinic_id', $user->clinic->id)
+                ->get(['id', 'clinic_id', 'key', 'value']);
+        } else {
+            $user->clinic = new \stdClass();
+            $user->clinic->preferences = collect();
         }
+        
+        // Load user privileges using the new UserPrivilege model methods
+        $normalized = new \stdClass();
+
+        try {
+            $privilegesArray = UserPrivilege::getPrivilegesAsArray($user->id);
+            foreach ($privilegesArray as $privilege) {
+                $normalized->$privilege = true;
+            }
+        } catch (\Exception $privEx) {
+            // If privilege loading fails completely, set empty privileges
+            \Log::error('Error loading user privileges: ' . $privEx->getMessage(), [
+                'user_id' => $user->id,
+                'trace' => $privEx->getTraceAsString()
+            ]);
+            $normalized = new \stdClass();
+        }
+
+        // Set privileges using setAttribute to override the accessor
+        $user->setAttribute('privileges', $normalized);
 
         return $this->sendResponse($user, Response::HTTP_OK, 'Success.');
     }

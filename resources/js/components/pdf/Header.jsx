@@ -1,23 +1,46 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
 
-import logo from "../../../images/logo.png";
+// Resolve logo source for PDF (prefer clinic-uploaded logo; fallback to public logo)
+const getLogoSrc = () => {
+  try {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const clinicLogo = window?.user?.clinic?.logo;
+    if (clinicLogo && typeof clinicLogo === 'string') {
+      // Accept absolute URLs or relative paths stored in DB
+      return clinicLogo.startsWith('http') ? clinicLogo : `${origin}${clinicLogo}`;
+    }
+    return `${origin}/logo.png`;
+  } catch (_) {
+    return '/images/logo.png';
+  }
+};
 
 const Header = ({ fixed, title, subtitle, dense }) => {
   const getAddressLine = () => {
-    let contacts = [window.user.clinic.name];
+    try {
+      const clinic = window?.user?.clinic;
+      if (!clinic) {
+        return window?.APP_NAME || 'Clinic Information';
+      }
 
-    if (window.user.clinic.address) {
-      contacts.push(window.user.clinic.address);
-    }
-    if (window.user.clinic.phone) {
-      contacts.push("Phone: " + window.user.clinic.phone);
-    }
-    if (window.user.clinic.email) {
-      contacts.push("Email: " + window.user.clinic.email);
-    }
+      let contacts = [clinic.name || window?.APP_NAME || 'Clinic'];
 
-    return contacts.join("\n");
+      if (clinic.address) {
+        contacts.push(clinic.address);
+      }
+      if (clinic.phone) {
+        contacts.push("Phone: " + clinic.phone);
+      }
+      if (clinic.email) {
+        contacts.push("Email: " + clinic.email);
+      }
+
+      return contacts.join("\n");
+    } catch (error) {
+      console.warn('Error getting clinic address line:', error);
+      return window?.APP_NAME || 'Clinic Information';
+    }
   };
 
   return (
@@ -40,7 +63,7 @@ const Header = ({ fixed, title, subtitle, dense }) => {
     >
       <View style={{ width: 112 }}>
         <Image
-          src={logo}
+          src={getLogoSrc()}
           style={{
             width: 80,
             height: "auto",
@@ -84,6 +107,19 @@ const Header = ({ fixed, title, subtitle, dense }) => {
             ]}
           >
             {subtitle}
+          </Text>
+        ) : null}
+        {dense ? (
+          <Text
+            style={[
+              styles.text,
+              {
+                marginTop: 4,
+                textAlign: "center",
+              },
+            ]}
+          >
+            {`${getAddressLine()}`}
           </Text>
         ) : null}
       </View>

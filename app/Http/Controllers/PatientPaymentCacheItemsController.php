@@ -11,6 +11,7 @@ use App\Models\PatientPaymentCacheItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class PatientPaymentCacheItemsController extends Controller
 {
@@ -24,37 +25,47 @@ class PatientPaymentCacheItemsController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-            'per_page' => 'sometimes|integer|min:0',
-            'page' => 'sometimes|integer|min:1',
-            'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d',
-            'sort_direction' => 'sometimes|in:asc,desc',
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:0',
+                'page' => 'sometimes|integer|min:1',
+                'start_date' => 'sometimes|date_format:Y-m-d',
+                'end_date' => 'sometimes|date_format:Y-m-d',
+                'sort_direction' => 'sometimes|in:asc,desc',
+            ]);
+
+            $user = $request->user();
+            $per_page = $request->per_page ?? 25;
+            $clinic_id = $request->clinic_id;
+            $status = $request->status;
+            $q = $request->q;
+            $payment_cache_id = $request->payment_cache_id;
+            $payment_mode_id = $request->payment_mode_id;
+            $transaction_type = $request->transaction_type;
+            $consultation_type = $request->consultation_type;
+            $is_stock_item = $request->is_stock_item;
+            $consultant_id = $request->consultant_id;
+            $consultation_id = $request->consultation_id;
+            $bill_id = $request->bill_id;
+            $with_patient = $request->with_patient;
+            $patient_name = $request->patient_name;
+            $patient_id = $request->patient_id;
+            $patient_gender = $request->patient_gender;
+            $patient_phone = $request->patient_phone;
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            $sort_direction = $request->sort_direction ?? 'asc';
+
+            $data = PatientPaymentCacheItem::with([
+            'item' => function($query) {
+                $query->select('id', 'name', 'code', 'templates', 'unit_of_measure_id', 'consultation_type_id', 'is_consultation_item', 'is_stock_item', 'balance', 'unit_buying_price', 'status');
+            },
+            'item.unit_of_measure', 
+            'consultation_type', 
+            'payment_mode', 
+            'creator', 
+            'server'
         ]);
-
-        $user = $request->user();
-        $per_page = $request->per_page ?? 25;
-        $clinic_id = $request->clinic_id;
-        $status = $request->status;
-        $q = $request->q;
-        $payment_cache_id = $request->payment_cache_id;
-        $payment_mode_id = $request->payment_mode_id;
-        $transaction_type = $request->transaction_type;
-        $consultation_type = $request->consultation_type;
-        $is_stock_item = $request->is_stock_item;
-        $consultant_id = $request->consultant_id;
-        $consultation_id = $request->consultation_id;
-        $bill_id = $request->bill_id;
-        $with_patient = $request->with_patient;
-        $patient_name = $request->patient_name;
-        $patient_id = $request->patient_id;
-        $patient_gender = $request->patient_gender;
-        $patient_phone = $request->patient_phone;
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
-        $sort_direction = $request->sort_direction ?? 'asc';
-
-        $data = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server']);
 
         if ($user->is_admin) {
             $data->with(['creator.clinic']);
@@ -65,9 +76,14 @@ class PatientPaymentCacheItemsController extends Controller
                 });
             }
         } else {
-            $data->whereHas('creator', function ($query) use ($user) {
-                $query->where('clinic_id', $user->clinic_id);
-            });
+            if ($user->clinic_id) {
+                $data->whereHas('creator', function ($query) use ($user) {
+                    $query->where('clinic_id', $user->clinic_id);
+                });
+            } else {
+                // If user has no clinic_id, return empty result
+                $data->whereRaw('1 = 0');
+            }
         }
 
         if ($status) {
@@ -96,7 +112,7 @@ class PatientPaymentCacheItemsController extends Controller
 
         if ($transaction_type) {
             $data->whereHas('payment_mode', function ($query) use ($transaction_type) {
-                $query->where('transaction_type', $transaction_type);
+                $query->where('payment_type', $transaction_type);
             });
         }
 
@@ -183,6 +199,19 @@ class PatientPaymentCacheItemsController extends Controller
         $data->orderBy('created_at', $sort_direction);
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('PatientPaymentCacheItemsController index query error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->sendError('Database query error occurred', Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            \Log::error('PatientPaymentCacheItemsController index error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->sendError('An error occurred while fetching data', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -218,9 +247,14 @@ class PatientPaymentCacheItemsController extends Controller
 
         if ($payment) {
             $items = $request->json('items');
+            $hasGlassItems = false;
+            $consultation = null;
+            $patient = null;
+            $paymentCache = null;
 
             foreach ($items as &$request_item) {
-                $item = PatientPaymentCacheItem::find($request_item);
+                $item = PatientPaymentCacheItem::with(['item.consultation_type', 'item.item_type', 'payment_cache.check_in.patient'])
+                    ->find($request_item);
 
                 if ($item) {
                     $amount += ($item->unit_price * $item->quantity);
@@ -229,25 +263,80 @@ class PatientPaymentCacheItemsController extends Controller
                     $item->status = 'Paid';
                     $item->save();
 
+                    // Get payment cache and patient for later use
+                    if (!$paymentCache) {
+                        $paymentCache = $item->payment_cache;
+                    }
+                    if (!$patient && $paymentCache && $paymentCache->check_in) {
+                        $patient = $paymentCache->check_in->patient;
+                    }
+
+                    // Check if this is a glass/spectacle item
+                    $isGlassItem = false;
+                    if ($item->item && $item->item->consultation_type) {
+                        $isGlassItem = $item->item->consultation_type->name === 'Glass';
+                    }
+                    
+                    if ($isGlassItem) {
+                        $hasGlassItems = true;
+                    }
+
                     // if item was not created from consultation, i.e. on check-in, create consultation
                     if (!$item->payment_cache->consultation_id) {
                         if ($item->item->is_consultation_item == 'Yes') {
-                            Consultation::create([
+                            $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
                                 'created_by' => $user->id,
                             ]);
-                        } else {
-                            if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
-                                $consultation = Consultation::create([
-                                    'payment_cache_item_id' => $item->id,
-                                    'patient_direction' => 'Direct to Optician',
-                                    'created_by' => $user->id,
-                                    'require_glass' => 'Yes',
-                                ]);
+                            
+                            $item->payment_cache->consultation_id = $consultation->id;
+                            $item->payment_cache->save();
+                        } elseif ($isGlassItem) {
+                            // Create consultation for glass/spectacle items
+                            $consultation = Consultation::create([
+                                'payment_cache_item_id' => $item->id,
+                                'patient_direction' => 'Sent to Optician',
+                                'created_by' => $user->id,
+                                'require_glass' => 'Yes',
+                                'sent_to_optician_at' => now(),
+                                'sent_to_optician_by' => $user->id,
+                            ]);
 
-                                $item->payment_cache->consultation_id = $consultation->id;
-                                $item->payment_cache->save();
+                            $item->payment_cache->consultation_id = $consultation->id;
+                            $item->payment_cache->save();
+                            
+                            \Log::info('Glass item consultation created during payment', [
+                                'consultation_id' => $consultation->id,
+                                'item_id' => $item->id,
+                                'payment_id' => $payment->id,
+                                'user_id' => $user->id
+                            ]);
+                        }
+                    } else {
+                        // Consultation already exists, check if it needs to be updated for glass items
+                        $existingConsultation = Consultation::find($item->payment_cache->consultation_id);
+                        if ($existingConsultation && $isGlassItem) {
+                            // Update existing consultation to mark as sent to optician
+                            $updateData = [
+                                'require_glass' => 'Yes',
+                                'patient_direction' => 'Sent to Optician',
+                            ];
+                            
+                            // Only set sent_to_optician_at if not already set
+                            if (!$existingConsultation->sent_to_optician_at) {
+                                $updateData['sent_to_optician_at'] = now();
+                                $updateData['sent_to_optician_by'] = $user->id;
                             }
+                            
+                            $existingConsultation->update($updateData);
+                            $consultation = $existingConsultation;
+                            
+                            \Log::info('Existing consultation updated for glass item during payment', [
+                                'consultation_id' => $existingConsultation->id,
+                                'item_id' => $item->id,
+                                'payment_id' => $payment->id,
+                                'user_id' => $user->id
+                            ]);
                         }
                     }
                 }
@@ -259,6 +348,55 @@ class PatientPaymentCacheItemsController extends Controller
             $payment->items = PatientPaymentCacheItem::with(['item.unit_of_measure'])
                 ->where('item_payment_id', $payment->id)
                 ->get();
+
+            // If patient has glass items and consultation was created/updated, move patient to optician
+            if ($hasGlassItems && $consultation && $patient) {
+                try {
+                    $waitingTime = $patient->current_waiting_time;
+                    if ($waitingTime) {
+                        $waitingTime->sendToConsultation();
+                        \Log::info('Patient with glass items moved to optician after payment', [
+                            'patient_id' => $patient->id,
+                            'patient_name' => $patient->full_name ?? 'Unknown',
+                            'consultation_id' => $consultation->id,
+                            'payment_id' => $payment->id,
+                            'sent_by' => $user->id
+                        ]);
+                    } else {
+                        \Log::warning('No waiting time found for patient when sending to optician after payment', [
+                            'patient_id' => $patient->id,
+                            'consultation_id' => $consultation->id,
+                            'payment_id' => $payment->id
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to move patient to optician department after payment', [
+                        'consultation_id' => $consultation->id,
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    // Don't fail the entire request, just log the error
+                }
+            }
+
+            // Clear notification cache and trigger refresh for real-time updates
+            try {
+                $user = $request->user();
+                $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
+                \Cache::forget($cacheKey);
+                event(new \App\Events\NotificationUpdate());
+                \Log::info('Payment completed - notification cache cleared and refresh triggered', [
+                    'payment_id' => $payment->id,
+                    'amount' => $payment->amount,
+                    'has_glass_items' => $hasGlassItems
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to clear notification cache and trigger refresh after payment', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             return $this->sendResponse($payment, Response::HTTP_OK, 'Payment made successfully.');
         }
@@ -281,9 +419,30 @@ class PatientPaymentCacheItemsController extends Controller
         $user = $request->user();
         $amount = 0;
         $items = $request->json('items');
+        $hasGlassItems = false;
+        $consultation = null;
+        $patient = null;
+        $paymentCache = null;
+
+        // Find or create Credit payment channel
+        $creditChannel = \App\Models\PaymentChannel::where('name', 'Credit')->first();
+        if (!$creditChannel) {
+            // Try alternative names
+            $creditChannel = \App\Models\PaymentChannel::whereIn('name', ['Credit', 'Credit Payment', 'Credit Payments'])->first();
+            if (!$creditChannel) {
+                // Create default Credit channel if it doesn't exist
+                $creditChannel = \App\Models\PaymentChannel::create([
+                    'name' => 'Credit',
+                    'description' => 'Credit payments',
+                    'status' => 'Active',
+                    'clinic_id' => $user->clinic_id ?? null,
+                ]);
+            }
+        }
 
         foreach ($items as &$request_item) {
-            $item = PatientPaymentCacheItem::find($request_item);
+            $item = PatientPaymentCacheItem::with(['item.consultation_type', 'item.item_type', 'payment_cache.check_in.patient'])
+                ->find($request_item);
 
             if ($item) {
                 $amount += ($item->unit_price * $item->quantity);
@@ -291,28 +450,148 @@ class PatientPaymentCacheItemsController extends Controller
                 $item->status = 'Paid';
                 $item->save();
 
+                // Get payment cache and patient for later use
+                if (!$paymentCache) {
+                    $paymentCache = $item->payment_cache;
+                }
+                if (!$patient && $paymentCache && $paymentCache->check_in) {
+                    $patient = $paymentCache->check_in->patient;
+                }
+
+                // Check if this is a glass/spectacle item
+                $isGlassItem = false;
+                if ($item->item && $item->item->consultation_type) {
+                    $isGlassItem = $item->item->consultation_type->name === 'Glass';
+                }
+                
+                if ($isGlassItem) {
+                    $hasGlassItems = true;
+                }
+
                 // if item was not created from consultation, i.e. on check-in, create consultation
                 if (!$item->payment_cache->consultation_id) {
                     if ($item->item->is_consultation_item == 'Yes') {
-                        Consultation::create([
+                        $consultation = Consultation::create([
                             'payment_cache_item_id' => $item->id,
                             'created_by' => $user->id,
                         ]);
-                    } else {
-                        if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
-                            $consultation = Consultation::create([
-                                'payment_cache_item_id' => $item->id,
-                                'patient_direction' => 'Direct to Optician',
-                                'created_by' => $user->id,
-                                'require_glass' => 'Yes',
-                            ]);
+                        
+                        $item->payment_cache->consultation_id = $consultation->id;
+                        $item->payment_cache->save();
+                    } elseif ($isGlassItem) {
+                        // Create consultation for glass/spectacle items
+                        $consultation = Consultation::create([
+                            'payment_cache_item_id' => $item->id,
+                            'patient_direction' => 'Sent to Optician',
+                            'created_by' => $user->id,
+                            'require_glass' => 'Yes',
+                            'sent_to_optician_at' => now(),
+                            'sent_to_optician_by' => $user->id,
+                        ]);
 
-                            $item->payment_cache->consultation_id = $consultation->id;
-                            $item->payment_cache->save();
+                        $item->payment_cache->consultation_id = $consultation->id;
+                        $item->payment_cache->save();
+                        
+                        \Log::info('Glass item consultation created during credit payment approval', [
+                            'consultation_id' => $consultation->id,
+                            'item_id' => $item->id,
+                            'user_id' => $user->id
+                        ]);
+                    }
+                } else {
+                    // Consultation already exists, check if it needs to be updated for glass items
+                    $existingConsultation = Consultation::find($item->payment_cache->consultation_id);
+                    if ($existingConsultation && $isGlassItem) {
+                        // Update existing consultation to mark as sent to optician
+                        $updateData = [
+                            'require_glass' => 'Yes',
+                            'patient_direction' => 'Sent to Optician',
+                        ];
+                        
+                        // Only set sent_to_optician_at if not already set
+                        if (!$existingConsultation->sent_to_optician_at) {
+                            $updateData['sent_to_optician_at'] = now();
+                            $updateData['sent_to_optician_by'] = $user->id;
                         }
+                        
+                        $existingConsultation->update($updateData);
+                        $consultation = $existingConsultation;
+                        
+                        \Log::info('Existing consultation updated for glass item during credit payment approval', [
+                            'consultation_id' => $existingConsultation->id,
+                            'item_id' => $item->id,
+                            'user_id' => $user->id
+                        ]);
                     }
                 }
             }
+        }
+
+        // Create payment record for credit payment
+        if ($amount > 0 && $creditChannel) {
+            $payment = \App\Models\PatientItemPayment::create([
+                'channel_id' => $creditChannel->id,
+                'amount' => $amount,
+                'discount' => 0,
+                'created_by' => $user->id,
+            ]);
+
+            // Link items to the payment
+            foreach ($items as &$request_item) {
+                $item = \App\Models\PatientPaymentCacheItem::find($request_item);
+                if ($item && $item->status === 'Paid') {
+                    $item->item_payment_id = $payment->id;
+                    $item->save();
+                }
+            }
+
+            \Log::info('Credit payment record created', [
+                'payment_id' => $payment->id,
+                'amount' => $amount,
+                'items_count' => count($items),
+                'user_id' => $user->id
+            ]);
+        }
+
+        // If patient has glass items and consultation was created/updated, move patient to optician
+        if ($hasGlassItems && $consultation && $patient) {
+            try {
+                $waitingTime = $patient->current_waiting_time;
+                if ($waitingTime) {
+                    $waitingTime->sendToConsultation();
+                    \Log::info('Patient with glass items moved to optician after credit payment approval', [
+                        'patient_id' => $patient->id,
+                        'patient_name' => $patient->full_name ?? 'Unknown',
+                        'consultation_id' => $consultation->id,
+                        'sent_by' => $user->id
+                    ]);
+                } else {
+                    \Log::warning('No waiting time found for patient when sending to optician after credit payment approval', [
+                        'patient_id' => $patient->id,
+                        'consultation_id' => $consultation->id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to move patient to optician department after credit payment approval', [
+                    'consultation_id' => $consultation->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Don't fail the entire request, just log the error
+            }
+        }
+
+        // Trigger notification refresh for real-time updates
+        try {
+            event(new \App\Events\NotificationUpdate());
+            \Log::info('Credit payment approved - notification refresh triggered', [
+                'items_count' => count($items),
+                'has_glass_items' => $hasGlassItems
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to trigger notification refresh after credit payment approval', [
+                'error' => $e->getMessage()
+            ]);
         }
 
         return $this->sendResponse($items, Response::HTTP_OK, 'Approved successfully.');
@@ -352,10 +631,13 @@ class PatientPaymentCacheItemsController extends Controller
                     // if item was not created from consultation, i.e. on check-in, create consultation
                     if (!$item->payment_cache->consultation_id) {
                         if ($item->item->is_consultation_item == 'Yes') {
-                            Consultation::create([
+                            $consultation = Consultation::create([
                                 'payment_cache_item_id' => $item->id,
                                 'created_by' => $user->id,
                             ]);
+                            
+                            $item->payment_cache->consultation_id = $consultation->id;
+                            $item->payment_cache->save();
                         } else {
                             if ($item->item->consultation_type->name == 'Glass' && $item->item->item_type->name == 'Lens') {
                                 $consultation = Consultation::create([
@@ -375,6 +657,22 @@ class PatientPaymentCacheItemsController extends Controller
 
             $bill->amount = $amount;
             $bill->save();
+
+            // Clear notification cache and trigger refresh for real-time updates (especially for spectacle patients)
+            try {
+                $user = $request->user();
+                $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
+                \Cache::forget($cacheKey);
+                event(new \App\Events\NotificationUpdate());
+                \Log::info('Bill created - notification cache cleared and refresh triggered', [
+                    'bill_id' => $bill->id,
+                    'items_count' => count($items)
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to clear notification cache and trigger refresh after bill creation', [
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             return $this->sendResponse($bill, Response::HTTP_OK, 'Bill created successfully.');
         }
@@ -422,6 +720,24 @@ class PatientPaymentCacheItemsController extends Controller
 
         if ($callback) {
             $callback($payment_cache);
+        }
+
+        // Clear notification cache and trigger refresh for real-time updates
+        try {
+            $user = $request->user();
+            $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
+            Cache::forget($cacheKey);
+            event(new \App\Events\NotificationUpdate());
+            \Log::info('Cleared notification cache and triggered refresh after payment cache item update', [
+                'user_id' => $user->id,
+                'cache_key' => $cacheKey,
+                'status' => $status,
+                'payment_cache_id' => $request->payment_cache_id
+            ]);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to clear notification cache and trigger refresh after payment update', [
+                'error' => $e->getMessage()
+            ]);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, $message);

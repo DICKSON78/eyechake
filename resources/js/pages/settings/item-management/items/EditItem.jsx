@@ -76,6 +76,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
   const [formData, setFormData] = useState({
     name: item.name,
     code: item.code,
+    category: item.category,
     item_type_id: item.item_type_id,
     consultation_type_id: item.consultation_type_id,
     unit_of_measure_id: item.unit_of_measure_id,
@@ -149,6 +150,20 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 fullWidth
                 defaultValue={item.code}
                 onChange={(value) => setFormData({ ...formData, code: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                label="Category"
+                fullWidth
+                placeholder="Enter category"
+                defaultValue={item.category}
+                onChange={(value) => setFormData({ ...formData, category: value })}
               />
             </Grid>
             <Grid

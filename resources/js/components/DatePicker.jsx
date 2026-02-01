@@ -147,6 +147,8 @@ const DatePicker = (
                 fullWidth,
                 required,
                 readOnly: true,
+                id: rest.id || rest.name || `datepicker-${Math.random().toString(36).substr(2, 9)}`,
+                name: rest.name || rest.id || `datepicker-${Math.random().toString(36).substr(2, 9)}`,
                 InputProps: {
                   error: !!state.error,
                   onClick: () => setState({ ...state, open: true }),

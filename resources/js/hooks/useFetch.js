@@ -18,11 +18,17 @@ const useFetch = (
     setLoading(true);
     setError(null);
 
+    const normalizedUri = String(uri || "").replace(/^\/+/, "");
     window.axios
-      .get("/" + uri, { params })
+      .get("/" + normalizedUri, { params })
       .then((response) => {
         if (!ignore.current) {
-          setData(callback ? callback(response) : response.data);
+          try {
+            const result = callback ? callback(response) : response?.data;
+            setData(result !== undefined && result !== null ? result : initialData);
+          } catch (e) {
+            setError(e);
+          }
           setLoading(false);
         }
       })

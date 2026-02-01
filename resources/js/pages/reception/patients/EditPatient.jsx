@@ -7,6 +7,9 @@ import {
   CardContent,
   Grid,
   LinearProgress,
+  FormControlLabel,
+  Checkbox,
+  Stack,
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
@@ -34,6 +37,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
   const addressRef = useRef();
   const nationalIdRef = useRef();
   const phoneRef = useRef();
+  const emailRef = useRef();
   const occupationRef = useRef();
   const paymentModeRef = useRef();
   const informationSourceRef = useRef();
@@ -47,13 +51,16 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     address: item.address,
     national_id: item.national_id,
     phone: item.phone,
+    email: item.email,
     occupation: item.occupation,
     payment_mode_id: item.payment_mode_id,
     info_source_id: item.info_source_id,
+    is_vip: item.is_vip || false,
+    is_employee: item.is_employee || false,
   });
 
   const marketingEnabled =
-    window.user.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
+    window.user?.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
       ?.value === "Yes";
 
   const { data: paymentModes } = useFetch(
@@ -248,6 +255,22 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
               xs={12}
             >
               <TextField
+                ref={emailRef}
+                label="Email Address"
+                fullWidth
+                type="email"
+                rules={[validationRules.optionalEmail]}
+                defaultValue={formData.email}
+                onChange={(value) => setFormData({ ...formData, email: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={4}
+              sm={6}
+              xs={12}
+            >
+              <TextField
                 ref={nationalIdRef}
                 label="National ID"
                 fullWidth
@@ -320,6 +343,35 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 />
               </Grid>
             ) : null}
+            <Grid
+              item
+              xs={12}
+            >
+              <Stack direction="row" spacing={3} flexWrap="wrap">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formData.is_vip}
+                    onChange={(event) =>
+                      setFormData({ ...formData, is_vip: event.target.checked })
+                    }
+                  />
+                }
+                  label="Prestige"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_employee}
+                      onChange={(event) =>
+                        setFormData({ ...formData, is_employee: event.target.checked })
+                      }
+                    />
+                  }
+                  label="Employee"
+              />
+              </Stack>
+            </Grid>
           </Grid>
         </Form>
       </CardContent>

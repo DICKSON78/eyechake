@@ -139,7 +139,7 @@ const EditDailyActivity = ({ item, modal, fetchDailyActivities }) => {
                   label="Remarks"
                   fullWidth
                   multiline
-                  rows={3}
+                  rows={4}
                   required
                   defaultValue={formData.remarks}
                   onChange={(value) =>

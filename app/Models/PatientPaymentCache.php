@@ -31,6 +31,11 @@ class PatientPaymentCache extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function consultation()
+    {
+        return $this->belongsTo(Consultation::class, 'consultation_id');
+    }
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i');

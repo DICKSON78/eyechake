@@ -52,7 +52,10 @@ class SmsService
         ];
 
         try {
-            $client = new Client();
+            $client = new Client([
+                'timeout' => 10, // 10 second timeout
+                'connect_timeout' => 5, // 5 second connection timeout
+            ]);
             $params['headers'] = $headers;
             $params['json'] = $body;
             $response = $client->post($this->sendMessageUrl, $params)
@@ -87,7 +90,10 @@ class SmsService
         ];
 
         try {
-            $client = new Client();
+            $client = new Client([
+                'timeout' => 10, // 10 second timeout
+                'connect_timeout' => 5, // 5 second connection timeout
+            ]);
             $params['headers'] = $headers;
 
             $url = sprintf('%s?requestId=%s', $this->deliveryReportUrl, $request_id);

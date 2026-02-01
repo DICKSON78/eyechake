@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getAge } from "../../../helpers";
+import { formatDateForDb, formatError, getAge, getWeekStartDate } from "../../../helpers";
 
 const PendingCreditPatients = () => {
   const addToast = useToast();
@@ -24,7 +24,7 @@ const PendingCreditPatients = () => {
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
     end_date: undefined,
   });
 
@@ -107,6 +107,32 @@ const PendingCreditPatients = () => {
                 field: "phone",
                 headerName: "Phone Number",
                 valueGetter: (item, index) => item.check_in.patient.phone,
+              },
+              {
+                field: "require_glass",
+                headerName: "Spectacle Required",
+                renderCell: (item) => {
+                  const requireGlass = item.consultation?.require_glass;
+                  if (requireGlass === 'Yes') {
+                    return (
+                      <Chip
+                        label="Yes"
+                        color="warning"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    );
+                  }
+                  return requireGlass === 'No' ? (
+                    <Chip
+                      label="No"
+                      color="default"
+                      size="small"
+                    />
+                  ) : (
+                    <span style={{ color: '#999', fontStyle: 'italic' }}>Not specified</span>
+                  );
+                },
               },
               {
                 field: "created_by",

@@ -149,7 +149,7 @@ const PatientBill = () => {
     if (!bill) {
       return 0;
     }
-    return bill.amount - bill.discount - (bill.amount_paid || 0);
+    return Math.max(0, (bill.amount || 0) - (bill.discount || 0) - (bill.amount_paid || 0));
   };
 
   return (

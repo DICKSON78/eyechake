@@ -11,9 +11,10 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import fontRegular from "../../../../fonts/Custom-Regular.ttf";
-import fontItalic from "../../../../fonts/Custom-Italic.ttf";
-import fontBold from "../../../../fonts/Custom-Bold.ttf";
+// Use system fonts as fallback to avoid font loading issues
+const fontRegular = "Helvetica";
+const fontItalic = "Helvetica-Oblique";
+const fontBold = "Helvetica-Bold";
 
 import Header from "../../../components/pdf/Header";
 import Footer from "../../../components/pdf/Footer";
@@ -25,14 +26,7 @@ import { PDFReportPage as CataractSurgeryRecordPage } from "./CataractSurgeryRec
 import { getAge } from "../../../helpers";
 import useFetch from "../../../hooks/useFetch";
 
-Font.register({
-  family: "Custom",
-  fonts: [
-    { src: fontRegular },
-    { src: fontItalic, fontStyle: "italic" },
-    { src: fontBold, fontWeight: 700 },
-  ],
-});
+// Use core PDF fonts directly (Helvetica family) to avoid production loading issues
 
 const Subheader = ({ title, style }) => {
   return (
@@ -40,7 +34,7 @@ const Subheader = ({ title, style }) => {
       style={[
         styles.text,
         {
-          fontSize: 10,
+          fontSize: 9,
           paddingVertical: 4,
           paddingHorizontal: 12,
           color: "#fff",
@@ -113,6 +107,11 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
           valueGetter: (item, index) => item.item.name,
         },
         {
+          field: "quantity",
+          headerName: "Qty",
+          valueGetter: (item) => item.quantity,
+        },
+        {
           field: "dosage",
           headerName: "Dosage",
           show: consultationType === "Pharmacy",
@@ -183,133 +182,103 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 consultation.payment_cache_item.served_at ||
                 consultation.created_at,
             },
+            { label: "Require Spectacle", value: consultation.require_glass },
+            { label: "To Return", value: consultation.patient_to_return },
+            { label: "Return Date", value: consultation.to_return_date },
           ]}
           containerStyle={{
             marginBottom: 8,
           }}
         />
 
-        {consultation.patient_direction === "Direct to Doctor" ? (
-          <React.Fragment>
-            <Subheader
-              title="History Taking"
-              style={{ marginBottom: 8 }}
-            />
+        {/* History Taking - Always show, matching form layout */}
+        <Subheader
+          title="History Taking"
+          style={{ marginBottom: 8 }}
+        />
 
-            <View style={[tableStyles.table, { marginBottom: 8 }]}>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  CC
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  HI
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  FH
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.chief_complaint}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.history_present_illness}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_history}
-                </Text>
-              </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  GH
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  FOH
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  FGH
-                </Text>
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.general_health}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_ocular_history}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_general_history}
-                </Text>
-              </View>
-              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  Pupils
-                </Text>
-                <Text
-                  style={[
-                    styles.text,
-                    tableStyles.tableCell,
-                    { fontWeight: "bold" },
-                  ]}
-                >
-                  EOM
-                </Text>
-                <View style={tableStyles.tableCell} />
-              </View>
-              <View style={tableStyles.tableRow}>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.pupils}
-                </Text>
-                <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.extra_ocular_muscles}
-                </Text>
-                <View style={tableStyles.tableCell} />
-              </View>
-            </View>
-          </React.Fragment>
-        ) : null}
+        <View style={[tableStyles.table, { marginBottom: 8 }]}>
+          <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              Chief Complaint
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              History of Present Illness
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              Family History
+            </Text>
+          </View>
+          <View style={tableStyles.tableRow}>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.chief_complaint || ""}
+            </Text>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.history_present_illness || ""}
+            </Text>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.family_history || ""}
+            </Text>
+          </View>
+          <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              General Health
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              Family Ocular History
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                tableStyles.tableCell,
+                { fontWeight: "bold" },
+              ]}
+            >
+              Family General History
+            </Text>
+          </View>
+          <View style={tableStyles.tableRow}>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.general_health || ""}
+            </Text>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.family_ocular_history || ""}
+            </Text>
+            <Text style={[styles.text, tableStyles.tableCell]}>
+              {consultation.family_general_history || ""}
+            </Text>
+          </View>
+        </View>
 
         {consultation.visual_acuity ? (
           <React.Fragment>
@@ -972,31 +941,69 @@ const PDFReportDocument = ({ consultation, patient }) => {
           </View>
         </View>
 
-        {consultation.status === "Consulted" ? (
+        {/* Remark & Doctor Recommendation - Matching form layout */}
+        <Subheader
+          title="Remark & Doctor Recommendation"
+          style={{ marginBottom: 8 }}
+        />
+
+        <View style={{ flexDirection: "row", marginBottom: 8 }}>
+          <View style={{ width: "50%", paddingRight: 8 }}>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontWeight: "bold",
+                  marginBottom: 4,
+                  fontSize: 9,
+                  color: "#039be5",
+                },
+              ]}
+            >
+              Remark
+            </Text>
+            <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
+              {consultation.remarks || ""}
+            </Text>
+          </View>
+          <View style={{ width: "50%", paddingLeft: 8 }}>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontWeight: "bold",
+                  marginBottom: 4,
+                  fontSize: 9,
+                  color: "#039be5",
+                },
+              ]}
+            >
+              Doctor Recommendation
+            </Text>
+            <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
+              {consultation.doctor_comments_remarks || ""}
+            </Text>
+          </View>
+        </View>
+
+        {consultation.status === "Consulted" && consultation.patient_to_return ? (
           <React.Fragment>
             <Subheader
-              title="Remarks"
+              title="Follow-up Information"
               style={{ marginBottom: 8 }}
             />
 
             <Descriptions
-              columns={1}
+              columns={2}
               items={[
                 {
                   label: "Patient to Return",
-                  value:
-                    consultation.patient_direction === "Direct to Doctor"
-                      ? consultation.patient_to_return
-                      : null,
+                  value: consultation.patient_to_return,
                 },
                 { label: "Return Date", value: consultation.to_return_date },
-                { label: "Remarks", value: consultation.remarks },
               ]}
               containerStyle={{
                 marginBottom: 8,
-              }}
-              valueStyle={{
-                width: "80%",
               }}
             />
           </React.Fragment>
@@ -1050,37 +1057,142 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
     (response) => response.data.data
   );
 
-  useEffect(() => {
-    if (consultation) {
-      generatePdfDocument();
-    }
-  }, [consultation]);
-
   const generatePdfDocument = useCallback(async () => {
-    if (consultation) {
+    if (consultation && patient) {
       setLoading(true);
-      const blob = await pdf(
-        <PDFReportDocument
-          consultation={consultation}
-          patient={patient}
-        />
-      ).toBlob();
-      setLoading(false);
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      try {
+        console.log('Starting PDF generation...', { consultation, patient });
+        
+        // Validate required data
+        if (!consultation.id || !patient.id) {
+          throw new Error('Missing consultation or patient ID');
+        }
+        
+        // Create the PDF document with error handling
+        const pdfDocument = (
+          <PDFReportDocument
+            consultation={consultation}
+            patient={patient}
+          />
+        );
+        
+        console.log('PDF document created, generating blob...');
+        
+        const blob = await pdf(pdfDocument).toBlob();
+        
+        if (!blob || blob.size === 0) {
+          throw new Error('Generated PDF is empty or invalid');
+        }
+        
+        console.log('PDF blob created successfully', { size: blob.size, type: blob.type });
+        
+        // Create a download link instead of opening in new tab
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `clinical-notes-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up after a short delay
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          window.URL.revokeObjectURL(url);
+        }, 100);
+        
+        console.log('PDF download initiated successfully');
+      } catch (error) {
+        console.error('PDF generation failed:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          consultation: consultation,
+          patient: patient,
+          errorType: error.constructor.name
+        });
+        
+        // More user-friendly error messages
+        let errorMessage = 'Failed to generate PDF. ';
+        if (error.message.includes('font')) {
+          errorMessage += 'Font loading issue. Please refresh the page and try again.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage += 'Network issue. Please check your connection and try again.';
+        } else {
+          errorMessage += `Error: ${error.message}. Please try again.`;
+        }
+        
+        alert(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.error('Missing required data for PDF generation:', { consultation, patient });
+      alert('Missing consultation or patient data. Please refresh the page and try again.');
     }
-  }, [consultation]);
+  }, [consultation, patient]);
+
+  const handleDownload = useCallback(async () => {
+    if (!consultationId || !patient?.id) {
+      alert('Missing consultation or patient data. Please refresh the page.');
+      return;
+    }
+    
+    // Fetch consultation data if not already loaded
+    if (!consultation && !loadingConsultation) {
+      await handleFetch();
+      // generatePdfDocument will be called via useEffect when consultation loads
+      return;
+    }
+    
+    // If consultation is already loaded, generate PDF directly
+    if (consultation && patient) {
+      await generatePdfDocument();
+    }
+  }, [consultation, consultationId, patient, loadingConsultation, handleFetch, generatePdfDocument]);
+
+  // Handle PDF generation when consultation is loaded after fetch
+  const [shouldGenerateOnLoad, setShouldGenerateOnLoad] = useState(false);
+  
+  useEffect(() => {
+    if (consultation && patient && shouldGenerateOnLoad && !loadingConsultation) {
+      generatePdfDocument();
+      setShouldGenerateOnLoad(false);
+    }
+  }, [consultation, patient, shouldGenerateOnLoad, loadingConsultation, generatePdfDocument]);
+  
+  // Update handleDownload to set flag when fetching
+  const handleDownloadWithFlag = useCallback(async () => {
+    if (!consultationId || !patient?.id) {
+      alert('Missing consultation or patient data. Please refresh the page.');
+      return;
+    }
+    
+    // Fetch consultation data if not already loaded
+    if (!consultation && !loadingConsultation) {
+      setShouldGenerateOnLoad(true);
+      await handleFetch();
+      return;
+    }
+    
+    // If consultation is already loaded, generate PDF directly
+    if (consultation && patient) {
+      await generatePdfDocument();
+    }
+  }, [consultation, consultationId, patient, loadingConsultation, handleFetch, generatePdfDocument]);
 
   return (
     <Button
-      disabled={loading}
+      disabled={loading || loadingConsultation}
       variant="contained"
       color="secondary"
       startIcon={<DownloadIcon />}
-      onClick={handleFetch}
+      onClick={handleDownloadWithFlag}
       {...rest}
     >
-      {loadingConsultation || loading ? "Generating PDF..." : "PDF"}
+      {loadingConsultation || loading ? "Generating PDF..." : "Clinical Note"}
     </Button>
   );
 };
@@ -1088,7 +1200,8 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
 const styles = StyleSheet.create({
   text: {
     fontSize: 8,
-    fontFamily: "Custom",
+    // Use Helvetica which is built into PDF viewers
+    fontFamily: "Helvetica",
   },
 });
 

@@ -122,8 +122,43 @@ class PatientItemBillPaymentsController extends Controller
 
         $input = $request->all();
         $input['created_by'] = $request->user()->id;
-        $data = PatientItemBillPayment::create($input);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        $payment = PatientItemBillPayment::create($input);
+
+        // After creating the payment, attempt to auto-clear the bill if fully paid
+        try {
+            $bill = \App\Models\PatientItemBill::with('first_item.payment_cache.check_in.patient')->find($request->bill_id);
+            if ($bill) {
+                $totalPaid = \App\Models\PatientItemBillPayment::where('bill_id', $bill->id)->sum('amount');
+                $billAmount = (float) ($bill->amount ?? 0);
+                $discount = (float) ($bill->discount ?? 0);
+                $netDue = max(0, $billAmount - $discount);
+
+                if ($totalPaid >= $netDue && $bill->status !== 'Cleared') {
+                    $bill->update([
+                        'status' => 'Cleared',
+                        'cleared_at' => now(),
+                        'cleared_by' => $request->user()->id,
+                    ]);
+
+                    // Best-effort: trigger notifications for UI counters that rely on cleared bills
+                    try {
+                        event(new \App\Events\NotificationUpdate());
+                    } catch (\Throwable $e) {
+                        \Log::warning('Notification update failed after auto-clearing bill', [
+                            'bill_id' => $bill->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to auto-clear bill after payment', [
+                'bill_id' => $request->bill_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $this->sendResponse($payment, Response::HTTP_OK, 'Payment recorded successfully.');
     }
 
     /**

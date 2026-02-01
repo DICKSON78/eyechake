@@ -10,9 +10,10 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import fontRegular from "../../../../fonts/Custom-Regular.ttf";
-import fontItalic from "../../../../fonts/Custom-Italic.ttf";
-import fontBold from "../../../../fonts/Custom-Bold.ttf";
+// Use public path for fonts to avoid build issues
+const fontRegular = "/fonts/Custom-Regular.ttf";
+const fontItalic = "/fonts/Custom-Italic.ttf";
+const fontBold = "/fonts/Custom-Bold.ttf";
 
 import Header from "../../../components/pdf/Header";
 import Footer from "../../../components/pdf/Footer";

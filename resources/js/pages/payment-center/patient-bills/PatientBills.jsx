@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Button, Card, CardContent, Divider, Stack } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, Stack } from "@mui/material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -120,6 +120,32 @@ const PatientBills = () => {
                 headerName: "Phone Number",
                 valueGetter: (item, index) =>
                   item.first_item.payment_cache.check_in.patient.phone,
+              },
+              {
+                field: "require_glass",
+                headerName: "Spectacle Required",
+                renderCell: (item) => {
+                  const requireGlass = item.first_item.payment_cache.consultation?.require_glass;
+                  if (requireGlass === 'Yes') {
+                    return (
+                      <Chip
+                        label="Yes"
+                        color="warning"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    );
+                  }
+                  return requireGlass === 'No' ? (
+                    <Chip
+                      label="No"
+                      color="default"
+                      size="small"
+                    />
+                  ) : (
+                    <span style={{ color: '#999', fontStyle: 'italic' }}>Not specified</span>
+                  );
+                },
               },
               {
                 field: "created_by",

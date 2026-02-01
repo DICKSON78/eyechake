@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Models\Item;
 use App\Models\PatientCheckIn;
+use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
+use App\Models\PaymentChannel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -109,12 +111,16 @@ class PatientCheckInsController extends Controller
             'items.*.consultant_id' => 'nullable|exists:users,id',
             'items.*.payment_mode_id' => 'required|exists:payment_modes,id',
             'items.*.quantity' => 'required|numeric|min:1',
+            'mode' => 'nullable|string|in:checkin,invoice,bill',
         ]);
 
         $user = $request->user();
+        $mode = $request->input('mode', 'checkin');
         $input = $request->only('patient_id', 'payment_mode_id');
         $input['created_by'] = $user->id;
         $data = PatientCheckIn::create($input);
+
+        $createdCacheItems = [];
 
         if ($data) {
             $payment_cache = PatientPaymentCache::create([
@@ -123,7 +129,7 @@ class PatientCheckInsController extends Controller
             ]);
 
             if ($payment_cache) {
-                $input_items = $request->json('items');
+                $input_items = $request->input('items', []);
 
                 foreach ($input_items as &$input_item) {
                     // if this item has price for the provided payment mode, continue
@@ -137,7 +143,7 @@ class PatientCheckInsController extends Controller
                         ->first();
 
                     if ($item) {
-                        PatientPaymentCacheItem::create([
+                        $cacheItem = PatientPaymentCacheItem::create([
                             'payment_cache_id' => $payment_cache->id,
                             'item_id' => $item->id,
                             'consultation_type_id' => $item->consultation_type_id,
@@ -148,12 +154,37 @@ class PatientCheckInsController extends Controller
                             'comments' => Arr::get($input_item, 'comments'),
                             'created_by' => $user->id,
                         ]);
+                        $createdCacheItems[] = $cacheItem;
+                    }
+                }
+            }
+
+            // When mode is 'invoice', create a PatientItemPayment and link items so the invoice appears in payment-center/invoices
+            if ($mode === 'invoice' && count($createdCacheItems) > 0) {
+                $channel = $this->getPaymentChannelForInvoice($user);
+                if ($channel) {
+                    $amount = 0;
+                    foreach ($createdCacheItems as $cacheItem) {
+                        $amount += ($cacheItem->unit_price ?? 0) * ($cacheItem->quantity ?? 0);
+                    }
+                    $payment = PatientItemPayment::create([
+                        'channel_id' => $channel->id,
+                        'amount' => $amount,
+                        'discount' => 0,
+                        'created_by' => $user->id,
+                    ]);
+                    if ($payment) {
+                        foreach ($createdCacheItems as $cacheItem) {
+                            $cacheItem->item_payment_id = $payment->id;
+                            $cacheItem->save();
+                        }
                     }
                 }
             }
         }
 
-        return $this->sendResponse($data, Response::HTTP_OK, 'Checked in successfully.');
+        $message = $mode === 'invoice' ? 'Invoice created successfully.' : ($mode === 'bill' ? 'Bill created successfully.' : 'Checked in successfully.');
+        return $this->sendResponse($data, Response::HTTP_OK, $message);
     }
 
     /**
@@ -189,5 +220,28 @@ class PatientCheckInsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Get a payment channel for creating an invoice (e.g. at check-in).
+     * Prefers "Cash" for the user's clinic; otherwise first active channel.
+     *
+     * @param \App\Models\User $user
+     * @return \App\Models\PaymentChannel|null
+     */
+    protected function getPaymentChannelForInvoice($user)
+    {
+        $base = PaymentChannel::where('status', 'Active');
+        $scoped = (clone $base);
+        if ($user->clinic_id) {
+            $scoped->where(function ($q) use ($user) {
+                $q->where('clinic_id', $user->clinic_id)->orWhereNull('clinic_id');
+            });
+        }
+        $cash = (clone $scoped)->where('name', 'Cash')->first();
+        if ($cash) {
+            return $cash;
+        }
+        return $scoped->first();
     }
 }

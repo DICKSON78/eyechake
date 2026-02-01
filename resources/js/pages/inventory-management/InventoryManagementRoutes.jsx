@@ -1,18 +1,42 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
+import Dashboard from "./dashboard/Dashboard";
 import Stocktaking from "./Stocktaking";
+import StockAlerts from "./StockAlerts";
+import LensList from "./lens-list/LensList";
+import LensTracking from "./lens-tracking/LensTracking";
 import ReportsRoutes from "./reports/ReportsRoutes";
 
 const InventoryManagementRoutes = () => {
   return (
     <Routes>
       <Route
-        path="/stocktaking"
+        path="dashboard"
+        element={<Dashboard />}
+      />
+      <Route
+        path="stocktaking"
         element={<Stocktaking />}
       />
       <Route
-        path="/reports/*"
+        path="stock-alerts"
+        element={<StockAlerts />}
+      />
+      <Route
+        path="lens-list"
+        element={<LensList />}
+      />
+      <Route
+        path="lens-tracking"
+        element={<LensTracking />}
+      />
+      <Route
+        path="reports/*"
         element={<ReportsRoutes />}
+      />
+      <Route
+        path=""
+        element={<Navigate to="dashboard" />}
       />
     </Routes>
   );

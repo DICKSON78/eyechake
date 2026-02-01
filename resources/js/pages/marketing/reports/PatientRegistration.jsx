@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -11,15 +12,28 @@ import DatePicker from "../../../components/DatePicker";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
 
-import { useFetch } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import {
   formatDateForDb,
   getAge,
   getDateRangeTitle,
   throttle,
+  hasReportAccess,
 } from "../../../helpers";
 
 const PatientRegistration = () => {
+  const navigate = useNavigate();
+  const addToast = useToast();
+
+  useEffect(() => {
+    const user = window.user || {};
+    const privileges = user.privileges || {};
+    const isAdmin = user.role === "Admin" || user.is_admin === true || user.is_admin === 1 || user.is_admin === "1";
+    if (!isAdmin && !hasReportAccess(privileges, "marketing", "patient_registration_report")) {
+      addToast({ message: "You do not have access to this report.", severity: "error" });
+      navigate("/marketing/dashboard");
+    }
+  }, [navigate, addToast]);
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
     {
@@ -260,6 +274,21 @@ const PatientRegistration = () => {
           {
             field: "address",
             headerName: "Address",
+          },
+          {
+            field: "region_id",
+            headerName: "Region",
+            valueGetter: (item, index) => item.region?.name || "Not provided",
+          },
+          {
+            field: "district_id",
+            headerName: "District",
+            valueGetter: (item, index) => item.district?.name || "Not provided",
+          },
+          {
+            field: "ward_id",
+            headerName: "Ward",
+            valueGetter: (item, index) => item.ward?.name || "Not provided",
           },
           {
             field: "payment_mode_id",

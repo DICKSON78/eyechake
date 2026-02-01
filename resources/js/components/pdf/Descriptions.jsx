@@ -84,7 +84,7 @@ const Descriptions = ({
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 7,
+    fontSize: 6.3,
     fontFamily: "Custom",
   },
 });

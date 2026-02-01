@@ -184,10 +184,6 @@ const Events = ({ eventType }) => {
                 ),
               },
               {
-                field: "remarks",
-                headerName: "Remarks",
-              },
-              {
                 field: "actions",
                 headerName: "Actions",
                 renderCell: (item) => (

@@ -1,9 +1,10 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import Dashboard from "./dashboard/Dashboard";
 import Patients from "./patients/Patients";
+import RegisterNewClient from "./register-new-client/RegisterNewClient";
 import CheckInPatient from "./CheckInPatient";
 import PatientRecords from "./patients/PatientRecords";
-import GlassPatientsRoutes from "./glass-patients/GlassPatientsRoutes";
 import PatientsToReturn from "./patients-to-return/PatientsToReturn";
 import SentMessages from "./sent-messages/Messages";
 import ReportsRoutes from "./reports/ReportsRoutes";
@@ -12,9 +13,17 @@ const ReceptionRoutes = () => {
   return (
     <Routes>
       <Route
+        path="/dashboard"
+        element={<Dashboard />}
+      />
+      <Route
         path="/patients"
         exact
         element={<Patients />}
+      />
+      <Route
+        path="/register-new-client"
+        element={<RegisterNewClient />}
       />
       <Route
         path="/patients/:patientId/check-in"
@@ -25,11 +34,11 @@ const ReceptionRoutes = () => {
         element={<PatientRecords />}
       />
       <Route
-        path="/glass-patients/*"
-        element={<GlassPatientsRoutes />}
+        path="/to-return/patients"
+        element={<PatientsToReturn />}
       />
       <Route
-        path="/to-return/patients"
+        path="/patients-scheduled-to-return"
         element={<PatientsToReturn />}
       />
       <Route

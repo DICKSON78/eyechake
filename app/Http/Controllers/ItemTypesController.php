@@ -49,7 +49,18 @@ class ItemTypesController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255|unique:item_types,name',
+            'description' => 'nullable|string',
+        ]);
+
+        $data = ItemType::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => 'Active',
+        ]);
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
     /**

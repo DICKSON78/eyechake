@@ -18,7 +18,7 @@ const GlassPatientRoutes = () => {
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
 
-  const { data: consultation, loading: loadingConsultation } = useFetch(
+  const { data: consultation, loading: loadingConsultation, error: consultationError } = useFetch(
     `api/consultations/${consultationId}`,
     null,
     true,
@@ -31,6 +31,16 @@ const GlassPatientRoutes = () => {
       navigate("/optician-center/glass-patients");
     }
   }, []);
+
+  useEffect(() => {
+    if (consultationError) {
+      console.error('Consultation error:', consultationError);
+      // If consultation not found (404), redirect back to glass patients list
+      if (consultationError.response?.status === 404) {
+        navigate("/optician-center/glass-patients");
+      }
+    }
+  }, [consultationError, navigate]);
 
   return (
     <Page

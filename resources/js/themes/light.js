@@ -47,36 +47,36 @@ const theme = createTheme({
       secondary: "rgba(0, 0, 0, 0.58)",
     },
     background: {
-      default: "#f1f3f4",
+      default: "#fafafa",
       paper: "#fff",
     },
-    divider: "#dae2ed",
+    divider: "#e3f2fd",
   },
   typography: {
     fontFamily: "Custom, sans-serif",
     h4: {
-      fontSize: 22,
-    },
-    h5: {
-      fontSize: 20,
-    },
-    h6: {
       fontSize: 18,
     },
+    h5: {
+      fontSize: 16.2,
+    },
+    h6: {
+      fontSize: 14.4,
+    },
     subtitle1: {
-      fontSize: 15,
+      fontSize: 12.6,
     },
     subtitle2: {
-      fontSize: 13,
+      fontSize: 11.7,
     },
     body1: {
-      fontSize: 13,
+      fontSize: 11.7,
     },
     body2: {
-      fontSize: 12,
+      fontSize: 10.8,
     },
     button: {
-      fontSize: 12,
+      fontSize: 10.8,
     },
   },
   shape: {

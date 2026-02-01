@@ -75,7 +75,7 @@ const EditIdea = ({ item, modal, fetchIdeas }) => {
                 label="Description"
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 required
                 defaultValue={formData.description}
                 onChange={(value) =>
@@ -113,7 +113,7 @@ const EditIdea = ({ item, modal, fetchIdeas }) => {
                   label="Remarks"
                   fullWidth
                   multiline
-                  rows={3}
+                  rows={4}
                   required
                   defaultValue={formData.remarks}
                   onChange={(value) =>

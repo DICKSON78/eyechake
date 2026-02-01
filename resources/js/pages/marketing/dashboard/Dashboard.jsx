@@ -1,23 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Avatar,
   Box,
   Card,
   CardContent,
   CardHeader,
-  Chip,
   Divider,
   Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Tooltip,
+  Typography,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   EventNoteRounded as AppointmentsIcon,
+  EventNoteRounded,
   Person2Rounded as PersonIcon,
   DoneAllRounded as DoneIcon,
   FilterAltRounded as FilterIcon,
@@ -27,17 +25,20 @@ import {
   NorthEastRounded as ViewMoreIcon,
   PhoneInTalkRounded as CommunicationLogsIcon,
   SendRounded as MarketingStrategiesIcon,
+  SendRounded,
   TaskRounded as DailyActivitiesIcon,
+  LibraryBooksRounded as ReportsIcon,
+  SettingsRounded as SettingsIcon,
 } from "@mui/icons-material";
 
 import Page from "../../../components/Page";
 import Modal from "../../../components/Modal";
 import LoadingSkeleton from "./LoadingSkeleton";
-import InfoCard from "./InfoCard";
+import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
-import Chart from "react-apexcharts";
+import ChartWrapper from "../../../components/ChartWrapper";
 
-import useTheme from "@mui/material/styles/useTheme";
+import { useTheme } from "@mui/material/styles";
 import {
   blue,
   cyan,
@@ -54,7 +55,7 @@ import {
   yellow,
 } from "@mui/material/colors";
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, numberFormat } from "../../../helpers";
+import { formatDateForDb, formatError, numberFormat, getWeekStartDate } from "../../../helpers";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -66,9 +67,11 @@ const Dashboard = () => {
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
     end_date: undefined,
   });
+
+  const [clientTab, setClientTab] = useState(0);
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/marketing/dashboard",
@@ -126,6 +129,11 @@ const Dashboard = () => {
         { title: "Marketing Management" },
         { title: "Marketing Dashboard" },
       ]}
+      sx={{
+        maxWidth: '100%',
+        mx: 0,
+        px: { xs: 1, sm: 2, md: 3 }
+      }}
     >
       <CardHeader
         title="Marketing Dashboard"
@@ -147,685 +155,486 @@ const Dashboard = () => {
       />
       {loading && <LoadingSkeleton />}
       {!loading && data ? (
-        <Grid
-          container
-          spacing={{ xs: 2, sm: 2, md: 3 }}
-          justifyContent="stretch"
-          sx={{
-            "& .MuiCard-root": {
-              minHeight: "100%",
-            },
-          }}
-        >
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Registered Patients"
-                count={numberFormat(data.summary.new_patients)}
-                icon={<PersonIcon />}
-                color={purple[400]}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.patients_by_information_source.map(
-                      (e) => e.name
-                    ),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+        <React.Fragment>
+          <Box sx={{ width: '100%', maxWidth: '100%' }}>
+            {/* First Row - 4 Cards */}
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{ mb: 4, width: '100%' }}
+            >
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <InfoCard
+                  title="Patients Registered"
+                  count={data.summary.total_patients_registered}
+                  icon={<PersonIcon />}
+                  color={blue[400]}
+                  onClick={() => navigate("/reception/patients")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <InfoCard
+                  title="Marketing Activities"
+                  count={numberFormat(data.summary.total_marketing_activities)}
+                  icon={<DailyActivitiesIcon />}
+                  color={purple[400]}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <InfoCard
+                  title="Ideas Generated"
+                  count={numberFormat(data.summary.total_ideas)}
+                  icon={<IdeaDevelopmentIcon />}
+                  color={lightBlue[400]}
+                  onClick={() => navigate('/marketing/idea-development')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <InfoCard
+                  title="Outreach Programmes"
+                  count={numberFormat(data.summary.total_outreach_programmes)}
+                  icon={<OutreachProgrammesIcon />}
+                  color={yellow[600]}
+                  onClick={() => navigate('/marketing/outreach-programmes')}
+                />
+              </Grid>
+            </Grid>
+
+            {/* Second Row - 3 Cards */}
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{ mb: 4, width: '100%' }}
+            >
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <InfoCard
+                  title="Communication Logs"
+                  count={numberFormat(data.summary.total_communication_logs)}
+                  icon={<CommunicationLogsIcon />}
+                  color={teal[400]}
+                  onClick={() => navigate('/marketing/communication-logs')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <InfoCard
+                  title="Marketing Strategies"
+                  count={numberFormat(data.summary.total_marketing_strategies || 0)}
+                  icon={<MarketingStrategiesIcon />}
+                  color={orange[400]}
+                  onClick={() => navigate('/marketing/strategies')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <InfoCard
+                  title="Research Plans"
+                  count={numberFormat(data.summary.total_research_plans || 0)}
+                  icon={<MarketResearchIcon />}
+                  color={green[400]}
+                  onClick={() => navigate('/marketing/research-plans')}
+                />
+              </Grid>
+            </Grid>
+
+            {/* Charts Section - Full Width */}
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{ mt: 2, width: '100%', maxWidth: '100%' }}
+            >
+              <Grid size={{ xs: 12, md: 6, lg: 6, xl: 6 }}>
+                <Card sx={{ height: '100%', width: '100%', minHeight: '500px' }}>
+                  <CardHeader title="Marketing Activities Overview" />
+                  <Divider />
+                  <ChartWrapper
+                    options={{
+                      chart: {
+                        fontFamily: theme.typography.fontFamily,
+                        foreColor: theme.palette.text.primary,
+                        background: "transparent",
+                        toolbar: {
+                          show: false,
                         },
                       },
-                    },
-                    colors: [
-                      purple[400],
-                      teal[400],
-                      red[400],
-                      lightBlue[400],
-                      deepOrange[300],
-                      lime[600],
-                      pink[400],
-                      cyan[500],
-                      green[500],
-                      yellow[600],
-                    ],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors:
-                        data.statistics.patients_by_information_source.map(
-                          (e) => theme.palette.background.paper
-                        ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
-                      },
-                      dropShadow: {
-                        enabled: false,
-                      },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
-                      },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors:
-                          data.statistics.patients_by_information_source.map(
-                            (e) => theme.palette.text.secondary
-                          ),
-                        useSeriesColors: false,
-                      },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
-                      },
-                    },
-                  }}
-                  series={data.statistics.patients_by_information_source.map(
-                    (e) => e.patients
-                  )}
-                  type="donut"
-                  height={
-                    data.statistics.patients_by_information_source.length
-                      ? 288
-                      : 256
-                  }
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Daily Activities"
-                count={numberFormat(
-                  data.statistics.daily_activities.reduce(
-                    (acc, e) => acc + e.activities,
-                    0
-                  )
-                )}
-                icon={<DailyActivitiesIcon />}
-                color={blue[400]}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.daily_activities.map(
-                      (e) => e.status
-                    ),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+                      plotOptions: {
+                        bar: {
+                          borderRadius: 0,
+                          borderRadiusApplication: "end",
+                          borderRadiusWhenStacked: "last",
                         },
                       },
-                    },
-                    colors: [blue[400], lime[600], purple[400]],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors: data.statistics.daily_activities.map(
-                        (e) => theme.palette.background.paper
-                      ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
+                      colors: [teal[400], pink[400], theme.palette.info.main, orange[400]],
+                      stroke: {
+                        show: true,
+                        width: [3, 3, 3, 3],
+                        curve: "smooth",
                       },
-                      dropShadow: {
+                      dataLabels: {
                         enabled: false,
+                        style: {
+                          fontWeight: "400",
+                          fontSize: "9px",
+                        },
+                        dropShadow: {
+                          enabled: false,
+                        },
+                        formatter: (val, opts) => numberFormat(val),
                       },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
-                      },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors: data.statistics.daily_activities.map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
-                      },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
-                      },
-                    },
-                  }}
-                  series={data.statistics.daily_activities.map(
-                    (e) => e.activities
-                  )}
-                  type="donut"
-                  height={data.statistics.daily_activities.length ? 288 : 256}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Appointments"
-                count={numberFormat(
-                  data.statistics.appointments.reduce(
-                    (acc, e) => acc + e.appointments,
-                    0
-                  )
-                )}
-                icon={<AppointmentsIcon />}
-                color={theme.palette.warning.main}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.appointments.map((e) => e.status),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
+                      grid: {
                         show: false,
+                        borderColor: theme.palette.divider,
                       },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+                      xaxis: {
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          height: 6,
                         },
                       },
-                    },
-                    colors: [
-                      theme.palette.warning.main,
-                      cyan[500],
-                      lightBlue[400],
-                    ],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors: data.statistics.appointments.map(
-                        (e) => theme.palette.background.paper
-                      ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
-                      },
-                      dropShadow: {
-                        enabled: false,
-                      },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
-                      },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors: data.statistics.appointments.map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
-                      },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
-                      },
-                    },
-                  }}
-                  series={data.statistics.appointments.map(
-                    (e) => e.appointments
-                  )}
-                  type="donut"
-                  height={data.statistics.appointments.length ? 288 : 256}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Outreach Programmes"
-                count={numberFormat(
-                  data.statistics.outreach_programmes.reduce(
-                    (acc, e) => acc + e.programmes,
-                    0
-                  )
-                )}
-                icon={<OutreachProgrammesIcon />}
-                color={cyan[500]}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.outreach_programmes.map(
-                      (e) => e.status
-                    ),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+                      yaxis: {
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          width: 6,
+                        },
+                        labels: {
+                          formatter: (val, index) => numberFormat(val),
                         },
                       },
-                    },
-                    colors: [cyan[500], pink[400], yellow[600]],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors: data.statistics.outreach_programmes.map(
-                        (e) => theme.palette.background.paper
-                      ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
+                      tooltip: {
+                        theme: "dark",
+                        fillSeriesColor: true,
                       },
-                      dropShadow: {
-                        enabled: false,
-                      },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
-                      },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors: data.statistics.outreach_programmes.map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
-                      },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
-                      },
-                    },
-                  }}
-                  series={data.statistics.outreach_programmes.map(
-                    (e) => e.programmes
-                  )}
-                  type="donut"
-                  height={
-                    data.statistics.outreach_programmes.length ? 288 : 256
-                  }
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Ideas"
-                count={numberFormat(
-                  data.statistics.ideas.reduce((acc, e) => acc + e.ideas, 0)
-                )}
-                icon={<IdeaDevelopmentIcon />}
-                color={lime[600]}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.ideas.map((e) => e.status),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+                      legend: {
+                        markers: {
+                          width: 14,
+                          height: 8,
+                          radius: 4,
                         },
                       },
-                    },
-                    colors: [
-                      theme.palette.warning.main,
-                      teal[500],
-                      lightBlue[500],
-                    ],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors: data.statistics.ideas.map(
-                        (e) => theme.palette.background.paper
-                      ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
+                    }}
+                    series={[
+                      {
+                        name: "Marketing Activities",
+                        data: data.statistics.yearly.map((e) => ({
+                          x: e.month,
+                          y:
+                            e.statistics.find((f) => f.name === "marketing_activities")
+                              ?.amount || 0,
+                        })),
                       },
-                      dropShadow: {
-                        enabled: false,
+                      {
+                        name: "Communication Logs",
+                        data: data.statistics.yearly.map((e) => ({
+                          x: e.month,
+                          y:
+                            e.statistics.find(
+                              (f) => f.name === "communication_logs"
+                            )?.amount || 0,
+                        })),
                       },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
-                      },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors: data.statistics.ideas.map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
-                      },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
-                      },
-                    },
-                  }}
-                  series={data.statistics.ideas.map((e) => e.ideas)}
-                  type="donut"
-                  height={data.statistics.ideas.length ? 288 : 256}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid
-            item
-            md={3}
-            sm={6}
-            xs={12}
-          >
-            <Card>
-              <InfoCard
-                title="Communication Logs"
-                count={numberFormat(
-                  data.statistics.communication_logs.reduce(
-                    (acc, e) => acc + e.logs,
-                    0
-                  )
-                )}
-                icon={<CommunicationLogsIcon />}
-                color={red[400]}
-                sx={{ m: 1 }}
-              />
-              <CardContent>
-                <Chart
-                  options={{
-                    labels: data.statistics.communication_logs.map(
-                      (e) => e.communication_type
-                    ),
-                    chart: {
-                      fontFamily: theme.typography.fontFamily,
-                      background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
-                    },
-                    plotOptions: {
-                      pie: {
-                        donut: {
-                          size: "50%",
+                    ]}
+                    type="line"
+                    height="500"
+                  />
+                </Card>
+              </Grid>
+              
+              {/* Information Source Line Chart */}
+              <Grid size={{ xs: 12, md: 6, lg: 6, xl: 6 }}>
+                <Card sx={{ height: '100%', width: '100%', minHeight: '500px' }}>
+                  <CardHeader title="Information Source Analysis" />
+                  <Divider />
+                  <ChartWrapper
+                    options={{
+                      chart: {
+                        fontFamily: theme.typography.fontFamily,
+                        foreColor: theme.palette.text.primary,
+                        background: "transparent",
+                        toolbar: {
+                          show: false,
                         },
                       },
-                    },
-                    colors: [pink[400], cyan[500], green[500]],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      colors: data.statistics.communication_logs.map(
-                        (e) => theme.palette.background.paper
-                      ),
-                    },
-                    dataLabels: {
-                      style: {
-                        fontWeight: "400",
-                        fontSize: "10px",
+                      plotOptions: {
+                        bar: {
+                          borderRadius: 0,
+                          borderRadiusApplication: "end",
+                          borderRadiusWhenStacked: "last",
+                        },
                       },
-                      dropShadow: {
+                      colors: [blue[400], green[400], orange[400], red[400], purple[400], teal[400]],
+                      stroke: {
+                        show: true,
+                        width: [3, 3, 3, 3, 3, 3],
+                        curve: "smooth",
+                      },
+                      dataLabels: {
                         enabled: false,
+                        style: {
+                          fontWeight: "400",
+                          fontSize: "9px",
+                        },
+                        dropShadow: {
+                          enabled: false,
+                        },
+                        formatter: (val, opts) => numberFormat(val),
                       },
-                    },
-                    tooltip: {
-                      y: {
-                        formatter: (
-                          val,
-                          { series, seriesIndex, dataPointIndex, w }
-                        ) => numberFormat(val),
+                      grid: {
+                        show: false,
+                        borderColor: theme.palette.divider,
                       },
-                    },
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        colors: data.statistics.communication_logs.map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
+                      xaxis: {
+                        categories: data.statistics.information_sources.map(item => item.source_name || 'Unknown'),
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          height: 6,
+                        },
                       },
-                      markers: {
-                        width: 14,
-                        height: 8,
-                        radius: 4,
+                      yaxis: {
+                        axisBorder: {
+                          show: false,
+                          color: theme.palette.divider,
+                        },
+                        axisTicks: {
+                          show: true,
+                          color: theme.palette.divider,
+                          width: 6,
+                        },
+                        labels: {
+                          formatter: (val, index) => numberFormat(val),
+                        },
                       },
-                    },
-                  }}
-                  series={data.statistics.communication_logs.map((e) => e.logs)}
-                  type="donut"
-                  height={data.statistics.communication_logs.length ? 288 : 256}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
+                      tooltip: {
+                        theme: "dark",
+                        fillSeriesColor: true,
+                        y: {
+                          formatter: (val) => val + ' patients',
+                        },
+                      },
+                      legend: {
+                        markers: {
+                          width: 14,
+                          height: 8,
+                          radius: 4,
+                        },
+                      },
+                    }}
+                    series={[
+                      {
+                        name: "Patients by Information Source",
+                        data: data.statistics.information_sources.map(item => item.patient_count || 0),
+                      }
+                    ]}
+                    type="line"
+                    height="500"
+                  />
+                </Card>
+              </Grid>
+            </Grid>
 
-          <Grid
-            item
-            md={6}
-            sm={12}
-            xs={12}
-          >
-            <Card>
-              <CardHeader title="Patient Registration" />
-              <Divider />
-              <Chart
-                options={{
-                  chart: {
-                    fontFamily: theme.typography.fontFamily,
-                    foreColor: theme.palette.text.primary,
-                    background: "transparent",
-                    toolbar: {
-                      show: false,
-                    },
-                  },
-                  plotOptions: {
-                    bar: {
-                      borderRadius: 0,
-                      borderRadiusApplication: "end",
-                      borderRadiusWhenStacked: "last",
-                    },
-                  },
-                  colors: [teal[400], pink[400], theme.palette.info.main],
-                  stroke: {
-                    show: true,
-                    width: [3, 3, 3],
-                    curve: "smooth",
-                  },
-                  dataLabels: {
-                    enabled: false,
-                    style: {
-                      fontWeight: "400",
-                      fontSize: "10px",
-                    },
-                    dropShadow: {
-                      enabled: false,
-                    },
-                    formatter: (val, opts) => numberFormat(val),
-                  },
-                  grid: {
-                    show: false,
-                    borderColor: theme.palette.divider,
-                  },
-                  xaxis: {
-                    axisBorder: {
-                      show: false,
-                      color: theme.palette.divider,
-                    },
-                    axisTicks: {
-                      show: true,
-                      color: theme.palette.divider,
-                      height: 6,
-                    },
-                  },
-                  yaxis: {
-                    axisBorder: {
-                      show: false,
-                      color: theme.palette.divider,
-                    },
-                    axisTicks: {
-                      show: true,
-                      color: theme.palette.divider,
-                      width: 6,
-                    },
-                    labels: {
-                      formatter: (val, index) => numberFormat(val),
-                    },
-                  },
-                  tooltip: {
-                    theme: "dark",
-                    fillSeriesColor: true,
-                  },
-                  legend: {
-                    markers: {
-                      width: 14,
-                      height: 8,
-                      radius: 4,
-                    },
-                  },
-                }}
-                series={[
-                  {
-                    name: "Male",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        e.statistics.find((f) => f.name === "new_patients_male")
-                          ?.amount || 0,
-                    })),
-                  },
-                  {
-                    name: "Female",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        e.statistics.find(
-                          (f) => f.name === "new_patients_female"
-                        )?.amount || 0,
-                    })),
-                  },
-                  {
-                    name: "Total",
-                    data: data.statistics.yearly.map((e) => ({
-                      x: e.month,
-                      y:
-                        (e.statistics.find(
-                          (f) => f.name === "new_patients_male"
-                        )?.amount || 0) +
-                        (e.statistics.find(
-                          (f) => f.name === "new_patients_female"
-                        )?.amount || 0),
-                    })),
-                  },
-                ]}
-                type="line"
-                height="272"
-              />
-            </Card>
-          </Grid>
-        </Grid>
+            {/* New Client vs Return Client Tab Section */}
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{ mt: 2, width: '100%', maxWidth: '100%' }}
+            >
+              <Grid size={{ xs: 12 }}>
+                <Card sx={{ width: '100%' }}>
+                  <CardHeader title="New Client vs Return Client" />
+                  <Divider />
+                  <CardContent>
+                    <Tabs
+                      value={clientTab}
+                      onChange={(e, newValue) => setClientTab(newValue)}
+                      sx={{ mb: 3 }}
+                    >
+                      <Tab label="New Client" />
+                      <Tab label="Return Client" />
+                    </Tabs>
+                    {clientTab === 0 && (
+                      <Box>
+                        <ChartWrapper
+                          options={{
+                            chart: {
+                              fontFamily: theme.typography.fontFamily,
+                              foreColor: theme.palette.text.primary,
+                              background: "transparent",
+                              toolbar: {
+                                show: false,
+                              },
+                            },
+                            labels: (data.statistics.client_statistics || []).map(
+                              (e) => e.name
+                            ),
+                            plotOptions: {
+                              pie: {
+                                dataLabels: {
+                                  offset: -16,
+                                },
+                              },
+                            },
+                            colors: [blue[400], green[400]],
+                            stroke: {
+                              show: false,
+                              width: 3,
+                              colors: (data.statistics.client_statistics || []).map(
+                                (e) => theme.palette.background.paper
+                              ),
+                            },
+                            dataLabels: {
+                              style: {
+                                fontSize: 12,
+                                fontWeight: 600,
+                              },
+                              dropShadow: {
+                                enabled: false,
+                              },
+                              formatter: (val, opts) => {
+                                const seriesIndex = opts.seriesIndex;
+                                const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
+                                return `${numberFormat(count)} (${val.toFixed(1)}%)`;
+                              },
+                            },
+                            tooltip: {
+                              y: {
+                                formatter: (val, { seriesIndex }) => {
+                                  const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
+                                  return `${numberFormat(count)} clients`;
+                                },
+                              },
+                            },
+                            legend: {
+                              position: 'bottom',
+                              labels: {
+                                colors: (data.statistics.client_statistics || []).map(
+                                  (e) => theme.palette.text.secondary
+                                ),
+                                useSeriesColors: false,
+                              },
+                              markers: {
+                                width: 14,
+                                height: 8,
+                                radius: 4,
+                              },
+                            },
+                          }}
+                          series={(data.statistics.client_statistics || []).map(
+                            (e) => e.count
+                          )}
+                          type="pie"
+                          height={350}
+                        />
+                        <Box sx={{ mt: 3, textAlign: 'center' }}>
+                          <Typography variant="h6" gutterBottom>
+                            New Clients: {numberFormat(data.statistics.client_statistics?.find(c => c.name === 'New Client')?.count || 0)}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Patients registered with no previous consultations
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                    {clientTab === 1 && (
+                      <Box>
+                        <ChartWrapper
+                          options={{
+                            chart: {
+                              fontFamily: theme.typography.fontFamily,
+                              foreColor: theme.palette.text.primary,
+                              background: "transparent",
+                              toolbar: {
+                                show: false,
+                              },
+                            },
+                            labels: (data.statistics.client_statistics || []).map(
+                              (e) => e.name
+                            ),
+                            plotOptions: {
+                              pie: {
+                                dataLabels: {
+                                  offset: -16,
+                                },
+                              },
+                            },
+                            colors: [blue[400], green[400]],
+                            stroke: {
+                              show: false,
+                              width: 3,
+                              colors: (data.statistics.client_statistics || []).map(
+                                (e) => theme.palette.background.paper
+                              ),
+                            },
+                            dataLabels: {
+                              style: {
+                                fontSize: 12,
+                                fontWeight: 600,
+                              },
+                              dropShadow: {
+                                enabled: false,
+                              },
+                              formatter: (val, opts) => {
+                                const seriesIndex = opts.seriesIndex;
+                                const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
+                                return `${numberFormat(count)} (${val.toFixed(1)}%)`;
+                              },
+                            },
+                            tooltip: {
+                              y: {
+                                formatter: (val, { seriesIndex }) => {
+                                  const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
+                                  return `${numberFormat(count)} clients`;
+                                },
+                              },
+                            },
+                            legend: {
+                              position: 'bottom',
+                              labels: {
+                                colors: (data.statistics.client_statistics || []).map(
+                                  (e) => theme.palette.text.secondary
+                                ),
+                                useSeriesColors: false,
+                              },
+                              markers: {
+                                width: 14,
+                                height: 8,
+                                radius: 4,
+                              },
+                            },
+                          }}
+                          series={(data.statistics.client_statistics || []).map(
+                            (e) => e.count
+                          )}
+                          type="pie"
+                          height={350}
+                        />
+                        <Box sx={{ mt: 3, textAlign: 'center' }}>
+                          <Typography variant="h6" gutterBottom>
+                            Return Clients: {numberFormat(data.statistics.client_statistics?.find(c => c.name === 'Return Client')?.count || 0)}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Patients registered with previous consultations
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+        </React.Fragment>
       ) : null}
       <Modal ref={modalRef} />
     </Page>

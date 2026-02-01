@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Button,
@@ -11,15 +12,17 @@ import {
   IconButton,
   LinearProgress,
   Radio,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/CloseRounded";
 
-import Page, { Header as PageHeader } from "../../components/Page";
+import Page from "../../components/Page";
 import Modal from "../../components/Modal";
 import TextField from "../../components/TextField";
+import DatePicker from "../../components/DatePicker";
 import Select from "../../components/Select";
 import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
@@ -38,6 +41,7 @@ const validationRules = getValidationRules();
 
 const Stocktaking = () => {
   const addToast = useToast();
+  const navigate = useNavigate();
 
   const modalRef = useRef();
   const reasonRef = useRef();
@@ -50,8 +54,11 @@ const Stocktaking = () => {
   const [itemType, setItemType] = useState();
   const [lensTypeId, setLensTypeId] = useState();
   const [selectedItem, setSelectedItem] = useState();
+  const [category, setCategory] = useState(null);
   const [quantity, setQuantity] = useState();
   const [unitBuyingPrice, setUnitBuyingPrice] = useState(null);
+  const [sellingPrice, setSellingPrice] = useState(null);
+  const [expirationDate, setExpirationDate] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
   const { data: lensTypes, handleFetch: fetchLensTypes } = useFetch(
@@ -68,6 +75,8 @@ const Stocktaking = () => {
   const {
     data: items,
     setData: setItems,
+    loading: loadingItems,
+    error: itemsError,
     handleFetch: fetchItems,
   } = useFetch(
     "api/items",
@@ -75,11 +84,12 @@ const Stocktaking = () => {
       status: "Active",
       per_page: 5000,
       is_stock_item: "Yes",
+      include_all_stock: "Yes", // Bypass balance/expiry filtering for stocktaking
       q: itemName,
       item_type: itemType,
       lens_type_id: lensTypeId,
     },
-    true,
+    false,
     [],
     (response) => response.data.data.data
   );
@@ -107,10 +117,36 @@ const Stocktaking = () => {
   }, [itemType]);
 
   useEffect(() => {
+    // Fetch items when filters change
+    fetchItems();
+  }, [itemName, itemType, lensTypeId]);
+
+  useEffect(() => {
+    if (itemsError) {
+      addToast({ message: formatError(itemsError), severity: "error" });
+    }
+  }, [itemsError]);
+
+  // Error boundary for component
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error("Stocktaking component error:", error);
+      addToast({ message: "An error occurred. Please refresh the page.", severity: "error" });
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
+      // Navigate back to dashboard after successful stocktake
+      setTimeout(() => {
+        navigate('/inventory-management/dashboard');
+      }, 1500);
     }
-  }, [data]);
+  }, [data, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -119,23 +155,44 @@ const Stocktaking = () => {
   }, [error]);
 
   const handleAddItem = () => {
-    if (
-      quantityRef.current.validate() &&
-      unitBuyingPriceRef.current.validate()
-    ) {
+    try {
+      if (!selectedItem) {
+        addToast({ message: "Please select an item first.", severity: "warning" });
+        return;
+      }
+
+      if (!quantity || quantity <= 0) {
+        addToast({ message: "Please enter a valid quantity.", severity: "warning" });
+        return;
+      }
+
+      if (!unitBuyingPrice || unitBuyingPrice <= 0) {
+        addToast({ message: "Please enter a valid unit buying price.", severity: "warning" });
+        return;
+      }
+
       setSelectedItems([
         ...selectedItems,
         {
           item_id: selectedItem.id,
           item_name: selectedItem.name,
+          category: category || selectedItem.category || null,
           quantity,
           unit_buying_price: unitBuyingPrice,
+          selling_price: sellingPrice,
+          expiration_date: expirationDate,
         },
       ]);
 
       setSelectedItem(null);
+      setCategory(null);
       setQuantity(null);
       setUnitBuyingPrice(null);
+      setSellingPrice(null);
+      setExpirationDate(null);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      addToast({ message: "Error adding item. Please try again.", severity: "error" });
     }
   };
 
@@ -174,25 +231,30 @@ const Stocktaking = () => {
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "Inventory Management" },
+        { title: "Stock Management" },
         { title: "Stocktaking" },
       ]}
     >
+      <CardHeader
+        title="Stocktaking"
+        titleTypographyProps={{
+          variant: "h4",
+          fontWeight: 700,
+        }}
+        sx={{
+          p: 0,
+          mb: 3,
+        }}
+      />
       <Card>
-        <PageHeader title="Stocktaking" />
         <Divider />
         <CardContent>
           <Grid
             container
-            spacing={2}
-            mb={2}
+            spacing={{ xs: 2, sm: 2, md: 3 }}
+            sx={{ mb: 3 }}
           >
-            <Grid
-              item
-              md={3.5}
-              sm={12}
-              xs={12}
-            >
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField
                 ref={reasonRef}
                 label="Reason"
@@ -201,12 +263,7 @@ const Stocktaking = () => {
                 onChange={(value) => setReason(value)}
               />
             </Grid>
-            <Grid
-              item
-              md={3}
-              sm={12}
-              xs={12}
-            >
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField
                 disabled
                 label="Prepared By"
@@ -219,14 +276,9 @@ const Stocktaking = () => {
 
           <Grid
             container
-            spacing={2}
+            spacing={{ xs: 2, sm: 2, md: 3 }}
           >
-            <Grid
-              item
-              md={3.5}
-              sm={12}
-              xs={12}
-            >
+            <Grid size={{ xs: 12, md: 4 }}>
               <Card variant="outlined">
                 <CardHeader
                   title="Select Item"
@@ -245,7 +297,7 @@ const Stocktaking = () => {
                     placeholder="Item Type"
                     fullWidth
                     clearable
-                    options={["Pharmaceutical", "Lens", "Frame"]}
+                    options={["Pharmaceutical", "Lens", "Frame", "Others", "Service"]}
                     onChange={(value) => setItemType(value)}
                   />
                   {itemType === "Lens" ? (
@@ -263,30 +315,38 @@ const Stocktaking = () => {
                 </CardContent>
                 <Divider />
                 <CardContent sx={{ height: "42vh", overflowY: "auto" }}>
-                  {items.map((e) => (
-                    <FormControlLabel
-                      key={e.id}
-                      control={
-                        <Radio
-                          size="small"
-                          checked={selectedItem === e}
-                          onChange={(event) => setSelectedItem(e)}
-                        />
-                      }
-                      label={<Typography variant="body2">{e.name}</Typography>}
-                      sx={{ display: "flex" }}
-                    />
-                  ))}
+                  {loadingItems ? (
+                    <Stack spacing={1}>
+                      {[...Array(5)].map((_, index) => (
+                        <Skeleton key={index} variant="rectangular" height={40} />
+                      ))}
+                    </Stack>
+                  ) : items.length > 0 ? (
+                    items.map((e) => (
+                      <FormControlLabel
+                        key={e.id}
+                        control={
+                          <Radio
+                            size="small"
+                            checked={selectedItem?.id === e.id}
+                            onChange={() => setSelectedItem(e)}
+                          />
+                        }
+                        label={<Typography variant="body2">{e.name}</Typography>}
+                        sx={{ display: "flex", cursor: "pointer" }}
+                        onClick={() => setSelectedItem(e)}
+                      />
+                    ))
+                  ) : (
+                    <Typography variant="body2" color="text.secondary" textAlign="center">
+                      No items found. Try adjusting your filters.
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
 
-            <Grid
-              item
-              md={8.5}
-              sm={12}
-              xs={12}
-            >
+            <Grid size={{ xs: 12, md: 8 }}>
               <Card
                 variant="outlined"
                 sx={{ mb: 1 }}
@@ -297,16 +357,11 @@ const Stocktaking = () => {
                   {selectedItem ? (
                     <Grid
                       container
-                      spacing={1}
+                      spacing={{ xs: 2, sm: 2, md: 2 }}
                       alignItems="flex-end"
-                      mb={2}
+                      sx={{ mb: 3 }}
                     >
-                      <Grid
-                        item
-                        md={4}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
                           ref={itemRef}
                           disabled={true}
@@ -316,12 +371,16 @@ const Stocktaking = () => {
                           value={selectedItem.name || ""}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={3}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                        <TextField
+                          label="Category"
+                          fullWidth
+                          placeholder="Enter category"
+                          value={category || selectedItem.category || ""}
+                          onChange={(value) => setCategory(value)}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
                         <TextField
                           disabled={true}
                           label="Unit of Measure"
@@ -330,12 +389,7 @@ const Stocktaking = () => {
                           value={selectedItem.unit_of_measure?.name || ""}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid size={{ xs: 12, sm: 6, md: 1.8 }}>
                         <TextField
                           ref={quantityRef}
                           label="Quantity"
@@ -353,12 +407,7 @@ const Stocktaking = () => {
                           }}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={2}
-                        sm={4}
-                        xs={12}
-                      >
+                      <Grid size={{ xs: 12, sm: 6, md: 1.8 }}>
                         <TextField
                           ref={unitBuyingPriceRef}
                           label="Unit Buying Price"
@@ -385,12 +434,28 @@ const Stocktaking = () => {
                           }}
                         />
                       </Grid>
-                      <Grid
-                        item
-                        md={1}
-                        sm={2}
-                        xs={12}
-                      >
+                      <Grid size={{ xs: 12, sm: 6, md: 1.8 }}>
+                        <TextField
+                          label="Selling Price"
+                          fullWidth
+                          type="number"
+                          placeholder="0.00"
+                          defaultValue={sellingPrice}
+                          onChange={(value) => {
+                            value = validateInteger(value);
+                            setSellingPrice(value);
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6, md: 1.8 }}>
+                        <DatePicker
+                          label="Expiration Date"
+                          fullWidth
+                          value={expirationDate}
+                          onChange={(value) => setExpirationDate(value)}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 12, md: 1.2 }}>
                         <Button
                           disabled={loading}
                           fullWidth
@@ -417,6 +482,11 @@ const Stocktaking = () => {
                         headerName: "Item Name",
                       },
                       {
+                        field: "category",
+                        headerName: "Category",
+                        valueGetter: (item, index) => item.category || "Uncategorized",
+                      },
+                      {
                         field: "quantity",
                         headerName: "Quantity",
                         valueGetter: (item, index) =>
@@ -427,6 +497,18 @@ const Stocktaking = () => {
                         headerName: "Unit Buying Price",
                         valueGetter: (item, index) =>
                           numberFormat(item.unit_buying_price || 0),
+                      },
+                      {
+                        field: "selling_price",
+                        headerName: "Selling Price",
+                        valueGetter: (item, index) =>
+                          numberFormat(item.selling_price || 0),
+                      },
+                      {
+                        field: "expiration_date",
+                        headerName: "Expiration Date",
+                        valueGetter: (item, index) =>
+                          item.expiration_date ? new Date(item.expiration_date).toLocaleDateString() : "-",
                       },
                       {
                         field: "actions",

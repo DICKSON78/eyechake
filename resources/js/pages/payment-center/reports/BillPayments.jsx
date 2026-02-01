@@ -17,6 +17,7 @@ import {
   getDateRangeTitle,
   numberFormat,
   throttle,
+  getWeekStartDate,
 } from "../../../helpers";
 
 const BillPayments = ({ module }) => {
@@ -39,7 +40,7 @@ const BillPayments = ({ module }) => {
     patient_gender: undefined,
     patient_phone: undefined,
     payment_channel_id: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
     end_date: undefined,
     sort_direction: "desc",
   });
@@ -273,7 +274,7 @@ const BillPayments = ({ module }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 4, index: 1 },
-          { reducer: (acc, item, index) => acc + item.amount, index: 4 },
+          { reducer: (acc, item, index) => acc + (parseFloat(item.amount) || 0), index: 4 },
         ]}
       />
     </Page>

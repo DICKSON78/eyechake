@@ -1,0 +1,317 @@
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Grid,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+  CircularProgress,
+  Chip,
+} from "@mui/material";
+import {
+  RefreshRounded as RefreshIcon,
+  SearchRounded as SearchIcon,
+  InventoryRounded as InventoryIcon,
+} from "@mui/icons-material";
+
+import Page, { Header as PageHeader } from "../../../components/Page";
+import Table from "../../../components/Table";
+import Select from "../../../components/Select";
+import { useFetch, useToast } from "../../../hooks";
+import { formatError, numberFormat, safeExtractArray, safeExtractPaginatedData } from "../../../helpers";
+
+const LensStock = () => {
+  const addToast = useToast();
+
+  const [params, setParams] = useState({
+    page: 1,
+    per_page: 25,
+    lens_type: undefined,
+    sph: undefined,
+    cyl: undefined,
+    q: undefined,
+  });
+
+  const { data: lensTypes, loading: loadingLensTypes } = useFetch(
+    "api/lens-types",
+    { status: "Active", per_page: 500 },
+    true,
+    [],
+    (response) => {
+      console.log("Lens types API response:", response);
+      const extracted = safeExtractArray(response, 'data.data.data', []);
+      console.log("Extracted lens types:", extracted);
+      return extracted;
+    }
+  );
+
+  const { data, loading, error, handleFetch } = useFetch(
+    "api/lens-stock",
+    params,
+    true,
+    {
+      data: [],
+      total: 0,
+      page: 1,
+    },
+    (response) => safeExtractPaginatedData(response, 'data.data')
+  );
+
+  useEffect(() => {
+    document.title = `Lens Stock - ${window.APP_NAME}`;
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      addToast({ message: formatError(error), severity: "error" });
+    }
+  }, [error, addToast]);
+
+  const handleSearch = () => {
+    setParams({ ...params, page: 1 });
+    handleFetch();
+  };
+
+  const handleClear = () => {
+    setParams({
+      page: 1,
+      per_page: 25,
+      lens_type: undefined,
+      sph: undefined,
+      cyl: undefined,
+      q: undefined,
+    });
+  };
+
+  // Extract SV lens types and Multifocal lens types
+  // Ensure lensTypes is always an array before filtering
+  const safeLensTypes = Array.isArray(lensTypes) ? lensTypes : [];
+  console.log("Safe lens types:", safeLensTypes);
+
+  const svLensTypes = safeLensTypes.filter(
+    (lt) => lt?.name === "Single Vision" || lt?.name === "SV"
+  );
+  const multifocalLensTypes = safeLensTypes.filter(
+    (lt) => ["Bifocal", "Progressive"].includes(lt?.name)
+  );
+
+  console.log("SV lens types:", svLensTypes);
+  console.log("Multifocal lens types:", multifocalLensTypes);
+
+  const lensTypeOptions = [
+    { label: "All Lens Types", value: "" },
+    { label: "SV (Single Vision)", value: "SV" },
+    { label: "Multifocal", value: "Multifocal" },
+  ];
+
+  console.log("Lens type options:", lensTypeOptions);
+  console.log("Current lens_type param:", params.lens_type);
+
+  return (
+    <Page
+      breadcrumbs={[
+        { title: "Home" },
+        { title: "Optician Center" },
+        { title: "Lens Stock" },
+      ]}
+    >
+      <Card>
+        <PageHeader
+          title="Lens Stock"
+          subtitle={`${data.total || 0} lenses available`}
+          trailing={
+            <Tooltip title="Refresh List">
+              <IconButton onClick={handleFetch} disabled={loading}>
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          }
+        />
+        <Divider />
+        <CardContent>
+          {/* Search Filters */}
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={12} md={3}>
+              <Select
+                fullWidth
+                label="Lens Type"
+                value={params.lens_type || ""}
+                onChange={(value) =>
+                  setParams({ ...params, lens_type: value || undefined, page: 1 })
+                }
+                clearable
+                options={lensTypeOptions}
+                optionsLabel="label"
+                optionsValue="value"
+              />
+            </Grid>
+            {params.lens_type === "SV" && (
+              <>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Sphere (Sph)"
+                    value={params.sph || ""}
+                    onChange={(e) =>
+                      setParams({ ...params, sph: e.target.value || undefined })
+                    }
+                    placeholder="e.g., -2.00, +1.50"
+                    helperText="Search by sphere value"
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="Cylinder (Cyl)"
+                    value={params.cyl || ""}
+                    onChange={(e) =>
+                      setParams({ ...params, cyl: e.target.value || undefined })
+                    }
+                    placeholder="e.g., -0.50, +1.00"
+                    helperText="Search by cylinder value"
+                  />
+                </Grid>
+              </>
+            )}
+            <Grid item xs={12} md={params.lens_type === "SV" ? 3 : 9}>
+              <TextField
+                fullWidth
+                label="Search by Name or Code"
+                value={params.q || ""}
+                onChange={(e) =>
+                  setParams({ ...params, q: e.target.value || undefined })
+                }
+                placeholder="Search lens name, code, or specifications"
+                InputProps={{
+                  endAdornment: (
+                    <IconButton onClick={handleSearch} size="small">
+                      <SearchIcon />
+                    </IconButton>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Tooltip title="Search">
+                  <IconButton
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSearch}
+                    disabled={loading}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Clear Filters">
+                  <IconButton onClick={handleClear} disabled={loading}>
+                    Clear
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {loading ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "200px",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Table
+              loading={loading}
+              columns={[
+                {
+                  field: "index",
+                  headerName: "S/N",
+                  valueGetter: (item, index) =>
+                    params.per_page * (params.page - 1) + index + 1,
+                },
+                {
+                  field: "name",
+                  headerName: "Lens Name",
+                },
+                {
+                  field: "code",
+                  headerName: "Code",
+                },
+                {
+                  field: "lens_type",
+                  headerName: "Lens Type",
+                  valueGetter: (item) => item.lens_type?.name || "N/A",
+                  renderCell: (item) => {
+                    const lensTypeName = item.lens_type?.name || "N/A";
+                    const isSV = lensTypeName === "Single Vision";
+                    const isMultifocal = ["Bifocal", "Progressive"].includes(
+                      lensTypeName
+                    );
+                    return (
+                      <Chip
+                        label={lensTypeName}
+                        size="small"
+                        color={
+                          isSV
+                            ? "primary"
+                            : isMultifocal
+                            ? "secondary"
+                            : "default"
+                        }
+                        variant="outlined"
+                      />
+                    );
+                  },
+                },
+                {
+                  field: "balance",
+                  headerName: "Stock Balance",
+                  valueGetter: (item) => numberFormat(item.balance || 0),
+                },
+                {
+                  field: "unit_buying_price",
+                  headerName: "Buying Price",
+                  valueGetter: (item) =>
+                    item.unit_buying_price
+                      ? numberFormat(item.unit_buying_price)
+                      : "N/A",
+                },
+                {
+                  field: "unit_of_measure",
+                  headerName: "Unit",
+                  valueGetter: (item) => item.unit_of_measure?.name || "N/A",
+                },
+                {
+                  field: "templates",
+                  headerName: "Specifications",
+                  valueGetter: (item) => item.templates || "N/A",
+                  show: false,
+                },
+              ]}
+              items={Array.isArray(data?.data) ? data.data : []}
+              itemCount={data?.total ?? 0}
+              page={params.page}
+              pageSize={params.per_page}
+              onPageChange={(page) => setParams({ ...params, page })}
+              onPageSizeChange={(value) =>
+                setParams({ ...params, per_page: value, page: 1 })
+              }
+            />
+          )}
+        </CardContent>
+      </Card>
+    </Page>
+  );
+};
+
+export default LensStock;
+

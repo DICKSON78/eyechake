@@ -17,6 +17,7 @@ import {
   getDateRangeTitle,
   numberFormat,
   throttle,
+  getWeekStartDate,
 } from "../../../helpers";
 
 const CreditCollection = ({ module }) => {
@@ -42,7 +43,7 @@ const CreditCollection = ({ module }) => {
     patient_phone: undefined,
     payment_mode_id: undefined,
     q: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
     end_date: undefined,
     sort_direction: "desc",
   });

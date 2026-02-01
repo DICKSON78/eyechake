@@ -70,43 +70,59 @@ class StocktakesController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'reason' => 'required',
-            'items' => 'required|array',
-            'items.*.item_id' => 'required|exists:items,id',
-            'items.*.quantity' => 'required|numeric|min:1',
-            'items.*.unit_buying_price' => 'nullable|numeric|min:1',
-        ]);
+        try {
+            $request->validate([
+                'reason' => 'required',
+                'items' => 'required|array',
+                'items.*.item_id' => 'required|exists:items,id',
+                'items.*.quantity' => 'required|numeric|min:1',
+                'items.*.unit_buying_price' => 'nullable|numeric|min:0',
+                'items.*.selling_price' => 'nullable|numeric|min:0',
+                'items.*.expiration_date' => 'nullable|date',
+                'items.*.category' => 'nullable|string|max:255',
+            ]);
 
-        $user = $request->user();
-        $input = $request->only('reason');
-        $input['created_by'] = $user->id;
-        $data = Stocktake::create($input);
+            $user = $request->user();
+            $input = $request->only('reason');
+            $input['created_by'] = $user->id;
+            $data = Stocktake::create($input);
 
-        if ($data) {
-            $input_items = $request->json('items');
+            if ($data) {
+                $input_items = $request->json('items');
 
-            foreach ($input_items as &$input_item) {
-                // if this item is a stock item, continue
-                $item = Item::where('id', $input_item['item_id'])
-                    ->where('is_stock_item', 'Yes')
-                    ->first();
+                foreach ($input_items as &$input_item) {
+                    // if this item is a stock item, continue
+                    $item = Item::where('id', $input_item['item_id'])
+                        ->where('is_stock_item', 'Yes')
+                        ->first();
 
-                if ($item) {
-                    $input_item['stocktake_id'] = $data->id;
-                    $stocktake_item = StocktakeItem::create($input_item);
+                    if ($item) {
+                        $input_item['stocktake_id'] = $data->id;
+                        $stocktake_item = StocktakeItem::create($input_item);
 
-                    if ($stocktake_item) {
-                        $item->update([
-                            'balance' => $stocktake_item->quantity,
-                            'unit_buying_price' => $stocktake_item->unit_buying_price,
-                        ]);
+                        if ($stocktake_item) {
+                            $updateData = [
+                                'balance' => $stocktake_item->quantity, // Use balance instead of new_balance
+                                'unit_buying_price' => $stocktake_item->unit_buying_price,
+                            ];
+                            
+                            // Update category if provided
+                            if (isset($input_item['category']) && !empty($input_item['category'])) {
+                                $updateData['category'] = $input_item['category'];
+                            }
+                            
+                            $item->update($updateData);
+                        }
                     }
                 }
             }
-        }
 
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+            return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Stocktake creation error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Error creating stocktake: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -131,6 +147,39 @@ class StocktakesController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    /**
+     * Apply a stocktake (move new_balance to balance for all items)
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function apply($id)
+    {
+        try {
+            $stocktake = Stocktake::with(['items.item'])->findOrFail($id);
+            
+            if ($stocktake->status === 'Applied') {
+                return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Stocktake has already been applied.');
+            }
+
+            foreach ($stocktake->items as $stocktakeItem) {
+                if ($stocktakeItem->item) {
+                    $stocktakeItem->item->update([
+                        'balance' => $stocktakeItem->quantity, // Use stocktake quantity directly
+                        // Note: new_balance column doesn't exist in items table
+                    ]);
+                }
+            }
+
+            $stocktake->update(['status' => 'Applied']);
+
+            return $this->sendResponse($stocktake, Response::HTTP_OK, 'Stocktake applied successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Stocktake application error: ' . $e->getMessage());
+            return $this->sendResponse(null, Response::HTTP_INTERNAL_SERVER_ERROR, 'Error applying stocktake: ' . $e->getMessage());
+        }
     }
 
     /**

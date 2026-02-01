@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 import {
   Button,
@@ -29,6 +29,7 @@ import Table, { SearchTextField } from "../../components/Table";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 import { useFetch, usePost, useToast } from "../../hooks";
+import { useNotificationContext } from "../../contexts/NotificationContext";
 import {
   formatError,
   getValidationError,
@@ -43,7 +44,25 @@ const validationRules = getValidationRules();
 const CheckInPatient = () => {
   const addToast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { patientId } = useParams();
+  const { refreshNotificationsImmediately } = useNotificationContext();
+
+  // Determine mode: invoice creation vs bill creation
+  const isInvoiceMode = location.state?.createInvoice === true;
+  const isBillMode = location.state?.createBill === true;
+  const mode = isInvoiceMode ? 'invoice' : (isBillMode ? 'bill' : 'checkin');
+
+  // Handle case where patientId is null or invalid
+  useEffect(() => {
+    if (!patientId || patientId === 'null' || patientId === 'undefined') {
+      addToast({ 
+        message: "Invalid patient ID. Please select a patient from the patients list.", 
+        severity: "error" 
+      });
+      navigate("/reception/patients");
+    }
+  }, [patientId, navigate, addToast]);
 
   const modalRef = useRef();
   const paymentModeRef = useRef();
@@ -53,6 +72,8 @@ const CheckInPatient = () => {
 
   const [loadingPatient, setLoadingPatient] = useState(true);
   const [patient, setPatient] = useState();
+  const [existingCheckIns, setExistingCheckIns] = useState([]);
+  const [loadingCheckIns, setLoadingCheckIns] = useState(false);
 
   const { data: paymentModes, handleFetch: fetchPaymentModes } = useFetch(
     "api/payment-modes",
@@ -121,20 +142,44 @@ const CheckInPatient = () => {
       patient_id: patientId,
       payment_mode_id: paymentMode ? paymentMode.id : undefined,
       items: selectedItems,
+      mode: mode, // Add mode to distinguish invoice vs bill vs checkin
     }
   );
 
-  useEffect(() => {
-    document.title = `Check-In Patient - ${window.APP_NAME}`;
-  }, []);
+  const { data: checkInData, handleFetch: fetchCheckIns } = useFetch(
+    "api/patient-payment-cache",
+    {
+      patient_id: patientId,
+      per_page: 100,
+    },
+    false,
+    [],
+    (response) => response.data.data.data
+  );
 
   useEffect(() => {
-    if (patient) {
+    const titles = {
+      invoice: 'Create Invoice',
+      bill: 'Create Bill',
+      checkin: 'Check-In Patient'
+    };
+    document.title = `${titles[mode]} - ${window.APP_NAME}`;
+  }, [mode]);
+
+  useEffect(() => {
+    if (patient && patientId && patientId !== 'null' && patientId !== 'undefined') {
       fetchPaymentModes();
       fetchItemTypes();
       setPaymentMode(patient.payment_mode);
+      fetchCheckIns();
     }
-  }, [patient]);
+  }, [patient, patientId]);
+
+  useEffect(() => {
+    if (checkInData) {
+      setExistingCheckIns(checkInData);
+    }
+  }, [checkInData]);
 
   useEffect(() => {
     if (paymentMode) {
@@ -164,11 +209,13 @@ const CheckInPatient = () => {
   useEffect(() => {
     if (data) {
       addToast({ message: data.message, severity: "success" });
+      // Trigger immediate notification refresh since patient status changed
+      refreshNotificationsImmediately();
       window.setTimeout(() => {
         navigate("/reception/patients");
       }, 1000);
     }
-  }, [data]);
+  }, [data, refreshNotificationsImmediately]);
 
   useEffect(() => {
     if (error) {
@@ -211,6 +258,20 @@ const CheckInPatient = () => {
       return setError(getValidationError("Please add at least one item."));
     }
 
+    // Validate payment mode for cash transactions
+    if (!paymentMode) {
+      return setError(getValidationError("Please select a payment mode."));
+    }
+
+    // Validate that all items have required fields
+    for (const item of selectedItems) {
+      if (!item.item_id || !item.payment_mode_id || !item.quantity) {
+        return setError(getValidationError("Some items are missing required information. Please check item details."));
+      }
+    }
+
+    console.log('Validation passed, proceeding with submission...');
+
     let component = (
       <ConfirmationDialog
         message="Are you sure you want to perform this action?"
@@ -232,13 +293,30 @@ const CheckInPatient = () => {
     );
   };
 
+  // Don't render if patientId is invalid
+  if (!patientId || patientId === 'null' || patientId === 'undefined') {
+    return (
+      <Page
+        breadcrumbs={[
+          { title: "Home" },
+          { title: "Reception" },
+          { title: "Patients/Customers" },
+          { title: "Check-In" },
+          { title: "Invalid Patient" },
+        ]}
+      >
+        <div>Redirecting to patients list...</div>
+      </Page>
+    );
+  }
+
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
         { title: "Reception" },
         { title: "Patients/Customers" },
-        { title: "Check-In" },
+        { title: mode === 'invoice' ? "Create Invoice" : (mode === 'bill' ? "Create Bill" : "Check-In") },
         { title: patientId },
       ]}
     >
@@ -256,10 +334,103 @@ const CheckInPatient = () => {
       ) : null}
 
       {patient ? (
-        <Card>
-          <PageHeader title="Check-In Patient" />
-          <Divider />
-          <CardContent>
+        <>
+          {existingCheckIns.length > 0 && (
+            <Card sx={{ mb: 2 }}>
+              <PageHeader title="Existing Check-In Data" />
+              <Divider />
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  This patient has already been checked in. Below are the existing check-in records:
+                </Typography>
+                {existingCheckIns.map((checkIn, index) => (
+                  <Card key={checkIn.id} variant="outlined" sx={{ mb: 2 }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        Check-In #{checkIn.id} - {new Date(checkIn.created_at).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Payment Mode: {checkIn.check_in?.payment_mode?.name || 'N/A'}
+                      </Typography>
+                      {checkIn.items && checkIn.items.length > 0 && (
+                        <Table
+                          columns={[
+                            {
+                              field: "index",
+                              headerName: "S/N",
+                              valueGetter: (item, index) => index + 1,
+                            },
+                            {
+                              field: "item_name",
+                              headerName: "Item Name",
+                              valueGetter: (item) => item.item?.name || 'Unknown',
+                            },
+                            {
+                              field: "consultation_type",
+                              headerName: "Type",
+                              valueGetter: (item) => item.consultation_type?.name || 'N/A',
+                            },
+                            {
+                              field: "unit_price",
+                              headerName: "Unit Price",
+                              valueGetter: (item) => numberFormat(item.unit_price || 0),
+                            },
+                            {
+                              field: "quantity",
+                              headerName: "Quantity",
+                              valueGetter: (item) => numberFormat(item.quantity || 0),
+                            },
+                            {
+                              field: "total_price",
+                              headerName: "Subtotal",
+                              valueGetter: (item) =>
+                                numberFormat((item.unit_price || 0) * (item.quantity || 0)),
+                            },
+                            {
+                              field: "status",
+                              headerName: "Status",
+                              valueGetter: (item) => item.status || 'N/A',
+                            },
+                          ]}
+                          items={checkIn.items}
+                          hidePaginationFooter
+                          footerItems={[
+                            [
+                              { value: "TOTAL", tableCellProps: { colSpan: 5 } },
+                              { 
+                                value: numberFormat(
+                                  checkIn.items.reduce(
+                                    (acc, item) => acc + (item.unit_price || 0) * (item.quantity || 0),
+                                    0
+                                  )
+                                )
+                              },
+                            ],
+                          ]}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+          
+          <Card>
+            <PageHeader
+              title={
+                mode === 'invoice' ? "Create Invoice" :
+                mode === 'bill' ? "Create Bill" :
+                "Check-In Patient"
+              }
+              subtitle={
+                mode === 'invoice' ? "Create a quotation/invoice for the patient before providing services" :
+                mode === 'bill' ? "Create a bill for services already provided" :
+                "Check-in patient and select services to provide"
+              }
+            />
+            <Divider />
+            <CardContent>
             <Grid
               container
               spacing={2}
@@ -454,6 +625,8 @@ const CheckInPatient = () => {
                           <TextField
                             label="Comments"
                             fullWidth
+                            multiline
+                            rows={4}
                             onChange={(value) => setComments(value)}
                           />
                         </Grid>
@@ -580,18 +753,27 @@ const CheckInPatient = () => {
               variant="contained"
               onClick={() =>
                 confirmSubmit(
-                  paymentMode && paymentMode.transaction_type === "Credit"
+                  mode === 'invoice'
+                    ? "Confirm Create Invoice"
+                    : mode === 'bill'
+                    ? "Confirm Create Bill"
+                    : paymentMode && paymentMode.transaction_type === "Credit"
                     ? "Confirm Send for Approval"
                     : "Confirm Send to Cashier"
                 )
               }
             >
-              {paymentMode && paymentMode.transaction_type === "Credit"
+              {mode === 'invoice'
+                ? "Create Invoice"
+                : mode === 'bill'
+                ? "Create Bill"
+                : paymentMode && paymentMode.transaction_type === "Credit"
                 ? "Send for Approval"
                 : "Send to Cashier"}
             </Button>
           </Stack>
         </Card>
+        </>
       ) : null}
       <Modal ref={modalRef} />
     </Page>

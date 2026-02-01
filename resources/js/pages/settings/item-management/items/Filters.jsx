@@ -13,7 +13,7 @@ import Select from "../../../../components/Select";
 import SelectClinic from "../../../../components/SelectClinic";
 import useFetch from "../../../../hooks/useFetch";
 
-import { throttle } from "../../../../helpers";
+import { throttle, safeExtractArray } from "../../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
   const { data: itemTypes } = useFetch(
@@ -24,7 +24,7 @@ const Filters = ({ params, setParams, ...rest }) => {
     },
     true,
     [],
-    (response) => response.data.data.data
+    (response) => safeExtractArray(response, 'data.data.data', [])
   );
   const { data: consultationTypes } = useFetch(
     "api/consultation-types",
@@ -34,7 +34,7 @@ const Filters = ({ params, setParams, ...rest }) => {
     },
     true,
     [],
-    (response) => response.data.data.data
+    (response) => safeExtractArray(response, 'data.data.data', [])
   );
 
   return (
@@ -124,7 +124,7 @@ const Filters = ({ params, setParams, ...rest }) => {
               onChange={(value) => setParams({ ...params, status: value })}
             />
           </Grid>
-          {window.user.role === "Admin" ? (
+          {window.user && window.user.role === "Admin" ? (
             <Grid
               item
               md={3}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\PatientPaymentCache;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -19,121 +20,322 @@ class PatientPaymentCacheController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-            'per_page' => 'sometimes|integer|min:0',
-            'page' => 'sometimes|integer|min:1',
-            'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
-        ]);
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:0',
+                'page' => 'sometimes|integer|min:1',
+                'start_date' => 'sometimes|date_format:Y-m-d',
+                'end_date' => 'sometimes|date_format:Y-m-d',
+                'include_optician_glass' => 'sometimes|in:true,false,1,0',
+                'consultation_status' => 'sometimes|string'
+            ]);
 
-        $user = $request->user();
-        $per_page = $request->per_page ?? 25;
-        $clinic_id = $request->clinic_id;
-        $patient_name = $request->patient_name;
-        $patient_id = $request->patient_id;
-        $patient_gender = $request->patient_gender;
-        $patient_phone = $request->patient_phone;
-        $item_status = $request->item_status;
-        $item_payment_mode_id = $request->item_payment_mode_id;
-        $item_transaction_type = $request->item_transaction_type;
-        $item_consultation_type = $request->item_consultation_type;
-        $is_stock_item = $request->is_stock_item;
-        $item_consultant_id = $request->item_consultant_id;
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
+            $user = $request->user();
+            if (!$user) {
+                return $this->sendError('Unauthenticated', Response::HTTP_UNAUTHORIZED);
+            }
+            $per_page = $request->per_page ?? 25;
+            $clinic_id = $request->clinic_id;
+            $patient_name = $request->patient_name;
+            $patient_id = $request->patient_id;
+            $patient_gender = $request->patient_gender;
+            $patient_phone = $request->patient_phone;
+            $item_status = $request->item_status;
+            $item_payment_mode_id = $request->item_payment_mode_id;
+            $item_transaction_type = $request->item_transaction_type;
+            $item_consultation_type = $request->item_consultation_type;
+            $is_stock_item = $request->is_stock_item;
+            $item_consultant_id = $request->item_consultant_id;
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            // Properly handle include_optician_glass boolean conversion
+            $include_optician_glass = false;
+            if ($request->has('include_optician_glass')) {
+                $value = $request->include_optician_glass;
+                if (is_bool($value)) {
+                    $include_optician_glass = $value;
+                } elseif (is_numeric($value)) {
+                    $include_optician_glass = (int)$value === 1;
+                } else {
+                    $value = strtolower((string)$value);
+                    $include_optician_glass = in_array($value, ['true', '1', 'yes', 'on'], true);
+                }
+            }
+            $consultation_status = $request->consultation_status;
 
-        $data = PatientPaymentCache::with(['check_in.patient', 'check_in.payment_mode', 'creator']);
+            $data = PatientPaymentCache::with(['check_in.patient', 'check_in.payment_mode', 'creator', 'consultation', 'items.consultation_type', 'items.item', 'items.payment_mode']);
 
-        if ($user->is_admin) {
-            $data->with(['creator.clinic']);
+            // Normalize date range: if only start_date provided, default end_date to today
+            if ($start_date && !$end_date) {
+                $end_date = Carbon::now()->format('Y-m-d');
+            }
+            // If end_date before start_date, swap to avoid empty/invalid ranges
+            if ($start_date && $end_date && $end_date < $start_date) {
+                [$start_date, $end_date] = [$end_date, $start_date];
+            }
 
-            if ($clinic_id) {
-                $data->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+            if ($user->is_admin) {
+                $data->with(['creator.clinic']);
+
+                if ($clinic_id) {
+                    $data->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                }
+            } else {
+                if ($user->clinic_id) {
+                    $data->whereHas('creator', function ($query) use ($user) {
+                        $query->where('clinic_id', $user->clinic_id);
+                    });
+                } else {
+                    // If user has no clinic_id, return empty result
+                    $data->whereRaw('1 = 0');
+                }
+            }
+
+            if ($patient_name) {
+                $data->whereHas('check_in', function ($query) use ($patient_name) {
+                    $query->whereHas('patient', function ($subQuery) use ($patient_name) {
+                        $subQuery->fullName('%' . $patient_name . '%');
+                    });
                 });
             }
-        } else {
-            $data->whereHas('creator', function ($query) use ($user) {
-                $query->where('clinic_id', $user->clinic_id);
-            });
-        }
 
-        if ($patient_name) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_name) {
-                $query->fullName('%' . $patient_name . '%');
-            });
-        }
+            if ($patient_id) {
+                $data->whereHas('check_in', function ($query) use ($patient_id) {
+                    $query->where('patient_id', $patient_id);
+                });
+            }
 
-        if ($patient_id) {
-            $data->whereHas('check_in', function ($query) use ($patient_id) {
-                $query->where('patient_id', $patient_id);
-            });
-        }
+            if ($patient_gender) {
+                $data->whereHas('check_in', function ($query) use ($patient_gender) {
+                    $query->whereHas('patient', function ($subQuery) use ($patient_gender) {
+                        $subQuery->where('gender', $patient_gender);
+                    });
+                });
+            }
 
-        if ($patient_gender) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_gender) {
-                $query->where('gender', $patient_gender);
-            });
-        }
+            if ($patient_phone) {
+                $data->whereHas('check_in', function ($query) use ($patient_phone) {
+                    $query->whereHas('patient', function ($subQuery) use ($patient_phone) {
+                        $subQuery->where('phone', 'like', '%' . $patient_phone . '%');
+                    });
+                });
+            }
 
-        if ($patient_phone) {
-            $data->whereHas('check_in.patient', function ($query) use ($patient_phone) {
-                $query->where('phone', 'like', '%' . $patient_phone . '%');
-            });
-        }
+            // Handle the main query logic
+            if ($include_optician_glass) {
+                // When including optician glass, we need to show both regular cash patients AND optician glass patients
+                $data->where(function ($query) use ($item_status, $item_transaction_type) {
+                    // Regular cash patients (pharmacy items) - must have at least one item matching criteria
+                    $query->whereHas('items', function ($subQuery) use ($item_status, $item_transaction_type) {
+                        if ($item_status) {
+                            $statuses = explode(',', $item_status);
+                            if (count($statuses) > 1) {
+                                $subQuery->whereIn('status', $statuses);
+                            } else {
+                                $subQuery->where('status', $statuses[0]);
+                            }
+                        }
+                        
+                        if ($item_transaction_type) {
+                            $subQuery->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
+                                $query2->where('payment_type', $item_transaction_type);
+                            });
+                        }
+                    });
+                    
+                    // OR optician glass patients - must have glass items with cash payment mode
+                    $query->orWhere(function ($subQuery) use ($item_status) {
+                        $subQuery->whereHas('items', function ($itemQuery) use ($item_status) {
+                            if ($item_status) {
+                                $statuses = explode(',', $item_status);
+                                if (count($statuses) > 1) {
+                                    $itemQuery->whereIn('status', $statuses);
+                                } else {
+                                    $itemQuery->where('status', $statuses[0]);
+                                }
+                            }
+                            
+                            $itemQuery->whereHas('consultation_type', function ($typeQuery) {
+                                $typeQuery->where('name', 'Glass');
+                            });
+                            
+                            $itemQuery->whereHas('payment_mode', function ($modeQuery) {
+                                $modeQuery->where('payment_type', 'Cash');
+                            });
+                        })
+                        ->whereHas('consultation', function ($consultationQuery) {
+                            $consultationQuery->whereNotNull('sent_to_optician_at')
+                                             ->where('require_glass', 'Yes');
+                        });
+                    });
+                });
+            } else {
+                // Regular filtering logic - ensure we only get payment caches that have at least one item matching ALL criteria
+                $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
+                    // Status filter
+                    if ($item_status) {
+                        $statuses = explode(',', $item_status);
+                        if (count($statuses) > 1) {
+                            $query->whereIn('status', $statuses);
+                        } else {
+                            $query->where('status', $statuses[0]);
+                        }
+                    }
+                    
+                    // Consultation type filter
+                    if ($item_consultation_type) {
+                        $query->whereHas('consultation_type', function ($query2) use ($item_consultation_type) {
+                            $query2->where('name', $item_consultation_type);
+                        });
+                    }
+                    
+                    // Stock item filter
+                    if ($is_stock_item) {
+                        $query->whereHas('item', function ($query2) use ($is_stock_item) {
+                            $query2->where('is_stock_item', $is_stock_item);
+                        });
+                    }
+                    
+                    // Consultant filter
+                    if ($item_consultant_id) {
+                        $query->where('consultant_id', $item_consultant_id);
+                    }
+                    
+                    // Payment mode filter
+                    if ($item_payment_mode_id) {
+                        $query->where('payment_mode_id', $item_payment_mode_id);
+                    }
+                    
+                    // Transaction type filter - this is critical for cash patients
+                    if ($item_transaction_type) {
+                        $query->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
+                            $query2->where('payment_type', $item_transaction_type);
+                        });
+                    }
+                });
+            }
 
-        if ($item_status) {
-            $data->whereHas('items', function ($query) use ($item_status) {
-                $statuses = explode(',', $item_status);
-                if (count($statuses) > 1) {
-                    $query->whereIn('status', $statuses);
-                } else {
-                    $query->where('status', $statuses[0]);
+            // Filter by consultation status if provided
+            if ($consultation_status) {
+                $data->whereHas('consultation', function ($query) use ($consultation_status) {
+                    $query->where('status', $consultation_status);
+                });
+            }
+
+            // Apply date filtering
+            if ($start_date) {
+                $data->whereDate('created_at', '>=', $start_date);
+            }
+            if ($end_date) {
+                $data->whereDate('created_at', '<=', $end_date);
+            }
+
+            $data->orderBy('created_at', 'desc');
+            
+            // Log the query parameters for debugging
+            \Log::info('PatientPaymentCacheController query parameters', [
+                'item_status' => $item_status,
+                'item_transaction_type' => $item_transaction_type,
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+                'include_optician_glass' => $include_optician_glass,
+                'clinic_id' => $user->is_admin ? $clinic_id : $user->clinic_id,
+                'user_id' => $user->id,
+                'user_is_admin' => $user->is_admin,
+            ]);
+            
+            // Debug: Check if there are any payment cache records at all
+            $totalPaymentCaches = PatientPaymentCache::when($user->is_admin && $clinic_id, function ($q) use ($clinic_id) {
+                $q->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }, function ($q) use ($user) {
+                if ($user->clinic_id) {
+                    $q->whereHas('creator', function ($query) use ($user) {
+                        $query->where('clinic_id', $user->clinic_id);
+                    });
+                }
+            })->count();
+            
+            // Debug: Check if there are any items with pending cash status
+            $totalPendingCashItems = \App\Models\PatientPaymentCacheItem::whereHas('payment_mode', function ($q) {
+                $q->where('payment_type', 'Cash');
+            })->where('status', 'Pending')->count();
+            
+            // Debug: Check payment caches that should appear in the query
+            $testQuery = PatientPaymentCache::query();
+            if ($user->is_admin && $clinic_id) {
+                $testQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            } else if ($user->clinic_id) {
+                $testQuery->whereHas('creator', function ($query) use ($user) {
+                    $query->where('clinic_id', $user->clinic_id);
+                });
+            }
+            if ($start_date) {
+                $testQuery->whereDate('created_at', '>=', $start_date);
+            }
+            if ($end_date) {
+                $testQuery->whereDate('created_at', '<=', $end_date);
+            }
+            $testQuery->whereHas('items', function ($q) use ($item_status, $item_transaction_type) {
+                if ($item_status) {
+                    $statuses = explode(',', $item_status);
+                    if (count($statuses) > 1) {
+                        $q->whereIn('status', $statuses);
+                    } else {
+                        $q->where('status', $statuses[0]);
+                    }
+                }
+                if ($item_transaction_type) {
+                    $q->whereHas('payment_mode', function ($q2) use ($item_transaction_type) {
+                        $q2->where('payment_type', $item_transaction_type);
+                    });
                 }
             });
+            $testCount = $testQuery->count();
+            
+            \Log::info('PatientPaymentCacheController debug counts', [
+                'total_payment_caches' => $totalPaymentCaches,
+                'total_pending_cash_items' => $totalPendingCashItems,
+                'test_query_count' => $testCount,
+            ]);
+            
+            $data = $data->paginate($per_page);
+            
+            // Log the results for debugging
+            \Log::info('PatientPaymentCacheController results', [
+                'total' => $data->total(),
+                'count' => $data->count(),
+                'current_page' => $data->currentPage(),
+                'per_page' => $data->perPage(),
+            ]);
+            
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('PatientPaymentCacheController index query error', [
+                'error' => $e->getMessage(),
+                'sql' => $e->getSql() ?? 'N/A',
+                'bindings' => $e->getBindings() ?? [],
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Gracefully return an empty paginated response instead of 500 to keep UI responsive
+            $empty = PatientPaymentCache::query()->whereRaw('1 = 0')->paginate($request->per_page ?? 25);
+            return $this->sendResponse($empty, Response::HTTP_OK, 'No results due to query error. Logged for review.');
+        } catch (\Exception $e) {
+            \Log::error('PatientPaymentCacheController index error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Gracefully return an empty paginated response instead of 500
+            $empty = PatientPaymentCache::query()->whereRaw('1 = 0')->paginate($request->per_page ?? 25);
+            return $this->sendResponse($empty, Response::HTTP_OK, 'No results due to error. Logged for review.');
         }
-
-        if ($item_payment_mode_id) {
-            $data->whereHas('items.payment_mode', function ($query) use ($item_payment_mode_id) {
-                $query->where('id', $item_payment_mode_id);
-            });
-        }
-
-        if ($item_transaction_type) {
-            $data->whereHas('items.payment_mode', function ($query) use ($item_transaction_type) {
-                $query->where('transaction_type', $item_transaction_type);
-            });
-        }
-
-        if ($item_consultation_type) {
-            $data->whereHas('items.consultation_type', function ($query) use ($item_consultation_type) {
-                $query->where('name', $item_consultation_type);
-            });
-        }
-
-        if ($is_stock_item) {
-            $data->whereHas('items.item', function ($query) use ($is_stock_item) {
-                $query->where('is_stock_item', $is_stock_item);
-            });
-        }
-
-        if ($item_consultant_id) {
-            $data->whereHas('items', function ($query) use ($item_consultant_id) {
-                $query->where('consultant_id', $item_consultant_id);
-            });
-        }
-
-        if ($start_date) {
-            $data->whereDate('created_at', '>=', $start_date);
-        }
-
-        if ($end_date) {
-            $data->whereDate('created_at', '<=', $end_date);
-        }
-
-        $data->orderBy('created_at', 'desc');
-        $data = $data->paginate($per_page);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
     /**
@@ -155,7 +357,15 @@ class PatientPaymentCacheController extends Controller
      */
     public function show($id)
     {
-        $data = PatientPaymentCache::with(['check_in.patient', 'items', 'creator'])->findOrFail($id);
+        $data = PatientPaymentCache::with([
+            'check_in.patient',
+            'creator',
+            'consultation',
+            'consultation.creator',
+            'items' => function ($q) {
+                $q->with(['item', 'payment_mode', 'consultation_type']);
+            },
+        ])->findOrFail($id);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 

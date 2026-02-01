@@ -52,7 +52,7 @@ const FunctionalTests = (
   }));
 
   return (
-    <Table>
+    <Table sx={{ width: '100%' }}>
       <TableHead>
         <TableRow>
           <TableCell />

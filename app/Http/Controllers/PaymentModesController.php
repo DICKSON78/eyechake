@@ -19,12 +19,13 @@ class PaymentModesController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-            'per_page' => 'sometimes|integer|min:0',
-            'page' => 'sometimes|integer|min:1',
-        ]);
+        try {
+            $request->validate([
+                'per_page' => 'sometimes|integer|min:0',
+                'page' => 'sometimes|integer|min:1',
+            ]);
 
-        $user = $request->user();
+            $user = $request->user();
         $per_page = $request->per_page ?? 25;
         $clinic_id = $request->clinic_id;
         $status = $request->status;
@@ -32,30 +33,48 @@ class PaymentModesController extends Controller
         $transaction_type = $request->transaction_type;
         $data = PaymentMode::query();
 
-        if ($user->is_admin) {
-            $data->with(['clinic']);
+            if ($user->is_admin) {
+                $data->with(['clinic']);
 
-            if ($clinic_id) {
-                $data->where('clinic_id', $clinic_id);
+                if ($clinic_id) {
+                    $data->where('clinic_id', $clinic_id);
+                }
+            } else {
+                if ($user->clinic_id) {
+                    $data->where('clinic_id', $user->clinic_id);
+                } else {
+                    // If user has no clinic_id, return empty result
+                    $data->whereRaw('1 = 0');
+                }
             }
-        } else {
-            $data->where('clinic_id', $user->clinic_id);
-        }
 
-        if ($status) {
-            $data->where('status', $status);
-        }
+            if ($status) {
+                $data->where('status', $status);
+            }
 
-        if ($q) {
-            $data->where('name', 'like', '%' . $q . '%');
-        }
+            if ($q) {
+                $data->where('name', 'like', '%' . $q . '%');
+            }
 
-        if ($transaction_type) {
-            $data->where('transaction_type', $transaction_type);
-        }
+            if ($transaction_type) {
+                $data->where('payment_type', $transaction_type);
+            }
 
-        $data = $data->paginate($per_page);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+            $data = $data->paginate($per_page);
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('PaymentModesController index query error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->sendError('Database query error occurred', Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            \Log::error('PaymentModesController index error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->sendError('An error occurred while fetching data', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -82,8 +101,12 @@ class PaymentModesController extends Controller
             'transaction_type' => 'required|in:Cash,Credit',
         ]);
 
-        $input = $request->only('name', 'description');
+        $input = $request->only('name', 'description', 'status');
         $input['clinic_id'] = $clinic_id;
+        // Map transaction_type (API input) to payment_type (database column)
+        if ($request->has('transaction_type')) {
+            $input['payment_type'] = $request->transaction_type;
+        }
         $data = PaymentMode::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
@@ -116,7 +139,12 @@ class PaymentModesController extends Controller
         ]);
 
         $data = PaymentMode::findOrFail($id);
-        $data->update($request->all());
+        $updateData = $request->only('name', 'description', 'status');
+        // Map transaction_type (API input) to payment_type (database column)
+        if ($request->has('transaction_type')) {
+            $updateData['payment_type'] = $request->transaction_type;
+        }
+        $data->update($updateData);
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
     }
 

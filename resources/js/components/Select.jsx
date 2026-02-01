@@ -10,7 +10,7 @@ import {
   CircularProgress,
   Paper,
   Stack,
-  TextField,
+  TextField as MuiTextField,
   Typography,
 } from "@mui/material";
 import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
@@ -56,10 +56,10 @@ const Select = (
 
   const _onChange = (value, validate = true) => {
     if (onChange) {
-      onChange(value);
+      onChange(value || "");
     }
 
-    setState({ ...state, value, validate });
+    setState({ ...state, value: value || "", validate });
   };
 
   const _validate = () => {
@@ -87,15 +87,29 @@ const Select = (
   };
 
   const _getOptionLabel = (option) => {
+    if (!option) return "";
+    
     if (typeof option === "string") {
       return option;
     }
 
     if (typeof optionsLabel === "string" && typeof option === "object") {
-      return option[optionsLabel];
+      return option[optionsLabel] || "";
     }
 
     return "";
+  };
+
+  const _getSelectedOption = () => {
+    if (!state.value) return null;
+    
+    if (typeof optionsValue === "string") {
+      // For object options with optionsValue
+      return Array.isArray(options) ? options.find(option => option && option[optionsValue] === state.value) || null : null;
+    } else {
+      // For string options
+      return state.value;
+    }
   };
 
   useImperativeHandle(ref, () => ({
@@ -145,12 +159,13 @@ const Select = (
         <Autocomplete
           {...rest}
           getOptionLabel={_getOptionLabel}
-          options={options}
+          options={Array.isArray(options) ? options : []}
           disableClearable={!clearable}
           loading={loading}
-          value={value || null}
+          value={_getSelectedOption()}
+          noOptionsText="No options available"
           renderInput={(params) => (
-            <TextField
+            <MuiTextField
               {...params}
               placeholder={placeholder || "Select"}
               helperText={helperText}
@@ -159,6 +174,8 @@ const Select = (
               margin="none"
               required={required}
               error={!!state.error}
+              id={rest.id || rest.name || `select-${Math.random().toString(36).substr(2, 9)}`}
+              name={rest.name || rest.id || `select-${Math.random().toString(36).substr(2, 9)}`}
               InputProps={{
                 ...params.InputProps,
                 ...InputProps,
@@ -195,9 +212,9 @@ const Select = (
               value &&
               typeof optionsValue === "string"
             ) {
-              _onChange(value[optionsValue], true);
+              _onChange(value[optionsValue] || "", true);
             } else {
-              _onChange(value, true);
+              _onChange(value || "", true);
             }
           }}
         />

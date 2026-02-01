@@ -24,6 +24,7 @@ import PaymentReceiptPDF from "./PaymentReceiptPDF";
 import { pdf } from "@react-pdf/renderer";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
+import { useNotificationContext } from "../../../contexts/NotificationContext";
 import {
   formatError,
   getValidationError,
@@ -36,6 +37,7 @@ const validationRules = getValidationRules();
 
 const PendingPatientItems = () => {
   const addToast = useToast();
+  const { refreshNotificationsImmediately } = useNotificationContext();
   const { patientId, paymentCacheId } = useParams();
 
   const modalRef = useRef();
@@ -69,7 +71,7 @@ const PendingPatientItems = () => {
   } = useFetch(
     "api/patient-payment-cache-items",
     {
-      status: "Pending",
+		  status: "Pending,Served", // Include both pending and served items for billing
       per_page: 500,
       payment_cache_id: paymentCacheId,
       transaction_type: "Cash",
@@ -81,12 +83,7 @@ const PendingPatientItems = () => {
 
   const { data, loading, error, handlePost, setError } = usePost(
     "api/patient-payment-cache-items/make-cash-payment",
-    {
-      payment_cache_id: paymentCacheId,
-      items: selectedItems.map((e) => e.id),
-      discount,
-      payment_channel_id: paymentChannel ? paymentChannel.id : null,
-    }
+    {} // Empty default payload - will be set in handlePost calls
   );
 
   useEffect(() => {
@@ -102,15 +99,60 @@ const PendingPatientItems = () => {
 
   useEffect(() => {
     if (data) {
-      addToast({ message: data.message, severity: "success" });
-      fetchItems();
-
+      addToast({ message: data.message || "Payment processed successfully", severity: "success" });
+      
+      // Reset form state
       setSelectedItems([]);
-      discountRef.current.setValue(null);
-      paymentChannelRef.current.setValue(null);
-      generatePaymentReceipt();
+      setDiscount(null);
+      setPaymentChannel(null);
+      
+      // Reset form fields
+      if (discountRef.current) {
+        discountRef.current.setValue(null);
+      }
+      if (paymentChannelRef.current) {
+        paymentChannelRef.current.setValue(null);
+      }
+      
+      // Trigger multiple notification refresh methods to ensure counts update
+      // Method 1: Use the context method
+      if (refreshNotificationsImmediately) {
+        refreshNotificationsImmediately();
+      }
+      
+      // Method 2: Use the global notification events
+      if (window.notificationEvents && typeof window.notificationEvents.refresh === 'function') {
+        window.notificationEvents.refresh();
+      }
+      
+      // Method 3: Additional delayed refresh to catch any backend processing delays
+      setTimeout(() => {
+        if (refreshNotificationsImmediately) {
+          refreshNotificationsImmediately();
+        }
+        if (window.notificationEvents && typeof window.notificationEvents.refresh === 'function') {
+          window.notificationEvents.refresh();
+        }
+      }, 1500);
+      
+      // Refresh items list after a short delay to ensure backend has processed
+      setTimeout(() => {
+        fetchItems();
+      }, 500);
+      
+      // Automatically generate and print receipt after payment
+      if (data.data?.items) {
+        generatePaymentReceipt();
+      }
+      
+      // Navigate to invoice page if payment ID is available
+      if (data.data?.id) {
+        setTimeout(() => {
+          window.open(`/payment-center/invoice/${data.data.id}`, '_blank');
+        }, 1000);
+      }
     }
-  }, [data]);
+  }, [data, fetchItems, refreshNotificationsImmediately]);
 
   useEffect(() => {
     if (error) {
@@ -120,14 +162,27 @@ const PendingPatientItems = () => {
 
   const confirmSubmit = (title, action) => {
     if (!selectedItems.length) {
-      return setError(getValidationError("Please select at least one item."));
+      addToast({ message: "Please select at least one item.", severity: "error" });
+      return;
     }
 
-    if (
-      !discountRef.current.validate() ||
-      (action === "make_payment" && !paymentChannelRef.current.validate())
-    ) {
-      return false;
+    // Validate discount
+    if (discountRef.current && !discountRef.current.validate()) {
+      return;
+    }
+
+    // Validate payment channel for make_payment action
+    if (action === "make_payment") {
+      if (!paymentChannel) {
+        addToast({ message: "Please select a payment channel.", severity: "error" });
+        if (paymentChannelRef.current) {
+          paymentChannelRef.current.focus();
+        }
+        return;
+      }
+      if (paymentChannelRef.current && !paymentChannelRef.current.validate()) {
+        return;
+      }
     }
 
     let component = (
@@ -136,14 +191,25 @@ const PendingPatientItems = () => {
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
-          if (action === "create_bill") {
-            handlePost("api/patient-payment-cache-items/create-bill", {
-              payment_cache_id: paymentCacheId,
-              items: selectedItems.map((e) => e.id),
-              discount,
-            });
-          } else {
-            handlePost();
+          try {
+            if (action === "create_bill") {
+              handlePost("api/patient-payment-cache-items/create-bill", {
+                payment_cache_id: paymentCacheId,
+                items: selectedItems.map((e) => e.id),
+                discount: discount || 0,
+              });
+            } else {
+              // Make payment
+              handlePost("api/patient-payment-cache-items/make-cash-payment", {
+                payment_cache_id: paymentCacheId,
+                items: selectedItems.map((e) => e.id),
+                discount: discount || 0,
+                payment_channel_id: paymentChannel ? paymentChannel.id : null,
+              });
+            }
+          } catch (err) {
+            console.error('Error submitting payment:', err);
+            addToast({ message: formatError(err) || "Failed to process payment. Please try again.", severity: "error" });
           }
         }}
       />
@@ -167,20 +233,47 @@ const PendingPatientItems = () => {
   };
 
   const generatePaymentReceipt = useCallback(async () => {
-    if (data.data.items) {
-      setLoadingReceipt(true);
+    if (!data?.data) {
+      console.warn('No payment data available for receipt generation');
+      return;
+    }
+    
+    const receiptData = data.data;
+    const receiptItems = receiptData.items || [];
+    
+    if (!receiptItems.length) {
+      console.warn('No items found in payment data for receipt');
+      addToast({ message: 'No items found in payment data.', severity: "warning" });
+      return;
+    }
+    
+    setLoadingReceipt(true);
+    try {
       const blob = await pdf(
         <PaymentReceiptPDF
-          receipt={data.data}
-          items={data.data.items}
+          receipt={receiptData}
+          items={receiptItems}
           patient={patient}
         />
       ).toBlob();
-      setLoadingReceipt(false);
+      
+      // Create a download link instead of opening in new tab
       const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payment-receipt-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      setLoadingReceipt(false);
+    } catch (error) {
+      console.error('Receipt generation failed:', error);
+      addToast({ message: 'Failed to generate receipt. Please try again.', severity: "error" });
+      setLoadingReceipt(false);
     }
-  }, [data]);
+  }, [data, patient, addToast]);
 
   return (
     <Page
@@ -298,7 +391,7 @@ const PendingPatientItems = () => {
                   disabled
                   label="Selected Grand Total"
                   fullWidth
-                  value={numberFormat(getSelectedAmount() - (discount || 0))}
+                  value={numberFormat(Math.max(0, getSelectedAmount() - (discount || 0)))}
                 />
               </Grid>
 

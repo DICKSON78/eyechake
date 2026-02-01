@@ -48,7 +48,7 @@ const ConsultationItemsCard = ({
   };
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ width: '100%', height: '100%' }}>
       <CardHeader title={title} />
       <Divider />
       <CardContent>

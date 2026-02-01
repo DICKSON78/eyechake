@@ -24,9 +24,14 @@ class Expense extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(ExpensePayment::class, 'expense_id');
+    }
+
     public function getPaidAmountAttribute()
     {
-        return ExpensePayment::where('expense_id', $this->id)->sum('amount');
+        return $this->payments()->sum('amount');
     }
 
     protected function serializeDate(DateTimeInterface $date)

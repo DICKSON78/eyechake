@@ -37,7 +37,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
   }));
 
   return (
-    <Table className="no-table-head">
+    <Table className="no-table-head" sx={{ width: '100%' }}>
       <TableBody>
         <TableRow>
           <TableCell component="th">RE</TableCell>
@@ -49,7 +49,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
               ref={reRef}
               fullWidth
               multiline
-              rows={2}
+              rows={3}
               defaultValue={fundoscopy ? fundoscopy.re : null}
               onChange={(value) => {
                 setFormData({ ...formData, re: value });
@@ -62,7 +62,7 @@ const Fundoscopy = ({ consultation: { id, status, fundoscopy } }, ref) => {
               ref={leRef}
               fullWidth
               multiline
-              rows={2}
+              rows={3}
               defaultValue={fundoscopy ? fundoscopy.le : null}
               onChange={(value) => {
                 setFormData({ ...formData, le: value });

@@ -25,7 +25,16 @@ const PatientPaymentHistory = ({ patient }) => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      // Handle paginated response from Laravel
+      const paginatedData = response?.data?.data || response?.data || {};
+      return {
+        data: paginatedData.data || [],
+        total: paginatedData.total || 0,
+        page: paginatedData.current_page || paginatedData.page || 1,
+        per_page: paginatedData.per_page || 25,
+      };
+    }
   );
 
   useEffect(() => {
@@ -35,8 +44,13 @@ const PatientPaymentHistory = ({ patient }) => {
   }, [error]);
 
   return (
-    <Card sx={{ borderTopLeftRadius: 0 }}>
-      <CardContent>
+    <Card sx={{ 
+      borderTopLeftRadius: 0,
+      width: "100%",
+      bgcolor: "background.paper",
+      boxShadow: 1,
+    }}>
+      <CardContent sx={{ p: 3 }}>
         <Table
           loading={loading}
           columns={[
@@ -64,7 +78,7 @@ const PatientPaymentHistory = ({ patient }) => {
               field: "subtotal",
               headerName: "Subtotal",
               valueGetter: (item, index) =>
-                numberFormat(item.amount - item.discount),
+                numberFormat(Math.max(0, (item.amount || 0) - (item.discount || 0))),
             },
             {
               field: "channel",
@@ -85,8 +99,8 @@ const PatientPaymentHistory = ({ patient }) => {
               headerName: "Transaction Type",
             },
           ]}
-          items={data.data}
-          itemCount={data.total}
+          items={Array.isArray(data?.data) ? data.data : []}
+          itemCount={data?.total || 0}
           page={params.page}
           pageSize={params.per_page}
           onPageChange={(page) => setParams({ ...params, page })}
@@ -98,20 +112,20 @@ const PatientPaymentHistory = ({ patient }) => {
               { value: "TOTAL", tableCellProps: { colSpan: 2 } },
               {
                 value: numberFormat(
-                  data.data.reduce((acc, item, index) => acc + item.amount, 0)
+                  Array.isArray(data?.data) ? data.data.reduce((acc, item, index) => acc + (parseFloat(item.amount) || 0), 0) : 0
                 ),
               },
               {
                 value: numberFormat(
-                  data.data.reduce((acc, item, index) => acc + item.discount, 0)
+                  Array.isArray(data?.data) ? data.data.reduce((acc, item, index) => acc + (parseFloat(item.discount) || 0), 0) : 0
                 ),
               },
               {
                 value: numberFormat(
-                  data.data.reduce(
-                    (acc, item, index) => acc + (item.amount - item.discount),
+                  Array.isArray(data?.data) ? data.data.reduce(
+                    (acc, item, index) => acc + Math.max(0, (parseFloat(item.amount) || 0) - (parseFloat(item.discount) || 0)),
                     0
-                  )
+                  ) : 0
                 ),
               },
             ],

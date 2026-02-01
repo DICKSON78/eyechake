@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
 import Filters from "../PatientFilters";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
+import { Visibility as ViewIcon } from "@mui/icons-material";
+
 import { formatDateForDb, getAge, getDateRangeTitle } from "../../../helpers";
 
 const Consultation = () => {
+  const navigate = useNavigate();
+
   const [params, setParams] = useState({
     with_diagnoses: "Yes",
     patient_direction: "Direct to Doctor",
@@ -133,6 +140,15 @@ const Consultation = () => {
                 }
                 spacing={1}
               >
+                <Tooltip title="View Consultation Details">
+                  <IconButton
+                    size="small"
+                    onClick={() => navigate(`/patient-records/patient-file/${item.payment_cache_item.payment_cache.check_in.patient_id}`)}
+                    sx={{ color: 'primary.main' }}
+                  >
+                    <ViewIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
                 <PatientFilePDF
                   size="small"
                   patient={

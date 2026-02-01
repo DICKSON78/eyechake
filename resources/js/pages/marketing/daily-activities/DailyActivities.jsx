@@ -20,7 +20,7 @@ import CreateDailyActivity from "./CreateDailyActivity";
 import EditDailyActivity from "./EditDailyActivity";
 
 import { useFetch, useToast } from "../../../hooks";
-import { formatDateForDb, formatError } from "../../../helpers";
+import { formatDateForDb, formatError, getWeekStartDate } from "../../../helpers";
 
 const DailyActivities = () => {
   const addToast = useToast();
@@ -32,7 +32,7 @@ const DailyActivities = () => {
     status: undefined,
     q: undefined,
     created_by: undefined,
-    start_date: new Date(),
+    start_date: getWeekStartDate(),
     end_date: undefined,
   });
 
@@ -170,10 +170,6 @@ const DailyActivities = () => {
                     label={item.status}
                   />
                 ),
-              },
-              {
-                field: "remarks",
-                headerName: "Remarks",
               },
               {
                 field: "actions",

@@ -1,3 +1,4 @@
+/* @refresh reload */
 import React, { createContext, useCallback, useEffect, useState } from "react";
 import { Alert, Fade, Stack } from "@mui/material";
 
@@ -17,7 +18,18 @@ const ToastContextProvider = ({ children }) => {
   }, [toasts]);
 
   const addToast = (toast) => {
-    setToasts([...toasts, toast]);
+    // Check if a toast with the same message already exists
+    const existingToast = toasts.find(t => t.message === toast.message && t.severity === toast.severity);
+    if (existingToast) {
+      return; // Don't add duplicate toasts
+    }
+    
+    // Add a unique ID to prevent duplicate toasts
+    const toastWithId = {
+      ...toast,
+      id: Date.now() + Math.random(),
+    };
+    setToasts([...toasts, toastWithId]);
   };
 
   const removeToast = useCallback(
@@ -41,7 +53,7 @@ const ToastContextProvider = ({ children }) => {
       >
         {toasts.map((e, i) => (
           <Fade
-            key={i}
+            key={e.id || i}
             in
             timeout={500}
           >

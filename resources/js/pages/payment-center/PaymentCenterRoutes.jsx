@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import Dashboard from "./dashboard/Dashboard";
 import PendingCashPayments from "./pending-cash-patients/PendingCashPatients";
 import PendingCashPatientItems from "./pending-cash-patients/PendingPatientItems";
 import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatients";
@@ -8,10 +9,17 @@ import PatientBills from "./patient-bills/PatientBills";
 import PatientBill from "./patient-bills/PatientBill";
 import Expenses from "../financial-management/expenses/Expenses";
 import ReportsRoutes from "./reports/ReportsRoutes";
+import Invoice from "./invoice/Invoice";
+import Invoices from "./invoice/Invoices";
 
 const PaymentCenterRoutes = () => {
   return (
     <Routes>
+      <Route
+        path="/dashboard"
+        exact
+        element={<Dashboard />}
+      />
       <Route
         path="/pending-cash-patients"
         exact
@@ -40,11 +48,19 @@ const PaymentCenterRoutes = () => {
         element={<PatientBill />}
       />
       <Route
+        path="/invoices"
+        exact
+        element={<Invoices />}
+      />
+      <Route
+        path="/invoice/:paymentId"
+        element={<Invoice />}
+      />
+      <Route
         path="/expenses"
         element={
           <Expenses
             module="Payment Center"
-            createdBy={window.user.id}
           />
         }
       />
