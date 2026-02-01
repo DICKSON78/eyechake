@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -13,11 +14,15 @@ import {
   MenuItem,
   Stack,
   Tooltip,
+  Typography,
+  alpha,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddRounded";
 import EditIcon from "@mui/icons-material/EditRounded";
 import MoreIcon from "@mui/icons-material/MoreVertRounded";
-import AssessmentIcon from "@mui/icons-material/AssessmentRounded";
+import SecurityIcon from "@mui/icons-material/SecurityRounded";
+import PersonIcon from "@mui/icons-material/PersonRounded";
+import BadgeIcon from "@mui/icons-material/BadgeRounded";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
@@ -82,20 +87,23 @@ const Users = () => {
     modalRef.current.open("Edit User", component, "md");
   };
 
-  const openEditUserAccessDetailsModal = () => {
+  const openEditUserAccessDetailsModal = (userItem) => {
+    const targetItem = userItem || item;
+    if (!targetItem) return;
+    
     let component = (
       <EditUserAccessDetails
-        item={item}
+        item={targetItem}
         modal={modalRef.current}
         fetchUsers={handleFetch}
       />
     );
 
     modalRef.current.open(
-      "Edit User Access Details",
+      "Access & Security Settings",
       component,
-      "sm",
-      item.full_name
+      "md",
+      targetItem.full_name
     );
   };
 
@@ -114,9 +122,35 @@ const Users = () => {
     switch (status) {
       case "Active":
         return "success";
+      case "Inactive":
+        return "error";
+      default:
+        return "default";
     }
+  };
 
-    return "neutral";
+  // Get initials from name
+  const getInitials = (name) => {
+    if (!name) return "?";
+    const parts = name.split(" ").filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0]?.substring(0, 2).toUpperCase() || "?";
+  };
+
+  // Get avatar color based on name
+  const getAvatarColor = (name) => {
+    if (!name) return "#9e9e9e";
+    const colors = [
+      "#1976d2", "#388e3c", "#d32f2f", "#7b1fa2", "#f57c00",
+      "#0288d1", "#689f38", "#c2185b", "#512da8", "#00796b"
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
   };
 
   return (
@@ -166,68 +200,96 @@ const Users = () => {
               columns={[
               {
                 field: "index",
-                headerName: "S/N",
+                headerName: "#",
                 valueGetter: (item, index) =>
                   params.per_page * (params.page - 1) + index + 1,
+                tableCellProps: { sx: { width: 50, minWidth: 50 } },
               },
               {
                 field: "full_name",
-                headerName: "Full Name",
+                headerName: "Employee",
+                renderCell: (item) => (
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Avatar
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        bgcolor: getAvatarColor(item.full_name),
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {getInitials(item.full_name)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        {item.full_name}
+                      </Typography>
+                      {item.employee_number && (
+                        <Typography variant="caption" color="text.secondary">
+                          #{item.employee_number}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Stack>
+                ),
               },
               {
-                field: "employee_number",
-                headerName: "Employee Number",
+                field: "designation_info",
+                headerName: "Role",
                 hideOnMobile: true,
+                renderCell: (item) => (
+                  <Box>
+                    <Typography variant="body2">
+                      {item.job_title?.name || "—"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {item.department?.name || "—"}
+                    </Typography>
+                  </Box>
+                ),
               },
               {
-                field: "gender",
-                headerName: "Gender",
+                field: "contact",
+                headerName: "Contact",
                 hideOnMobile: true,
+                renderCell: (item) => (
+                  <Box>
+                    <Typography variant="body2">
+                      {item.phone || "—"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {item.gender}
+                    </Typography>
+                  </Box>
+                ),
               },
               {
-                field: "phone",
-                headerName: "Phone Number",
+                field: "performance",
+                headerName: "Performance",
                 hideOnMobile: true,
-              },
-              {
-                field: "designation",
-                headerName: "Designation",
-                hideOnMobile: true,
-              },
-              {
-                field: "department_id",
-                headerName: "Department",
-                valueGetter: (item, index) => item.department?.name,
-                hideOnMobile: true,
-              },
-              {
-                field: "job_title_id",
-                headerName: "Job Title",
-                valueGetter: (item, index) => item.job_title?.name,
-                hideOnMobile: true,
-              },
-              {
-                field: "sales_performance",
-                headerName: "Initiated Deals",
-                valueGetter: (item) => item.sales_performance?.initiated_deals || 0,
-                hideOnMobile: true,
-              },
-              {
-                field: "sales_performance",
-                headerName: "Closed Deals",
-                valueGetter: (item) => item.sales_performance?.closed_deals || 0,
-                hideOnMobile: true,
-              },
-              {
-                field: "created_by",
-                headerName: "Created By",
-                valueGetter: (item, index) => item.creator?.full_name,
-                show: false,
-              },
-              {
-                field: "created_at",
-                headerName: "Date Created",
-                show: false,
+                renderCell: (item) => (
+                  <Stack direction="row" spacing={1}>
+                    <Tooltip title="Initiated Deals">
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        label={`${item.sales_performance?.initiated_deals || 0} initiated`}
+                        sx={{ fontSize: "0.7rem" }}
+                      />
+                    </Tooltip>
+                    <Tooltip title="Closed Deals">
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color="success"
+                        label={`${item.sales_performance?.closed_deals || 0} closed`}
+                        sx={{ fontSize: "0.7rem" }}
+                      />
+                    </Tooltip>
+                  </Stack>
+                ),
               },
               {
                 field: "status",
@@ -237,14 +299,19 @@ const Users = () => {
                     size="small"
                     color={getStatusColor(item.status)}
                     label={item.status}
+                    sx={{
+                      fontWeight: 500,
+                      minWidth: 70,
+                    }}
                   />
                 ),
               },
               {
                 field: "clinic_id",
-                headerName: "Clinic",
+                headerName: "Branch",
                 valueGetter: (item) => item.clinic?.name,
                 show: window.user.role === "Admin",
+                hideOnMobile: true,
               },
               {
                 field: "actions",
@@ -255,7 +322,7 @@ const Users = () => {
                     right: { xs: 'auto', sm: 0 },
                     backgroundColor: { xs: 'transparent', sm: 'background.paper' },
                     zIndex: { xs: 0, sm: 1 },
-                    minWidth: { xs: 80, sm: 100 },
+                    minWidth: { xs: 80, sm: 120 },
                     maxWidth: { xs: 100, sm: 'none' },
                     whiteSpace: 'nowrap',
                   },
@@ -264,37 +331,37 @@ const Users = () => {
                   <Stack
                     direction="row"
                     alignItems="center"
-                    divider={
-                      <Divider
-                        orientation="vertical"
-                        sx={{ height: 16 }}
-                      />
-                    }
-                    spacing={1}
+                    spacing={0.5}
                     sx={{
                       flexWrap: 'nowrap',
                     }}
                   >
-                    <Tooltip title="Edit">
+                    <Tooltip title="Edit Profile">
                       <IconButton
                         size="small"
                         onClick={() => openEditUserModal(item)}
                         sx={{
-                          padding: { xs: 0.5, sm: 1 },
+                          color: "primary.main",
+                          "&:hover": {
+                            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                          },
                         }}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="More">
+                    <Tooltip title="Access & Security">
                       <IconButton
                         size="small"
-                        onClick={(event) => handleMenuOpen(event, item)}
+                        onClick={() => openEditUserAccessDetailsModal(item)}
                         sx={{
-                          padding: { xs: 0.5, sm: 1 },
+                          color: "secondary.main",
+                          "&:hover": {
+                            bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.1),
+                          },
                         }}
                       >
-                        <MoreIcon fontSize="small" />
+                        <SecurityIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Stack>
@@ -313,22 +380,6 @@ const Users = () => {
           </Box>
         </CardContent>
       </Card>
-      {item ? (
-        <Menu
-          anchorEl={anchorEl}
-          open={isMenuOpen}
-          onClose={handleMenuClose}
-        >
-          <MenuItem
-            onClick={() => {
-              openEditUserAccessDetailsModal();
-              handleMenuClose();
-            }}
-          >
-            Edit Access Details
-          </MenuItem>
-        </Menu>
-      ) : null}
       <Modal ref={modalRef} />
     </Page>
   );

@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
   CardHeader,
   Checkbox,
+  Chip,
   Divider,
   FormControlLabel,
   Grid,
@@ -14,11 +16,22 @@ import {
   LinearProgress,
   Paper,
   Stack,
+  Step,
+  StepLabel,
+  Stepper,
   Typography,
+  alpha,
 } from "@mui/material";
 import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
+  PersonAdd as PersonAddIcon,
+  Badge as BadgeIcon,
+  Security as SecurityIcon,
+  Work as WorkIcon,
+  ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon,
+  Save as SaveIcon,
 } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -74,6 +87,14 @@ const UserRegistration = () => {
   );
 
   const [showPassword, setShowPassword] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, label: "", color: "error" });
+
+  const steps = [
+    { label: "Personal Info", icon: <PersonAddIcon /> },
+    { label: "Employment", icon: <WorkIcon /> },
+    { label: "Access & Security", icon: <SecurityIcon /> },
+  ];
 
   const [formData, setFormData] = useState({
     clinic_id: undefined,
@@ -120,10 +141,76 @@ const UserRegistration = () => {
     }
   }, [error]);
 
+  // Password strength checker
+  const checkPasswordStrength = (password) => {
+    if (!password) {
+      return { score: 0, label: "", color: "error" };
+    }
+    
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[^a-zA-Z\d]/.test(password)) score++;
+
+    const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+    const colors = ["error", "error", "warning", "info", "success"];
+    
+    return {
+      score: (score / 5) * 100,
+      label: labels[Math.min(score, 4)],
+      color: colors[Math.min(score, 4)],
+    };
+  };
+
+  const handlePasswordChange = (value) => {
+    setFormData({ ...formData, password: value });
+    setPasswordStrength(checkPasswordStrength(value));
+  };
+
+  // Step navigation
+  const handleNext = () => {
+    setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const handleBack = () => {
+    setActiveStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  // Validate current step before proceeding
+  const canProceed = () => {
+    switch (activeStep) {
+      case 0: // Personal Info
+        return formData.first_name && formData.last_name && formData.gender;
+      case 1: // Employment
+        return formData.department_id && formData.job_title_id;
+      case 2: // Access & Security
+        return formData.username && formData.password;
+      default:
+        return true;
+    }
+  };
+
   const handleSubmit = () => {
     if (formRef.current.validate()) {
       handlePost();
     }
+  };
+
+  // Toggle all privileges in a category
+  const toggleCategory = (category, checked) => {
+    const categoryPrivileges = [category.value];
+    if (category.children) {
+      category.children.forEach(child => categoryPrivileges.push(child.value));
+    }
+    
+    setFormData({
+      ...formData,
+      privileges: checked
+        ? [...new Set([...formData.privileges, ...categoryPrivileges])]
+        : formData.privileges.filter(p => !categoryPrivileges.includes(p)),
+    });
   };
 
   const getPrivilegesTree = (items) => {
@@ -133,39 +220,38 @@ const UserRegistration = () => {
       .filter((e) => typeof e.show === "undefined" || e.show)
       .map((e) => {
         const hasChildren = e.children && e.children.length;
+        const isChecked = formData.privileges.indexOf(e.value) !== -1;
+        const childrenChecked = hasChildren 
+          ? e.children.filter(c => formData.privileges.includes(c.value)).length 
+          : 0;
+        const someChildrenChecked = hasChildren && childrenChecked > 0 && childrenChecked < e.children.length;
+        
         return hasChildren ? (
-          <Paper
-            key={e.value}
-            variant="outlined"
-            sx={{
-              my: 1.5,
-              p: 2,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.03)"
-                  : "rgba(0, 0, 0, 0.02)",
-              border: (theme) =>
-                `1px solid ${
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.12)"
-                    : "rgba(0, 0, 0, 0.12)"
-                }`,
-              borderRadius: 2,
-            }}
-          >
-            <Box sx={{ mb: 1.5 }}>
+          <Grid item xs={12} sm={6} key={e.value}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                height: "100%",
+                backgroundColor: isChecked 
+                  ? (theme) => alpha(theme.palette.primary.main, 0.04)
+                  : "background.paper",
+                borderColor: isChecked 
+                  ? "primary.main"
+                  : (theme) => theme.palette.divider,
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  boxShadow: 1,
+                },
+              }}
+            >
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={formData.privileges.indexOf(e.value) !== -1}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        privileges: event.target.checked
-                          ? [...formData.privileges, e.value]
-                          : formData.privileges.filter((f) => f !== e.value),
-                      })
-                    }
+                    checked={isChecked}
+                    indeterminate={someChildrenChecked && !isChecked}
+                    onChange={(event) => toggleCategory(e, event.target.checked)}
                     sx={{
                       "&.Mui-checked": {
                         color: "primary.main",
@@ -174,449 +260,517 @@ const UserRegistration = () => {
                   />
                 }
                 label={
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 600,
-                      color: "text.primary",
-                    }}
-                  >
+                  <Typography variant="subtitle2" fontWeight={600}>
                     {e.label}
                   </Typography>
                 }
               />
-            </Box>
-            <Box
-              sx={{
-                pl: 4,
-                borderLeft: (theme) =>
-                  `2px solid ${
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.1)"
-                  }`,
-                ml: 1,
-              }}
-            >
-              <Grid container spacing={1.5}>
-                {getPrivilegesTree(e.children)}
-              </Grid>
-            </Box>
-          </Paper>
+              {e.children && (
+                <Box sx={{ pl: 4, mt: 1 }}>
+                  {e.children.map(child => (
+                    <FormControlLabel
+                      key={child.value}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={formData.privileges.indexOf(child.value) !== -1}
+                          onChange={(event) =>
+                            setFormData({
+                              ...formData,
+                              privileges: event.target.checked
+                                ? [...new Set([...formData.privileges, child.value])]
+                                : formData.privileges.filter((f) => f !== child.value),
+                            })
+                          }
+                        />
+                      }
+                      label={
+                        <Typography variant="body2" color="text.secondary">
+                          {child.label}
+                        </Typography>
+                      }
+                      sx={{ display: "block", ml: 0 }}
+                    />
+                  ))}
+                </Box>
+              )}
+            </Paper>
+          </Grid>
         ) : (
           <Grid item xs={12} sm={6} md={4} key={e.value}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.privileges.indexOf(e.value) !== -1}
-                  onChange={(event) =>
-                    setFormData({
-                      ...formData,
-                      privileges: event.target.checked
-                        ? [...formData.privileges, e.value]
-                        : formData.privileges.filter((f) => f !== e.value),
-                    })
-                  }
-                  sx={{
-                    "&.Mui-checked": {
-                      color: "primary.main",
-                    },
-                  }}
-                />
-              }
-              label={
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  {e.label}
-                </Typography>
-              }
+            <Paper
+              variant="outlined"
               sx={{
-                width: "100%",
-                py: 0.5,
-                px: 1,
-                borderRadius: 1,
+                p: 1.5,
+                height: "100%",
+                backgroundColor: isChecked 
+                  ? (theme) => alpha(theme.palette.primary.main, 0.04)
+                  : "background.paper",
+                borderColor: isChecked 
+                  ? "primary.main"
+                  : (theme) => theme.palette.divider,
+                transition: "all 0.2s ease",
+                cursor: "pointer",
                 "&:hover": {
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.05)"
-                      : "rgba(0, 0, 0, 0.03)",
+                  borderColor: "primary.main",
                 },
               }}
-            />
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  privileges: isChecked
+                    ? formData.privileges.filter((f) => f !== e.value)
+                    : [...formData.privileges, e.value],
+                })
+              }
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isChecked}
+                    onChange={(event) =>
+                      setFormData({
+                        ...formData,
+                        privileges: event.target.checked
+                          ? [...new Set([...formData.privileges, e.value])]
+                          : formData.privileges.filter((f) => f !== e.value),
+                      })
+                    }
+                  />
+                }
+                label={
+                  <Typography variant="body2">
+                    {e.label}
+                  </Typography>
+                }
+                sx={{ m: 0, width: "100%" }}
+              />
+            </Paper>
           </Grid>
         );
       });
   };
 
+  const privilegeCount = formData.privileges.length;
+
   return (
     <Page
       breadcrumbs={[
         { title: "Home" },
-        { title: "User Management" },
-        { title: "User Registration" },
+        { title: "Employee Management" },
+        { title: "New Employee" },
       ]}
     >
       <Card>
-        <PageHeader title="User Registration" />
+        <PageHeader 
+          title="Register New Employee" 
+          trailing={
+            <Chip 
+              icon={<PersonAddIcon />} 
+              label="New Employee" 
+              color="primary" 
+              variant="outlined" 
+            />
+          }
+        />
         <Divider />
-        <CardContent>
-          <Form ref={formRef}>
-            <Grid
-              container
-              spacing={2}
-            >
-              {window.user.role === "Admin" ? (
-                <Grid
-                  item
-                  md={4}
-                  sm={6}
-                  xs={12}
-                >
-                  <SelectClinic
-                    ref={clinicRef}
-                    required
-                    onChange={(value) =>
-                      setFormData({ ...formData, clinic_id: value?.id })
-                    }
-                  />
-                </Grid>
-              ) : null}
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={firstNameRef}
-                  label="First Name"
-                  fullWidth
-                  required
-                  onChange={(value) =>
-                    setFormData({ ...formData, first_name: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={middleNameRef}
-                  label="Middle Name"
-                  fullWidth
-                  onChange={(value) =>
-                    setFormData({ ...formData, middle_name: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={lastNameRef}
-                  label="Last Name"
-                  fullWidth
-                  required
-                  onChange={(value) =>
-                    setFormData({ ...formData, last_name: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={employeeNumberRef}
-                  label="Employee Number"
-                  fullWidth
-                  onChange={(value) =>
-                    setFormData({ ...formData, employee_number: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={genderRef}
-                  label="Gender"
-                  fullWidth
-                  required
-                  options={["Male", "Female"]}
-                  onChange={(value) =>
-                    setFormData({ ...formData, gender: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <DatePicker
-                  ref={dateOfBirthRef}
-                  label="Date of Birth"
-                  fullWidth
-                  value={formData.date_of_birth}
-                  onChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      date_of_birth: !isNaN(value) ? value : null,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={designationRef}
-                  label="Designation"
-                  fullWidth
-                  options={["Doctor", "Other"]}
-                  onChange={(value) =>
-                    setFormData({ ...formData, designation: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={departmentRef}
-                  label="Department"
-                  fullWidth
-                  required
-                  options={departments}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  onChange={(value) =>
-                    setFormData({ ...formData, department_id: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={jobTitleRef}
-                  label="Job Title"
-                  fullWidth
-                  required
-                  options={jobTitles}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  onChange={(value) =>
-                    setFormData({ ...formData, job_title_id: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={phoneRef}
-                  label="Phone Number"
-                  fullWidth
-                  onChange={(value) =>
-                    setFormData({ ...formData, phone: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={nationalIdRef}
-                  label="National ID"
-                  fullWidth
-                  onChange={(value) =>
-                    setFormData({ ...formData, national_id: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={usernameRef}
-                  label="Username"
-                  fullWidth
-                  required
-                  onChange={(value) =>
-                    setFormData({ ...formData, username: value })
-                  }
-                />
-              </Grid>
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <TextField
-                  ref={passwordRef}
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  fullWidth
-                  required
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment
-                        position="end"
-                        sx={{ cursor: "pointer" }}
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <VisibilityIcon />
-                        ) : (
-                          <VisibilityOffIcon />
-                        )}
-                      </InputAdornment>
-                    ),
-                  }}
-                  onChange={(value) =>
-                    setFormData({ ...formData, password: value })
-                  }
-                />
-              </Grid>
-            </Grid>
+        
+        {/* Stepper */}
+        <Box sx={{ p: 3, pb: 0 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((step, index) => (
+              <Step key={step.label}>
+                <StepLabel>{step.label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
 
-            <Card
-              variant="outlined"
-              sx={{
-                mt: 3,
-                border: (theme) =>
-                  `1px solid ${
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.12)"
-                      : "rgba(0, 0, 0, 0.12)"
-                  }`,
-                borderRadius: 2,
-              }}
-            >
-              <CardHeader
-                title={
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      color: "text.primary",
-                    }}
-                  >
-                    Access Privileges
-                  </Typography>
-                }
-                sx={{
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  borderBottom: (theme) =>
-                    `1px solid ${
-                      theme.palette.mode === "dark"
-                        ? "rgba(255, 255, 255, 0.12)"
-                        : "rgba(0, 0, 0, 0.12)"
-                    }`,
-                }}
-              />
-              <CardContent
-                sx={{
-                  pt: 3,
-                  pb: 3,
-                  px: 3,
-                }}
-              >
-                <Box
+        <CardContent>
+          {loading && <LinearProgress sx={{ mb: 2 }} />}
+          <Form ref={formRef}>
+            {/* Step 1: Personal Information */}
+            {activeStep === 0 && (
+              <Card variant="outlined">
+                <CardHeader
+                  avatar={<PersonAddIcon color="primary" />}
+                  title={
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      Personal Information
+                    </Typography>
+                  }
+                  subheader="Basic employee details"
                   sx={{
-                    maxHeight: "500px",
-                    overflowY: "auto",
-                    pr: 1,
-                    "&::-webkit-scrollbar": {
-                      width: "8px",
-                    },
-                    "&::-webkit-scrollbar-track": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.05)"
-                          : "rgba(0, 0, 0, 0.05)",
-                      borderRadius: "4px",
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.2)"
-                          : "rgba(0, 0, 0, 0.2)",
-                      borderRadius: "4px",
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.3)"
-                            : "rgba(0, 0, 0, 0.3)",
-                      },
-                    },
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.02)"
+                        : "rgba(0, 0, 0, 0.01)",
                   }}
-                >
-                  {getPrivilegesTree(
-                    getPrivileges(window.user?.clinic?.preferences || [])
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
+                />
+                <Divider />
+                <CardContent>
+                  <Grid container spacing={2}>
+                    {window.user.role === "Admin" && (
+                      <Grid item xs={12}>
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                          As an administrator, you can assign this employee to any branch.
+                        </Alert>
+                        <SelectClinic
+                          ref={clinicRef}
+                          required
+                          onChange={(value) =>
+                            setFormData({ ...formData, clinic_id: value?.id })
+                          }
+                        />
+                      </Grid>
+                    )}
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        ref={firstNameRef}
+                        label="First Name"
+                        fullWidth
+                        required
+                        onChange={(value) =>
+                          setFormData({ ...formData, first_name: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        ref={middleNameRef}
+                        label="Middle Name"
+                        fullWidth
+                        onChange={(value) =>
+                          setFormData({ ...formData, middle_name: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        ref={lastNameRef}
+                        label="Last Name"
+                        fullWidth
+                        required
+                        onChange={(value) =>
+                          setFormData({ ...formData, last_name: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Select
+                        ref={genderRef}
+                        label="Gender"
+                        fullWidth
+                        required
+                        options={["Male", "Female"]}
+                        onChange={(value) =>
+                          setFormData({ ...formData, gender: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <DatePicker
+                        ref={dateOfBirthRef}
+                        label="Date of Birth"
+                        fullWidth
+                        value={formData.date_of_birth}
+                        onChange={(value) =>
+                          setFormData({
+                            ...formData,
+                            date_of_birth: !isNaN(value) ? value : null,
+                          })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        ref={phoneRef}
+                        label="Phone Number"
+                        fullWidth
+                        onChange={(value) =>
+                          setFormData({ ...formData, phone: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        ref={nationalIdRef}
+                        label="National ID"
+                        fullWidth
+                        onChange={(value) =>
+                          setFormData({ ...formData, national_id: value })
+                        }
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Step 2: Employment Details */}
+            {activeStep === 1 && (
+              <Card variant="outlined">
+                <CardHeader
+                  avatar={<WorkIcon color="primary" />}
+                  title={
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      Employment Details
+                    </Typography>
+                  }
+                  subheader="Job role and department information"
+                  sx={{
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.02)"
+                        : "rgba(0, 0, 0, 0.01)",
+                  }}
+                />
+                <Divider />
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        ref={employeeNumberRef}
+                        label="Employee Number"
+                        fullWidth
+                        helperText="Unique identifier for the employee"
+                        onChange={(value) =>
+                          setFormData({ ...formData, employee_number: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Select
+                        ref={designationRef}
+                        label="Designation"
+                        fullWidth
+                        options={["Doctor", "Other"]}
+                        helperText="Select if employee is a doctor"
+                        onChange={(value) =>
+                          setFormData({ ...formData, designation: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Select
+                        ref={departmentRef}
+                        label="Department"
+                        fullWidth
+                        required
+                        options={departments}
+                        optionsLabel="name"
+                        optionsValue="id"
+                        onChange={(value) =>
+                          setFormData({ ...formData, department_id: value })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Select
+                        ref={jobTitleRef}
+                        label="Job Title"
+                        fullWidth
+                        required
+                        options={jobTitles}
+                        optionsLabel="name"
+                        optionsValue="id"
+                        onChange={(value) =>
+                          setFormData({ ...formData, job_title_id: value })
+                        }
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Step 3: Access & Security */}
+            {activeStep === 2 && (
+              <Stack spacing={3}>
+                {/* Login Credentials */}
+                <Card variant="outlined">
+                  <CardHeader
+                    avatar={<BadgeIcon color="primary" />}
+                    title={
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Login Credentials
+                      </Typography>
+                    }
+                    subheader="Username and password for system access"
+                    sx={{
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.02)"
+                          : "rgba(0, 0, 0, 0.01)",
+                    }}
+                  />
+                  <Divider />
+                  <CardContent>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          ref={usernameRef}
+                          label="Username"
+                          fullWidth
+                          required
+                          helperText="Used for logging into the system"
+                          onChange={(value) =>
+                            setFormData({ ...formData, username: value })
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          ref={passwordRef}
+                          label="Password"
+                          type={showPassword ? "text" : "password"}
+                          fullWidth
+                          required
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment
+                                position="end"
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                              </InputAdornment>
+                            ),
+                          }}
+                          onChange={handlePasswordChange}
+                        />
+                        {formData.password && (
+                          <Box sx={{ mt: 1 }}>
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Box sx={{ flexGrow: 1 }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={passwordStrength.score}
+                                  color={passwordStrength.color}
+                                  sx={{ height: 6, borderRadius: 3 }}
+                                />
+                              </Box>
+                              <Chip
+                                size="small"
+                                label={passwordStrength.label}
+                                color={passwordStrength.color}
+                                sx={{ minWidth: 80 }}
+                              />
+                            </Stack>
+                          </Box>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+
+                {/* Access Privileges */}
+                <Card variant="outlined">
+                  <CardHeader
+                    avatar={<SecurityIcon color="primary" />}
+                    title={
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          Access Privileges
+                        </Typography>
+                        <Chip
+                          size="small"
+                          label={`${privilegeCount} selected`}
+                          color={privilegeCount > 0 ? "primary" : "default"}
+                          variant="outlined"
+                        />
+                      </Stack>
+                    }
+                    subheader="Control which areas of the system this employee can access"
+                    action={
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            const allPrivs = [];
+                            getPrivileges(window.user?.clinic?.preferences || [])
+                              .filter(e => typeof e.show === "undefined" || e.show)
+                              .forEach(e => {
+                                allPrivs.push(e.value);
+                                if (e.children) {
+                                  e.children.forEach(c => allPrivs.push(c.value));
+                                }
+                              });
+                            setFormData({ ...formData, privileges: allPrivs });
+                          }}
+                        >
+                          Select All
+                        </Button>
+                        <Button
+                          size="small"
+                          color="secondary"
+                          onClick={() => setFormData({ ...formData, privileges: [] })}
+                        >
+                          Clear All
+                        </Button>
+                      </Stack>
+                    }
+                    sx={{
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.02)"
+                          : "rgba(0, 0, 0, 0.01)",
+                    }}
+                  />
+                  <Divider />
+                  <CardContent>
+                    <Grid container spacing={2}>
+                      {getPrivilegesTree(
+                        getPrivileges(window.user?.clinic?.preferences || [])
+                      )}
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Stack>
+            )}
           </Form>
         </CardContent>
+
         <Divider />
-        {loading && <LinearProgress />}
+        
+        {/* Navigation Buttons */}
         <Stack
           direction="row"
           spacing={2}
           alignItems="center"
-          justifyContent="flex-end"
-          flexWrap="wrap"
+          justifyContent="space-between"
           p={2}
         >
           <Button
-            disabled={loading}
-            variant="contained"
-            onClick={handleSubmit}
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBack}
+            disabled={activeStep === 0 || loading}
           >
-            Save
+            Back
           </Button>
+          <Stack direction="row" spacing={2}>
+            {activeStep < steps.length - 1 ? (
+              <Button
+                variant="contained"
+                endIcon={<ArrowForwardIcon />}
+                onClick={handleNext}
+                disabled={!canProceed()}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<SaveIcon />}
+                onClick={handleSubmit}
+                disabled={loading || !canProceed()}
+              >
+                {loading ? "Creating Employee..." : "Create Employee"}
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Card>
       <Modal ref={modalRef} />

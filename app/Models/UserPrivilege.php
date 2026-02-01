@@ -15,27 +15,37 @@ class UserPrivilege extends Model
     public $incrementing = false;
     protected $keyType = 'int';
 
-    protected $fillable = ['user_id', 'privilege', 'dashboard', 'reception', 'payment_center', 'consultation_room', 'optician_center', 'medicine_center', 'procedure_room', 'inventory_management', 'financial_management', 'employee_management', 'settings', 'clear_pending_bill', 'customer_relationship_management', 'marketing', 'user_management', 'director', 'sales_center'];
+    protected $fillable = ['user_id', 'privilege'];
 
-    // Available privileges (boolean columns in database when using column-based schema)
+    // Available privileges - dynamically supports any privilege string
+    // This list is kept for reference but the row-based schema supports any value
     public static $availablePrivileges = [
         'dashboard',
         'reception',
+        'receptionist_monthly_report',
         'payment_center',
+        'cashier_monthly_report',
         'consultation_room',
+        'optometrist_monthly_report',
         'optician_center',
         'medicine_center',
+        'dispensing',
+        'other_dispensing',
         'procedure_room',
         'inventory_management',
+        'sales_center',
+        'sales_manager_monthly_report',
         'financial_management',
         'employee_management',
+        'user_management',
         'settings',
         'clear_pending_bill',
         'customer_relationship_management',
         'marketing',
-        'user_management',
+        'marketing_operations_monthly_report',
         'director',
-        'sales_center',
+        'office_calendar',
+        'calendar_edit',
     ];
 
     /**
