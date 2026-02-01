@@ -840,9 +840,6 @@ class PatientWaitingTimesController extends Controller
         return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to dispensing successfully.');
     }
 
-        return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to dispensing successfully.');
-    }
-
     /**
      * Move patient to procedure room
      */
