@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import { Button, Card, CardContent, Chip, Divider, Stack, Badge, Box } from "@mui/material";
 import {
-  SendRounded as SendIcon,
   VisibilityRounded as VisibilityIcon,
   Star as StarIcon,
   Business as BusinessIcon,
@@ -12,9 +11,8 @@ import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "../PatientFilters";
-import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
-import { useFetch, usePatch, useToast } from "../../../hooks";
+import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge, getWeekStartDate } from "../../../helpers";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
 
@@ -23,9 +21,6 @@ const PendingCashPatients = () => {
   const navigate = useNavigate();
   const modalRef = useRef();
   const { notifications, loading: notificationsLoading } = useNotificationContext();
-  const [selectedItem, setSelectedItem] = useState(null);
-  const { handlePatch, loading: sendingToOptician } = usePatch();
-
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
@@ -117,100 +112,6 @@ const PendingCashPatients = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications?.patients_sent_to_cashier, notificationsLoading]);
-
-  const handleSendToOptician = async (item) => {
-    if (!item) {
-      addToast({ message: "Invalid item selected", severity: "error" });
-      return;
-    }
-
-    if (!modalRef.current) {
-      addToast({ message: "Modal not initialized", severity: "error" });
-      return;
-    }
-
-    setSelectedItem(item);
-
-    // Check if consultation exists - could be on payment cache or directly on item
-    const hasConsultation = item?.consultation?.id || item?.consultation_id;
-    const consultationId = item?.consultation?.id || item?.consultation_id;
-    
-    const message = hasConsultation 
-      ? "Are you sure you want to send this patient to the optician?"
-      : "This patient has no consultation record. Do you want to create a consultation and send them to the optician?";
-
-    const component = (
-      <ConfirmationDialog
-        message={message}
-        onCancel={() => {
-          if (modalRef.current) {
-          modalRef.current.close();
-          }
-          setSelectedItem(null);
-        }}
-        onOk={async () => {
-          if (modalRef.current) {
-          modalRef.current.close();
-          }
-          try {
-            if (hasConsultation && consultationId) {
-              // Update existing consultation
-              await handlePatch(`api/consultations/${consultationId}`, {
-                send_to_optician: "Yes",
-                require_glass: "Yes",
-              });
-            } else {
-              // Create a new consultation for this patient
-              const patientId = item.check_in?.patient_id;
-              const paymentCacheId = item.id;
-              
-              if (!patientId || !paymentCacheId) {
-                addToast({ 
-                  message: "Missing required information. Patient ID or Payment Cache ID not found.", 
-                  severity: "error" 
-                });
-                setSelectedItem(null);
-                return;
-              }
-              
-              // Create consultation via the consultations API
-              const response = await window.axios.post('/api/consultations', {
-                payment_cache_id: paymentCacheId,
-                patient_id: patientId,
-                send_to_optician: "Yes",
-                require_glass: "Yes", // Assume they need glass if being sent to optician
-                status: "Pending"
-              });
-
-              if (response.data && response.data.success === false) {
-                throw new Error(response.data.message || 'Failed to create consultation');
-              }
-            }
-            addToast({ message: "Patient sent to optician successfully", severity: "success" });
-            
-            // Trigger notification refresh for real-time updates
-            if (window.notificationEvents && typeof window.notificationEvents.refresh === 'function') {
-              window.notificationEvents.refresh();
-            }
-            
-            handleFetch();
-          } catch (err) {
-            console.error('Error sending to optician:', err);
-            const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || formatError(err);
-            addToast({ message: errorMessage, severity: "error" });
-          }
-          setSelectedItem(null);
-        }}
-      />
-    );
-
-    if (modalRef.current) {
-    modalRef.current.open("Send to Optician", component, "sm");
-    } else {
-      addToast({ message: "Modal not available", severity: "error" });
-    }
-  };
-
 
   return (
     <Page
@@ -396,31 +297,6 @@ const PendingCashPatients = () => {
                       >
                         Manage
                       </Button>
-                      {hasPendingItems && !hasServedItems && (
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="small"
-                          startIcon={<SendIcon />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSendToOptician(item);
-                          }}
-                          disabled={sendingToOptician || loading}
-                          sx={{
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            minWidth: { xs: "100%", sm: 140 },
-                            maxWidth: { xs: "100%", sm: 'none' },
-                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                            px: { xs: 1.5, sm: 2 },
-                            py: { xs: 0.75, sm: 0.5 },
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          Send to Optician
-                        </Button>
-                      )}
                       {hasServedItems && (
                         <Button
                           variant="contained"

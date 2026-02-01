@@ -582,13 +582,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         },
         {
           title: "Patients Sent to Sales",
-          icon: <WaitingIcon />,
-          to: "/sales-management/patients-sent-to-sales",
-          show: hasSalesCenterAccess,
-          badge: notifications && typeof notifications.patients_sent_to_sales !== 'undefined' && notifications.patients_sent_to_sales != null ? (Number(notifications.patients_sent_to_sales) || 0) : 0,
-        },
-        {
-          title: "Sales Clinical Notes",
           icon: <PrescriptionIcon />,
           to: "/sales-management/clinical-notes",
           show: hasSalesCenterAccess,

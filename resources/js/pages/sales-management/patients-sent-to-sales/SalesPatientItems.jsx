@@ -60,8 +60,24 @@ const SalesPatientItems = () => {
     navigate("/sales-management/patients-sent-to-sales");
   };
 
+  // Check if there are any unpaid items
+  const hasUnpaidItems = items.some(item => 
+    item?.status === 'Pending' || item?.status === 'Billed'
+  );
+
+  // Check if patient has glass items (needs to go to optician)
+  const hasGlassItems = items.some(item => 
+    item?.consultation_type?.name === 'Glass'
+  );
+
   const handleSendToCashier = () => {
     navigate(`/payment-center/pending-cash-patients/${patientId}/${paymentCacheId}`);
+  };
+
+  const handleSendToOptician = () => {
+    // Navigate to optician center - patient is ready for dispensing
+    navigate(`/optician-center/glass-patients`);
+    addToast({ message: 'Patient sent to optician for dispensing', severity: 'success' });
   };
 
   if (!paymentCacheId) {
@@ -100,14 +116,38 @@ const SalesPatientItems = () => {
         <Button startIcon={<BackIcon />} onClick={handleBack} variant="outlined">
           Back to list
         </Button>
-        <Button
-          variant="contained"
-          startIcon={<SendToCashierIcon />}
-          onClick={handleSendToCashier}
-          disabled={loadingCache || !paymentCache}
-        >
-          Send to Cashier
-        </Button>
+        <Stack direction="row" spacing={2}>
+          {/* Show appropriate button based on payment status */}
+          {hasUnpaidItems ? (
+            <Button
+              variant="contained"
+              startIcon={<SendToCashierIcon />}
+              onClick={handleSendToCashier}
+              disabled={loadingCache || !paymentCache}
+            >
+              Send to Cashier
+            </Button>
+          ) : hasGlassItems ? (
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<SendToCashierIcon />}
+              onClick={handleSendToOptician}
+              disabled={loadingCache || !paymentCache}
+            >
+              Send to Optician
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              startIcon={<SendToCashierIcon />}
+              onClick={handleSendToCashier}
+              disabled={loadingCache || !paymentCache}
+            >
+              Complete
+            </Button>
+          )}
+        </Stack>
       </Stack>
 
       <PatientDetails

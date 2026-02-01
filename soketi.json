@@ -1,0 +1,34 @@
+{
+  "debug": true,
+  "host": "0.0.0.0",
+  "port": 6001,
+  "appManager.array.apps": [
+    {
+      "id": "eyechake-app",
+      "key": "eyechake-key-local",
+      "secret": "eyechake-secret-local",
+      "maxConnections": 1000,
+      "enableClientMessages": false,
+      "enabled": true,
+      "maxBackendEventsPerSecond": 100,
+      "maxClientEventsPerSecond": 100,
+      "maxReadRequestsPerSecond": 100
+    }
+  ],
+  "cors": {
+    "origin": ["*"],
+    "methods": ["GET", "POST"],
+    "allowedHeaders": [
+      "Origin",
+      "Content-Type",
+      "X-Auth-Token",
+      "X-Requested-With",
+      "Accept",
+      "Authorization",
+      "X-CSRF-TOKEN",
+      "XSRF-TOKEN",
+      "X-Socket-Id"
+    ],
+    "credentials": true
+  }
+}

@@ -1,4 +1,5 @@
 import "./bootstrap";
+import "./echo"; // Initialize WebSocket connection
 import React from "react";
 import ReactDOM from "react-dom/client";
 import {

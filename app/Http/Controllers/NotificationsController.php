@@ -133,8 +133,9 @@ class NotificationsController extends Controller
     private function getPatientsSentToCashierCount($clinic_id)
     {
         try {
-            // Count patients with pending cash items (matches pending cash patients page)
-            // Include both Pending and Served items for billing workflow
+            // Count patients with pending cash items that need payment
+            // Only include patients who have at least one Pending item (not yet paid)
+            // Exclude patients where all items are already Paid or Served
             $query = PatientPaymentCache::query()
                 ->when($clinic_id, function ($q) use ($clinic_id) {
                     $q->whereHas('creator', function ($query) use ($clinic_id) {
@@ -142,14 +143,12 @@ class NotificationsController extends Controller
                     });
                 })
                 ->whereHas('items', function ($query) {
-                    $query->whereIn('status', ['Pending', 'Served'])
+                    // Must have at least one Pending item that needs payment
+                    $query->where('status', 'Pending')
                         ->whereHas('payment_mode', function ($q) {
                             $q->where('payment_type', 'Cash');
                         });
-                })
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00')
-                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
+                });
 
             return $query->distinct('patient_payment_cache.id')->count();
         } catch (\Exception $e) {

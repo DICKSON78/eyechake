@@ -1009,6 +1009,66 @@ const PDFReportDocument = ({ consultation, patient }) => {
           </React.Fragment>
         ) : null}
 
+        {/* Referral Information - Show if referral exists */}
+        {consultation.referral ? (
+          <React.Fragment>
+            <Subheader
+              title="Referral Information"
+              style={{ marginBottom: 8 }}
+            />
+
+            {/* Referred To Info */}
+            <View style={{ marginBottom: 8 }}>
+              <Text style={[styles.text, { fontSize: 8, fontWeight: 'bold', marginBottom: 2 }]}>
+                Referred To:
+              </Text>
+              <Text style={[styles.text, { fontSize: 8 }]}>
+                {`${consultation.referral.referred_to_name || "N/A"}${consultation.referral.referred_to_type ? ` (${consultation.referral.referred_to_type})` : ""}`}
+              </Text>
+            </View>
+
+            {/* Highlighted Action Taken */}
+            <View style={{ backgroundColor: "#fff3cd", padding: 8, borderRadius: 4, marginBottom: 8 }}>
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    fontWeight: "bold",
+                    marginBottom: 4,
+                    fontSize: 10,
+                    color: "#000",
+                  },
+                ]}
+              >
+                ACTION TAKEN:
+              </Text>
+              <Text style={[styles.text, { fontSize: 9, lineHeight: 1.4 }]}>
+                {consultation.referral.clinical_summary || "N/A"}
+              </Text>
+            </View>
+
+            {/* Highlighted Reason for Referral */}
+            <View style={{ backgroundColor: "#fff3cd", padding: 8, borderRadius: 4, marginBottom: 8 }}>
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    fontWeight: "bold",
+                    marginBottom: 4,
+                    fontSize: 10,
+                    color: "#000",
+                  },
+                ]}
+              >
+                REASON FOR REFERRAL:
+              </Text>
+              <Text style={[styles.text, { fontSize: 9, lineHeight: 1.4 }]}>
+                {consultation.referral.referral_reason || "N/A"}
+              </Text>
+            </View>
+          </React.Fragment>
+        ) : null}
+
         <Footer
           render={({ pageNumber, totalPages }) =>
             `${pageNumber} / ${totalPages}`
@@ -1051,6 +1111,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
       with_diagnoses: "Yes",
       with_items: "Yes",
       with_item_templates: "Yes",
+      with_referral: "Yes",
     },
     false,
     null,

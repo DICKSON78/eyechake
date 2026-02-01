@@ -750,12 +750,40 @@ class PatientPaymentCacheItemsController extends Controller
 
             // check if dispensing a glass item and change its consultation status
             $consultation = Consultation::find($request->consultation_id);
-            if ($consultation && $consultation->patient_direction == 'Direct to Optician') {
-                $consultation->update(['status' => 'Consulted']);
+            if ($consultation) {
+                // Mark as Consulted if Direct to Optician
+                if ($consultation->patient_direction == 'Direct to Optician') {
+                    $consultation->update(['status' => 'Consulted']);
 
-                // update consultant
-                $consultation->payment_cache_item->consultant_id = $user->id;
-                $consultation->payment_cache_item->save();
+                    // update consultant
+                    $consultation->payment_cache_item->consultant_id = $user->id;
+                    $consultation->payment_cache_item->save();
+                }
+
+                // Only mark optician as completed if ALL glass items are dispensed
+                // Check if there are any remaining glass items that are not yet served
+                $remainingGlassItems = PatientPaymentCacheItem::whereHas('payment_cache', function($q) use ($consultation) {
+                        $q->where('consultation_id', $consultation->id);
+                    })
+                    ->whereHas('item.consultation_type', function($q) {
+                        $q->where('name', 'Glass');
+                    })
+                    ->where('status', '!=', 'Served')
+                    ->count();
+
+                // If no remaining glass items, mark optician work as complete
+                if ($remainingGlassItems == 0) {
+                    $consultation->update(['optician_completed_at' => now()]);
+                    \Log::info('All glass items dispensed - marking optician completed', [
+                        'consultation_id' => $consultation->id,
+                        'completed_at' => now()
+                    ]);
+                } else {
+                    \Log::info('Glass items dispensed but more remain', [
+                        'consultation_id' => $consultation->id,
+                        'remaining_items' => $remainingGlassItems
+                    ]);
+                }
             }
         });
     }

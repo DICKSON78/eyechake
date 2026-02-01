@@ -133,8 +133,8 @@ Route::get('/health', function () {
     }
 });
 
-// Temporarily moved notifications outside auth middleware to test
-Route::get('/notifications', [NotificationsController::class, '__invoke']);
+// Notifications route - requires auth to get user's clinic_id for proper filtering
+Route::get('/notifications', [NotificationsController::class, '__invoke'])->middleware('auth:api');
 Route::get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications'])->middleware('auth:api');
 
 // Test authentication endpoint

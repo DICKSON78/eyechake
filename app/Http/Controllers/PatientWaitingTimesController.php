@@ -147,6 +147,7 @@ class PatientWaitingTimesController extends Controller
                     // Only send to cashier when there are unpaid (Pending) items — not when only Billed/Paid/Served
                     if ($pendingItems > 0 && $item->current_department !== 'cashier') {
                         $item->sendToCashier();
+                        event(new \App\Events\NotificationUpdate());
                         \Log::info('Auto-moved patient to cashier due to pending (unpaid) items', [
                             'patient_id' => $patient->id,
                             'patient_name' => $patient->name ?? 'Unknown',
@@ -163,6 +164,7 @@ class PatientWaitingTimesController extends Controller
                     
                     if ($pendingConsultations > 0 && $item->current_department !== 'consultation') {
                         $item->sendToConsultation();
+                        event(new \App\Events\NotificationUpdate());
                         \Log::info('Auto-moved patient to consultation due to pending consultations', [
                             'patient_id' => $patient->id,
                             'patient_name' => $patient->name ?? 'Unknown',
@@ -181,6 +183,7 @@ class PatientWaitingTimesController extends Controller
                     
                     if ($paidProcedureItems > 0 && $item->current_department !== 'procedure_room') {
                         $item->sendToProcedureRoom();
+                        event(new \App\Events\NotificationUpdate());
                         \Log::info('Auto-moved patient to procedure room due to paid procedure items', [
                             'patient_id' => $patient->id,
                             'patient_name' => $patient->name ?? 'Unknown',
@@ -806,6 +809,8 @@ class PatientWaitingTimesController extends Controller
         $waitingTime = PatientWaitingTime::findOrFail($id);
         $waitingTime->sendToCashier();
 
+        event(new \App\Events\NotificationUpdate());
+
         return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to cashier successfully.');
     }
 
@@ -816,6 +821,8 @@ class PatientWaitingTimesController extends Controller
     {
         $waitingTime = PatientWaitingTime::findOrFail($id);
         $waitingTime->sendToConsultation();
+
+        event(new \App\Events\NotificationUpdate());
 
         return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to consultation successfully.');
     }
@@ -828,6 +835,11 @@ class PatientWaitingTimesController extends Controller
         $waitingTime = PatientWaitingTime::findOrFail($id);
         $waitingTime->sendToDispensing();
 
+        event(new \App\Events\NotificationUpdate());
+
+        return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to dispensing successfully.');
+    }
+
         return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to dispensing successfully.');
     }
 
@@ -838,6 +850,8 @@ class PatientWaitingTimesController extends Controller
     {
         $waitingTime = PatientWaitingTime::findOrFail($id);
         $waitingTime->sendToProcedureRoom();
+
+        event(new \App\Events\NotificationUpdate());
 
         return $this->sendResponse($waitingTime, Response::HTTP_OK, 'Patient moved to procedure room successfully.');
     }
@@ -851,6 +865,8 @@ class PatientWaitingTimesController extends Controller
             'department' => 'required|string|in:reception,cashier,consultation,dispensing,procedure_room',
             'notes' => 'nullable|string',
         ]);
+
+        event(new \App\Events\NotificationUpdate());
 
         $waitingTime = PatientWaitingTime::findOrFail($id);
         $waitingTime->moveToDepartment($request->department, $request->notes);

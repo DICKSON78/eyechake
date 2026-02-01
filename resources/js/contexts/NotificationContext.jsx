@@ -239,60 +239,78 @@ export const NotificationProvider = ({ children }) => {
     window.notificationEvents = notificationEvents;
   }, []); // Only run once on mount
 
-  // Automatic polling for real-time notification updates with exponential backoff
+  // WebSocket listener for real-time notifications (replaces polling)
   useEffect(() => {
+    // Check if Echo is available
+    if (!window.Echo) {
+      console.warn('Echo not initialized, WebSocket notifications disabled');
+      return;
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
-      return; // Don't poll if user is not authenticated
+      console.log('NotificationContext: No token, skipping WebSocket subscription');
+      return;
+    }
+
+    console.log('NotificationContext: Subscribing to notification channel via WebSocket...');
+    
+    const channel = window.Echo.channel('notifications')
+      .listen('.notification.update', (data) => {
+        console.log('✅ Notification update received via WebSocket:', data);
+        // Fetch fresh notifications when broadcast is received
+        fetchNotifications({});
+      });
+
+    return () => {
+      console.log('NotificationContext: Unsubscribing from notification channel');
+      try {
+        window.Echo.leave('notifications');
+      } catch (e) {
+        console.warn('Error leaving notification channel:', e);
+      }
+    };
+  }, [fetchNotifications]);
+
+  // Fallback polling (only if WebSocket unavailable) - much less frequent
+  useEffect(() => {
+    // Only use polling as fallback if Echo is not available
+    if (window.Echo) {
+      console.log('NotificationContext: WebSocket active, polling disabled');
+      return;
+    }
+
+    console.log('NotificationContext: WebSocket unavailable, using fallback polling');
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
     }
 
     let pollCount = 0;
-    let consecutiveErrors = 0;
-    const maxConsecutiveErrors = 5;
-    const baseInterval = 2000; // Start with 2 seconds
-    const maxInterval = 30000; // Max 30 seconds
+    const pollInterval = 30000; // Poll every 30 seconds as fallback (instead of 2 seconds)
 
     const pollNotifications = () => {
-      // Only fetch if not currently loading to avoid duplicate requests
       if (!loading) {
-        console.log(`NotificationContext: Automatic polling (attempt ${pollCount + 1}) - fetching notifications...`);
+        console.log(`NotificationContext: Fallback polling (attempt ${pollCount + 1})`);
         fetchNotifications({})
           .then(() => {
-            consecutiveErrors = 0; // Reset error count on success
             pollCount++;
           })
           .catch((error) => {
-            consecutiveErrors++;
-            console.warn(`NotificationContext: Polling failed (error ${consecutiveErrors}/${maxConsecutiveErrors}):`, error);
-
-            // If too many consecutive errors, stop polling temporarily
-            if (consecutiveErrors >= maxConsecutiveErrors) {
-              console.error('NotificationContext: Too many polling errors, stopping automatic polling for 5 minutes');
-              setTimeout(() => {
-                consecutiveErrors = 0; // Reset after timeout
-                pollNotifications(); // Restart polling
-              }, 300000); // 5 minutes
-              return;
-            }
+            console.warn('NotificationContext: Fallback polling failed:', error);
           });
       }
     };
 
-    // Start polling immediately
+    // Initial poll
     pollNotifications();
 
-    // Set up automatic polling interval with exponential backoff on errors
-    const pollingInterval = setInterval(() => {
-      // Calculate interval with exponential backoff for errors
-      const errorMultiplier = Math.min(consecutiveErrors + 1, 5); // Max 5x multiplier
-      const currentInterval = Math.min(baseInterval * errorMultiplier, maxInterval);
+    // Set up polling interval
+    const intervalId = setInterval(pollNotifications, pollInterval);
 
-      setTimeout(pollNotifications, currentInterval);
-    }, baseInterval);
-
-    // Cleanup interval on unmount
     return () => {
-      clearInterval(pollingInterval);
+      clearInterval(intervalId);
     };
   }, [fetchNotifications, loading]);
 

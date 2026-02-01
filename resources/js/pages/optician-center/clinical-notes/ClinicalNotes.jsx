@@ -24,7 +24,7 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import Refraction from "./Refraction";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
-import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
+import { useFetch, usePost, useToast } from "../../../hooks";
 import {
   formatError,
   getValidationError,
@@ -54,13 +54,36 @@ const Subheader = ({ title, sx }) => {
   );
 };
 
+// Read-only field display component
+const ReadOnlyField = ({ label, value, multiline = false }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="caption" color="text.secondary" fontWeight="500">
+      {label}
+    </Typography>
+    <Typography 
+      variant="body2" 
+      sx={{ 
+        mt: 0.5, 
+        whiteSpace: multiline ? 'pre-wrap' : 'normal',
+        minHeight: multiline ? 60 : 'auto',
+        p: 1,
+        bgcolor: 'grey.50',
+        borderRadius: 1,
+        border: '1px solid',
+        borderColor: 'grey.200'
+      }}
+    >
+      {value || '-'}
+    </Typography>
+  </Box>
+);
+
 const ClinicalNotes = ({ patient, consultation }) => {
   const addToast = useToast();
   const navigate = useNavigate();
 
   const modalRef = useRef();
   const formRef = useRef();
-  const remarksRef = useRef();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
@@ -82,10 +105,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
     (response) => response.data.data.data
   );
 
-  const [remarks, setRemarks] = useState(consultation.remarks);
   const [selectedItems, setSelectedItems] = useState([]);
 
-  const { handlePatch: handleAutoSave } = usePatch();
   const {
     data: dataDispense,
     loading: loadingDispense,
@@ -128,18 +149,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
-
-  const autoSave = (field, value) => {
-    if (value !== consultation[field]) {
-      handleAutoSave(
-        `api/consultations/${consultation.id}/auto-save-clinical-notes`,
-        {
-          what: "Consultation",
-          [field]: value,
-        }
-      );
-    }
-  };
 
   const confirmDispense = () => {
     setData(null);
@@ -213,10 +222,48 @@ const ClinicalNotes = ({ patient, consultation }) => {
         <Divider />
         <Form ref={formRef}>
           <CardContent>
+            {/* History Taking - Read-only display */}
             <Subheader
-              title="Refraction Details"
+              title="History Taking"
               sx={{ mt: 0 }}
             />
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <ReadOnlyField label="Chief Complaint" value={consultation.chief_complaint} multiline />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <ReadOnlyField label="History of Present Illness" value={consultation.history_present_illness} multiline />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <ReadOnlyField label="Family History" value={consultation.family_history} multiline />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <ReadOnlyField label="General Health" value={consultation.general_health} multiline />
+              </Grid>
+            </Grid>
+
+            {/* Diagnosis - Read-only display */}
+            {consultation.diagnoses && consultation.diagnoses.length > 0 && (
+              <>
+                <Subheader title="Diagnosis" />
+                <Box sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1, border: '1px solid', borderColor: 'grey.200' }}>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {consultation.diagnoses.map((diagnosis, index) => (
+                      <Chip
+                        key={index}
+                        label={`${diagnosis.disease?.name || 'Unknown'} ${diagnosis.disease?.code ? `(${diagnosis.disease.code})` : ''}`}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                        sx={{ mb: 1 }}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              </>
+            )}
+
+            <Subheader title="Refraction Details" />
             <Refraction consultation={consultation} />
 
             <Subheader title="Management" />
@@ -305,27 +352,20 @@ const ClinicalNotes = ({ patient, consultation }) => {
               </Box>
             )}
 
-            <Subheader title="Remarks" />
-            <TextField
-              disabled
-              ref={remarksRef}
-              fullWidth
-              placeholder="Type remarks..."
-              multiline
-              rows={6}
-              horizontal
-              defaultValue={remarks}
-              onChange={(value) => autoSave("remarks", value)}
-              sx={{
-                width: '100%',
-                '& .MuiInputBase-root': {
-                  width: '100%',
-                },
-                '& .MuiInputBase-input': {
-                  width: '100%',
-                }
-              }}
-            />
+            {/* Doctor Recommendations - Show recommendations instead of remarks */}
+            <Subheader title="Doctor Recommendations" />
+            <Box sx={{ 
+              p: 2, 
+              bgcolor: 'grey.50', 
+              borderRadius: 1, 
+              border: '1px solid', 
+              borderColor: 'grey.200',
+              minHeight: 100
+            }}>
+              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                {consultation.doctor_comments_remarks || 'No recommendations provided'}
+              </Typography>
+            </Box>
           </CardContent>
         </Form>
         <Divider />

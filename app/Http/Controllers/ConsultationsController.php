@@ -109,13 +109,15 @@ class ConsultationsController extends Controller
                                ->orWhere('patient_direction', 'Direct to Optician')
                                ->orWhere('patient_direction', 'Sent to Optician');
                      })
-                ->whereHas('payment_cache_item', function ($query) {
-                    // Include all patients with glass items (for both dispensing and maintenance)
-                    $query->whereHas('consultation_type', function ($typeQuery) {
-                        $typeQuery->where('name', 'Glass');
+                     // Exclude dispensed patients (optician completed)
+                     ->whereNull('optician_completed_at')
+                // Check if there are ANY glass items in the payment cache (not just the linked item)
+                ->whereHas('payment_cache', function ($query) {
+                    $query->whereHas('items', function ($itemsQuery) {
+                        $itemsQuery->whereHas('item.consultation_type', function ($typeQuery) {
+                            $typeQuery->where('name', 'Glass');
+                        });
                     });
-                    // Include both served and not served items (dispensing and maintenance)
-                    // No status filter to include all glass-related patients
                 });
             } else if ($status === 'Pending') {
                 // For pending consultations, only show those that came from cashier flow
@@ -515,6 +517,7 @@ class ConsultationsController extends Controller
             $with_diagnoses = $request->with_diagnoses;
             $with_items = $request->with_items;
             $with_item_templates = $request->with_item_templates;
+            $with_referral = $request->with_referral;
             $data = Consultation::with([
                 'payment_cache_item' => function ($query) {
                     $query->with(['payment_cache.check_in.patient' => function ($query2) {
@@ -528,6 +531,11 @@ class ConsultationsController extends Controller
 
             if ($with_diagnoses == 'Yes') {
                 $data->with(['diagnoses.disease']);
+            }
+
+            // Load referral if requested (for clinical note PDF)
+            if ($with_referral == 'Yes') {
+                $data->with(['referral']);
             }
 
             $data = $data->findOrFail($id);
@@ -660,9 +668,8 @@ class ConsultationsController extends Controller
             if ($request->send_to_optician == 'Yes') {
                 // Only cashiers (users with payment_center privilege) can send clients to optician
                 $user = $request->user();
-                $hasPaymentCenterPrivilege = \App\Models\UserPrivilege::where('user_id', $user->id)
-                    ->where('privilege', 'payment_center')
-                    ->exists();
+                $userPrivilege = \App\Models\UserPrivilege::where('user_id', $user->id)->first();
+                $hasPaymentCenterPrivilege = $userPrivilege && $userPrivilege->payment_center == 1;
 
                 if (!$hasPaymentCenterPrivilege && !$user->is_admin) {
                     return $this->sendResponse(

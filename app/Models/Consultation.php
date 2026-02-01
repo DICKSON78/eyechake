@@ -16,11 +16,12 @@ class Consultation extends Model
         // Note: family_ocular_history and family_general_history removed - columns don't exist in database
         'patient_to_return', 'to_return_date', 'return_reason', 'remarks', 'created_by',
         'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by', 'lens_types',
-        'doctor_recommendations', 'doctor_comments_remarks',
+        'doctor_recommendations', 'doctor_comments_remarks', 'optician_completed_at',
     ];
 
     protected $casts = [
         'sent_to_optician_at' => 'datetime:Y-m-d H:i',
+        'optician_completed_at' => 'datetime:Y-m-d H:i',
     ];
 
     public function payment_cache_item()
@@ -76,6 +77,22 @@ class Consultation extends Model
     public function doctor_tasks()
     {
         return $this->hasMany(DoctorTask::class, 'consultation_id');
+    }
+
+    /**
+     * Get the referrals for the consultation.
+     */
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'consultation_id');
+    }
+
+    /**
+     * Get the latest referral for the consultation.
+     */
+    public function referral()
+    {
+        return $this->hasOne(Referral::class, 'consultation_id')->latest();
     }
 
     protected function serializeDate(DateTimeInterface $date)
