@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y \
         gd \
         zip \
         intl \
-       docker-php-ext-enable imagick \
+    && printf "\n" | pecl install imagick \
+    && docker-php-ext-enable imagick \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
