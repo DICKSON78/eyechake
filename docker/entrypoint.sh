@@ -129,5 +129,5 @@ echo "  ✓ Application Ready!"
 echo "========================================="
 echo ""
 
-# Start PHP-FPM
-exec php-fpm
+# Execute the command passed to the container (e.g., php artisan serve or php-fpm)
+exec "$@"
