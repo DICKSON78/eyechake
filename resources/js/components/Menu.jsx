@@ -688,13 +688,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: isPrivilegeGranted('medicine_center'),
         },
         {
-          title: "Other Dispensing Requests",
-          icon: <WaitingIcon />,
-          to: "/other-dispensing/dispensing-requests",
-          badge: notifications && typeof notifications.other_dispensing_requests !== 'undefined' && notifications.other_dispensing_requests != null ? (Number(notifications.other_dispensing_requests) || 0) : 0,
-          show: isPrivilegeGranted('medicine_center'),
-        },
-        {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/dispensing/reports",

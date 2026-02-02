@@ -20,7 +20,7 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending,Paid,Billed",
+    item_status: "Pending,Paid,Billed", // Only show items awaiting dispensing, not already served
     item_consultation_type: undefined,
     is_stock_item: undefined,
     patient_id: undefined,
@@ -39,7 +39,7 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
   const [queryParams, setQueryParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending,Paid,Billed",
+    item_status: "Pending,Paid,Billed", // Only show items awaiting dispensing, not already served
     item_consultation_type: undefined,
     is_stock_item: undefined,
     patient_id: undefined,

@@ -136,8 +136,8 @@ const Dashboard = () => {
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: getWeekStartDate(),
-    end_date: undefined,
+    start_date: new Date(), // Default to today for daily view
+    end_date: new Date(),   // Default to today for daily view
   });
 
   const [salesExpensesPeriod, setSalesExpensesPeriod] = useState('yearly');

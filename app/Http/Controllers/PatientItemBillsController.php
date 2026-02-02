@@ -220,6 +220,21 @@ class PatientItemBillsController extends Controller
             // Patient needs glasses, send to optician (consultation department)
             $waitingTime->sendToConsultation();
             
+            // Trigger notification refresh for optician/workshop
+            try {
+                event(new \App\Events\NotificationUpdate());
+                \Log::info('Notification refresh triggered after sending patient to optician', [
+                    'patient_id' => $waitingTime->patient_id,
+                    'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',
+                    'department' => 'consultation (optician)'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to trigger notification after sending to optician', [
+                    'patient_id' => $waitingTime->patient_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            
             // Check if existing consultation's payment_cache_item is a glass item
             $consultationHasGlassItem = false;
             if ($consultation && $consultation->payment_cache_item) {
@@ -307,6 +322,22 @@ class PatientItemBillsController extends Controller
         if ($pendingNonGlassItems > 0) {
             // Patient has items that need dispensing (non-glass items)
             $waitingTime->sendToDispensing();
+            
+            // Trigger notification refresh for dispensing/workshop
+            try {
+                event(new \App\Events\NotificationUpdate());
+                \Log::info('Notification refresh triggered after sending patient to dispensing', [
+                    'patient_id' => $waitingTime->patient_id,
+                    'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',
+                    'department' => 'dispensing'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to trigger notification after sending to dispensing', [
+                    'patient_id' => $waitingTime->patient_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            
             \Log::info('Patient moved to dispensing after bill cleared (non-glass items)', [
                 'patient_id' => $waitingTime->patient_id,
                 'patient_name' => $waitingTime->patient->full_name ?? 'Unknown',

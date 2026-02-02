@@ -785,6 +785,30 @@ class PatientPaymentCacheItemsController extends Controller
                     ]);
                 }
             }
+
+            // Check if patient has unpaid items after dispensing
+            $unpaidItems = PatientPaymentCacheItem::where('payment_cache_id', $payment_cache->id)
+                ->whereIn('status', ['Pending', 'Billed'])
+                ->count();
+            
+            if ($unpaidItems > 0) {
+                \Log::info('Patient has unpaid items after dispensing - should go to cashier', [
+                    'payment_cache_id' => $payment_cache->id,
+                    'unpaid_items_count' => $unpaidItems
+                ]);
+                
+                // Update patient waiting time to send them to cashier
+                if ($payment_cache->check_in && $payment_cache->check_in->patient) {
+                    $waitingTime = $payment_cache->check_in->patient->current_waiting_time;
+                    if ($waitingTime) {
+                        $waitingTime->sendToCashier();
+                        \Log::info('Patient redirected to cashier after dispensing', [
+                            'patient_id' => $payment_cache->check_in->patient->id,
+                            'waiting_time_id' => $waitingTime->id
+                        ]);
+                    }
+                }
+            }
         });
     }
 

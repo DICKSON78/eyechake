@@ -361,8 +361,8 @@ const Home = () => {
                 }}
               >
         <Box sx={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, width: '100%', gap: 0, height: { xs: 'auto', md: '85vh' }, alignItems: 'stretch', overflow: 'hidden', margin: 0, padding: 0 }}>
-          {/* Left Content Section with Container - First on Mobile */}
-          <Box sx={{ flex: { xs: '1 1 100%', md: '0 0 50%' }, position: 'relative', height: { xs: 'auto', md: '100%' }, display: 'flex', alignItems: 'center', minHeight: { xs: 'auto', sm: 'auto', md: 'auto' } }}>
+          {/* Left Content Section with Container - Takes 65% width to avoid video overlap */}
+          <Box sx={{ flex: { xs: '1 1 100%', md: '0 0 65%' }, position: 'relative', height: { xs: 'auto', md: '100%' }, display: 'flex', alignItems: 'center', minHeight: { xs: 'auto', sm: 'auto', md: 'auto' } }}>
             <Container maxWidth="xl" sx={{ pr: { xs: 2, sm: 3, md: 4 }, pl: { xs: 2, sm: 3, md: 8 }, py: { xs: 3, sm: 4, md: 6 }, width: '100%', height: { xs: 'auto', md: '100%' }, display: 'flex', alignItems: 'center' }}>
               <Box
                 sx={{
@@ -488,6 +488,7 @@ const Home = () => {
                           justifyContent: 'flex-start',
                           height: '100%',
                           px: { xs: 0.5, sm: 1, md: 0 },
+                          background: 'transparent',
                         }}
                       >
                         <Typography
@@ -531,76 +532,47 @@ const Home = () => {
             </Container>
           </Box>
 
-          {/* Right Video Section - Full Width - Second on Mobile */}
+          {/* Video Section - Absolutely Positioned at Right Edge */}
           <Box 
             sx={{ 
-              flex: { xs: '1 1 100%', md: '0 0 50%' },
-              position: 'relative',
+              position: { xs: 'relative', md: 'absolute' },
+              top: { xs: 'auto', md: 0 },
+              right: 0,
+              width: { xs: '100%', md: '30%' },
+              height: { xs: '300px', md: '100%' },
+              zIndex: 3,
               display: 'flex',
-              height: { xs: '300px', sm: '350px', md: '100%' },
-              minHeight: { xs: '300px', sm: '350px', md: 'auto' },
-              alignItems: 'stretch',
-              marginTop: { xs: 0, md: 0 },
-              marginBottom: { xs: 0, md: 0 },
-              marginRight: { xs: 0, md: 0 },
-              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
             }}
           >
             <Box
               className="hero-animate"
               sx={{
                 position: 'relative',
-                borderRadius: { xs: 0, md: '0' },
                 overflow: 'hidden',
-                boxShadow: 'none',
                 height: '100%',
                 width: '100%',
-                border: {
-                  xs: '3px solid rgba(255, 255, 255, 0.8)',
-                  sm: '4px solid rgba(255, 255, 255, 0.8)',
-                  md: '5px solid rgba(255, 255, 255, 0.8)',
-                  lg: '6px solid rgba(255, 255, 255, 0.8)'
-                },
-                margin: 0,
-                padding: 0,
+                background: 'transparent',
+                border: 'none',
+                boxShadow: 'none',
               }}
             >
-              {/* Video Player */}
-              <Box sx={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
-                margin: 0,
-                padding: {
-                  xs: '8px 4px 8px 0', // Top 8px, Right 4px, Bottom 8px, Left 0
-                  sm: '12px 6px 12px 0', // Slightly more spacing on larger screens
-                  md: '16px 8px 16px 0', // More spacing on medium screens
-                  lg: '20px 10px 20px 0' // Even more spacing on large screens
-                }
-              }}>
-                <Box
-                  component="video"
-                  ref={videoRef}
-                  src="/images/video/home_video.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                    margin: 0,
-                    padding: 0,
-                    borderRadius: {
-                      xs: '4px',
-                      sm: '6px',
-                      md: '8px'
-                    },
-                  }}
-                />
-              </Box>
+              <Box
+                component="video"
+                ref={videoRef}
+                src="/images/video/home_video.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
             </Box>
           </Box>
         </Box>

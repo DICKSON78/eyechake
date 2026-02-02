@@ -29,6 +29,7 @@ import {
   LocationOn as LocationIcon,
   Person as PersonIcon,
   Description as DescriptionIcon,
+  Download as DownloadIcon,
 } from '@mui/icons-material';
 import TextField from '../../../components/TextField';
 import DatePicker from '../../../components/DatePicker';
@@ -36,11 +37,9 @@ import Select from '../../../components/Select';
 import Modal from '../../../components/Modal';
 import { usePost, usePatch, useDelete, useToast } from '../../../hooks';
 import { formatDateForDb, formatError } from '../../../helpers';
-import ReferralPDF from '../referrals/ReferralPDF';
 import ConfirmationDialog from '../../../components/ConfirmationDialog';
-import { Document, Page, pdf, StyleSheet, Text, View } from "@react-pdf/renderer";
-import Header from "../../../components/pdf/Header";
-import Footer from "../../../components/pdf/Footer";
+import { pdf } from "@react-pdf/renderer";
+import { PDFReportDocument } from '../../patient-records/patient-file/PatientFilePDF';
 
 const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals, patient }, ref) => {
   const addToast = useToast();
@@ -245,76 +244,23 @@ const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals
     );
   };
 
-  // Function to generate and print referral PDF
+  // Function to generate and print referral PDF using clinical note template
   const printReferralPDF = async (referral, patient) => {
     try {
-      // Import PDF styles and components inline
-      const pdfStyles = StyleSheet.create({
-        page: { padding: 30, fontSize: 10, fontFamily: "Helvetica" },
-        section: { marginBottom: 15 },
-        title: { fontSize: 16, fontWeight: "bold", marginBottom: 10, color: "#1976d2" },
-        subtitle: { fontSize: 12, fontWeight: "bold", marginTop: 10, marginBottom: 5, color: "#424242" },
-        label: { fontSize: 9, fontWeight: "bold", color: "#666", marginTop: 8, marginBottom: 3 },
-        value: { fontSize: 10, color: "#000", marginBottom: 5, lineHeight: 1.5 },
-        divider: { borderBottom: "1 solid #e0e0e0", marginVertical: 10 },
-        row: { flexDirection: "row", marginBottom: 8 },
-        col: { flex: 1 },
-      });
-
-      const ReferralPDFDoc = ({ referral, patient }) => (
-        <Document>
-          <Page size="A4" style={pdfStyles.page}>
-            <Header
-              title="Referral Letter"
-              subtitle={`Patient: ${patient?.full_name || "N/A"}`}
-            />
-            <View style={pdfStyles.section}>
-              <Text style={pdfStyles.title}>Referral Information</Text>
-              <View style={pdfStyles.row}>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Referred To:</Text>
-                  <Text style={pdfStyles.value}>{referral.referred_to_name || "N/A"}</Text>
-                </View>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Type:</Text>
-                  <Text style={pdfStyles.value}>{referral.referred_to_type || "N/A"}</Text>
-                </View>
-              </View>
-              {referral.referral_reason && (
-                <>
-                  <View style={pdfStyles.divider} />
-                  <Text style={pdfStyles.subtitle}>Reason for Referral:</Text>
-                  <Text style={pdfStyles.value}>{referral.referral_reason}</Text>
-                </>
-              )}
-              {referral.clinical_summary && (
-                <>
-                  <View style={pdfStyles.divider} />
-                  <Text style={pdfStyles.subtitle}>Clinical Summary:</Text>
-                  <Text style={pdfStyles.value}>{referral.clinical_summary}</Text>
-                </>
-              )}
-              {referral.notes && (
-                <>
-                  <View style={pdfStyles.divider} />
-                  <Text style={pdfStyles.subtitle}>Additional Notes:</Text>
-                  <Text style={pdfStyles.value}>{referral.notes}</Text>
-                </>
-              )}
-            </View>
-            <Footer />
-          </Page>
-        </Document>
-      );
-
-      const pdfDoc = <ReferralPDFDoc referral={referral} patient={patient} />;
-      const blob = await pdf(pdfDoc).toBlob();
+      // Use the clinical note PDF component which includes referral data
+      const pdfBlob = await pdf(
+        <PDFReportDocument 
+          patient={patient} 
+          consultation={consultation}
+          includeReferral={referral}
+        />
+      ).toBlob();
       
-      if (!blob || blob.size === 0) {
+      if (!pdfBlob || pdfBlob.size === 0) {
         throw new Error('Generated PDF is empty or invalid');
       }
       
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(pdfBlob);
       
       // Try to open in new window and trigger print
       const printWindow = window.open(url, '_blank');
@@ -335,7 +281,7 @@ const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals
                 // Download as fallback
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+                link.download = `clinical-note-referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 setTimeout(() => {
@@ -369,7 +315,7 @@ const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals
         // Popup blocked - download instead
         const link = document.createElement('a');
         link.href = url;
-        link.download = `referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.download = `clinical-note-referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
@@ -384,6 +330,39 @@ const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals
     } catch (error) {
       console.error('Failed to generate/print referral PDF:', error);
       addToast({ message: 'Failed to print referral PDF', severity: 'warning' });
+    }
+  };
+
+  // Function to download referral PDF using clinical note template
+  const downloadReferralPDF = async (referral, patient) => {
+    try {
+      // Use the clinical note PDF component which includes referral data
+      const pdfBlob = await pdf(
+        <PDFReportDocument 
+          patient={patient} 
+          consultation={consultation}
+          includeReferral={referral}
+        />
+      ).toBlob();
+      
+      if (!pdfBlob || pdfBlob.size === 0) {
+        throw new Error('Generated PDF is empty or invalid');
+      }
+      
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `clinical-note-referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      addToast({ message: 'Referral PDF downloaded successfully', severity: 'success' });
+    } catch (error) {
+      console.error('Failed to generate/download referral PDF:', error);
+      addToast({ message: 'Failed to download referral PDF', severity: 'error' });
     }
   };
 
@@ -684,13 +663,13 @@ const ReferralCard = React.forwardRef(({ consultation, referrals, fetchReferrals
                   action={
                     <Stack direction="row" spacing={0.5}>
                       <Tooltip title="Download PDF">
-                        <span>
-                          <ReferralPDF
-                            referral={referral}
-                            patient={patientInfo}
-                            size="small"
-                          />
-                        </span>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => downloadReferralPDF(referral, patientInfo)}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
                       </Tooltip>
                       <Tooltip title="Edit">
                         <IconButton

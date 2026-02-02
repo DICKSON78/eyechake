@@ -113,16 +113,22 @@ class NotificationsController extends Controller
         try {
             $query = PatientPaymentCache::query()
                 ->when($clinic_id, function ($q) use ($clinic_id) {
-                    $q->whereHas('creator', function ($query) use ($clinic_id) {
-                        $query->where('clinic_id', $clinic_id);
+                    $q->whereHas('creator', function ($creatorQuery) use ($clinic_id) {
+                        $creatorQuery->where('clinic_id', $clinic_id);
                     });
                 })
-                ->whereHas('consultation', function ($q) {
-                    $q->where('status', 'Consulted');
+                ->where(function ($cacheQuery) {
+                    $cacheQuery->whereHas('consultation', function ($consultationQuery) {
+                        $consultationQuery->where('status', 'Consulted');
+                    })
+                    ->orWhereHas('items.consultation', function ($consultationQuery) {
+                        $consultationQuery->where('status', 'Consulted');
+                    });
                 })
-                ->whereHas('items', function ($q) {
-                    $q->whereIn('status', ['Pending', 'Billed']);
+                ->whereHas('items', function ($itemQuery) {
+                    $itemQuery->whereIn('status', ['Pending', 'Billed']);
                 });
+
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
             Log::error('Error counting patients_sent_to_sales: ' . $e->getMessage());
@@ -216,11 +222,12 @@ class NotificationsController extends Controller
                         $query->where('clinic_id', $clinic_id);
                     });
                 })
-                ->where('require_glass', 'Yes')
-                ->where(function ($q) {
-                    $q->where('send_to_optician', 'Yes')
-                      ->orWhereNotNull('sent_to_optician_at');
-                })
+                    ->where('require_glass', 'Yes')
+                    ->where(function ($q) {
+                        $q->whereNotNull('sent_to_optician_at')
+                          ->orWhere('patient_direction', 'Sent to Optician')
+                          ->orWhere('patient_direction', 'Direct to Optician');
+                    })
                 ->whereNull('optician_completed_at')
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');

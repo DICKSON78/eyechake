@@ -109,6 +109,8 @@ php artisan serve
 
 # Start WebSocket server (in another terminal)
 php artisan websockets:serve
+#worker
+php artisan queue:work --tries=3 --timeout=60
 
 # For development with hot reload
 npm run dev

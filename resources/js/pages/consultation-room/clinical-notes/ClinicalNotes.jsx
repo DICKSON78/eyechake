@@ -23,7 +23,7 @@ import {
 import {
   Download as DownloadIcon,
   Assignment as ReferralIcon,
-  Print as PrintIcon,
+  Save as SaveIcon,
 } from "@mui/icons-material";
 
 import { Header as PageHeader } from "../../../components/Page";
@@ -42,11 +42,9 @@ import Refraction from "./Refraction";
 import Fundoscopy from "./Fundoscopy";
 import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
-import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
+import PatientFilePDF, { PDFReportDocument } from "../../patient-records/patient-file/PatientFilePDF";
 import PrescriptionPDF from "../prescriptions/PrescriptionPDF";
-import { Document, Page, pdf, StyleSheet, Text, View } from "@react-pdf/renderer";
-import Header from "../../../components/pdf/Header";
-import Footer from "../../../components/pdf/Footer";
+import { pdf } from "@react-pdf/renderer";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
@@ -228,14 +226,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
   useEffect(() => {
     if (referralData) {
       addToast({ message: 'Referral created successfully', severity: 'success' });
-      // Print referral PDF after creation
-      // The API response structure is: { data: { data: { ...referral object... } } }
-      const referral = referralData?.data?.data || referralData?.data || referralData;
-      if (referral?.id) {
-        setTimeout(() => {
-          printReferralPDF(referral, patient);
-        }, 500);
-      }
       // Reset form and hide it
       setReferralFormData({
         referred_to_name: '',
@@ -422,125 +412,22 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const printReferralPDF = async (referral, patientData) => {
     try {
-      const pdfStyles = StyleSheet.create({
-        page: { padding: 30, fontSize: 10, fontFamily: "Helvetica" },
-        section: { marginBottom: 12 },
-        title: { fontSize: 16, fontWeight: "bold", marginBottom: 10, color: "#1976d2" },
-        subtitle: { fontSize: 12, fontWeight: "bold", marginTop: 12, marginBottom: 6, color: "#424242" },
-        label: { fontSize: 9, fontWeight: "bold", color: "#666", marginTop: 6, marginBottom: 2 },
-        value: { fontSize: 10, color: "#000", marginBottom: 4, lineHeight: 1.5 },
-        row: { flexDirection: "row", marginBottom: 6 },
-        col: { flex: 1 },
-        highlight: { backgroundColor: "#fff3cd", padding: 8, borderRadius: 4, marginTop: 8 },
-      });
+      const resolvedPatient = patientData || patient;
 
-      const patientName = patientData?.full_name || 
-                          `${patientData?.first_name || ''} ${patientData?.middle_name || ''} ${patientData?.last_name || ''}`.trim() || 
-                          'N/A';
+      const pdfBlob = await pdf(
+        <PDFReportDocument
+          patient={resolvedPatient}
+          consultation={consultation}
+          includeReferral={referral}
+        />
+      ).toBlob();
 
-      const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        try {
-          const date = new Date(dateString);
-          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch (e) {
-          return dateString;
-        }
-      };
-
-      const ReferralPDFDoc = ({ referral, patient }) => (
-        <Document>
-          <Page size="A4" style={pdfStyles.page}>
-            <Header
-              title="Referral Document"
-              subtitle={`Patient: ${patientName}`}
-            />
-
-            {/* Referral Information Only */}
-            <View style={pdfStyles.section}>
-              <Text style={pdfStyles.title}>Referral Information</Text>
-              
-              <View style={pdfStyles.row}>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Referred To:</Text>
-                  <Text style={pdfStyles.value}>{referral.referred_to_name || "N/A"}</Text>
-                </View>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Type:</Text>
-                  <Text style={pdfStyles.value}>{referral.referred_to_type || "N/A"}</Text>
-                </View>
-              </View>
-              
-              <View style={pdfStyles.row}>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Referral Date:</Text>
-                  <Text style={pdfStyles.value}>{formatDate(referral.referral_date)}</Text>
-                </View>
-                <View style={pdfStyles.col}>
-                  <Text style={pdfStyles.label}>Status:</Text>
-                  <Text style={pdfStyles.value}>{referral.status || "Pending"}</Text>
-                </View>
-              </View>
-              
-              {referral.appointment_date && (
-                <View style={pdfStyles.row}>
-                  <View style={pdfStyles.col}>
-                    <Text style={pdfStyles.label}>Appointment Date:</Text>
-                    <Text style={pdfStyles.value}>{formatDate(referral.appointment_date)}</Text>
-                  </View>
-                  <View style={pdfStyles.col}></View>
-                </View>
-              )}
-              
-              {/* Highlighted Action Taken */}
-              {referral.clinical_summary && (
-                <View style={pdfStyles.highlight}>
-                  <Text style={[pdfStyles.subtitle, { backgroundColor: "transparent", fontWeight: "bold" }]}>ACTION TAKEN:</Text>
-                  <Text style={pdfStyles.value}>{referral.clinical_summary}</Text>
-                </View>
-              )}
-              
-              {/* Highlighted Reason for Referral */}
-              {referral.referral_reason && (
-                <View style={pdfStyles.highlight}>
-                  <Text style={[pdfStyles.subtitle, { backgroundColor: "transparent", fontWeight: "bold" }]}>REASON FOR REFERRAL:</Text>
-                  <Text style={pdfStyles.value}>{referral.referral_reason}</Text>
-                </View>
-              )}
-              
-              {referral.notes && (
-                <View style={pdfStyles.section}>
-                  <Text style={pdfStyles.label}>Additional Notes:</Text>
-                  <Text style={pdfStyles.value}>{referral.notes}</Text>
-                </View>
-              )}
-            </View>
-
-            <View style={{ marginTop: 20, fontSize: 9, color: "#666" }}>
-              <Text>
-                Generated on: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
-              </Text>
-              {referral.creator && (
-                <Text style={{ marginTop: 5 }}>
-                  Referred by: {referral.creator.full_name || "N/A"}
-                </Text>
-              )}
-            </View>
-
-            <Footer />
-          </Page>
-        </Document>
-      );
-
-      const pdfDoc = <ReferralPDFDoc referral={referral} patient={patientData} />;
-      const blob = await pdf(pdfDoc).toBlob();
-      
-      if (!blob || blob.size === 0) {
+      if (!pdfBlob || pdfBlob.size === 0) {
         throw new Error('Generated PDF is empty or invalid');
       }
-      
-      const url = window.URL.createObjectURL(blob);
-      
+
+      const url = window.URL.createObjectURL(pdfBlob);
+
       // Try to open in new window and trigger print
       const printWindow = window.open(url, '_blank');
       if (printWindow) {
@@ -557,31 +444,28 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 addToast({ message: 'Print dialog could not be opened. PDF downloaded instead.', severity: 'info' });
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `clinical-note-referral-${patientName}-${new Date().toISOString().split('T')[0]}.pdf`;
-                link.style.display = 'none';
+                link.download = `clinical-note-referral-${resolvedPatient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 setTimeout(() => {
-                  if (document.body.contains(link)) {
-                    document.body.removeChild(link);
-                  }
+                  document.body.removeChild(link);
                   window.URL.revokeObjectURL(url);
                 }, 100);
               }
             }, 500);
           }
         };
-        
+
         if (printWindow.addEventListener) {
           printWindow.addEventListener('load', () => {
             setTimeout(tryPrint, 500);
           });
         }
-        
+
         printWindow.onload = () => {
           setTimeout(tryPrint, 500);
         };
-        
+
         setTimeout(() => {
           if (printWindow && !printWindow.closed) {
             tryPrint();
@@ -590,7 +474,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       } else {
         const link = document.createElement('a');
         link.href = url;
-        link.download = `clinical-note-referral-${patientName}-${new Date().toISOString().split('T')[0]}.pdf`;
+        link.download = `clinical-note-referral-${resolvedPatient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
@@ -604,7 +488,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       }
     } catch (error) {
       console.error('Failed to generate/print referral PDF:', error);
-      addToast({ message: 'Failed to print clinical note with referral: ' + (error.message || 'Unknown error'), severity: 'error' });
+      addToast({ message: 'Failed to print referral PDF', severity: 'warning' });
     }
   };
 
@@ -779,11 +663,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     </Button>
                     <Button
                       variant="contained"
-                      startIcon={<PrintIcon />}
+                      startIcon={<SaveIcon />}
                       onClick={handleCreateReferralSubmit}
                       disabled={loadingReferral}
                     >
-                      {loadingReferral ? 'Creating...' : 'Create & Print Referral'}
+                      {loadingReferral ? 'Creating...' : 'Create Referral'}
                     </Button>
                   </Stack>
                 </Grid>

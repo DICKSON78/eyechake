@@ -132,7 +132,10 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
   );
 };
 
-const PDFReportDocument = ({ consultation, patient }) => {
+const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
+  // Use includeReferral if provided, otherwise use consultation.referral
+  const referralData = includeReferral || consultation.referral;
+  
   return (
     <Document
       title="Patient File"
@@ -637,8 +640,138 @@ const PDFReportDocument = ({ consultation, patient }) => {
 
         {consultation.refraction ? (
           <React.Fragment>
+            {/* Objective Refraction */}
             <Subheader
-              title="Refraction Details (Subjective)"
+              title="Refraction Details - Objective Refraction"
+              style={{ marginBottom: 8 }}
+            />
+
+            <View style={[tableStyles.table, { marginBottom: 12 }]}>
+              <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  RE
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  LE
+                </Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  SPH
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  CYL
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  AXIS
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  VA
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  SPH
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  CYL
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  AXIS
+                </Text>
+                <Text
+                  style={[
+                    styles.text,
+                    tableStyles.tableCell,
+                    { fontWeight: "bold" },
+                  ]}
+                >
+                  VA
+                </Text>
+              </View>
+              <View style={tableStyles.tableRow}>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_re_sph}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_re_cyl}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_re_axis}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_re_va}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_le_sph}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_le_cyl}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_le_axis}
+                </Text>
+                <Text style={[styles.text, tableStyles.tableCell]}>
+                  {consultation.refraction.ob_le_va}
+                </Text>
+              </View>
+            </View>
+
+            {/* Subjective Refraction */}
+            <Subheader
+              title="Refraction Details - Subjective Refraction"
               style={{ marginBottom: 8 }}
             />
 
@@ -1010,7 +1143,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
         ) : null}
 
         {/* Referral Information - Show if referral exists */}
-        {consultation.referral ? (
+        {referralData ? (
           <React.Fragment>
             <Subheader
               title="Referral Information"
@@ -1023,12 +1156,12 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 Referred To:
               </Text>
               <Text style={[styles.text, { fontSize: 8 }]}>
-                {`${consultation.referral.referred_to_name || "N/A"}${consultation.referral.referred_to_type ? ` (${consultation.referral.referred_to_type})` : ""}`}
+                {`${referralData.referred_to_name || "N/A"}${referralData.referred_to_type ? ` (${referralData.referred_to_type})` : ""}`}
               </Text>
             </View>
 
-            {/* Highlighted Action Taken */}
-            <View style={{ backgroundColor: "#fff3cd", padding: 8, borderRadius: 4, marginBottom: 8 }}>
+            {/* Action Taken */}
+            <View style={{ marginBottom: 8 }}>
               <Text
                 style={[
                   styles.text,
@@ -1043,12 +1176,12 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 ACTION TAKEN:
               </Text>
               <Text style={[styles.text, { fontSize: 9, lineHeight: 1.4 }]}>
-                {consultation.referral.clinical_summary || "N/A"}
+                {referralData.clinical_summary || ""}
               </Text>
             </View>
 
-            {/* Highlighted Reason for Referral */}
-            <View style={{ backgroundColor: "#fff3cd", padding: 8, borderRadius: 4, marginBottom: 8 }}>
+            {/* Reason for Referral */}
+            <View style={{ marginBottom: 8 }}>
               <Text
                 style={[
                   styles.text,
@@ -1063,7 +1196,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
                 REASON FOR REFERRAL:
               </Text>
               <Text style={[styles.text, { fontSize: 9, lineHeight: 1.4 }]}>
-                {consultation.referral.referral_reason || "N/A"}
+                {referralData.referral_reason || ""}
               </Text>
             </View>
           </React.Fragment>
@@ -1098,7 +1231,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
   );
 };
 
-const PDFReport = ({ consultationId, patient, ...rest }) => {
+const PDFReport = ({ consultationId, patient, includeReferral, ...rest }) => {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -1134,6 +1267,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
           <PDFReportDocument
             consultation={consultation}
             patient={patient}
+            includeReferral={includeReferral}
           />
         );
         
@@ -1193,7 +1327,7 @@ const PDFReport = ({ consultationId, patient, ...rest }) => {
       console.error('Missing required data for PDF generation:', { consultation, patient });
       alert('Missing consultation or patient data. Please refresh the page and try again.');
     }
-  }, [consultation, patient]);
+  }, [consultation, patient, includeReferral]);
 
   const handleDownload = useCallback(async () => {
     if (!consultationId || !patient?.id) {
@@ -1267,3 +1401,4 @@ const styles = StyleSheet.create({
 });
 
 export default PDFReport;
+export { PDFReportDocument };

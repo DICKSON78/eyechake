@@ -117,16 +117,38 @@ class UserPrivilege extends Model
         }
 
         // Column-based schema: one row per user
-        $updateData = ['user_id' => $userId];
-        foreach (self::$availablePrivileges as $priv) {
-            $updateData[$priv] = 0;
+        static $cachedColumns = null;
+
+        if ($cachedColumns === null) {
+            $cachedColumns = array_values(array_filter(
+                Schema::getColumnListing('user_privileges'),
+                fn ($column) => $column !== 'user_id'
+            ));
         }
+
+        if (empty($cachedColumns)) {
+            return null;
+        }
+
+        $updateData = ['user_id' => $userId];
+
+        foreach ($cachedColumns as $column) {
+            $updateData[$column] = 0;
+        }
+
         foreach ($privileges as $priv) {
-            if (in_array($priv, self::$availablePrivileges)) {
+            if (in_array($priv, $cachedColumns, true)) {
                 $updateData[$priv] = 1;
             }
         }
-        self::upsert($updateData, ['user_id'], array_filter(array_keys($updateData), fn ($k) => $k !== 'user_id'));
+
+        $columnsToUpdate = array_values(array_filter(
+            array_keys($updateData),
+            fn ($column) => $column !== 'user_id'
+        ));
+
+        self::upsert([$updateData], ['user_id'], $columnsToUpdate);
+
         return self::where('user_id', $userId)->first();
     }
 }

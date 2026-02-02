@@ -171,43 +171,62 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->user();
-        if ($user->is_admin) {
-            $request->validate([
-                'clinic_id' => 'required|exists:clinics,id',
+        try {
+            $user = $request->user();
+            if ($user->is_admin) {
+                $request->validate([
+                    'clinic_id' => 'required|exists:clinics,id',
+                ]);
+
+                $clinic_id = $request->clinic_id;
+            } else {
+                $clinic_id = $user->clinic_id;
+            }
+
+            $validationRules = [
+                'first_name' => 'required|string|max:255',
+                'middle_name' => 'nullable|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'username' => 'required|string|unique:users,username|max:255',
+                'gender' => 'required|in:Male,Female',
+                'date_of_birth' => 'nullable|date_format:Y-m-d',
+                'phone' => 'nullable|string|max:20',
+                'national_id' => 'nullable|string|max:50',
+                'designation' => 'nullable|in:Doctor,Other',
+                'department_id' => 'nullable|exists:departments,id',
+                'job_title_id' => 'nullable|exists:job_titles,id',
+                'employee_number' => 'nullable|string|unique:users,employee_number|max:50',
+                'password' => 'required|string|min:6',
+                'privileges' => 'sometimes|array',
+            ];
+
+            $request->validate($validationRules);
+
+            $input = $request->except('password', 'privileges');
+            $input['clinic_id'] = $clinic_id;
+            $input['password'] = Hash::make($request->password);
+            $input['created_by'] = $request->user()->id;
+            $data = User::create($input);
+
+            if ($data && $request->has('privileges')) {
+                // Set privileges for new user using the boolean column structure
+                UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
+            }
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('User registration validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['password'])
             ]);
-
-            $clinic_id = $request->clinic_id;
-        } else {
-            $clinic_id = $user->clinic_id;
+            return $this->sendError('Validation failed. Please check all required fields.', Response::HTTP_UNPROCESSABLE_ENTITY, $e->errors());
+        } catch (\Exception $e) {
+            \Log::error('User registration failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->sendError('Failed to create user: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'username' => 'required|unique:users,username',
-            'gender' => 'required|in:Male,Female',
-            'date_of_birth' => 'nullable|date_format:Y-m-d',
-            'designation' => 'nullable|in:Doctor,Other',
-            'department_id' => 'nullable|exists:departments,id',
-            'job_title_id' => 'nullable|exists:job_titles,id',
-            'employee_number' => 'nullable|unique:users,employee_number',
-            'password' => 'required',
-            'privileges' => 'sometimes|array',
-        ]);
-
-        $input = $request->except('password', 'privileges');
-        $input['clinic_id'] = $clinic_id;
-        $input['password'] = Hash::make($request->password);
-        $input['created_by'] = $request->user()->id;
-        $data = User::create($input);
-
-        if ($data && $request->has('privileges')) {
-            // Set privileges for new user using the boolean column structure
-            UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
-        }
-
-        return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
     }
 
     /**

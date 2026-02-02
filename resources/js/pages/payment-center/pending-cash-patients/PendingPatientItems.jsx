@@ -71,7 +71,7 @@ const PendingPatientItems = () => {
   } = useFetch(
     "api/patient-payment-cache-items",
     {
-		  status: "Pending,Served", // Include both pending and served items for billing
+		  status: "Pending,Billed", // Only show items that haven't been paid yet
       per_page: 500,
       payment_cache_id: paymentCacheId,
       transaction_type: "Cash",

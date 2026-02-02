@@ -431,14 +431,26 @@ class ConsultationsController extends Controller
         $data = null;
         $user = $request->user();
 
+        $consultation = Consultation::with(['payment_cache_item.payment_cache.check_in.patient'])
+            ->find($request->consultation_id);
+
+        if (!$consultation) {
+            return $this->sendResponse(null, Response::HTTP_NOT_FOUND, 'Consultation not found.');
+        }
+
         // if item has price for the provided payment mode, continue
         $item = Item::where('id', $request->item_id)
             ->whereHas('prices', function ($query) use ($request) {
                 $query->where('payment_mode_id', $request->payment_mode_id);
             })
-            ->with(['prices' => function ($query) use ($request) {
+            ->with([
+                'prices' => function ($query) use ($request) {
                 $query->where('payment_mode_id', $request->payment_mode_id);
-            }])
+                },
+                'consultation_type',
+                'item_type',
+                'lens_type',
+            ])
             ->first();
 
         if ($item) {
@@ -448,7 +460,6 @@ class ConsultationsController extends Controller
                 ->first();
 
             if (!$payment_cache) {
-                $consultation = Consultation::find($request->consultation_id);
                 $payment_cache = PatientPaymentCache::create([
                     'check_in_id' => $consultation->payment_cache_item->payment_cache->check_in_id,
                     'consultation_id' => $request->consultation_id,
@@ -470,33 +481,109 @@ class ConsultationsController extends Controller
                 'comments' => $request->comments,
                 'created_by' => $user->id,
             ]);
-            $data->item = $item;
+
+            // Ensure response includes freshly created relations
+            $data->setRelation('item', $item);
             $data->status = 'Pending';
+            $data->loadMissing(['payment_cache.check_in.patient']);
+
+            // Auto-flag glass journeys so downstream flows push the patient to sales and optician
+            if (
+                $item->consultation_type
+                && strcasecmp($item->consultation_type->name, 'Glass') === 0
+            ) {
+                $consultationUpdates = [];
+
+                if ($consultation->require_glass !== 'Yes') {
+                    $consultationUpdates['require_glass'] = 'Yes';
+                }
+
+                $existingLensTypes = [];
+                if (!empty($consultation->lens_types)) {
+                    if (is_string($consultation->lens_types)) {
+                        $decoded = json_decode($consultation->lens_types, true);
+                        if (is_array($decoded)) {
+                            $existingLensTypes = $decoded;
+                        }
+                    } elseif (is_array($consultation->lens_types)) {
+                        $existingLensTypes = $consultation->lens_types;
+                    }
+                }
+
+                if (
+                    $item->item_type
+                    && strcasecmp($item->item_type->name, 'Lens') === 0
+                    && $item->lens_type
+                    && $item->lens_type->name
+                ) {
+                    $existingLensTypes[] = $item->lens_type->name;
+                }
+
+                if (!empty($existingLensTypes)) {
+                    $consultationUpdates['lens_types'] = json_encode(array_values(array_unique($existingLensTypes)));
+                }
+
+                if (!empty($consultationUpdates)) {
+                    $consultation->update($consultationUpdates);
+
+                    \Log::info('Consultation auto-updated after glass item added', [
+                        'consultation_id' => $consultation->id,
+                        'updates' => array_keys($consultationUpdates),
+                    ]);
+                }
+            }
 
             // Start treatment for patient waiting time tracking
             try {
-                $patient = $data->payment_cache_item->payment_cache->check_in->patient;
+                $paymentCache = $data->payment_cache;
+                $patient = $paymentCache && $paymentCache->check_in
+                    ? $paymentCache->check_in->patient
+                    : null;
+
                 if ($patient) {
+                    $itemCreatedAt = $data->created_at instanceof Carbon
+                        ? $data->created_at
+                        : Carbon::now();
+
                     $waitingTime = $patient->waiting_times()
-                        ->whereDate('registration_time', $data->created_at->format('Y-m-d'))
+                        ->whereDate('registration_time', $itemCreatedAt->format('Y-m-d'))
                         ->where('status', 'waiting')
                         ->first();
-                    
+
                     if ($waitingTime) {
                         $waitingTime->startTreatment();
                         $waitingTime->sendToConsultation();
-                        
-                        \Log::info('Started treatment for patient waiting time', [
+
+                        \Log::info('Started treatment for patient waiting time after adding consultation item', [
                             'patient_id' => $patient->id,
-                            'consultation_id' => $data->id,
-                            'waiting_time_id' => $waitingTime->id
+                            'consultation_id' => $request->consultation_id,
+                            'waiting_time_id' => $waitingTime->id,
+                            'item_id' => $data->id,
                         ]);
                     }
                 }
             } catch (\Exception $e) {
-                \Log::error('Failed to start treatment for patient waiting time', [
-                    'consultation_id' => $data->id,
-                    'error' => $e->getMessage()
+                \Log::error('Failed to start treatment for patient waiting time after adding consultation item', [
+                    'consultation_id' => $request->consultation_id,
+                    'item_id' => $data->id ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Trigger notification refresh so sales/dispensing dashboards update immediately
+            try {
+                cache()->flush();
+                event(new \App\Events\NotificationUpdate());
+                \Log::info('Notification refresh triggered after consultation item added', [
+                    'consultation_id' => $request->consultation_id,
+                    'item_id' => $data->id,
+                    'created_by' => $user->id,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to trigger notification refresh after consultation item added', [
+                    'consultation_id' => $request->consultation_id,
+                    'item_id' => $data->id ?? null,
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -1137,6 +1224,48 @@ class ConsultationsController extends Controller
                 if ($patient) {
                     $patient->info_source_id = $request->info_source_id;
                     $patient->save();
+                }
+            }
+
+            // Check if lenses are prescribed and send patient to sales
+            if ($data->require_glass === 'Yes' || $data->lens_types) {
+                try {
+                    $patient = $data->payment_cache_item->payment_cache->check_in->patient;
+                    if ($patient) {
+                        $waitingTime = $patient->current_waiting_time;
+                        
+                        if ($waitingTime && $waitingTime->status === 'in_treatment') {
+                            // Send patient to sales/cashier for lens payment
+                            $waitingTime->sendToCashier();
+                            
+                            \Log::info('Patient prescribed lenses - sent to sales/cashier', [
+                                'patient_id' => $patient->id,
+                                'patient_name' => $patient->full_name,
+                                'consultation_id' => $data->id,
+                                'require_glass' => $data->require_glass,
+                                'lens_types' => $data->lens_types
+                            ]);
+
+                            // Trigger notification refresh after sending to cashier
+                            try {
+                                cache()->flush();
+                                event(new \App\Events\NotificationUpdate());
+                                \Log::info('Notification refresh triggered after sending patient to sales', [
+                                    'patient_id' => $patient->id,
+                                    'department' => 'cashier'
+                                ]);
+                            } catch (\Exception $e) {
+                                \Log::error('Failed to trigger notification after sending to sales', [
+                                    'error' => $e->getMessage()
+                                ]);
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send patient to sales after lens prescription', [
+                        'consultation_id' => $data->id,
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
 
