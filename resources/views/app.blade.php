@@ -97,11 +97,11 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ \Illuminate\Support\Facades\URL::to('/') }}/favicon.ico">
-    <link rel="icon" type="image/png" href="{{ \Illuminate\Support\Facades\URL::to('/') }}/logo.png">
-    <link rel="apple-touch-icon" href="{{ \Illuminate\Support\Facades\URL::to('/') }}/logo.png">
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
 
     <!-- Fonts -->
-    <link href="{{ \Illuminate\Support\Facades\URL::to('/') . '/css/fonts.css' }}" rel="stylesheet">
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
 
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
