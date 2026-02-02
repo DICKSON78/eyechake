@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # PHP Application
+  # PHP Application with built-in server
   app:
     build:
       context: .
@@ -10,11 +10,14 @@ services:
     container_name: eyechake_app
     restart: unless-stopped
     working_dir: /var/www
+    ports:
+      - "8074:8074"
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
       - php_vendor:/var/www/vendor
       - php_storage:/var/www/storage
+    command: php artisan serve --host=0.0.0.0 --port=8074
     environment:
       - DB_HOST=db
       - DB_DATABASE=sikaf
@@ -35,30 +38,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # Nginx Web Server
-  nginx:
-    image: nginx:alpine
-    container_name: eyechake_nginx
-    restart: unless-stopped
-    ports:
-      - "8000:80"
-      - "443:443"
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-    networks:
-      - eyechake-network
-    depends_on:
-      app:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   # MySQL Database
   db:
