@@ -536,10 +536,10 @@ const Home = () => {
           <Box 
             sx={{ 
               position: { xs: 'relative', md: 'absolute' },
-              top: { xs: 'auto', md: '8%' },
-              right: { xs: 0, md: '6%' },
-              width: { xs: '100%', md: '26%' },
-              height: { xs: '300px', md: '75%' },
+              top: { xs: 'auto', md: '7.5%' },
+              right: { xs: 0, md: '2%' },
+              width: { xs: '100%', md: '28%' },
+              height: { xs: '300px', md: '85%' },
               zIndex: 3,
               display: 'flex',
               alignItems: 'center',
@@ -555,8 +555,8 @@ const Home = () => {
                 width: '100%',
                 background: 'transparent',
                 border: 'none',
-                borderRadius: { xs: '16px', md: '24px' },
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                boxShadow: { xs: 'none', md: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' },
+                borderRadius: { xs: '0', md: '30px' },
               }}
             >
               <Box
