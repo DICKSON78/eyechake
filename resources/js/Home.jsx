@@ -536,10 +536,10 @@ const Home = () => {
           <Box 
             sx={{ 
               position: { xs: 'relative', md: 'absolute' },
-              top: { xs: 'auto', md: '5%' },
-              right: { xs: 0, md: '3%' },
+              top: { xs: 'auto', md: '8%' },
+              right: { xs: 0, md: '6%' },
               width: { xs: '100%', md: '26%' },
-              height: { xs: '300px', md: '90%' },
+              height: { xs: '300px', md: '75%' },
               zIndex: 3,
               display: 'flex',
               alignItems: 'center',
