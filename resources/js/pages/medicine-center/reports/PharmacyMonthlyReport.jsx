@@ -331,27 +331,21 @@ const PharmacyMonthlyReport = () => {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Employee Name:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.employeeName || " "}
-                </span>
+                <strong>Employee Name:</strong>
               </Typography>
+              <TextField fullWidth size="small" value={formData.employeeName} onChange={(v) => setFormData((p) => ({ ...p, employeeName: v }))} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Month:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "250px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.month || " "}
-                </span>
+                <strong>Month:</strong>
               </Typography>
+              <TextField fullWidth size="small" value={formData.month} onChange={(v) => setFormData((p) => ({ ...p, month: v }))} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Date Submitted:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "250px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.dateSubmitted || " "}
-                </span>
+                <strong>Date Submitted:</strong>
               </Typography>
+              <DatePicker fullWidth value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null} onChange={(v) => setFormData((p) => ({ ...p, dateSubmitted: v ? v.toISOString().split("T")[0] : "" }))} />
             </Grid>
           </Grid>
         </Box>
@@ -366,83 +360,76 @@ const PharmacyMonthlyReport = () => {
               <TableCell sx={{ fontWeight: 700 }}>MEDICINE</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>TARGET</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>RESULTS</TableCell>
+              <TableCell sx={{ fontWeight: 700, width: "80px" }}>ACTION</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {formData.productTargets.map((product, index) => (
               <TableRow key={index}>
-                <TableCell>{product.productName || " "}</TableCell>
-                <TableCell>{product.target || " "}</TableCell>
-                <TableCell>{product.result || " "}</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={product.productName || ""}
+                    onChange={(v) => handleProductTargetChange(index, "productName", v)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={product.target || ""}
+                    onChange={(v) => handleProductTargetChange(index, "target", v)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={product.result || ""}
+                    onChange={(v) => handleProductTargetChange(index, "result", v)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={1}>
+                    {index === formData.productTargets.length - 1 && (
+                      <Tooltip title="Add Medicine">
+                        <IconButton size="small" color="primary" onClick={handleAddMedicine}>
+                          <AddIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {formData.productTargets.length > 1 && (
+                      <Tooltip title="Remove">
+                        <IconButton size="small" color="error" onClick={() => handleRemoveMedicine(index)}>
+                          <RemoveIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
 
         <Box sx={{ mt: 4, mb: 2 }}>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            <strong>Signature:</strong>{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "200px", display: "inline-block" }}>
-              {formData.signature || "_________________________"}
-            </span>
-          </Typography>
-          <Typography variant="body1">
-            <strong>Date:</strong>{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "200px", display: "inline-block" }}>
-              {formData.reportDate || "_________________________"}
-            </span>
-          </Typography>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Signature:</strong>
+              </Typography>
+              <TextField fullWidth size="small" value={formData.signature} onChange={(v) => setFormData((p) => ({ ...p, signature: v }))} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Date:</strong>
+              </Typography>
+              <DatePicker fullWidth value={formData.reportDate ? new Date(formData.reportDate) : null} onChange={(v) => setFormData((p) => ({ ...p, reportDate: v ? v.toISOString().split("T")[0] : "" }))} />
+            </Grid>
+          </Grid>
         </Box>
       </Paper>
-
-      <Box sx={{ mt: 4, "@media print": { display: "none" } }}>
-        <Card>
-          <CardHeader title="Fill Report Data" />
-          <CardContent>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="Employee Name" value={formData.employeeName} onChange={(v) => setFormData((p) => ({ ...p, employeeName: v }))} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="Month" value={formData.month} onChange={(v) => setFormData((p) => ({ ...p, month: v }))} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DatePicker fullWidth label="Date Submitted" value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null} onChange={(v) => setFormData((p) => ({ ...p, dateSubmitted: v ? v.toISOString().split("T")[0] : "" }))} />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Medicine Targets</Typography>
-                <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddMedicine} sx={{ mb: 2 }}>
-                  Add Medicine
-                </Button>
-              </Grid>
-              {formData.productTargets.map((product, index) => (
-                <React.Fragment key={index}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <TextField fullWidth label="Medicine Name" value={product.productName} onChange={(v) => handleProductTargetChange(index, "productName", v)} />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <TextField fullWidth label="Target" value={product.target} onChange={(v) => handleProductTargetChange(index, "target", v)} />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 3 }}>
-                    <TextField fullWidth label="Results" value={product.result} onChange={(v) => handleProductTargetChange(index, "result", v)} />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 1 }}>
-                    <IconButton color="error" onClick={() => handleRemoveMedicine(index)} disabled={formData.productTargets.length === 1}>
-                      <RemoveIcon />
-                    </IconButton>
-                  </Grid>
-                </React.Fragment>
-              ))}
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Signature" value={formData.signature} onChange={(v) => setFormData((p) => ({ ...p, signature: v }))} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <DatePicker fullWidth label="Report Date" value={formData.reportDate ? new Date(formData.reportDate) : null} onChange={(v) => setFormData((p) => ({ ...p, reportDate: v ? v.toISOString().split("T")[0] : "" }))} />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Box>
       <Modal ref={modalRef} />
     </Page>
   );
