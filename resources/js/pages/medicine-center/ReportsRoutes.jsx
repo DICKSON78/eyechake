@@ -4,6 +4,7 @@ import PatientItems from "../reports/PatientItems";
 import MedicineItemBalance from "./reports/MedicineItemBalance";
 import MedicineQuantityDispensed from "./reports/MedicineQuantityDispensed";
 import MedicineAlerts from "./MedicineAlerts";
+import PharmacyMonthlyReport from "./reports/PharmacyMonthlyReport";
 
 const ReportsRoutes = () => {
   return (
@@ -56,6 +57,12 @@ const ReportsRoutes = () => {
       <Route
         path="/medicine-alerts"
         element={<MedicineAlerts />}
+      />
+
+      {/* Pharmacy Monthly Report */}
+      <Route
+        path="/pharmacy-monthly-report"
+        element={<PharmacyMonthlyReport />}
       />
       
       {/* Legacy routes for backward compatibility */}

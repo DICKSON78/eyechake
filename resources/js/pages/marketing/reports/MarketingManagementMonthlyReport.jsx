@@ -14,6 +14,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -41,12 +42,44 @@ const MarketingManagementMonthlyReport = () => {
   const navigate = useNavigate();
   const printRef = useRef();
 
+  const customerRelationshipActivities = [
+    "Total Clients Called",
+    "Clients Reached Successfully",
+    "Clients Reminded for Follow-up / Recheck",
+    "Clients Contacted for After-Sales Feedback",
+    "Clients Contacted for Marketing / Offers",
+    "Number of clients who returned after follow-up",
+    "Cross-selling achieved through follow-up calls",
+  ];
+
+  const getCustomerRelationshipKey = (activity) => {
+    const keyMap = {
+      "Total Clients Called": "totalClientsCalled",
+      "Clients Reached Successfully": "clientsReachedSuccessfully",
+      "Clients Reminded for Follow-up / Recheck": "clientsRemindedForFollowup",
+      "Clients Contacted for After-Sales Feedback": "clientsContactedForAfterSales",
+      "Clients Contacted for Marketing / Offers": "clientsContactedForMarketing",
+      "Number of clients who returned after follow-up": "clientsReturnedAfterFollowup",
+      "Cross-selling achieved through follow-up calls": "crossSellingAchieved",
+    };
+    return keyMap[activity] || activity;
+  };
+
   const [isEditing, setIsEditing] = useState(false);
   const [reports, setReports] = useState([]);
   const [selectedReportId, setSelectedReportId] = useState(null);
   const [formData, setFormData] = useState({
     employeeName: "",
     dateSubmitted: new Date(),
+    customerRelationship: {
+      totalClientsCalled: "",
+      clientsReachedSuccessfully: "",
+      clientsRemindedForFollowup: "",
+      clientsContactedForAfterSales: "",
+      clientsContactedForMarketing: "",
+      clientsReturnedAfterFollowup: "",
+      crossSellingAchieved: "",
+    },
     tiktokManagement: [
       { description: "Number of contents posted", target: "", result: "" },
       { description: "New followers gained", target: "", result: "" },
@@ -126,6 +159,15 @@ const MarketingManagementMonthlyReport = () => {
     setFormData({
       employeeName: "",
       dateSubmitted: new Date(),
+      customerRelationship: {
+        totalClientsCalled: "",
+        clientsReachedSuccessfully: "",
+        clientsRemindedForFollowup: "",
+        clientsContactedForAfterSales: "",
+        clientsContactedForMarketing: "",
+        clientsReturnedAfterFollowup: "",
+        crossSellingAchieved: "",
+      },
       tiktokManagement: [
         { description: "Number of contents posted", target: "", result: "" },
         { description: "New followers gained", target: "", result: "" },
@@ -608,6 +650,55 @@ const MarketingManagementMonthlyReport = () => {
                 </Typography>
               </Box>
             )}
+
+            {/* CUSTOMER RELATIONSHIP MANAGEMENT Section */}
+            <Typography
+              variant="h6"
+              sx={{
+                mt: 4,
+                mb: 2,
+                fontWeight: "bold",
+                textAlign: "center",
+                textDecoration: "underline",
+              }}
+            >
+              CUSTOMER RELATIONSHIP MANAGEMENT
+            </Typography>
+            <TableContainer component={Paper} variant="outlined" sx={{ mb: 4 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold", border: "1px solid #ddd" }}>Activity</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", border: "1px solid #ddd" }}>Number/Summary</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {customerRelationshipActivities.map((activity, index) => (
+                    <TableRow key={index}>
+                      <TableCell sx={{ border: "1px solid #ddd" }}>{activity}</TableCell>
+                      <TableCell sx={{ border: "1px solid #ddd" }}>
+                        {isEditing ? (
+                          <TextField
+                            fullWidth
+                            size="small"
+                            value={formData.customerRelationship[getCustomerRelationshipKey(index)] || ""}
+                            onChange={(value) =>
+                              handleInputChange(
+                                "customerRelationship",
+                                getCustomerRelationshipKey(index),
+                                value
+                              )
+                            }
+                          />
+                        ) : (
+                          formData.customerRelationship[getCustomerRelationshipKey(index)] || ""
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
             <Divider sx={{ my: 4 }} />
 

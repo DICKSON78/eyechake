@@ -60,9 +60,9 @@ const DispensingRequests = ({ consultationType, stockItem }) => {
       item_consultation_type: consultationType,
       is_stock_item: stockItem,
       start_date: queryParams.start_date
-        ? formatDateForDb(params.start_date)
+        ? formatDateForDb(queryParams.start_date)
         : undefined,
-      end_date: queryParams.end_date ? formatDateForDb(params.end_date) : undefined,
+      end_date: queryParams.end_date ? formatDateForDb(queryParams.end_date) : undefined,
     },
     true,
     {

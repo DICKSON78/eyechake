@@ -277,6 +277,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           other_dispensing_requests: notifications.other_dispensing_requests,
           procedure_requests: notifications.procedure_requests,
           vip_patients: notifications.vip_patients,
+          patients_sent_to_sales: notifications.patients_sent_to_sales,
         });
       }
     }
@@ -395,12 +396,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               show: isPrivilegeGranted('reception'),
             },
             {
-              title: "Receptionist Monthly Report",
-              icon: <ReportsIcon />,
-              to: "/reception/reports/receptionist-monthly-report",
-              show: isPrivilegeGranted('reception'),
-            },
-            {
               title: "Items Dispensed",
               icon: <ReportsIcon />,
               to: "/reception/reports/items-dispensed",
@@ -485,12 +480,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/payment-center/reports/expenses",
-              show: isPrivilegeGranted('payment_center'),
-            },
-            {
-              title: "Comprehensive Monthly Cashier Report",
-              icon: <ReportsIcon />,
-              to: "/payment-center/reports/cashier-monthly-report",
               show: isPrivilegeGranted('payment_center'),
             },
           ],
@@ -585,6 +574,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           icon: <PrescriptionIcon />,
           to: "/sales-management/clinical-notes",
           show: hasSalesCenterAccess,
+          badge: notifications && typeof notifications.patients_sent_to_sales !== 'undefined' && notifications.patients_sent_to_sales != null ? (Number(notifications.patients_sent_to_sales) || 0) : 0,
         },
         {
           title: "Reports",
@@ -673,6 +663,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
                   show: isPrivilegeGranted('medicine_center'),
                 },
               ],
+            },
+            {
+              title: "Pharmacy Monthly Report",
+              icon: <ReportsIcon />,
+              to: "/pharmacy/reports/pharmacy-monthly-report",
+              show: isPrivilegeGranted('medicine_center'),
             },
           ],
         },
@@ -1077,12 +1073,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
                   to: "/director/reports/reception/patient-registration",
                   show: isPrivilegeGranted('director'),
                 },
-                {
-                  title: "Receptionist Monthly Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/reception/receptionist-monthly-report",
-                  show: isPrivilegeGranted('director'),
-                },
               ],
             },
             {
@@ -1107,12 +1097,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
                   title: "Expenses Report",
                   icon: <ReportsIcon />,
                   to: "/director/reports/payment-center/expenses",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Cashier Monthly Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/payment-center/cashier-monthly-report",
                   show: isPrivilegeGranted('director'),
                 },
               ],

@@ -69,22 +69,34 @@ const OptometristMonthlyReport = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
+  // Default products list for Pharmacy section
+  const defaultProducts = [
+    "Carofit",
+    "Probeta N",
+    "Levofloxacin",
+    "Olopat od",
+    "Chloramphenicol ointment",
+    "Softdrop",
+  ];
+
   // Form data state (Pharmacy & Consultation section moved to separate report)
   const [formData, setFormData] = useState({
     name: "",
     month: "",
     dateSubmitted: new Date().toISOString().split("T")[0],
     
-    // Section 1: Patient & Clinical Summary
-    patientClinical: {
-      totalPatientsSeen: "",
-      newPatients: "",
-      returningPatients: "",
-      refractionsPerformed: "",
-      contactLensFittings: "",
-      specialTests: "",
-      referralsMade: "",
-    },
+    // Pharmacy & Product Sales Summary
+    products: defaultProducts.map((name) => ({
+      productName: name,
+      openingStock: "",
+      closingStock: "",
+      buyingPricePerUnit: "",
+      sellingPricePerUnit: "",
+      totalSales: "",
+      profit: "",
+    })),
+    totalSales: "",
+    totalTarget: "2,000,000",
     
     // Sales Targets & Achievements - General
     salesTargets: {
@@ -222,6 +234,30 @@ const OptometristMonthlyReport = () => {
     }));
   };
 
+  const handleProductChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.products];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, products: updated };
+    });
+  };
+
+  const calculateProfit = (index) => {
+    setFormData((prev) => {
+      const product = prev.products[index];
+      const buying = parseFloat(product.buyingPricePerUnit) || 0;
+      const selling = parseFloat(product.sellingPricePerUnit) || 0;
+      const closing = parseFloat(product.closingStock) || 0;
+      if (buying && selling && closing) {
+        const profit = (selling - buying) * closing;
+        const updated = [...prev.products];
+        updated[index] = { ...updated[index], profit: profit.toString() };
+        return { ...prev, products: updated };
+      }
+      return prev;
+    });
+  };
+
   const handleSave = async () => {
     try {
       const reportData = {
@@ -256,15 +292,17 @@ const OptometristMonthlyReport = () => {
         name: report.name || "",
         month: report.month || "",
         dateSubmitted: report.dateSubmitted || new Date().toISOString().split("T")[0],
-        patientClinical: report.patientClinical || {
-          totalPatientsSeen: "",
-          newPatients: "",
-          returningPatients: "",
-          refractionsPerformed: "",
-          contactLensFittings: "",
-          specialTests: "",
-          referralsMade: "",
-        },
+        products: report.products || defaultProducts.map((name) => ({
+          productName: name,
+          openingStock: "",
+          closingStock: "",
+          buyingPricePerUnit: "",
+          sellingPricePerUnit: "",
+          totalSales: "",
+          profit: "",
+        })),
+        totalSales: report.totalSales || "",
+        totalTarget: report.totalTarget || "2,000,000",
         salesTargets: report.salesTargets || {
           bluecutVsTransitionRatio: { target: "10:2", result: "" },
           averageBifocalLensMonthly: { target: "5", result: "" },
@@ -344,15 +382,17 @@ const OptometristMonthlyReport = () => {
                 name: "",
                 month: "",
                 dateSubmitted: new Date().toISOString().split("T")[0],
-                patientClinical: {
-                  totalPatientsSeen: "",
-                  newPatients: "",
-                  returningPatients: "",
-                  refractionsPerformed: "",
-                  contactLensFittings: "",
-                  specialTests: "",
-                  referralsMade: "",
-                },
+                products: defaultProducts.map((name) => ({
+                  productName: name,
+                  openingStock: "",
+                  closingStock: "",
+                  buyingPricePerUnit: "",
+                  sellingPricePerUnit: "",
+                  totalSales: "",
+                  profit: "",
+                })),
+                totalSales: "",
+                totalTarget: "2,000,000",
                 salesTargets: {
                   bluecutVsTransitionRatio: { target: "10:2", result: "" },
                   averageBifocalLensMonthly: { target: "5", result: "" },
@@ -407,15 +447,17 @@ const OptometristMonthlyReport = () => {
       name: "",
       month: "",
       dateSubmitted: new Date().toISOString().split("T")[0],
-      patientClinical: {
-        totalPatientsSeen: "",
-        newPatients: "",
-        returningPatients: "",
-        refractionsPerformed: "",
-        contactLensFittings: "",
-        specialTests: "",
-        referralsMade: "",
-      },
+      products: defaultProducts.map((name) => ({
+        productName: name,
+        openingStock: "",
+        closingStock: "",
+        buyingPricePerUnit: "",
+        sellingPricePerUnit: "",
+        totalSales: "",
+        profit: "",
+      })),
+      totalSales: "",
+      totalTarget: "2,000,000",
       salesTargets: {
         bluecutVsTransitionRatio: { target: "10:2", result: "" },
         averageBifocalLensMonthly: { target: "5", result: "" },
@@ -704,59 +746,96 @@ const OptometristMonthlyReport = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Section 1: Patient & Clinical Summary */}
+        {/* Section A: Pharmacy & Product Sales Summary */}
         <Typography
           variant="h5"
           component="h2"
           sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}
         >
-          1. Patient & Clinical Summary
+          A. Pharmacy & Product Sales Summary
         </Typography>
 
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Total Patients Seen:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.totalPatientsSeen || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • New Patients:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.newPatients || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Returning Patients:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.returningPatients || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Refractions Performed:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.refractionsPerformed || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Contact Lens Fittings:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.contactLensFittings || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Special Tests (Fundoscopy, Tonometry, Others):{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.specialTests || " "}
-            </span>
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            • Referrals Made:{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-              {formData.patientClinical.referralsMade || " "}
-            </span>
-          </Typography>
-        </Box>
+        <Table
+          sx={{
+            mb: 4,
+            border: "1px solid #ccc",
+            "& .MuiTableCell-root": {
+              border: "1px solid #ccc",
+              padding: "8px",
+            },
+          }}
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Product Name</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Opening Stock</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Closing Stock</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Buying price per Unit (Tsh)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Selling Price per Unit (Tsh)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Total Sales (Tsh)</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Profit (Tsh)</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {formData.products.map((product, index) => (
+              <TableRow key={index}>
+                <TableCell>{product.productName}</TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.openingStock || " "}
+                  </span>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.closingStock || " "}
+                  </span>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.buyingPricePerUnit || " "}
+                  </span>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.sellingPricePerUnit || " "}
+                  </span>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.totalSales || " "}
+                  </span>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                    {product.profit || " "}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell colSpan={5} sx={{ fontWeight: 700, textAlign: "right" }}>
+                TOTAL SALES
+              </TableCell>
+              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                  {formData.totalSales || " "}
+                </span>
+              </TableCell>
+              <TableCell sx={{ border: "1px solid #ccc" }}></TableCell>
+            </TableRow>
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell colSpan={5} sx={{ fontWeight: 700, textAlign: "right", border: "1px solid #ccc" }}>
+                TOTAL TARGET
+              </TableCell>
+              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
+                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
+                  {formData.totalTarget || "2,000,000"}
+                </span>
+              </TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
 
         <Divider sx={{ my: 3 }} />
 
@@ -1076,80 +1155,119 @@ const OptometristMonthlyReport = () => {
                 />
               </Grid>
 
-              {/* Section 1: Patient & Clinical Summary */}
+              {/* Section A: Pharmacy & Product Sales Summary */}
               <Grid size={{ xs: 12 }}>
                 <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 1: Patient & Clinical Summary
+                  A. Pharmacy & Product Sales Summary
                 </Typography>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+
+              {formData.products.map((product, index) => (
+                <React.Fragment key={index}>
+                  <Grid size={{ xs: 12 }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+                      {product.productName}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Opening Stock"
+                      value={product.openingStock}
+                      onChange={(value) => handleProductChange(index, "openingStock", value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Closing Stock"
+                      value={product.closingStock}
+                      onChange={(value) => {
+                        handleProductChange(index, "closingStock", value);
+                        setTimeout(() => calculateProfit(index), 100);
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Buying Price per Unit (Tsh)"
+                      value={product.buyingPricePerUnit}
+                      onChange={(value) => {
+                        handleProductChange(index, "buyingPricePerUnit", value);
+                        setTimeout(() => calculateProfit(index), 100);
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Selling Price per Unit (Tsh)"
+                      value={product.sellingPricePerUnit}
+                      onChange={(value) => {
+                        handleProductChange(index, "sellingPricePerUnit", value);
+                        setTimeout(() => calculateProfit(index), 100);
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Total Sales (Tsh)"
+                      value={product.totalSales}
+                      onChange={(value) => handleProductChange(index, "totalSales", value)}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={2}
+                      label="Profit (Tsh)"
+                      value={product.profit}
+                      onChange={(value) => handleProductChange(index, "profit", value)}
+                      helperText="Auto-calculated when buying/selling prices and closing stock are entered"
+                    />
+                  </Grid>
+                </React.Fragment>
+              ))}
+
+              {/* Summary Fields */}
+              <Grid size={{ xs: 12 }}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                  Summary
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   multiline
                   rows={2}
-                  label="Total Patients Seen"
-                  value={formData.patientClinical.totalPatientsSeen}
-                  onChange={(value) => handleInputChange("patientClinical", "totalPatientsSeen", value)}
+                  label="Total Sales (Tsh)"
+                  value={formData.totalSales}
+                  onChange={(value) => handleInputChange(null, "totalSales", value)}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   multiline
                   rows={2}
-                  label="New Patients"
-                  value={formData.patientClinical.newPatients}
-                  onChange={(value) => handleInputChange("patientClinical", "newPatients", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Returning Patients"
-                  value={formData.patientClinical.returningPatients}
-                  onChange={(value) => handleInputChange("patientClinical", "returningPatients", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Refractions Performed"
-                  value={formData.patientClinical.refractionsPerformed}
-                  onChange={(value) => handleInputChange("patientClinical", "refractionsPerformed", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Contact Lens Fittings"
-                  value={formData.patientClinical.contactLensFittings}
-                  onChange={(value) => handleInputChange("patientClinical", "contactLensFittings", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Special Tests (Fundoscopy, Tonometry, Others)"
-                  value={formData.patientClinical.specialTests}
-                  onChange={(value) => handleInputChange("patientClinical", "specialTests", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Referrals Made"
-                  value={formData.patientClinical.referralsMade}
-                  onChange={(value) => handleInputChange("patientClinical", "referralsMade", value)}
+                  label="Total Target (Tsh)"
+                  value={formData.totalTarget}
+                  onChange={(value) => handleInputChange(null, "totalTarget", value)}
                 />
               </Grid>
 
