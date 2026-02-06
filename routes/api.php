@@ -277,6 +277,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/make-cash-payment', 'makeCashPayment');
         $router->post('/approve-credit-payment', 'approveCreditPayment');
         $router->post('/create-bill', 'createBill');
+        $router->post('/create-invoice', 'createInvoice');
         $router->post('/dispense', 'dispense');
         $router->post('/complete', 'complete');
     });

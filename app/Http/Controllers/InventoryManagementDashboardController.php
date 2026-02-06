@@ -323,8 +323,7 @@ class InventoryManagementDashboardController extends Controller
                     DB::raw('COALESCE(lens_types.name, items.category, "Unspecified") as lens_type'),
                     DB::raw('SUM(items.balance) as total_quantity')
                 )
-                ->groupBy(DB::raw('COALESCE(lens_types.name, items.category)'))
-                ->havingRaw('SUM(items.balance) > 0') // Only show items with stock
+                ->groupBy(DB::raw('COALESCE(lens_types.name, items.category, "Unspecified")'))
                 ->get();
 
             // If no lens types found, provide fallback data

@@ -72,8 +72,8 @@ class NotificationsController extends Controller
                 'patients_sent_to_sales' => $this->getPatientsSentToSalesCount($clinic_id),
             ];
 
-            // Cache for 10 seconds (reduced for more real-time updates)
-            cache()->put($cacheKey, $data, 10);
+            // Cache for 2 seconds (reduced for more real-time updates)
+            cache()->put($cacheKey, $data, 2);
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
         } catch (\Throwable $e) {
@@ -126,7 +126,8 @@ class NotificationsController extends Controller
                     });
                 })
                 ->whereHas('items', function ($itemQuery) {
-                    $itemQuery->whereIn('status', ['Pending', 'Billed']);
+                    $itemQuery->whereIn('status', ['Pending', 'Billed'])
+                              ->whereNull('item_payment_id');
                 });
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
@@ -151,6 +152,7 @@ class NotificationsController extends Controller
                 ->whereHas('items', function ($query) {
                     // Must have at least one Pending item that needs payment
                     $query->where('status', 'Pending')
+                        ->whereNull('item_payment_id')
                         ->whereHas('payment_mode', function ($q) {
                             $q->where('payment_type', 'Cash');
                         });
@@ -229,6 +231,15 @@ class NotificationsController extends Controller
                           ->orWhere('patient_direction', 'Direct to Optician');
                     })
                 ->whereNull('optician_completed_at')
+                // Exclude dispensed patients by ensuring they have at least one unserved glass item
+                ->whereHas('payment_cache', function ($query) {
+                    $query->whereHas('items', function ($itemsQuery) {
+                        $itemsQuery->whereHas('item.consultation_type', function ($typeQuery) {
+                            $typeQuery->where('name', 'Glass');
+                        })
+                        ->where('status', '!=', 'Served');
+                    });
+                })
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
 

@@ -313,7 +313,7 @@ const Dashboard = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <CheckCircleRounded sx={{ fontSize: 32, color: green[600] }} />
+                      <CompletedIcon sx={{ fontSize: 32, color: green[600] }} />
                     </Box>
                   </Box>
                 </CardContent>

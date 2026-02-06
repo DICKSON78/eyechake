@@ -597,6 +597,72 @@ class PatientPaymentCacheItemsController extends Controller
         return $this->sendResponse($items, Response::HTTP_OK, 'Approved successfully.');
     }
 
+    public function createInvoice(Request $request)
+    {
+        $request->validate([
+            'payment_cache_id' => 'required|exists:patient_payment_cache,id',
+            'items' => 'required|array',
+            'items.*' => 'required|integer',
+            'discount' => 'nullable|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+        $amount = 0;
+        $items = $request->json('items');
+        
+        // Find suitable payment channel
+        $base = \App\Models\PaymentChannel::where('status', 'Active');
+        $scoped = (clone $base);
+        if ($user->clinic_id) {
+            $scoped->where(function ($q) use ($user) {
+                $q->where('clinic_id', $user->clinic_id)->orWhereNull('clinic_id');
+            });
+        }
+        $selectedChannel = (clone $scoped)->where('name', 'Cash')->first();
+        if (!$selectedChannel) {
+            $selectedChannel = $scoped->first();
+        }
+
+        if (!$selectedChannel) {
+             return $this->sendError('No active payment channel found.', Response::HTTP_BAD_REQUEST);
+        }
+
+        // Calculate amount and gather valid items
+        $itemsToProcess = [];
+        foreach ($items as $item_id) {
+            $item = PatientPaymentCacheItem::find($item_id);
+            if ($item && is_null($item->item_payment_id)) {
+                $itemTotal = ($item->unit_price ?? 0) * ($item->quantity ?? 0);
+                $amount += $itemTotal;
+                $itemsToProcess[] = $item;
+            }
+        }
+
+        if (empty($itemsToProcess)) {
+            return $this->sendError('No eligible items found for invoicing.', Response::HTTP_BAD_REQUEST);
+        }
+
+        $payment = PatientItemPayment::create([
+            'channel_id' => $selectedChannel->id,
+            'amount' => $amount,
+            'discount' => $request->discount ?? 0,
+            'created_by' => $user->id,
+        ]);
+
+        if ($payment) {
+            foreach ($itemsToProcess as $item) {
+                $item->item_payment_id = $payment->id;
+                // We keep the status as is (Pending) as it's not paid yet, but it is invoiced.
+                // The filter in PatientPaymentCacheController checks for item_payment_id != null.
+                $item->save();
+            }
+
+            return $this->sendResponse($payment, Response::HTTP_OK, 'Invoice created successfully.');
+        }
+
+        return $this->sendError('An error occurred while creating the invoice.', Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
     public function createBill(Request $request)
     {
         $request->validate([

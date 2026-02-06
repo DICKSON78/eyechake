@@ -94,6 +94,7 @@ const LensList = () => {
                     value: lt.name,
                   })),
                 ]}
+                optionsValue="value"
                 value={lensTypeFilter}
                 onChange={(value) => setLensTypeFilter(value)}
                 clearable

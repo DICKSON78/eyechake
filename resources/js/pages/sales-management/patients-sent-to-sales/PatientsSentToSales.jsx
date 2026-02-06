@@ -105,14 +105,42 @@ const PatientsSentToSales = () => {
   };
 
   const handleCreateInvoice = (item) => {
-    const patientId = item.check_in?.patient_id;
-    if (patientId) {
-      navigate(`/reception/patients/${patientId}/check-in`, {
-        state: { createInvoice: true }
-      });
-    } else {
-      addToast({ message: "Invalid patient ID", severity: "error" });
+    if (!item.items || item.items.length === 0) {
+        addToast({ message: "No items to invoice.", severity: "warning" });
+        return;
     }
+
+    const itemIds = item.items
+        .filter(i => !i.item_payment_id)
+        .map(i => i.id);
+        
+    if (itemIds.length === 0) {
+         addToast({ message: "All items are already invoiced.", severity: "info" });
+         return;
+    }
+
+    const component = (
+      <ConfirmationDialog
+        message={`Create invoice for ${itemIds.length} pending items?`}
+        onCancel={() => {
+          modalRef.current.close();
+        }}
+        onOk={async () => {
+          modalRef.current.close();
+          try {
+            await window.axios.post("api/patient-payment-cache-items/create-invoice", {
+               payment_cache_id: item.id,
+               items: itemIds
+            });
+            addToast({ message: "Invoice created successfully", severity: "success" });
+            handleFetch(); // Refresh the list - patient should disappear if all items invoiced
+          } catch (err) {
+            addToast({ message: formatError(err), severity: "error" });
+          }
+        }}
+      />
+    );
+    modalRef.current.open("Create Invoice", component, "sm");
   };
 
   return (
