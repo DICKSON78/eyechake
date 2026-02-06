@@ -404,7 +404,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                       }
                     />
                   }
-                  label="Student"
+                  label="VIP"
                 />
                 <FormControlLabel
                   control={

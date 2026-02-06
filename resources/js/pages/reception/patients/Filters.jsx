@@ -140,6 +140,8 @@ const Filters = ({ params, setParams, ...rest }) => {
               { label: "Prestige", value: "prestige", icon: <StarIcon sx={{ fontSize: 16, color: '#FFD700' }} /> },
               { label: "Business", value: "business", icon: <BusinessIcon sx={{ fontSize: 16 }} /> },
               { label: "Student", value: "student", icon: <SchoolIcon sx={{ fontSize: 16 }} /> },
+              { label: "Outreach", value: "outreach" },
+              { label: "VIP", value: "vip" },
             ]}
             optionsLabel="label"
             optionsValue="value"

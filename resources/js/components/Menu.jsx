@@ -642,7 +642,14 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: isPrivilegeGranted('medicine_center'),
         },
         {
-          title: "Reports",
+          title: "Medicine Dispensing Requests",
+          icon: <WaitingIcon />,
+          to: "/pharmacy/dispensing-requests",
+          badge: notifications && typeof notifications.dispensing_requests !== 'undefined' && notifications.dispensing_requests != null ? (Number(notifications.dispensing_requests) || 0) : 0,
+          show: isPrivilegeGranted('medicine_center'),
+        },
+        {
+          title: "Pharmacy Reports",
           icon: <ReportsIcon />,
           to: "/pharmacy/reports",
           show: isPrivilegeGranted('medicine_center'),
@@ -670,25 +677,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-          title: "6. DISPENSING",
-          subheader: true,
-          show: isPrivilegeGranted('medicine_center'),
-        },
-        {
-          title: "Dispensing Dashboard",
-          icon: <HomeIcon />,
-          to: "/dispensing/dashboard",
-          show: isPrivilegeGranted('medicine_center'),
-        },
-        {
-          title: "Medicine Dispensing Requests",
-          icon: <WaitingIcon />,
-          to: "/pharmacy/dispensing-requests",
-          badge: notifications && typeof notifications.dispensing_requests !== 'undefined' && notifications.dispensing_requests != null ? (Number(notifications.dispensing_requests) || 0) : 0,
-          show: isPrivilegeGranted('medicine_center'),
-        },
-        {
-          title: "Reports",
+          title: "Dispensing Reports",
           icon: <ReportsIcon />,
           to: "/dispensing/reports",
           show: isPrivilegeGranted('medicine_center'),
@@ -714,7 +703,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-          title: "7. WORKSHOP",
+          title: "6. WORKSHOP",
           subheader: true,
           show: isPrivilegeGranted('optician_center'),
         },

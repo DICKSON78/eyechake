@@ -267,6 +267,174 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
+          {/* Dispensing Dashboard Cards */}
+          <CardHeader
+            title="Dispensing Overview"
+            titleTypographyProps={{
+              variant: "h6",
+              fontWeight: 600,
+            }}
+            sx={{
+              p: 0,
+              mb: 2,
+              mt: 3,
+            }}
+          />
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+                onClick={() => navigate('/dispensing/reports/items-dispensed')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Total Dispensed
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color={green[600]}>
+                        {numberFormat(data.summary?.total_medicines_dispensed || 0)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: '50%', 
+                      bgcolor: green[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <CheckCircleRounded sx={{ fontSize: 32, color: green[600] }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+                onClick={() => navigate('/pharmacy/dispensing-requests')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Pending Requests
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color={orange[600]}>
+                        {numberFormat(data.summary?.pending_medicines || 0)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: '50%', 
+                      bgcolor: orange[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <PendingIcon sx={{ fontSize: 32, color: orange[600] }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+                onClick={() => navigate('/dispensing/reports/items-dispensed')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Completed Today
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color={cyan[600]}>
+                        0
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: '50%', 
+                      bgcolor: cyan[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <CompletedIcon sx={{ fontSize: 32, color: cyan[600] }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+                onClick={() => navigate('/dispensing/reports/items-dispensed')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Items Dispensed
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color={purple[600]}>
+                        {numberFormat(data.summary?.total_medicine_items || 0)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: '50%', 
+                      bgcolor: purple[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <DispensedIcon sx={{ fontSize: 32, color: purple[600] }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
           {/* Charts Row */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {/* Stock by Category Pie Chart */}

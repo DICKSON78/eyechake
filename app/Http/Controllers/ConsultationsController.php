@@ -111,12 +111,13 @@ class ConsultationsController extends Controller
                      })
                      // Exclude dispensed patients (optician completed)
                      ->whereNull('optician_completed_at')
-                // Check if there are ANY glass items in the payment cache (not just the linked item)
+                // Check if there are ANY glass items in the payment cache that are NOT yet served
                 ->whereHas('payment_cache', function ($query) {
                     $query->whereHas('items', function ($itemsQuery) {
                         $itemsQuery->whereHas('item.consultation_type', function ($typeQuery) {
                             $typeQuery->where('name', 'Glass');
-                        });
+                        })
+                        ->where('status', '!=', 'Served'); // Exclude already dispensed items
                     });
                 });
             } else if ($status === 'Pending') {

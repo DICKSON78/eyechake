@@ -874,7 +874,7 @@ const RegisterNewClient = () => {
                     { key: 'is_businessperson', label: 'Businessperson', icon: '💼' },
                     { key: 'is_vip', label: 'Prestige', icon: '⭐' },
                     { key: 'is_outreach', label: 'Outreach Client', icon: '🤝' },
-                    { key: 'is_employee', label: 'Employee', icon: '👔' },
+                    { key: 'is_employee', label: 'VIP', icon: '👔' },
                   ].map(({ key, label, icon }) => (
                     <Paper
                       key={key}

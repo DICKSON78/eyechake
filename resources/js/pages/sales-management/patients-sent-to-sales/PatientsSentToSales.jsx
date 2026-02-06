@@ -5,6 +5,7 @@ import { Button, Card, CardContent, Chip, Divider, Stack, Badge } from "@mui/mat
 import {
   SendRounded as SendIcon,
   VisibilityRounded as VisibilityIcon,
+  ReceiptRounded as InvoiceIcon,
 } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -101,6 +102,17 @@ const PatientsSentToSales = () => {
     );
 
     modalRef.current.open("Send to Cashier", component, "sm");
+  };
+
+  const handleCreateInvoice = (item) => {
+    const patientId = item.check_in?.patient_id;
+    if (patientId) {
+      navigate(`/reception/patients/${patientId}/check-in`, {
+        state: { createInvoice: true }
+      });
+    } else {
+      addToast({ message: "Invalid patient ID", severity: "error" });
+    }
   };
 
   return (
@@ -240,6 +252,19 @@ const PatientsSentToSales = () => {
                       }}
                     >
                       Manage
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="secondary"
+                      startIcon={<InvoiceIcon />}
+                      onClick={() => handleCreateInvoice(item)}
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Create Invoice
                     </Button>
                     <Button
                       variant="outlined"

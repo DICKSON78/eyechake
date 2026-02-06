@@ -368,7 +368,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                       }
                     />
                   }
-                  label="Employee"
+                  label="VIP"
               />
               </Stack>
             </Grid>

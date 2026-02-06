@@ -350,7 +350,7 @@ const Patients = () => {
                     types.push(
                       <Chip
                         key="employee"
-                        label="Employee"
+                        label="VIP"
                         color="primary"
                         size="small"
                         sx={{ 

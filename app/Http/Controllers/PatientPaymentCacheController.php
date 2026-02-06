@@ -174,6 +174,9 @@ class PatientPaymentCacheController extends Controller
             } else {
                 // Regular filtering logic - ensure we only get payment caches that have at least one item matching ALL criteria
                 $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
+                    // Exclude items that are already invoiced (have item_payment_id)
+                    $query->whereNull('item_payment_id');
+                    
                     // Status filter
                     if ($item_status) {
                         $statuses = explode(',', $item_status);
