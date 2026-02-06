@@ -130,12 +130,11 @@ const SalesPatientItems = () => {
           ) : hasGlassItems ? (
             <Button
               variant="contained"
-              color="success"
-              startIcon={<SendToCashierIcon />}
-              onClick={handleSendToOptician}
+              startIcon={<BackIcon />}
+              onClick={handleBack}
               disabled={loadingCache || !paymentCache}
             >
-              Send to Optician
+              Done
             </Button>
           ) : (
             <Button

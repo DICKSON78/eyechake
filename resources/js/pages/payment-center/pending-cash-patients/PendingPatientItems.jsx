@@ -144,13 +144,6 @@ const PendingPatientItems = () => {
       if (data.data?.items) {
         generatePaymentReceipt();
       }
-      
-      // Navigate to invoice page if payment ID is available
-      if (data.data?.id) {
-        setTimeout(() => {
-          window.open(`/payment-center/invoice/${data.data.id}`, '_blank');
-        }, 1000);
-      }
     }
   }, [data, fetchItems, refreshNotificationsImmediately]);
 

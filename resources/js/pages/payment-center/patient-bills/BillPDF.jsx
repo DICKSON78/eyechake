@@ -151,7 +151,13 @@ const PDFReport = ({ title, columns, items, ...rest }) => {
     ).toBlob();
     setLoading(false);
     const url = window.URL.createObjectURL(blob);
-    window.open(url, "_blank");
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bill-${Date.now()}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }, [title, columns, items]);
 
   return (
