@@ -174,3 +174,47 @@ docker compose up -d --build
 docker compose --profile build up frontend
 # To build backend
 docker compose up -d --build app
+```
+
+## Database Backup
+
+### Docker Environment
+
+**Backup database using .env credentials:**
+
+```bash
+# Load .env variables and backup database
+docker-compose exec -T mysql sh -c 'mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_DATABASE}' > sikaf.sql
+```
+
+**Or use a dedicated backup script:**
+
+```bash
+# Create backup with timestamp
+docker-compose exec -T mysql sh -c 'mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_DATABASE}' > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+### Local Environment
+
+**Backup database using .env credentials:**
+
+```bash
+# Linux/Mac
+source .env && mysqldump -h${DB_HOST} -P${DB_PORT} -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_DATABASE} > sikaf.sql
+
+# Windows PowerShell
+Get-Content .env | ForEach-Object { if ($_ -match '^(DB_\w+)=(.+)$') { Set-Variable -Name $matches[1] -Value $matches[2] } }; mysqldump -h$DB_HOST -P$DB_PORT -u$DB_USERNAME -p$DB_PASSWORD $DB_DATABASE > sikaf.sql
+```
+
+**Restore database from backup:**
+
+```bash
+# Docker
+docker-compose exec -T mysql sh -c 'mysql -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_DATABASE}' < sikaf.sql
+
+# Local (Linux/Mac)
+source .env && mysql -h${DB_HOST} -P${DB_PORT} -u${DB_USERNAME} -p${DB_PASSWORD} ${DB_DATABASE} < sikaf.sql
+
+# Local (Windows PowerShell)
+Get-Content .env | ForEach-Object { if ($_ -match '^(DB_\w+)=(.+)$') { Set-Variable -Name $matches[1] -Value $matches[2] } }; mysql -h$DB_HOST -P$DB_PORT -u$DB_USERNAME -p$DB_PASSWORD $DB_DATABASE < sikaf.sql
+```

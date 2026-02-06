@@ -1,0 +1,1814 @@
+[
+    {
+        "id": "5",
+        "name": "Hordeolum and chalazion",
+        "code": "H00",
+        "status": "Active"
+    },
+    {
+        "id": "6",
+        "name": "Hordeolum and other deep inflammation of eyelid",
+        "code": "H00.0",
+        "status": "Active"
+    },
+    {
+        "id": "7",
+        "name": "Chalazion",
+        "code": "H00.1",
+        "status": "Active"
+    },
+    {
+        "id": "8",
+        "name": "Other inflammation of eyelid",
+        "code": "H01",
+        "status": "Active"
+    },
+    {
+        "id": "9",
+        "name": "Blepharitis",
+        "code": "H01.0",
+        "status": "Active"
+    },
+    {
+        "id": "10",
+        "name": "Noninfectious dermatoses of eyelid",
+        "code": "H01.1",
+        "status": "Active"
+    },
+    {
+        "id": "11",
+        "name": "Other specified inflammation of eyelid",
+        "code": "H01.8",
+        "status": "Active"
+    },
+    {
+        "id": "12",
+        "name": "Inflammation of eyelid, unspecified",
+        "code": "H01.9",
+        "status": "Active"
+    },
+    {
+        "id": "13",
+        "name": "Other disorders of eyelid",
+        "code": "H02",
+        "status": "Active"
+    },
+    {
+        "id": "14",
+        "name": "Entropion and trichiasis of eyelid",
+        "code": "H02.0",
+        "status": "Active"
+    },
+    {
+        "id": "15",
+        "name": "Ectropion of eyelid",
+        "code": "H02.1",
+        "status": "Active"
+    },
+    {
+        "id": "16",
+        "name": "Lagophthalmos",
+        "code": "H02.2",
+        "status": "Active"
+    },
+    {
+        "id": "17",
+        "name": "Blepharochalasis",
+        "code": "H02.3",
+        "status": "Active"
+    },
+    {
+        "id": "18",
+        "name": "Ptosis of eyelid",
+        "code": "H02.4",
+        "status": "Active"
+    },
+    {
+        "id": "19",
+        "name": "Other disorders affecting eyelid function",
+        "code": "H02.5",
+        "status": "Active"
+    },
+    {
+        "id": "20",
+        "name": "Xanthelasma of eyelid",
+        "code": "H02.6",
+        "status": "Active"
+    },
+    {
+        "id": "21",
+        "name": "Other degenerative disorders of eyelid and periocular area",
+        "code": "H02.7",
+        "status": "Active"
+    },
+    {
+        "id": "22",
+        "name": "Other specified disorders of eyelid",
+        "code": "H02.8",
+        "status": "Active"
+    },
+    {
+        "id": "23",
+        "name": "Disorder of eyelid, unspecified",
+        "code": "H02.9",
+        "status": "Active"
+    },
+    {
+        "id": "24",
+        "name": "Disorders of eyelid in diseases classified elsewhere",
+        "code": "H03",
+        "status": "Active"
+    },
+    {
+        "id": "25",
+        "name": "Parasitic infestation of eyelid in diseases classified elsewhere",
+        "code": "H03.0",
+        "status": "Active"
+    },
+    {
+        "id": "26",
+        "name": "Involvement of eyelid in other infectious diseases classified elsewhere",
+        "code": "H03.1",
+        "status": "Active"
+    },
+    {
+        "id": "27",
+        "name": "Involvement of eyelid in other diseases classified elsewhere",
+        "code": "H03.8",
+        "status": "Active"
+    },
+    {
+        "id": "28",
+        "name": "Disorders of lacrimal system",
+        "code": "H04",
+        "status": "Active"
+    },
+    {
+        "id": "29",
+        "name": "Dacryoadenitis",
+        "code": "H04.0",
+        "status": "Active"
+    },
+    {
+        "id": "30",
+        "name": "Other disorders of lacrimal gland",
+        "code": "H04.1",
+        "status": "Active"
+    },
+    {
+        "id": "31",
+        "name": "Epiphora",
+        "code": "H04.2",
+        "status": "Active"
+    },
+    {
+        "id": "32",
+        "name": "Acute and unspecified inflammation of lacrimal passages",
+        "code": "H04.3",
+        "status": "Active"
+    },
+    {
+        "id": "33",
+        "name": "Chronic inflammation of lacrimal passages",
+        "code": "H04.4",
+        "status": "Active"
+    },
+    {
+        "id": "34",
+        "name": "Stenosis and insufficiency of lacrimal passages",
+        "code": "H04.5",
+        "status": "Active"
+    },
+    {
+        "id": "35",
+        "name": "Other changes in lacrimal passages",
+        "code": "H04.6",
+        "status": "Active"
+    },
+    {
+        "id": "36",
+        "name": "Other disorders of lacrimal system",
+        "code": "H04.8",
+        "status": "Active"
+    },
+    {
+        "id": "37",
+        "name": "Disorder of lacrimal system, unspecified",
+        "code": "H04.9",
+        "status": "Active"
+    },
+    {
+        "id": "38",
+        "name": "Disorders of orbit",
+        "code": "H05",
+        "status": "Active"
+    },
+    {
+        "id": "39",
+        "name": "Acute inflammation of orbit",
+        "code": "H05.0",
+        "status": "Active"
+    },
+    {
+        "id": "40",
+        "name": "Chronic inflammatory disorders of orbit",
+        "code": "H05.1",
+        "status": "Active"
+    },
+    {
+        "id": "41",
+        "name": "Exophthalmic conditions",
+        "code": "H05.2",
+        "status": "Active"
+    },
+    {
+        "id": "42",
+        "name": "Deformity of orbit",
+        "code": "H05.3",
+        "status": "Active"
+    },
+    {
+        "id": "43",
+        "name": "Enophthalmos",
+        "code": "H05.4",
+        "status": "Active"
+    },
+    {
+        "id": "45",
+        "name": "Other disorders of orbit",
+        "code": "H05.8",
+        "status": "Active"
+    },
+    {
+        "id": "46",
+        "name": "Disorder of orbit, unspecified",
+        "code": "H05.9",
+        "status": "Active"
+    },
+    {
+        "id": "47",
+        "name": "Disorders of lacrimal system and orbit in diseases classified elsewhere",
+        "code": "H06",
+        "status": "Active"
+    },
+    {
+        "id": "48",
+        "name": "Disorders of lacrimal system in diseases classified elsewhere",
+        "code": "H06.0",
+        "status": "Active"
+    },
+    {
+        "id": "49",
+        "name": "Parasitic infestation of orbit in diseases classified elsewhere",
+        "code": "H06.1",
+        "status": "Active"
+    },
+    {
+        "id": "50",
+        "name": "Dysthyroid exophthalmos",
+        "code": "H06.2",
+        "status": "Active"
+    },
+    {
+        "id": "51",
+        "name": "Other disorders of orbit in diseases classified elsewhere",
+        "code": "H06.3",
+        "status": "Active"
+    },
+    {
+        "id": "52",
+        "name": "Conjunctivitis",
+        "code": "H10",
+        "status": "Active"
+    },
+    {
+        "id": "53",
+        "name": "Mucopurulent conjunctivitis",
+        "code": "H10.0",
+        "status": "Active"
+    },
+    {
+        "id": "54",
+        "name": "Acute atopic conjunctivitis",
+        "code": "H10.1",
+        "status": "Active"
+    },
+    {
+        "id": "55",
+        "name": "Other acute conjunctivitis",
+        "code": "H10.2",
+        "status": "Active"
+    },
+    {
+        "id": "56",
+        "name": "Acute conjunctivitis, unspecified",
+        "code": "H10.3",
+        "status": "Active"
+    },
+    {
+        "id": "57",
+        "name": "Chronic conjunctivitis",
+        "code": "H10.4",
+        "status": "Active"
+    },
+    {
+        "id": "58",
+        "name": "Blepharoconjunctivitis",
+        "code": "H10.5",
+        "status": "Active"
+    },
+    {
+        "id": "59",
+        "name": "Other conjunctivitis",
+        "code": "H10.8",
+        "status": "Active"
+    },
+    {
+        "id": "60",
+        "name": "Conjunctivitis, unspecified",
+        "code": "H10.9",
+        "status": "Active"
+    },
+    {
+        "id": "61",
+        "name": "Other disorders of conjunctiva",
+        "code": "H11",
+        "status": "Active"
+    },
+    {
+        "id": "62",
+        "name": "Pterygium",
+        "code": "H11.0",
+        "status": "Active"
+    },
+    {
+        "id": "63",
+        "name": "Conjunctival degenerations and deposits",
+        "code": "H11.1",
+        "status": "Active"
+    },
+    {
+        "id": "64",
+        "name": "Conjunctival scars",
+        "code": "H11.2",
+        "status": "Active"
+    },
+    {
+        "id": "65",
+        "name": "Conjunctival haemorrhage",
+        "code": "H11.3",
+        "status": "Active"
+    },
+    {
+        "id": "66",
+        "name": "Other conjunctival vascular disorders and cysts",
+        "code": "H11.4",
+        "status": "Active"
+    },
+    {
+        "id": "67",
+        "name": "Other specified disorders of conjunctiva",
+        "code": "H11.8",
+        "status": "Active"
+    },
+    {
+        "id": "68",
+        "name": "Disorder of conjunctiva, unspecified",
+        "code": "H11.9",
+        "status": "Active"
+    },
+    {
+        "id": "69",
+        "name": "Disorders of conjunctiva in diseases classified elsewhere",
+        "code": "H13",
+        "status": "Active"
+    },
+    {
+        "id": "70",
+        "name": "Filarial infection of conjunctiva",
+        "code": "H13.0",
+        "status": "Active"
+    },
+    {
+        "id": "71",
+        "name": "Conjunctivitis in infectious and parasitic diseases classified elsewhere",
+        "code": "H13.1",
+        "status": "Active"
+    },
+    {
+        "id": "72",
+        "name": "Conjunctivitis in other diseases classified elsewhere",
+        "code": "H13.2",
+        "status": "Active"
+    },
+    {
+        "id": "73",
+        "name": "Ocular pemphigoid",
+        "code": "H13.3",
+        "status": "Active"
+    },
+    {
+        "id": "74",
+        "name": "Other disorders of conjunctiva in diseases classified elsewhere",
+        "code": "H13.8",
+        "status": "Active"
+    },
+    {
+        "id": "75",
+        "name": "Disorders of sclera",
+        "code": "H15",
+        "status": "Active"
+    },
+    {
+        "id": "76",
+        "name": "Scleritis",
+        "code": "H15.0",
+        "status": "Active"
+    },
+    {
+        "id": "77",
+        "name": "Episcleritis",
+        "code": "H15.1",
+        "status": "Active"
+    },
+    {
+        "id": "78",
+        "name": "Other disorders of sclera",
+        "code": "H15.8",
+        "status": "Active"
+    },
+    {
+        "id": "79",
+        "name": "Disorder of sclera, unspecified",
+        "code": "H15.9",
+        "status": "Active"
+    },
+    {
+        "id": "80",
+        "name": "Keratitis",
+        "code": "H16",
+        "status": "Active"
+    },
+    {
+        "id": "81",
+        "name": "Corneal ulcer",
+        "code": "H16.0",
+        "status": "Active"
+    },
+    {
+        "id": "82",
+        "name": "Other superficial keratitis without conjunctivitis",
+        "code": "H16.1",
+        "status": "Active"
+    },
+    {
+        "id": "83",
+        "name": "Keratoconjunctivitis",
+        "code": "H16.2",
+        "status": "Active"
+    },
+    {
+        "id": "84",
+        "name": "Interstitial and deep keratitis",
+        "code": "H16.3",
+        "status": "Active"
+    },
+    {
+        "id": "85",
+        "name": "Corneal neovascularization",
+        "code": "H16.4",
+        "status": "Active"
+    },
+    {
+        "id": "86",
+        "name": "Other keratitis",
+        "code": "H16.8",
+        "status": "Active"
+    },
+    {
+        "id": "87",
+        "name": "Keratitis, unspecified",
+        "code": "H16.9",
+        "status": "Active"
+    },
+    {
+        "id": "88",
+        "name": "Corneal scars and opacities",
+        "code": "H17",
+        "status": "Active"
+    },
+    {
+        "id": "89",
+        "name": "Adherent leukoma",
+        "code": "H17.0",
+        "status": "Active"
+    },
+    {
+        "id": "90",
+        "name": "Other central corneal opacity",
+        "code": "H17.1",
+        "status": "Active"
+    },
+    {
+        "id": "91",
+        "name": "Other corneal scars and opacities",
+        "code": "H17.8",
+        "status": "Active"
+    },
+    {
+        "id": "92",
+        "name": "Corneal scar and opacity, unspecified",
+        "code": "H17.9",
+        "status": "Active"
+    },
+    {
+        "id": "93",
+        "name": "Other disorders of cornea",
+        "code": "H18",
+        "status": "Active"
+    },
+    {
+        "id": "94",
+        "name": "Corneal pigmentations and deposits",
+        "code": "H18.0",
+        "status": "Active"
+    },
+    {
+        "id": "95",
+        "name": "Bullous keratopathy",
+        "code": "H18.1",
+        "status": "Active"
+    },
+    {
+        "id": "96",
+        "name": "Other corneal oedema",
+        "code": "H18.2",
+        "status": "Active"
+    },
+    {
+        "id": "97",
+        "name": "Changes in corneal membranes",
+        "code": "H18.3",
+        "status": "Active"
+    },
+    {
+        "id": "98",
+        "name": "Corneal degeneration",
+        "code": "H18.4",
+        "status": "Active"
+    },
+    {
+        "id": "99",
+        "name": "Hereditary corneal dystrophies",
+        "code": "H18.5",
+        "status": "Active"
+    },
+    {
+        "id": "100",
+        "name": "Keratoconus",
+        "code": "H18.6",
+        "status": "Active"
+    },
+    {
+        "id": "101",
+        "name": "Other corneal deformities",
+        "code": "H18.7",
+        "status": "Active"
+    },
+    {
+        "id": "102",
+        "name": "Other specified disorders of cornea",
+        "code": "H18.8",
+        "status": "Active"
+    },
+    {
+        "id": "103",
+        "name": "Disorder of cornea, unspecified",
+        "code": "H18.9",
+        "status": "Active"
+    },
+    {
+        "id": "104",
+        "name": "Disorders of sclera and cornea in diseases classified elsewhere",
+        "code": "H19",
+        "status": "Active"
+    },
+    {
+        "id": "105",
+        "name": "Scleritis and episcleritis in diseases classified elsewhere",
+        "code": "H19.0",
+        "status": "Active"
+    },
+    {
+        "id": "106",
+        "name": "Herpesviral keratitis and keratoconjunctivitis",
+        "code": "H19.1",
+        "status": "Active"
+    },
+    {
+        "id": "107",
+        "name": "Keratitis and keratoconjunctivitis in other infectious and parasitic diseases classified elsewhere",
+        "code": "H19.2",
+        "status": "Active"
+    },
+    {
+        "id": "108",
+        "name": "Keratitis and keratoconjunctivitis in other diseases classified elsewhere",
+        "code": "H19.3",
+        "status": "Active"
+    },
+    {
+        "id": "109",
+        "name": "Other disorders of sclera and cornea in diseases classified elsewhere",
+        "code": "H19.8",
+        "status": "Active"
+    },
+    {
+        "id": "110",
+        "name": "Iridocyclitis",
+        "code": "H20",
+        "status": "Active"
+    },
+    {
+        "id": "111",
+        "name": "Acute and subacute iridocyclitis",
+        "code": "H20.0",
+        "status": "Active"
+    },
+    {
+        "id": "112",
+        "name": "Chronic iridocyclitis",
+        "code": "H20.1",
+        "status": "Active"
+    },
+    {
+        "id": "113",
+        "name": "Lens-induced iridocyclitis",
+        "code": "H20.2",
+        "status": "Active"
+    },
+    {
+        "id": "114",
+        "name": "Other iridocyclitis",
+        "code": "H20.8",
+        "status": "Active"
+    },
+    {
+        "id": "115",
+        "name": "Iridocyclitis, unspecified",
+        "code": "H20.9",
+        "status": "Active"
+    },
+    {
+        "id": "116",
+        "name": "Other disorders of iris and ciliary body",
+        "code": "H21",
+        "status": "Active"
+    },
+    {
+        "id": "117",
+        "name": "Hyphaema",
+        "code": "H21.0",
+        "status": "Active"
+    },
+    {
+        "id": "118",
+        "name": "Other vascular disorders of iris and ciliary body",
+        "code": "H21.1",
+        "status": "Active"
+    },
+    {
+        "id": "119",
+        "name": "Degeneration of iris and ciliary body",
+        "code": "H21.2",
+        "status": "Active"
+    },
+    {
+        "id": "120",
+        "name": "Cyst of iris, ciliary body and anterior chamber",
+        "code": "H21.3",
+        "status": "Active"
+    },
+    {
+        "id": "121",
+        "name": "Pupillary membranes",
+        "code": "H21.4",
+        "status": "Active"
+    },
+    {
+        "id": "122",
+        "name": "Other adhesions and disruptions of iris and ciliary body",
+        "code": "H21.5",
+        "status": "Active"
+    },
+    {
+        "id": "123",
+        "name": "Other specified disorders of iris and ciliary body",
+        "code": "H21.8",
+        "status": "Active"
+    },
+    {
+        "id": "124",
+        "name": "Disorder of iris and ciliary body, unspecified",
+        "code": "H21.9",
+        "status": "Active"
+    },
+    {
+        "id": "125",
+        "name": "Disorders of iris and ciliary body in diseases classified elsewhere",
+        "code": "H22",
+        "status": "Active"
+    },
+    {
+        "id": "126",
+        "name": "Iridocyclitis in infectious and parasitic diseases classified elsewhere",
+        "code": "H22.0",
+        "status": "Active"
+    },
+    {
+        "id": "127",
+        "name": "Iridocyclitis in other diseases classified elsewhere",
+        "code": "H22.1",
+        "status": "Active"
+    },
+    {
+        "id": "128",
+        "name": "Other disorders of iris and ciliary body in diseases classified elsewhere",
+        "code": "H22.8",
+        "status": "Active"
+    },
+    {
+        "id": "129",
+        "name": "Senile cataract",
+        "code": "H25",
+        "status": "Active"
+    },
+    {
+        "id": "130",
+        "name": "Senile incipient cataract",
+        "code": "H25.0",
+        "status": "Active"
+    },
+    {
+        "id": "131",
+        "name": "Senile nuclear cataract",
+        "code": "H25.1",
+        "status": "Active"
+    },
+    {
+        "id": "132",
+        "name": "Senile cataract, morgagnian type",
+        "code": "H25.2",
+        "status": "Active"
+    },
+    {
+        "id": "133",
+        "name": "Other senile cataract",
+        "code": "H25.8",
+        "status": "Active"
+    },
+    {
+        "id": "134",
+        "name": "Senile cataract, unspecified",
+        "code": "H25.9",
+        "status": "Active"
+    },
+    {
+        "id": "135",
+        "name": "Other cataract",
+        "code": "H26",
+        "status": "Active"
+    },
+    {
+        "id": "136",
+        "name": "Infantile, juvenile and presenile cataract",
+        "code": "H26.0",
+        "status": "Active"
+    },
+    {
+        "id": "137",
+        "name": "Traumatic cataract",
+        "code": "H26.1",
+        "status": "Active"
+    },
+    {
+        "id": "138",
+        "name": "Complicated cataract",
+        "code": "H26.2",
+        "status": "Active"
+    },
+    {
+        "id": "139",
+        "name": "Drug-induced cataract",
+        "code": "H26.3",
+        "status": "Active"
+    },
+    {
+        "id": "140",
+        "name": "After-cataract",
+        "code": "H26.4",
+        "status": "Active"
+    },
+    {
+        "id": "141",
+        "name": "Other specified cataract",
+        "code": "H26.8",
+        "status": "Active"
+    },
+    {
+        "id": "142",
+        "name": "Cataract, unspecified",
+        "code": "H26.9",
+        "status": "Active"
+    },
+    {
+        "id": "143",
+        "name": "Other disorders of lens",
+        "code": "H27",
+        "status": "Active"
+    },
+    {
+        "id": "144",
+        "name": "Aphakia",
+        "code": "H27.0",
+        "status": "Active"
+    },
+    {
+        "id": "145",
+        "name": "Dislocation of lens",
+        "code": "H27.1",
+        "status": "Active"
+    },
+    {
+        "id": "146",
+        "name": "Other specified disorders of lens",
+        "code": "H27.8",
+        "status": "Active"
+    },
+    {
+        "id": "147",
+        "name": "Disorder of lens, unspecified",
+        "code": "H27.9",
+        "status": "Active"
+    },
+    {
+        "id": "148",
+        "name": "Cataract and other disorders of lens in diseases classified elsewhere",
+        "code": "H28",
+        "status": "Active"
+    },
+    {
+        "id": "149",
+        "name": "Diabetic cataract",
+        "code": "H28.0",
+        "status": "Active"
+    },
+    {
+        "id": "150",
+        "name": "Cataract in other endocrine, nutritional and metabolic diseases",
+        "code": "H28.1",
+        "status": "Active"
+    },
+    {
+        "id": "151",
+        "name": "Cataract in other diseases classified elsewhere",
+        "code": "H28.2",
+        "status": "Active"
+    },
+    {
+        "id": "152",
+        "name": "Other disorders of lens in diseases classified elsewhere",
+        "code": "H28.8",
+        "status": "Active"
+    },
+    {
+        "id": "153",
+        "name": "Chorioretinal inflammation",
+        "code": "H30",
+        "status": "Active"
+    },
+    {
+        "id": "154",
+        "name": "Focal chorioretinal inflammation",
+        "code": "H30.0",
+        "status": "Active"
+    },
+    {
+        "id": "155",
+        "name": "Disseminated chorioretinal inflammation",
+        "code": "H30.1",
+        "status": "Active"
+    },
+    {
+        "id": "156",
+        "name": "Posterior cyclitis",
+        "code": "H30.2",
+        "status": "Active"
+    },
+    {
+        "id": "157",
+        "name": "Other chorioretinal inflammations",
+        "code": "H30.8",
+        "status": "Active"
+    },
+    {
+        "id": "158",
+        "name": "Chorioretinal inflammation, unspecified",
+        "code": "H30.9",
+        "status": "Active"
+    },
+    {
+        "id": "159",
+        "name": "Other disorders of choroid",
+        "code": "H31",
+        "status": "Active"
+    },
+    {
+        "id": "160",
+        "name": "Chorioretinal scars",
+        "code": "H31.0",
+        "status": "Active"
+    },
+    {
+        "id": "161",
+        "name": "Choroidal degeneration",
+        "code": "H31.1",
+        "status": "Active"
+    },
+    {
+        "id": "162",
+        "name": "Hereditary choroidal dystrophy",
+        "code": "H31.2",
+        "status": "Active"
+    },
+    {
+        "id": "163",
+        "name": "Choroidal haemorrhage and rupture",
+        "code": "H31.3",
+        "status": "Active"
+    },
+    {
+        "id": "164",
+        "name": "Choroidal detachment",
+        "code": "H31.4",
+        "status": "Active"
+    },
+    {
+        "id": "165",
+        "name": "Other specified disorders of choroid",
+        "code": "H31.8",
+        "status": "Active"
+    },
+    {
+        "id": "166",
+        "name": "Disorder of choroid, unspecified",
+        "code": "H31.9",
+        "status": "Active"
+    },
+    {
+        "id": "167",
+        "name": "Chorioretinal disorders in diseases classified elsewhere",
+        "code": "H32",
+        "status": "Active"
+    },
+    {
+        "id": "168",
+        "name": "Chorioretinal inflammation in infectious and parasitic diseases classified elsewhere",
+        "code": "H32.0",
+        "status": "Active"
+    },
+    {
+        "id": "169",
+        "name": "Other chorioretinal disorders in diseases classified elsewhere",
+        "code": "H32.8",
+        "status": "Active"
+    },
+    {
+        "id": "170",
+        "name": "Retinal detachments and breaks",
+        "code": "H33",
+        "status": "Active"
+    },
+    {
+        "id": "171",
+        "name": "Retinal detachment with retinal break",
+        "code": "H33.0",
+        "status": "Active"
+    },
+    {
+        "id": "172",
+        "name": "Retinoschisis and retinal cysts",
+        "code": "H33.1",
+        "status": "Active"
+    },
+    {
+        "id": "173",
+        "name": "Serous retinal detachment",
+        "code": "H33.2",
+        "status": "Active"
+    },
+    {
+        "id": "174",
+        "name": "Retinal breaks without detachment",
+        "code": "H33.3",
+        "status": "Active"
+    },
+    {
+        "id": "175",
+        "name": "Traction detachment of retina",
+        "code": "H33.4",
+        "status": "Active"
+    },
+    {
+        "id": "176",
+        "name": "Other retinal detachments",
+        "code": "H33.5",
+        "status": "Active"
+    },
+    {
+        "id": "177",
+        "name": "Retinal vascular occlusions",
+        "code": "H34",
+        "status": "Active"
+    },
+    {
+        "id": "178",
+        "name": "Transient retinal artery occlusion",
+        "code": "H34.0",
+        "status": "Active"
+    },
+    {
+        "id": "179",
+        "name": "Central retinal artery occlusion",
+        "code": "H34.1",
+        "status": "Active"
+    },
+    {
+        "id": "180",
+        "name": "Other retinal artery occlusions",
+        "code": "H34.2",
+        "status": "Active"
+    },
+    {
+        "id": "181",
+        "name": "Other retinal vascular occlusions",
+        "code": "H34.8",
+        "status": "Active"
+    },
+    {
+        "id": "182",
+        "name": "Retinal vascular occlusion, unspecified",
+        "code": "H34.9",
+        "status": "Active"
+    },
+    {
+        "id": "183",
+        "name": "Other retinal disorders",
+        "code": "H35",
+        "status": "Active"
+    },
+    {
+        "id": "184",
+        "name": "Background retinopathy and retinal vascular changes",
+        "code": "H35.0",
+        "status": "Active"
+    },
+    {
+        "id": "185",
+        "name": "Retinopathy of prematurity",
+        "code": "H35.1",
+        "status": "Active"
+    },
+    {
+        "id": "186",
+        "name": "Other proliferative retinopathy",
+        "code": "H35.2",
+        "status": "Active"
+    },
+    {
+        "id": "187",
+        "name": "Degeneration of macula and posterior pole",
+        "code": "H35.3",
+        "status": "Active"
+    },
+    {
+        "id": "188",
+        "name": "Peripheral retinal degeneration",
+        "code": "H35.4",
+        "status": "Active"
+    },
+    {
+        "id": "189",
+        "name": "Hereditary retinal dystrophy",
+        "code": "H35.5",
+        "status": "Active"
+    },
+    {
+        "id": "190",
+        "name": "Retinal haemorrhage",
+        "code": "H35.6",
+        "status": "Active"
+    },
+    {
+        "id": "191",
+        "name": "Separation of retinal layers",
+        "code": "H35.7",
+        "status": "Active"
+    },
+    {
+        "id": "192",
+        "name": "Other specified retinal disorders",
+        "code": "H35.8",
+        "status": "Active"
+    },
+    {
+        "id": "193",
+        "name": "Retinal disorder, unspecified",
+        "code": "H35.9",
+        "status": "Active"
+    },
+    {
+        "id": "194",
+        "name": "Retinal disorders in diseases classified elsewhere",
+        "code": "H36",
+        "status": "Active"
+    },
+    {
+        "id": "195",
+        "name": "Diabetic retinopathy",
+        "code": "H36.0",
+        "status": "Active"
+    },
+    {
+        "id": "196",
+        "name": "Other retinal disorders in diseases classified elsewhere",
+        "code": "H36.8",
+        "status": "Active"
+    },
+    {
+        "id": "197",
+        "name": "Glaucoma",
+        "code": "H40",
+        "status": "Active"
+    },
+    {
+        "id": "198",
+        "name": "Glaucoma suspect",
+        "code": "H40.0",
+        "status": "Active"
+    },
+    {
+        "id": "199",
+        "name": "Primary open-angle glaucoma",
+        "code": "H40.1",
+        "status": "Active"
+    },
+    {
+        "id": "200",
+        "name": "Primary angle-closure glaucoma",
+        "code": "H40.2",
+        "status": "Active"
+    },
+    {
+        "id": "201",
+        "name": "Glaucoma secondary to eye trauma",
+        "code": "H40.3",
+        "status": "Active"
+    },
+    {
+        "id": "202",
+        "name": "Glaucoma secondary to eye inflammation",
+        "code": "H40.4",
+        "status": "Active"
+    },
+    {
+        "id": "203",
+        "name": "Glaucoma secondary to other eye disorders",
+        "code": "H40.5",
+        "status": "Active"
+    },
+    {
+        "id": "204",
+        "name": "Glaucoma secondary to drugs",
+        "code": "H40.6",
+        "status": "Active"
+    },
+    {
+        "id": "205",
+        "name": "Other glaucoma",
+        "code": "H40.8",
+        "status": "Active"
+    },
+    {
+        "id": "206",
+        "name": "Glaucoma, unspecified",
+        "code": "H40.9",
+        "status": "Active"
+    },
+    {
+        "id": "207",
+        "name": "Glaucoma in diseases classified elsewhere",
+        "code": "H42",
+        "status": "Active"
+    },
+    {
+        "id": "208",
+        "name": "Glaucoma in endocrine, nutritional and metabolic diseases",
+        "code": "H42.0",
+        "status": "Active"
+    },
+    {
+        "id": "209",
+        "name": "Glaucoma in other diseases classified elsewhere",
+        "code": "H42.8",
+        "status": "Active"
+    },
+    {
+        "id": "210",
+        "name": "Disorders of vitreous body",
+        "code": "H43",
+        "status": "Active"
+    },
+    {
+        "id": "211",
+        "name": "Vitreous prolapse",
+        "code": "H43.0",
+        "status": "Active"
+    },
+    {
+        "id": "212",
+        "name": "Vitreous haemorrhage",
+        "code": "H43.1",
+        "status": "Active"
+    },
+    {
+        "id": "213",
+        "name": "Crystalline deposits in vitreous body",
+        "code": "H43.2",
+        "status": "Active"
+    },
+    {
+        "id": "214",
+        "name": "Other vitreous opacities",
+        "code": "H43.3",
+        "status": "Active"
+    },
+    {
+        "id": "215",
+        "name": "Other disorders of vitreous body",
+        "code": "H43.8",
+        "status": "Active"
+    },
+    {
+        "id": "216",
+        "name": "Disorder of vitreous body, unspecified",
+        "code": "H43.9",
+        "status": "Active"
+    },
+    {
+        "id": "217",
+        "name": "Disorders of globe",
+        "code": "H44",
+        "status": "Active"
+    },
+    {
+        "id": "218",
+        "name": "Purulent endophthalmitis",
+        "code": "H44.0",
+        "status": "Active"
+    },
+    {
+        "id": "219",
+        "name": "Other endophthalmitis",
+        "code": "H44.1",
+        "status": "Active"
+    },
+    {
+        "id": "220",
+        "name": "Degenerative myopia",
+        "code": "H44.2",
+        "status": "Active"
+    },
+    {
+        "id": "221",
+        "name": "Other degenerative disorders of globe",
+        "code": "H44.3",
+        "status": "Active"
+    },
+    {
+        "id": "222",
+        "name": "Hypotony of eye",
+        "code": "H44.4",
+        "status": "Active"
+    },
+    {
+        "id": "223",
+        "name": "Degenerated conditions of globe",
+        "code": "H44.5",
+        "status": "Active"
+    },
+    {
+        "id": "226",
+        "name": "Other disorders of globe",
+        "code": "H44.8",
+        "status": "Active"
+    },
+    {
+        "id": "227",
+        "name": "Disorder of globe, unspecified",
+        "code": "H44.9",
+        "status": "Active"
+    },
+    {
+        "id": "228",
+        "name": "Disorders of vitreous body and globe in diseases classified elsewhere",
+        "code": "H45",
+        "status": "Active"
+    },
+    {
+        "id": "229",
+        "name": "Vitreous haemorrhage in diseases classified elsewhere",
+        "code": "H45.0",
+        "status": "Active"
+    },
+    {
+        "id": "230",
+        "name": "Endophthalmitis in diseases classified elsewhere",
+        "code": "H45.1",
+        "status": "Active"
+    },
+    {
+        "id": "231",
+        "name": "Other disorders of vitreous body and globe in diseases classified elsewhere",
+        "code": "H45.8",
+        "status": "Active"
+    },
+    {
+        "id": "232",
+        "name": "Optic neuritis",
+        "code": "H46",
+        "status": "Active"
+    },
+    {
+        "id": "233",
+        "name": "Other disorders of optic [2nd] nerve and visual pathways",
+        "code": "H47",
+        "status": "Active"
+    },
+    {
+        "id": "234",
+        "name": "Disorders of optic nerve, NEC",
+        "code": "H47.0",
+        "status": "Active"
+    },
+    {
+        "id": "235",
+        "name": "Papilloedema, unspecified",
+        "code": "H47.1",
+        "status": "Active"
+    },
+    {
+        "id": "236",
+        "name": "Optic atrophy",
+        "code": "H47.2",
+        "status": "Active"
+    },
+    {
+        "id": "237",
+        "name": "Other disorders of optic disc",
+        "code": "H47.3",
+        "status": "Active"
+    },
+    {
+        "id": "238",
+        "name": "Disorders of optic chiasm",
+        "code": "H47.4",
+        "status": "Active"
+    },
+    {
+        "id": "239",
+        "name": "Disorders of other visual pathways",
+        "code": "H47.5",
+        "status": "Active"
+    },
+    {
+        "id": "240",
+        "name": "Disorders of visual cortex",
+        "code": "H47.6",
+        "status": "Active"
+    },
+    {
+        "id": "241",
+        "name": "Disorder of visual pathways, unspecified",
+        "code": "H47.7",
+        "status": "Active"
+    },
+    {
+        "id": "242",
+        "name": "Disorders of optic [2nd] nerve and visual pathways in diseases classified elsewhere",
+        "code": "H48",
+        "status": "Active"
+    },
+    {
+        "id": "243",
+        "name": "Optic atrophy in diseases classified elsewhere",
+        "code": "H48.0",
+        "status": "Active"
+    },
+    {
+        "id": "244",
+        "name": "Retrobulbar neuritis in diseases classified elsewhere",
+        "code": "H48.1",
+        "status": "Active"
+    },
+    {
+        "id": "245",
+        "name": "Other disorders of optic nerve and visual pathways in diseases classified elsewhere",
+        "code": "H48.8",
+        "status": "Active"
+    },
+    {
+        "id": "246",
+        "name": "Paralytic strabismus",
+        "code": "H49",
+        "status": "Active"
+    },
+    {
+        "id": "247",
+        "name": "Third [oculomotor] nerve palsy",
+        "code": "H49.0",
+        "status": "Active"
+    },
+    {
+        "id": "248",
+        "name": "Fourth [trochlear] nerve palsy",
+        "code": "H49.1",
+        "status": "Active"
+    },
+    {
+        "id": "249",
+        "name": "Sixth [abducent] nerve palsy",
+        "code": "H49.2",
+        "status": "Active"
+    },
+    {
+        "id": "251",
+        "name": "Progressive external ophthalmoplegia",
+        "code": "H49.4",
+        "status": "Active"
+    },
+    {
+        "id": "252",
+        "name": "Other paralytic strabismus",
+        "code": "H49.8",
+        "status": "Active"
+    },
+    {
+        "id": "253",
+        "name": "Paralytic strabismus, unspecified",
+        "code": "H49.9",
+        "status": "Active"
+    },
+    {
+        "id": "254",
+        "name": "Other strabismus",
+        "code": "H50",
+        "status": "Active"
+    },
+    {
+        "id": "255",
+        "name": "Convergent concomitant strabismus",
+        "code": "H50.0",
+        "status": "Active"
+    },
+    {
+        "id": "256",
+        "name": "Divergent concomitant strabismus",
+        "code": "H50.1",
+        "status": "Active"
+    },
+    {
+        "id": "257",
+        "name": "Vertical strabismus",
+        "code": "H50.2",
+        "status": "Active"
+    },
+    {
+        "id": "258",
+        "name": "Intermittent heterotropia",
+        "code": "H50.3",
+        "status": "Active"
+    },
+    {
+        "id": "259",
+        "name": "Other and unspecified heterotropia",
+        "code": "H50.4",
+        "status": "Active"
+    },
+    {
+        "id": "260",
+        "name": "Heterophoria",
+        "code": "H50.5",
+        "status": "Active"
+    },
+    {
+        "id": "261",
+        "name": "Mechanical strabismus",
+        "code": "H50.6",
+        "status": "Active"
+    },
+    {
+        "id": "262",
+        "name": "Other specified strabismus",
+        "code": "H50.8",
+        "status": "Active"
+    },
+    {
+        "id": "263",
+        "name": "Strabismus, unspecified",
+        "code": "H50.9",
+        "status": "Active"
+    },
+    {
+        "id": "264",
+        "name": "Other disorders of binocular movement",
+        "code": "H51",
+        "status": "Active"
+    },
+    {
+        "id": "265",
+        "name": "Palsy of conjugate gaze",
+        "code": "H51.0",
+        "status": "Active"
+    },
+    {
+        "id": "266",
+        "name": "Convergence insufficiency and excess",
+        "code": "H51.1",
+        "status": "Active"
+    },
+    {
+        "id": "267",
+        "name": "Internuclear ophthalmoplegia",
+        "code": "H51.2",
+        "status": "Active"
+    },
+    {
+        "id": "268",
+        "name": "Other specified disorders of binocular movement",
+        "code": "H51.8",
+        "status": "Active"
+    },
+    {
+        "id": "269",
+        "name": "Disorder of binocular movement, unspecified",
+        "code": "H51.9",
+        "status": "Active"
+    },
+    {
+        "id": "270",
+        "name": "Disorders of refraction and accommodation",
+        "code": "H52",
+        "status": "Active"
+    },
+    {
+        "id": "271",
+        "name": "Hypermetropia",
+        "code": "H52.0",
+        "status": "Active"
+    },
+    {
+        "id": "272",
+        "name": "Myopia",
+        "code": "H52.1",
+        "status": "Active"
+    },
+    {
+        "id": "273",
+        "name": "Astigmatism",
+        "code": "H52.2",
+        "status": "Active"
+    },
+    {
+        "id": "274",
+        "name": "Anisometropia and aniseikonia",
+        "code": "H52.3",
+        "status": "Active"
+    },
+    {
+        "id": "275",
+        "name": "Presbyopia",
+        "code": "H52.4",
+        "status": "Active"
+    },
+    {
+        "id": "276",
+        "name": "Disorders of accommodation",
+        "code": "H52.5",
+        "status": "Active"
+    },
+    {
+        "id": "277",
+        "name": "Other disorders of refraction",
+        "code": "H52.6",
+        "status": "Active"
+    },
+    {
+        "id": "278",
+        "name": "Disorder of refraction, unspecified",
+        "code": "H52.7",
+        "status": "Active"
+    },
+    {
+        "id": "279",
+        "name": "Visual disturbances",
+        "code": "H53",
+        "status": "Active"
+    },
+    {
+        "id": "280",
+        "name": "Amblyopia ex anopsia",
+        "code": "H53.0",
+        "status": "Active"
+    },
+    {
+        "id": "281",
+        "name": "Subjective visual disturbances",
+        "code": "H53.1",
+        "status": "Active"
+    },
+    {
+        "id": "282",
+        "name": "Diplopia",
+        "code": "H53.2",
+        "status": "Active"
+    },
+    {
+        "id": "283",
+        "name": "Other disorders of binocular vision",
+        "code": "H53.3",
+        "status": "Active"
+    },
+    {
+        "id": "284",
+        "name": "Visual field defects",
+        "code": "H53.4",
+        "status": "Active"
+    },
+    {
+        "id": "285",
+        "name": "Colour vision deficiencies",
+        "code": "H53.5",
+        "status": "Active"
+    },
+    {
+        "id": "286",
+        "name": "Night blindness",
+        "code": "H53.6",
+        "status": "Active"
+    },
+    {
+        "id": "287",
+        "name": "Other visual disturbances",
+        "code": "H53.8",
+        "status": "Active"
+    },
+    {
+        "id": "288",
+        "name": "Visual disturbance, unspecified",
+        "code": "H53.9",
+        "status": "Active"
+    },
+    {
+        "id": "289",
+        "name": "Blindness and low vision",
+        "code": "H54",
+        "status": "Active"
+    },
+    {
+        "id": "290",
+        "name": "Blindness, both eyes",
+        "code": "H54.0",
+        "status": "Active"
+    },
+    {
+        "id": "291",
+        "name": "Blindness, one eye, low vision other eye",
+        "code": "H54.1",
+        "status": "Active"
+    },
+    {
+        "id": "292",
+        "name": "Low vision, both eyes",
+        "code": "H54.2",
+        "status": "Active"
+    },
+    {
+        "id": "293",
+        "name": "Unqualified visual loss, both eyes",
+        "code": "H54.3",
+        "status": "Active"
+    },
+    {
+        "id": "294",
+        "name": "Blindness, one eye",
+        "code": "H54.4",
+        "status": "Active"
+    },
+    {
+        "id": "295",
+        "name": "Low vision, one eye",
+        "code": "H54.5",
+        "status": "Active"
+    },
+    {
+        "id": "296",
+        "name": "Unqualified visual loss, one eye",
+        "code": "H54.6",
+        "status": "Active"
+    },
+    {
+        "id": "298",
+        "name": "Nystagmus and other irregular eye movements",
+        "code": "H55",
+        "status": "Active"
+    },
+    {
+        "id": "299",
+        "name": "Other disorders of eye and adnexa",
+        "code": "H57",
+        "status": "Active"
+    },
+    {
+        "id": "300",
+        "name": "Anomalies of pupillary function",
+        "code": "H57.0",
+        "status": "Active"
+    },
+    {
+        "id": "301",
+        "name": "Ocular pain",
+        "code": "H57.1",
+        "status": "Active"
+    },
+    {
+        "id": "302",
+        "name": "Other specified disorders of eye and adnexa",
+        "code": "H57.8",
+        "status": "Active"
+    },
+    {
+        "id": "303",
+        "name": "Disorder of eye and adnexa, unspecified",
+        "code": "H57.9",
+        "status": "Active"
+    },
+    {
+        "id": "304",
+        "name": "Other disorders of eye and adnexa in diseases classified elsewhere",
+        "code": "H58",
+        "status": "Active"
+    },
+    {
+        "id": "305",
+        "name": "Anomalies of pupillary function in diseases classified elsewhere",
+        "code": "H58.0",
+        "status": "Active"
+    },
+    {
+        "id": "306",
+        "name": "Visual disturbances in diseases classified elsewhere",
+        "code": "H58.1",
+        "status": "Active"
+    },
+    {
+        "id": "307",
+        "name": "Other specified disorders of eye and adnexa in diseases classified elsewhere",
+        "code": "H58.8",
+        "status": "Active"
+    },
+    {
+        "id": "308",
+        "name": "Postprocedural disorders of eye and adnexa, NEC",
+        "code": "H59",
+        "status": "Active"
+    },
+    {
+        "id": "309",
+        "name": "Vitreous syndrome following cataract surgery",
+        "code": "H59.0",
+        "status": "Active"
+    },
+    {
+        "id": "310",
+        "name": "Other postprocedural disorders of eye and adnexa",
+        "code": "H59.8",
+        "status": "Active"
+    },
+    {
+        "id": "311",
+        "name": "Postprocedural disorder of eye and adnexa, unspecified",
+        "code": "H59.9",
+        "status": "Active"
+    }
+]
