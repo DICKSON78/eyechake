@@ -422,8 +422,8 @@ const PharmacyMonthlyReport = () => {
               <Grid size={{ xs: 12, sm: 3 }}>
                 <DatePicker
                   label="Date Submitted"
-                  value={formData.dateSubmitted}
-                  onChange={(date) => handleInputChange("dateSubmitted", date)}
+                  value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null}
+                  onChange={(date) => handleInputChange("dateSubmitted", date ? date.toISOString().split("T")[0] : "")}
                 />
               </Grid>
             </Grid>
@@ -658,8 +658,8 @@ const PharmacyMonthlyReport = () => {
                   <Typography variant="body1" sx={{ mb: 3 }}>
                     <strong>Date:</strong>
                     <DatePicker
-                      value={formData.reportDate}
-                      onChange={(date) => handleInputChange("reportDate", date)}
+                      value={formData.reportDate ? new Date(formData.reportDate) : null}
+                      onChange={(date) => handleInputChange("reportDate", date ? date.toISOString().split("T")[0] : "")}
                       sx={{ ml: 1 }}
                     />
                   </Typography>

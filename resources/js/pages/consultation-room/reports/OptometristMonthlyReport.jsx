@@ -746,13 +746,13 @@ const OptometristMonthlyReport = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Section A: Pharmacy & Product Sales Summary */}
+        {/* Section A: Consultation & Product Sales Summary */}
         <Typography
           variant="h5"
           component="h2"
           sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}
         >
-          A. Pharmacy & Product Sales Summary
+          A. Consultation & Product Sales Summary
         </Typography>
 
         <Table
@@ -833,83 +833,6 @@ const OptometristMonthlyReport = () => {
                 </span>
               </TableCell>
               <TableCell></TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Sales Targets & Achievements */}
-        <Typography
-          variant="h5"
-          component="h2"
-          sx={{ fontWeight: 700, mb: 2, fontFamily: "serif" }}
-        >
-          Sales Targets & Achievements
-        </Typography>
-
-        <Table
-          sx={{
-            mb: 2,
-            border: "1px solid #ccc",
-            "& .MuiTableCell-root": {
-              border: "1px solid #ccc",
-              padding: "8px",
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Metric</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Target</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Results</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell>Bluecut vs transition lens ratio</TableCell>
-              <TableCell>{formData.salesTargets.bluecutVsTransitionRatio.target}</TableCell>
-              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                  {formData.salesTargets.bluecutVsTransitionRatio.result || " "}
-                </span>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Average Bifocal lens (monthly)</TableCell>
-              <TableCell>{formData.salesTargets.averageBifocalLensMonthly.target}</TableCell>
-              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                  {formData.salesTargets.averageBifocalLensMonthly.result || " "}
-                </span>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Average Progressive lens (monthly)</TableCell>
-              <TableCell>{formData.salesTargets.averageProgressiveLensMonthly.target}</TableCell>
-              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                  {formData.salesTargets.averageProgressiveLensMonthly.result || " "}
-                </span>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Contact lenses</TableCell>
-              <TableCell>{formData.salesTargets.contactLenses.target}</TableCell>
-              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                  {formData.salesTargets.contactLenses.result || " "}
-                </span>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>New consultation vs Returning patients</TableCell>
-              <TableCell>{formData.salesTargets.newConsultationVsReturning.target}</TableCell>
-              <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                  {formData.salesTargets.newConsultationVsReturning.result || " "}
-                </span>
-              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -1268,73 +1191,6 @@ const OptometristMonthlyReport = () => {
                   label="Total Target (Tsh)"
                   value={formData.totalTarget}
                   onChange={(value) => handleInputChange(null, "totalTarget", value)}
-                />
-              </Grid>
-
-              {/* Sales Targets & Achievements - General */}
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Sales Targets & Achievements - General
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Bluecut vs transition lens ratio (Result)"
-                  value={formData.salesTargets.bluecutVsTransitionRatio.result}
-                  onChange={(value) =>
-                    handleNestedInputChange("salesTargets", "bluecutVsTransitionRatio", "result", value)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Average Bifocal lens monthly (Result)"
-                  value={formData.salesTargets.averageBifocalLensMonthly.result}
-                  onChange={(value) =>
-                    handleNestedInputChange("salesTargets", "averageBifocalLensMonthly", "result", value)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Average Progressive lens monthly (Result)"
-                  value={formData.salesTargets.averageProgressiveLensMonthly.result}
-                  onChange={(value) =>
-                    handleNestedInputChange("salesTargets", "averageProgressiveLensMonthly", "result", value)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Contact lenses (Result)"
-                  value={formData.salesTargets.contactLenses.result}
-                  onChange={(value) =>
-                    handleNestedInputChange("salesTargets", "contactLenses", "result", value)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="New consultation vs Returning patients (Result)"
-                  value={formData.salesTargets.newConsultationVsReturning.result}
-                  onChange={(value) =>
-                    handleNestedInputChange("salesTargets", "newConsultationVsReturning", "result", value)
-                  }
                 />
               </Grid>
 

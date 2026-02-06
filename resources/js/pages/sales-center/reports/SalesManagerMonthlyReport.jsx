@@ -849,45 +849,6 @@ const SalesManagerMonthlyReport = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Section 1: Sales Performance Summary */}
-        <Typography
-          variant="h5"
-          component="h2"
-          sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}
-        >
-          1. Sales Performance Summary
-        </Typography>
-
-        <Table
-          sx={{
-            mb: 4,
-            border: "1px dashed #ccc",
-            "& .MuiTableCell-root": {
-              border: "1px dashed #ccc",
-              padding: "8px",
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Item Category</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Quantity Sold</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {itemCategories.map((category, index) => (
-              <TableRow key={index}>
-                <TableCell>{category.label}</TableCell>
-                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                    {formData.salesPerformance[category.key] || " "}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
         {/* Section 2: Sales Targets & Sales Information - Side by Side */}
         <Grid container spacing={3} sx={{ mt: 2, mb: 4 }}>
           {/* Left Side: SALES TARGETS */}
@@ -1117,27 +1078,6 @@ const SalesManagerMonthlyReport = () => {
                   }
                 />
               </Grid>
-
-              {/* Section 1: Sales Performance */}
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 1: Sales Performance Summary
-                </Typography>
-              </Grid>
-              {itemCategories.map((category, index) => (
-                <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={2}
-                    label={category.label}
-                    value={formData.salesPerformance[category.key] || ""}
-                    onChange={(value) =>
-                      handleInputChange("salesPerformance", category.key, value)
-                    }
-                  />
-                </Grid>
-              ))}
 
               {/* Section 2: Sales Targets */}
               <Grid size={{ xs: 12 }}>
