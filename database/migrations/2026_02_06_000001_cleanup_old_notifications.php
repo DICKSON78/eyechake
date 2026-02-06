@@ -41,32 +41,53 @@ return new class extends Migration
             ]);
         \Log::info("Updated {$updatedConsultations} pending consultations");
 
-        // 4. Insert diseases from JSON file
-        $diseasesJson = file_get_contents(base_path('diseases_from_sql.json'));
-        $diseases = json_decode($diseasesJson, true);
+        // 4. Insert diseases from JSON file (skip duplicates)
+        $diseasesJsonPath = base_path('diseases_from_sql.json');
+        $totalInserted = 0;
         
-        if ($diseases && is_array($diseases)) {
-            // Prepare diseases for insertion (remove id, add timestamps)
-            $diseasesData = array_map(function($disease) {
-                return [
-                    'name' => $disease['name'],
-                    'code' => $disease['code'],
-                    'status' => $disease['status'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }, $diseases);
+        if (file_exists($diseasesJsonPath)) {
+            $diseasesJson = file_get_contents($diseasesJsonPath);
+            $diseases = json_decode($diseasesJson, true);
             
-            // Insert in chunks to avoid memory issues
-            $chunks = array_chunk($diseasesData, 100);
-            $totalInserted = 0;
-            
-            foreach ($chunks as $chunk) {
-                DB::table('diseases')->insert($chunk);
-                $totalInserted += count($chunk);
+            if ($diseases && is_array($diseases)) {
+                // Get existing disease names to avoid duplicates
+                $existingNames = DB::table('diseases')
+                    ->pluck('name')
+                    ->map(fn($name) => strtolower(trim($name)))
+                    ->toArray();
+                
+                // Prepare diseases for insertion (remove id, add timestamps)
+                $diseasesData = array_map(function($disease) {
+                    return [
+                        'name' => $disease['name'],
+                        'code' => $disease['code'],
+                        'status' => $disease['status'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }, $diseases);
+                
+                // Filter out existing diseases
+                $newDiseases = array_filter($diseasesData, function($disease) use ($existingNames) {
+                    return !in_array(strtolower(trim($disease['name'])), $existingNames);
+                });
+                
+                if (count($newDiseases) > 0) {
+                    // Insert in chunks to avoid memory issues
+                    $chunks = array_chunk($newDiseases, 100);
+                    
+                    foreach ($chunks as $chunk) {
+                        DB::table('diseases')->insert($chunk);
+                        $totalInserted += count($chunk);
+                    }
+                    
+                    \Log::info("Inserted {$totalInserted} new diseases (skipped " . (count($diseases) - $totalInserted) . " duplicates)");
+                } else {
+                    \Log::info("All diseases already exist - no new diseases inserted");
+                }
             }
-            
-            \Log::info("Inserted {$totalInserted} diseases into diseases table");
+        } else {
+            \Log::info("diseases_from_sql.json not found - skipping disease insertion");
         }
 
         // 5. Clear notification cache
