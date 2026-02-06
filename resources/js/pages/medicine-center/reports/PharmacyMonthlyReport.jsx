@@ -392,43 +392,13 @@ const PharmacyMonthlyReport = () => {
               sx={{
                 textAlign: "center",
                 fontWeight: 700,
-                mb: 1,
+                mb: 3,
                 textTransform: "uppercase",
                 fontFamily: "serif",
               }}
             >
               PHARMACY MONTHLY REPORT
             </Typography>
-            <Divider sx={{ mb: 3 }} />
-
-            {/* Employee Info */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Employee Name"
-                  value={formData.employeeName}
-                  onChange={(value) => handleInputChange("employeeName", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Month"
-                  value={formData.month}
-                  onChange={(value) => handleInputChange("month", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <DatePicker
-                  label="Date Submitted"
-                  value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null}
-                  onChange={(date) => handleInputChange("dateSubmitted", date ? date.toISOString().split("T")[0] : "")}
-                />
-              </Grid>
-            </Grid>
-
-            <Divider sx={{ my: 3 }} />
 
             {/* Section A: Pharmacy & Product Sales Summary */}
             <Typography
@@ -465,34 +435,61 @@ const PharmacyMonthlyReport = () => {
                   <TableRow key={index}>
                     <TableCell>{product.productName}</TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.openingStock || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.openingStock}
+                        onChange={(value) => handleProductChange(index, "openingStock", value)}
+                      />
                     </TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.closingStock || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.closingStock}
+                        onChange={(value) => {
+                          handleProductChange(index, "closingStock", value);
+                          setTimeout(() => calculateProfit(index), 100);
+                        }}
+                      />
                     </TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.buyingPricePerUnit || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.buyingPricePerUnit}
+                        onChange={(value) => {
+                          handleProductChange(index, "buyingPricePerUnit", value);
+                          setTimeout(() => calculateProfit(index), 100);
+                        }}
+                      />
                     </TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.sellingPricePerUnit || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.sellingPricePerUnit}
+                        onChange={(value) => {
+                          handleProductChange(index, "sellingPricePerUnit", value);
+                          setTimeout(() => calculateProfit(index), 100);
+                        }}
+                      />
                     </TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.totalSales || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.totalSales}
+                        onChange={(value) => handleProductChange(index, "totalSales", value)}
+                      />
                     </TableCell>
                     <TableCell>
-                      <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                        {product.profit || " "}
-                      </span>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={product.profit}
+                        onChange={(value) => handleProductChange(index, "profit", value)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -501,9 +498,12 @@ const PharmacyMonthlyReport = () => {
                     TOTAL SALES
                   </TableCell>
                   <TableCell>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.totalSales || " "}
-                    </span>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={formData.totalSales}
+                      onChange={(value) => handleInputChange("totalSales", value)}
+                    />
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
@@ -512,160 +512,17 @@ const PharmacyMonthlyReport = () => {
                     TOTAL TARGET
                   </TableCell>
                   <TableCell>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.totalTarget || "2,000,000"}
-                    </span>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={formData.totalTarget}
+                      onChange={(value) => handleInputChange("totalTarget", value)}
+                    />
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableBody>
             </Table>
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* Edit Inputs for Products */}
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Edit Product Data
-            </Typography>
-            <Grid container spacing={2}>
-              {formData.products.map((product, index) => (
-                <React.Fragment key={index}>
-                  <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 2 }} />
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
-                      {product.productName}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Opening Stock"
-                      value={product.openingStock}
-                      onChange={(value) => handleProductChange(index, "openingStock", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Closing Stock"
-                      value={product.closingStock}
-                      onChange={(value) => {
-                        handleProductChange(index, "closingStock", value);
-                        setTimeout(() => calculateProfit(index), 100);
-                      }}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Buying Price per Unit (Tsh)"
-                      value={product.buyingPricePerUnit}
-                      onChange={(value) => {
-                        handleProductChange(index, "buyingPricePerUnit", value);
-                        setTimeout(() => calculateProfit(index), 100);
-                      }}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Selling Price per Unit (Tsh)"
-                      value={product.sellingPricePerUnit}
-                      onChange={(value) => {
-                        handleProductChange(index, "sellingPricePerUnit", value);
-                        setTimeout(() => calculateProfit(index), 100);
-                      }}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Total Sales (Tsh)"
-                      value={product.totalSales}
-                      onChange={(value) => handleProductChange(index, "totalSales", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Profit (Tsh)"
-                      value={product.profit}
-                      onChange={(value) => handleProductChange(index, "profit", value)}
-                      helperText="Auto-calculated when buying/selling prices and closing stock are entered"
-                    />
-                  </Grid>
-                </React.Fragment>
-              ))}
-
-              {/* Summary Fields */}
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Summary
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Total Sales (Tsh)"
-                  value={formData.totalSales}
-                  onChange={(value) => handleInputChange("totalSales", value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={2}
-                  label="Total Target (Tsh)"
-                  value={formData.totalTarget}
-                  onChange={(value) => handleInputChange("totalTarget", value)}
-                />
-              </Grid>
-            </Grid>
-
-            <Divider sx={{ my: 4 }} />
-
-            {/* Footer - Signature and Date */}
-            <Box sx={{ mt: 6, mb: 2 }}>
-              <Grid container spacing={4}>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    <strong>Signature:</strong>
-                    <TextField
-                      fullWidth
-                      value={formData.signature}
-                      onChange={(value) => handleInputChange("signature", value)}
-                      sx={{ mt: 1 }}
-                    />
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    <strong>Date:</strong>
-                    <DatePicker
-                      value={formData.reportDate ? new Date(formData.reportDate) : null}
-                      onChange={(date) => handleInputChange("reportDate", date ? date.toISOString().split("T")[0] : "")}
-                      sx={{ ml: 1 }}
-                    />
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Box>
           </Paper>
         </CardContent>
       </Card>
