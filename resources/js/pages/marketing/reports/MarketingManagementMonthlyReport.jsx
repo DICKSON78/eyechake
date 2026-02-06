@@ -24,7 +24,6 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
   Print as PrintIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
@@ -65,7 +64,6 @@ const MarketingManagementMonthlyReport = () => {
     return keyMap[activity] || activity;
   };
 
-  const [isEditing, setIsEditing] = useState(false);
   const [reports, setReports] = useState([]);
   const [selectedReportId, setSelectedReportId] = useState(null);
   const [formData, setFormData] = useState({
@@ -186,7 +184,6 @@ const MarketingManagementMonthlyReport = () => {
       reportDate: new Date(),
     });
     setSelectedReportId(null);
-    setIsEditing(true);
   };
 
   const handleEdit = (report) => {
@@ -196,7 +193,6 @@ const MarketingManagementMonthlyReport = () => {
       reportDate: report.reportDate ? new Date(report.reportDate) : new Date(),
     });
     setSelectedReportId(report.id);
-    setIsEditing(true);
   };
 
   const handleSave = () => {
@@ -219,8 +215,6 @@ const MarketingManagementMonthlyReport = () => {
     setReports(updatedReports);
     localStorage.setItem("marketing_management_monthly_reports", JSON.stringify(updatedReports));
     addToast({ message: "Report saved successfully!", severity: "success" });
-    setIsEditing(false);
-    setSelectedReportId(null);
   };
 
   const handleDelete = (id) => {
@@ -231,21 +225,6 @@ const MarketingManagementMonthlyReport = () => {
       addToast({ message: "Report deleted successfully!", severity: "success" });
       if (selectedReportId === id) {
         handleNewReport();
-      }
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setSelectedReportId(null);
-    if (selectedReportId) {
-      const report = reports.find((r) => r.id === selectedReportId);
-      if (report) {
-        setFormData({
-          ...report,
-          dateSubmitted: report.dateSubmitted ? new Date(report.dateSubmitted) : new Date(),
-          reportDate: report.reportDate ? new Date(report.reportDate) : new Date(),
-        });
       }
     }
   };
@@ -296,57 +275,42 @@ const MarketingManagementMonthlyReport = () => {
           title="Marketing Management Monthly Report"
           action={
             <Stack direction="row" spacing={1}>
-              {!isEditing && (
-                <>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleNewReport}
-                  >
-                    New Report
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<PrintIcon />}
-                    onClick={handlePrint}
-                  >
-                    Print
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<DownloadIcon />}
-                    onClick={handleDownloadPDF}
-                  >
-                    Download PDF
-                  </Button>
-                </>
-              )}
-              {isEditing && (
-                <>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<SaveIcon />}
-                    onClick={handleSave}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<CancelIcon />}
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={handleNewReport}
+              >
+                New Report
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+              >
+                {selectedReportId ? "Update" : "Save"}
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PrintIcon />}
+                onClick={handlePrint}
+              >
+                Print
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={handleDownloadPDF}
+              >
+                Download PDF
+              </Button>
             </Stack>
           }
         />
         <Divider />
         <CardContent>
-          {/* Reports List (when not editing) */}
-          {!isEditing && reports.length > 0 && (
+          {/* Reports List */}
+          {reports.length > 0 && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Saved Reports
@@ -436,52 +400,22 @@ const MarketingManagementMonthlyReport = () => {
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
                       <strong>Employee Name:</strong>{" "}
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={formData.employeeName}
-                          onChange={(value) => handleInputChange(null, "employeeName", value)}
-                          sx={{ display: "inline-block", width: "300px", ml: 1 }}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            borderBottom: "1px solid #000",
-                            minWidth: "300px",
-                            width: "100%",
-                            display: "inline-block",
-                            paddingBottom: "2px",
-                          }}
-                        >
-                          {formData.employeeName || " "}
-                        </span>
-                      )}
+                      <TextField
+                        fullWidth
+                        value={formData.employeeName}
+                        onChange={(value) => handleInputChange(null, "employeeName", value)}
+                        sx={{ display: "inline-block", width: "300px", ml: 1 }}
+                      />
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body1" sx={{ mb: 1 }}>
                       <strong>Date Submitted:</strong>{" "}
-                      {isEditing ? (
-                        <DatePicker
-                          value={formData.dateSubmitted}
-                          onChange={(date) => handleInputChange(null, "dateSubmitted", date)}
-                          sx={{ display: "inline-block", ml: 1 }}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            borderBottom: "1px solid #000",
-                            minWidth: "250px",
-                            width: "100%",
-                            display: "inline-block",
-                            paddingBottom: "2px",
-                          }}
-                        >
-                          {formData.dateSubmitted
-                            ? new Date(formData.dateSubmitted).toLocaleDateString()
-                            : " "}
-                        </span>
-                      )}
+                      <DatePicker
+                        value={formData.dateSubmitted}
+                        onChange={(date) => handleInputChange(null, "dateSubmitted", date)}
+                        sx={{ display: "inline-block", ml: 1 }}
+                      />
                     </Typography>
                   </Grid>
                 </Grid>
@@ -523,30 +457,18 @@ const MarketingManagementMonthlyReport = () => {
                   <TableRow key={index}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell sx={{ border: "1px solid #ccc" }}>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={item.target}
-                          onChange={(value) => handleTiktokChange(index, "target", value)}
-                        />
-                      ) : (
-                        <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                          {item.target || " "}
-                        </span>
-                      )}
+                      <TextField
+                        fullWidth
+                        value={item.target}
+                        onChange={(value) => handleTiktokChange(index, "target", value)}
+                      />
                     </TableCell>
                     <TableCell sx={{ border: "1px solid #ccc" }}>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={item.result}
-                          onChange={(value) => handleTiktokChange(index, "result", value)}
-                        />
-                      ) : (
-                        <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                          {item.result || " "}
-                        </span>
-                      )}
+                      <TextField
+                        fullWidth
+                        value={item.result}
+                        onChange={(value) => handleTiktokChange(index, "result", value)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -587,37 +509,24 @@ const MarketingManagementMonthlyReport = () => {
                   <TableRow key={index}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell sx={{ border: "1px solid #ccc" }}>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={item.target}
-                          onChange={(value) => handleInstagramChange(index, "target", value)}
-                        />
-                      ) : (
-                        <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                          {item.target || " "}
-                        </span>
-                      )}
+                      <TextField
+                        fullWidth
+                        value={item.target}
+                        onChange={(value) => handleInstagramChange(index, "target", value)}
+                      />
                     </TableCell>
                     <TableCell sx={{ border: "1px solid #ccc" }}>
-                      {isEditing ? (
-                        <TextField
-                          fullWidth
-                          value={item.result}
-                          onChange={(value) => handleInstagramChange(index, "result", value)}
-                        />
-                      ) : (
-                        <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                          {item.result || " "}
-                        </span>
-                      )}
+                      <TextField
+                        fullWidth
+                        value={item.result}
+                        onChange={(value) => handleInstagramChange(index, "result", value)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
 
-            {/* GOOGLE MANAGEMENT Section */}
             <Typography
               variant="h5"
               component="h2"
@@ -625,31 +534,15 @@ const MarketingManagementMonthlyReport = () => {
             >
               GOOGLE MANAGEMENT
             </Typography>
-            {isEditing ? (
-              <TextField
-                fullWidth
-                multiline
-                rows={6}
-                value={formData.googleManagement}
-                onChange={(value) => handleInputChange(null, "googleManagement", value)}
-                placeholder="Enter Google Management report..."
-                sx={{ mb: 4 }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  border: "1px solid #ccc",
-                  minHeight: "150px",
-                  mb: 4,
-                  p: 2,
-                  borderRadius: 1,
-                }}
-              >
-                <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-                  {formData.googleManagement || " "}
-                </Typography>
-              </Box>
-            )}
+            <TextField
+              fullWidth
+              multiline
+              rows={6}
+              value={formData.googleManagement}
+              onChange={(value) => handleInputChange(null, "googleManagement", value)}
+              placeholder="Enter Google Management report..."
+              sx={{ mb: 4 }}
+            />
 
             {/* CUSTOMER RELATIONSHIP MANAGEMENT Section */}
             <Typography
@@ -677,22 +570,18 @@ const MarketingManagementMonthlyReport = () => {
                     <TableRow key={index}>
                       <TableCell sx={{ border: "1px solid #ddd" }}>{activity}</TableCell>
                       <TableCell sx={{ border: "1px solid #ddd" }}>
-                        {isEditing ? (
-                          <TextField
-                            fullWidth
-                            size="small"
-                            value={formData.customerRelationship[getCustomerRelationshipKey(index)] || ""}
-                            onChange={(value) =>
-                              handleInputChange(
-                                "customerRelationship",
-                                getCustomerRelationshipKey(index),
-                                value
-                              )
-                            }
-                          />
-                        ) : (
-                          formData.customerRelationship[getCustomerRelationshipKey(index)] || ""
-                        )}
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={formData.customerRelationship[getCustomerRelationshipKey(activity)] || ""}
+                          onChange={(value) =>
+                            handleInputChange(
+                              "customerRelationship",
+                              getCustomerRelationshipKey(activity),
+                              value
+                            )
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -708,52 +597,22 @@ const MarketingManagementMonthlyReport = () => {
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="body1" sx={{ mb: 3 }}>
                     <strong>Signature:</strong>
-                    {isEditing ? (
-                      <TextField
-                        fullWidth
-                        value={formData.signature}
-                        onChange={(value) => handleInputChange(null, "signature", value)}
-                        sx={{ mt: 1 }}
-                      />
-                    ) : (
-                      <span
-                        style={{
-                          borderBottom: "1px solid #000",
-                          minWidth: "200px",
-                          display: "inline-block",
-                          marginLeft: "10px",
-                          paddingBottom: "2px",
-                        }}
-                      >
-                        {formData.signature || " "}
-                      </span>
-                    )}
+                    <TextField
+                      fullWidth
+                      value={formData.signature}
+                      onChange={(value) => handleInputChange(null, "signature", value)}
+                      sx={{ mt: 1 }}
+                    />
                   </Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
                   <Typography variant="body1" sx={{ mb: 3 }}>
                     <strong>Date:</strong>
-                    {isEditing ? (
-                      <DatePicker
-                        value={formData.reportDate}
-                        onChange={(date) => handleInputChange(null, "reportDate", date)}
-                        sx={{ ml: 1 }}
-                      />
-                    ) : (
-                      <span
-                        style={{
-                          borderBottom: "1px solid #000",
-                          minWidth: "200px",
-                          display: "inline-block",
-                          marginLeft: "10px",
-                          paddingBottom: "2px",
-                        }}
-                      >
-                        {formData.reportDate
-                          ? new Date(formData.reportDate).toLocaleDateString()
-                          : " "}
-                      </span>
-                    )}
+                    <DatePicker
+                      value={formData.reportDate}
+                      onChange={(date) => handleInputChange(null, "reportDate", date)}
+                      sx={{ ml: 1 }}
+                    />
                   </Typography>
                 </Grid>
               </Grid>

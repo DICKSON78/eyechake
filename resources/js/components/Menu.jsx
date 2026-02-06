@@ -524,7 +524,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Monthly Optometrist Report",
               icon: <ReportsIcon />,
               to: "/consultation-room/reports/optometrist-monthly-report",
-              show: isPrivilegeGranted('consultation_room'),
+              show: false, // Hidden per user request
             },
             {
               title: "Pharmacy & Consultation Report",
@@ -592,7 +592,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Sales Manager Monthly Report",
               icon: <ReportsIcon />,
               to: "/sales-center/reports/sales-manager-monthly-report",
-              show: hasSalesCenterAccess,
+              show: false, // Hidden per user request
             },
             {
               title: "Sales Monthly Report",
@@ -604,7 +604,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Customer Relationship Monthly Report",
               icon: <ReportsIcon />,
               to: "/sales-center/reports/customer-relationship-monthly-report",
-              show: hasSalesCenterAccess,
+              show: false, // Hidden per user request
             },
           ],
         },
@@ -668,7 +668,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Pharmacy Monthly Report",
               icon: <ReportsIcon />,
               to: "/pharmacy/reports/pharmacy-monthly-report",
-              show: isPrivilegeGranted('medicine_center'),
+              show: false, // Hidden per user request
             },
           ],
         },
@@ -997,7 +997,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Monthly Marketing & Operations Manager Report",
               icon: <ReportsIcon />,
               to: "/marketing/reports/marketing-operations-monthly-report",
-              show: isPrivilegeGranted('marketing'),
+              show: false, // Hidden per user request
             },
             {
               title: "Marketing Management Monthly Report",
