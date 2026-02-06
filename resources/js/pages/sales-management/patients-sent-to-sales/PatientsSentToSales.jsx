@@ -5,6 +5,7 @@ import { Button, Card, CardContent, Chip, Divider, Stack, Badge } from "@mui/mat
 import {
   SendRounded as SendIcon,
   VisibilityRounded as VisibilityIcon,
+  ReceiptRounded as InvoiceIcon,
 } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -103,7 +104,44 @@ const PatientsSentToSales = () => {
     modalRef.current.open("Send to Cashier", component, "sm");
   };
 
+  const handleCreateInvoice = (item) => {
+    if (!item.items || item.items.length === 0) {
+        addToast({ message: "No items to invoice.", severity: "warning" });
+        return;
+    }
 
+    const itemIds = item.items
+        .filter(i => !i.item_payment_id)
+        .map(i => i.id);
+        
+    if (itemIds.length === 0) {
+         addToast({ message: "All items are already invoiced.", severity: "info" });
+         return;
+    }
+
+    const component = (
+      <ConfirmationDialog
+        message={`Create invoice for ${itemIds.length} pending items?`}
+        onCancel={() => {
+          modalRef.current.close();
+        }}
+        onOk={async () => {
+          modalRef.current.close();
+          try {
+            await window.axios.post("api/patient-payment-cache-items/create-invoice", {
+               payment_cache_id: item.id,
+               items: itemIds
+            });
+            addToast({ message: "Invoice created successfully", severity: "success" });
+            handleFetch(); // Refresh the list - patient should disappear if all items invoiced
+          } catch (err) {
+            addToast({ message: formatError(err), severity: "error" });
+          }
+        }}
+      />
+    );
+    modalRef.current.open("Create Invoice", component, "sm");
+  };
 
   return (
     <Page
@@ -243,7 +281,19 @@ const PatientsSentToSales = () => {
                     >
                       Manage
                     </Button>
-
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="secondary"
+                      startIcon={<InvoiceIcon />}
+                      onClick={() => handleCreateInvoice(item)}
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Create Invoice
+                    </Button>
                     <Button
                       variant="outlined"
                       size="small"

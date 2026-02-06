@@ -24,13 +24,11 @@ import VisibilityIcon from "@mui/icons-material/VisibilityRounded";
 import CheckCircleIcon from "@mui/icons-material/CheckCircleRounded";
 import AssignmentIcon from "@mui/icons-material/AssignmentRounded";
 import MoreVertIcon from "@mui/icons-material/MoreVertRounded";
-import { ReceiptRounded as InvoiceIcon } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
 import Modal from "../../../components/Modal";
 import Filters from "../../sales-center/clients/Filters";
 import CreateClient from "../../sales-center/clients/CreateClient";
-import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 import { useFetch, useToast, usePost } from "../../../hooks";
 import { formatError, getAge } from "../../../helpers";
@@ -135,45 +133,10 @@ const Clients = () => {
   };
 
   const handleCreateInvoice = (client) => {
-    // If the client object from api/patients doesn't contain items, redirect.
-    if (!client.items || client.items.length === 0) {
-        navigate(`/payment-center/pending-cash-patients`);
-        addToast({ message: "Redirecting to Payment Center to manage pending items.", severity: "info" });
-        handleMenuClose();
-        return;
-    }
-
-    const itemIds = client.items
-        .filter(i => !i.item_payment_id)
-        .map(i => i.id);
-        
-    if (itemIds.length === 0) {
-         addToast({ message: "All items are already invoiced.", severity: "info" });
-         return;
-    }
-
-    const component = (
-      <ConfirmationDialog
-        message={`Create invoice for ${itemIds.length} pending items?`}
-        onCancel={() => {
-          modalRef.current.close();
-        }}
-        onOk={async () => {
-          modalRef.current.close();
-          try {
-            await window.axios.post("api/patient-payment-cache-items/create-invoice", {
-               payment_cache_id: client.payment_cache_id || client.id, 
-               items: itemIds
-            });
-            addToast({ message: "Invoice created successfully", severity: "success" });
-            handleFetch();
-          } catch (err) {
-            addToast({ message: formatError(err), severity: "error" });
-          }
-        }}
-      />
-    );
-    modalRef.current.open("Create Invoice", component, "sm");
+    navigate(`/reception/patients/${client.id}/check-in`, {
+      state: { createInvoice: true }
+    });
+    handleMenuClose();
   };
 
   return (
@@ -324,7 +287,7 @@ const Clients = () => {
       >
         <MenuItem onClick={() => handleCreateInvoice(selectedClient)}>
           <ListItemIcon>
-            <InvoiceIcon fontSize="small" />
+            <ReceiptIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Create Invoice</ListItemText>
         </MenuItem>
