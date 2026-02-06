@@ -668,7 +668,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Pharmacy Monthly Report",
               icon: <ReportsIcon />,
               to: "/pharmacy/reports/pharmacy-monthly-report",
-              show: false, // Hidden per user request
+              show: isPrivilegeGranted('medicine_center'),
             },
           ],
         },

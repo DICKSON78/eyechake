@@ -396,26 +396,20 @@ const SalesMonthlyReport = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Employee Name:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.employeeName || " "}
-                </span>
               </Typography>
+              <TextField fullWidth size="small" value={formData.employeeName} onChange={(v) => handleInputChange(null, "employeeName", v)} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Month:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "250px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.month || " "}
-                </span>
               </Typography>
+              <TextField fullWidth size="small" value={formData.month} onChange={(v) => handleInputChange(null, "month", v)} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Date Submitted:</strong>{" "}
-                <span style={{ borderBottom: "1px solid #000", minWidth: "250px", width: "100%", display: "inline-block", paddingBottom: "2px" }}>
-                  {formData.dateSubmitted || " "}
-                </span>
               </Typography>
+              <DatePicker fullWidth value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null} onChange={(v) => handleInputChange(null, "dateSubmitted", v ? v.toISOString().split("T")[0] : "")} />
             </Grid>
           </Grid>
         </Box>
@@ -436,7 +430,14 @@ const SalesMonthlyReport = () => {
             {itemCategories.map((cat) => (
               <TableRow key={cat.key}>
                 <TableCell>{cat.label}</TableCell>
-                <TableCell>{formData.salesItemCategories[cat.key] || " "}</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={formData.salesItemCategories[cat.key] || ""}
+                    onChange={(v) => handleInputChange("salesItemCategories", cat.key, v)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -457,13 +458,41 @@ const SalesMonthlyReport = () => {
           <TableBody>
             <TableRow>
               <TableCell>Average glass daily sales</TableCell>
-              <TableCell>{formData.salesTargets.averageGlassDailySales?.target ?? " "}</TableCell>
-              <TableCell>{formData.salesTargets.averageGlassDailySales?.result || " "}</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.salesTargets.averageGlassDailySales?.target ?? ""}
+                  onChange={(v) => handleNestedInputChange("salesTargets", "averageGlassDailySales", "target", v)}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.salesTargets.averageGlassDailySales?.result || ""}
+                  onChange={(v) => handleNestedInputChange("salesTargets", "averageGlassDailySales", "result", v)}
+                />
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Glass customer conversion ratio</TableCell>
-              <TableCell>{formData.salesTargets.glassCustomerConversionRatio?.target ?? " "}</TableCell>
-              <TableCell>{formData.salesTargets.glassCustomerConversionRatio?.result || " "}</TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.salesTargets.glassCustomerConversionRatio?.target ?? ""}
+                  onChange={(v) => handleNestedInputChange("salesTargets", "glassCustomerConversionRatio", "target", v)}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.salesTargets.glassCustomerConversionRatio?.result || ""}
+                  onChange={(v) => handleNestedInputChange("salesTargets", "glassCustomerConversionRatio", "result", v)}
+                />
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -483,7 +512,14 @@ const SalesMonthlyReport = () => {
             {salesPerformanceLabels.map((item) => (
               <TableRow key={item.key}>
                 <TableCell>{item.label}</TableCell>
-                <TableCell>{formData.salesPerformance[item.key] || " "}</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={formData.salesPerformance[item.key] || ""}
+                    onChange={(v) => handleInputChange("salesPerformance", item.key, v)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -504,7 +540,14 @@ const SalesMonthlyReport = () => {
             {salesInformationItems.map((item) => (
               <TableRow key={item.key}>
                 <TableCell>{item.label}</TableCell>
-                <TableCell>{formData.salesInformation[item.key] || " "}</TableCell>
+                <TableCell>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={formData.salesInformation[item.key] || ""}
+                    onChange={(v) => handleInputChange("salesInformation", item.key, v)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -513,101 +556,32 @@ const SalesMonthlyReport = () => {
         <Typography variant="body1" sx={{ mb: 2, fontStyle: "italic" }}>
           <strong>Results evaluation & suggestions/commitments:</strong>
         </Typography>
-        <Box sx={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", paddingBottom: "2px", minHeight: "40px", mb: 4, p: 1 }}>
-          {formData.resultsEvaluation || ""}
-        </Box>
+        <TextField
+          fullWidth
+          multiline
+          rows={3}
+          value={formData.resultsEvaluation}
+          onChange={(v) => handleInputChange(null, "resultsEvaluation", v)}
+          sx={{ mb: 4 }}
+        />
 
         <Box sx={{ mt: 4, mb: 2 }}>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            <strong>Signature:</strong>{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "200px", display: "inline-block" }}>
-              {formData.signature || "_________________________"}
-            </span>
-          </Typography>
-          <Typography variant="body1">
-            <strong>Date:</strong>{" "}
-            <span style={{ borderBottom: "1px solid #000", minWidth: "200px", display: "inline-block" }}>
-              {formData.reportDate || "_________________________"}
-            </span>
-          </Typography>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Signature:</strong>
+              </Typography>
+              <TextField fullWidth size="small" value={formData.signature} onChange={(v) => handleInputChange(null, "signature", v)} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Date:</strong>
+              </Typography>
+              <DatePicker fullWidth value={formData.reportDate ? new Date(formData.reportDate) : null} onChange={(v) => handleInputChange(null, "reportDate", v ? v.toISOString().split("T")[0] : "")} />
+            </Grid>
+          </Grid>
         </Box>
       </Paper>
-
-      <Box sx={{ mt: 4, "@media print": { display: "none" } }}>
-        <Card>
-          <CardHeader title="Fill Report Data" />
-          <CardContent>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="Employee Name" value={formData.employeeName} onChange={(v) => handleInputChange(null, "employeeName", v)} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="Month" value={formData.month} onChange={(v) => handleInputChange(null, "month", v)} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <DatePicker
-                  fullWidth
-                  label="Date Submitted"
-                  value={formData.dateSubmitted ? new Date(formData.dateSubmitted) : null}
-                  onChange={(v) => handleInputChange(null, "dateSubmitted", v ? v.toISOString().split("T")[0] : "")}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Section 1: Sales Performance Summary</Typography>
-              </Grid>
-              {itemCategories.map((cat) => (
-                <Grid key={cat.key} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    label={cat.label}
-                    value={formData.salesItemCategories[cat.key] || ""}
-                    onChange={(v) => handleInputChange("salesItemCategories", cat.key, v)}
-                  />
-                </Grid>
-              ))}
-
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Section 2: Sales Targets</Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Average glass daily sales (Result)" value={formData.salesTargets.averageGlassDailySales?.result ?? ""} onChange={(v) => handleNestedInputChange("salesTargets", "averageGlassDailySales", "result", v)} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Glass customer conversion ratio (Result)" value={formData.salesTargets.glassCustomerConversionRatio?.result ?? ""} onChange={(v) => handleNestedInputChange("salesTargets", "glassCustomerConversionRatio", "result", v)} />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Section 3: Sales Performance</Typography>
-              </Grid>
-              {salesPerformanceLabels.map((item) => (
-                <Grid key={item.key} size={{ xs: 12, sm: 6 }}>
-                  <TextField fullWidth label={item.label} value={formData.salesPerformance[item.key] || ""} onChange={(v) => handleInputChange("salesPerformance", item.key, v)} />
-                </Grid>
-              ))}
-
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Section 4: Sales Information</Typography>
-              </Grid>
-              {salesInformationItems.map((item) => (
-                <Grid key={item.key} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField fullWidth label={item.label} value={formData.salesInformation[item.key] || ""} onChange={(v) => handleInputChange("salesInformation", item.key, v)} />
-                </Grid>
-              ))}
-
-              <Grid size={{ xs: 12 }}>
-                <TextField fullWidth multiline rows={3} label="Results evaluation & suggestions/commitments" value={formData.resultsEvaluation} onChange={(v) => handleInputChange(null, "resultsEvaluation", v)} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Signature" value={formData.signature} onChange={(v) => handleInputChange(null, "signature", v)} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <DatePicker fullWidth label="Report Date" value={formData.reportDate ? new Date(formData.reportDate) : null} onChange={(v) => handleInputChange(null, "reportDate", v ? v.toISOString().split("T")[0] : "")} />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Box>
       <Modal ref={modalRef} />
     </Page>
   );
