@@ -831,68 +831,7 @@ const MarketingOperationsMonthlyReport = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Marketing Metrics Section */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}
-            >
-              Marketing Metrics
-            </Typography>
-            <Table
-              sx={{
-                border: "1px solid #ccc",
-                "& .MuiTableCell-root": {
-                  border: "1px solid #ccc",
-                  padding: "8px",
-                },
-              }}
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Metric</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Value</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Total required calls</TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.marketingMetrics.totalRequiredCalls || " "}
-                    </span>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Total clients called</TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.marketingMetrics.totalClientsCalled || " "}
-                    </span>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Successful calls</TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.marketingMetrics.successfulCalls || " "}
-                    </span>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Unreachable calls</TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {formData.marketingMetrics.unreachableCalls || " "}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Grid>
-        </Grid>
+
 
         {/* TIKTOK MANAGEMENT Table */}
         <Typography
@@ -1006,63 +945,7 @@ const MarketingOperationsMonthlyReport = () => {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Section 2: Monthly Targets vs Results */}
-        <Typography
-          variant="h5"
-          component="h2"
-          sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}
-        >
-          2. Monthly Targets vs Results
-        </Typography>
 
-        <Table
-          sx={{
-            mb: 4,
-            border: "1px dashed #ccc",
-            "& .MuiTableCell-root": {
-              border: "1px dashed #ccc",
-              padding: "8px",
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Category</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Performance Indicator</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Monthly Target</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Actual Result</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Remarks / Comments</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(groupedMonthlyTargets).map(([category, targets]) =>
-              targets.map((target, index) => (
-                <TableRow key={`${category}-${index}`}>
-                  {index === 0 && (
-                    <TableCell
-                      rowSpan={targets.length}
-                      sx={{ fontWeight: 600, verticalAlign: "top" }}
-                    >
-                      {category}
-                    </TableCell>
-                  )}
-                  <TableCell>{target.performanceIndicator}</TableCell>
-                  <TableCell>{target.monthlyTarget}</TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {target.actualResult || " "}
-                    </span>
-                  </TableCell>
-                  <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                    <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                      {target.remarks || " "}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
 
         {/* Operational Tasks Table */}
         <Table
@@ -1114,65 +997,7 @@ const MarketingOperationsMonthlyReport = () => {
           </TableBody>
         </Table>
 
-        {/* Section 3: Supervision of Staff Performance */}
-        <Typography
-          variant="h5"
-          component="h2"
-          sx={{ fontWeight: 700, mb: 1, mt: 4, color: "#1976d2", fontFamily: "serif" }}
-        >
-          3. Supervision of Staff Performance
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 2, fontStyle: "italic" }}>
-          The manager must evaluate Monthly performance of the following departments and ensure all meet their set targets:
-        </Typography>
 
-        <Table
-          sx={{
-            mb: 4,
-            border: "1px dashed #ccc",
-            "& .MuiTableCell-root": {
-              border: "1px dashed #ccc",
-              padding: "8px",
-            },
-          }}
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Employee Name</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Monthly Target Summary</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Actual Performance</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Remarks / Action Plan</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {formData.staffPerformance.map((staff, index) => (
-              <TableRow key={index}>
-                <TableCell>{staff.department}</TableCell>
-                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                    {staff.employeeName || " "}
-                  </span>
-                </TableCell>
-                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                    {staff.monthlyTargetSummary || " "}
-                  </span>
-                </TableCell>
-                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                    {staff.actualPerformance || " "}
-                  </span>
-                </TableCell>
-                <TableCell sx={{ border: "1px solid #ccc", "& span": { borderBottom: "none" } }}>
-                  <span style={{ minWidth: "100%", display: "block", padding: "4px 0" }}>
-                    {staff.remarksActionPlan || " "}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
 
         {/* Section 4: Action Plan if Targets Are Not Met */}
         <Typography
@@ -1180,7 +1005,7 @@ const MarketingOperationsMonthlyReport = () => {
           component="h2"
           sx={{ fontWeight: 700, mb: 1, mt: 4, color: "#1976d2", fontFamily: "serif" }}
         >
-          4. Action Plan if Targets Are Not Met
+          2. Action Plan if Targets Are Not Met
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, fontStyle: "italic" }}>
           If any department fails to meet their Monthly targets, the manager must outline specific steps to improve performance in the following week. This may include additional training, motivation strategies, workload reallocation, or promotional activities to boost results.
@@ -1205,7 +1030,7 @@ const MarketingOperationsMonthlyReport = () => {
           component="h2"
           sx={{ fontWeight: 700, mb: 2, mt: 4, color: "#1976d2", fontFamily: "serif" }}
         >
-          5. Observations / Challenges
+          3. Observations / Challenges
         </Typography>
         <Box
           sx={{
@@ -1224,7 +1049,7 @@ const MarketingOperationsMonthlyReport = () => {
           component="h2"
           sx={{ fontWeight: 700, mb: 2, mt: 4, color: "#1976d2", fontFamily: "serif" }}
         >
-          6. Recommendations / Plans for Next Month
+          4. Recommendations / Plans for Next Month
         </Typography>
         <Box
           sx={{
@@ -1329,65 +1154,7 @@ const MarketingOperationsMonthlyReport = () => {
                 />
               </Grid>
 
-              {/* Marketing Metrics Section */}
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ my: 3 }} />
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Marketing Metrics
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Total required calls"
-                  value={formData.marketingMetrics.totalRequiredCalls}
-                  onChange={(value) =>
-                    handleInputChange("marketingMetrics", {
-                      ...formData.marketingMetrics,
-                      totalRequiredCalls: value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Total clients called"
-                  value={formData.marketingMetrics.totalClientsCalled}
-                  onChange={(value) =>
-                    handleInputChange("marketingMetrics", {
-                      ...formData.marketingMetrics,
-                      totalClientsCalled: value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Successful calls"
-                  value={formData.marketingMetrics.successfulCalls}
-                  onChange={(value) =>
-                    handleInputChange("marketingMetrics", {
-                      ...formData.marketingMetrics,
-                      successfulCalls: value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Unreachable calls"
-                  value={formData.marketingMetrics.unreachableCalls}
-                  onChange={(value) =>
-                    handleInputChange("marketingMetrics", {
-                      ...formData.marketingMetrics,
-                      unreachableCalls: value,
-                    })
-                  }
-                />
-              </Grid>
+
 
               {/* TIKTOK MANAGEMENT Section */}
               <Grid size={{ xs: 12 }}>
@@ -1490,53 +1257,7 @@ const MarketingOperationsMonthlyReport = () => {
                 />
               </Grid>
 
-              {/* Section 2: Monthly Targets vs Results */}
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ my: 3 }} />
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 2: Monthly Targets vs Results
-                </Typography>
-              </Grid>
-              {formData.monthlyTargets.map((target, index) => (
-                <React.Fragment key={index}>
-                  <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                      {target.category} - {target.performanceIndicator}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Monthly Target"
-                      value={target.monthlyTarget}
-                      onChange={(value) => handleMonthlyTargetChange(index, "monthlyTarget", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Actual Result"
-                      value={target.actualResult}
-                      onChange={(value) => handleMonthlyTargetChange(index, "actualResult", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Remarks / Comments"
-                      value={target.remarks}
-                      onChange={(value) => handleMonthlyTargetChange(index, "remarks", value)}
-                    />
-                  </Grid>
-                </React.Fragment>
-              ))}
+
 
               {/* Operational Tasks */}
               <Grid size={{ xs: 12 }}>
@@ -1585,67 +1306,12 @@ const MarketingOperationsMonthlyReport = () => {
                 </React.Fragment>
               ))}
 
-              {/* Section 3: Supervision of Staff Performance */}
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 3: Supervision of Staff Performance
-                </Typography>
-              </Grid>
-              {formData.staffPerformance.map((staff, index) => (
-                <React.Fragment key={index}>
-                  <Grid size={{ xs: 12 }}>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                      {staff.department}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Employee Name"
-                      value={staff.employeeName}
-                      onChange={(value) => handleStaffPerformanceChange(index, "employeeName", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Monthly Target Summary"
-                      value={staff.monthlyTargetSummary}
-                      onChange={(value) => handleStaffPerformanceChange(index, "monthlyTargetSummary", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Actual Performance"
-                      value={staff.actualPerformance}
-                      onChange={(value) => handleStaffPerformanceChange(index, "actualPerformance", value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={2}
-                      label="Remarks / Action Plan"
-                      value={staff.remarksActionPlan}
-                      onChange={(value) => handleStaffPerformanceChange(index, "remarksActionPlan", value)}
-                    />
-                  </Grid>
-                </React.Fragment>
-              ))}
+
 
               {/* Section 4: Action Plan */}
               <Grid size={{ xs: 12 }}>
                 <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 4: Action Plan if Targets Are Not Met
+                  Section 2: Action Plan if Targets Are Not Met
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12 }}>
@@ -1662,7 +1328,7 @@ const MarketingOperationsMonthlyReport = () => {
               {/* Section 5: Observations / Challenges */}
               <Grid size={{ xs: 12 }}>
                 <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 5: Observations / Challenges
+                  Section 3: Observations / Challenges
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12 }}>
@@ -1680,7 +1346,7 @@ const MarketingOperationsMonthlyReport = () => {
               <Grid size={{ xs: 12 }}>
                 <Divider sx={{ my: 3 }} />
                 <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-                  Section 6: Recommendations / Plans for Next Month
+                  Section 4: Recommendations / Plans for Next Month
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12 }}>
