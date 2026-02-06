@@ -281,19 +281,7 @@ const PatientsSentToSales = () => {
                     >
                       Manage
                     </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="secondary"
-                      startIcon={<InvoiceIcon />}
-                      onClick={() => handleCreateInvoice(item)}
-                      sx={{
-                        textTransform: 'none',
-                        fontWeight: 600,
-                      }}
-                    >
-                      Create Invoice
-                    </Button>
+
                     <Button
                       variant="outlined"
                       size="small"
