@@ -1247,16 +1247,19 @@ class ConsultationsController extends Controller
                                 'lens_types' => $data->lens_types
                             ]);
 
-                            // Trigger notification refresh after sending to cashier
+                            // Clear notification cache and trigger refresh after sending to sales
                             try {
-                                cache()->flush();
+                                $user = $request->user();
+                                $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
+                                \Cache::forget($cacheKey);
                                 event(new \App\Events\NotificationUpdate());
-                                \Log::info('Notification refresh triggered after sending patient to sales', [
+                                \Log::info('Notification cache cleared and refresh triggered after sending patient to sales', [
                                     'patient_id' => $patient->id,
-                                    'department' => 'cashier'
+                                    'department' => 'cashier',
+                                    'cache_key' => $cacheKey
                                 ]);
                             } catch (\Exception $e) {
-                                \Log::error('Failed to trigger notification after sending to sales', [
+                                \Log::error('Failed to clear notification cache after sending to sales', [
                                     'error' => $e->getMessage()
                                 ]);
                             }
