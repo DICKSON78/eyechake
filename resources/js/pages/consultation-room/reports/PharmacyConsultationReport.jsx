@@ -361,7 +361,7 @@ const PharmacyConsultationReport = () => {
               <TableCell sx={{ fontWeight: 700 }}>MEDICINE</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>TARGET</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>RESULTS</TableCell>
-              <TableCell sx={{ fontWeight: 700, width: "80px" }}>ACTION</TableCell>
+              <TableCell sx={{ fontWeight: 700, "@media print": { display: "none" } }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -391,28 +391,18 @@ const PharmacyConsultationReport = () => {
                     onChange={(v) => handleProductTargetChange(index, "result", v)}
                   />
                 </TableCell>
-                <TableCell>
-                  <Stack direction="row" spacing={1}>
-                    {index === formData.productTargets.length - 1 && (
-                      <Tooltip title="Add Medicine">
-                        <IconButton size="small" color="primary" onClick={handleAddMedicine}>
-                          <AddIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {formData.productTargets.length > 1 && (
-                      <Tooltip title="Remove">
-                        <IconButton size="small" color="error" onClick={() => handleRemoveMedicine(index)}>
-                          <RemoveIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Stack>
+                <TableCell sx={{ "@media print": { display: "none" } }}>
+                  <IconButton color="error" size="small" onClick={() => handleRemoveMedicine(index)} disabled={formData.productTargets.length === 1}>
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddMedicine} sx={{ mb: 4, "@media print": { display: "none" } }}>
+          Add Medicine
+        </Button>
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>
