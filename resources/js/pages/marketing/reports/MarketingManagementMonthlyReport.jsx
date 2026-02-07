@@ -92,6 +92,8 @@ const MarketingManagementMonthlyReport = () => {
       { description: "Ads conducted", target: "", result: "" },
     ],
     googleManagement: "",
+    reportSummary: "",
+    reportRecommendation: "",
     signature: "",
     reportDate: new Date(),
   });
@@ -180,6 +182,8 @@ const MarketingManagementMonthlyReport = () => {
         { description: "Ads conducted", target: "", result: "" },
       ],
       googleManagement: "",
+      reportSummary: "",
+      reportRecommendation: "",
       signature: "",
       reportDate: new Date(),
     });
@@ -588,6 +592,36 @@ const MarketingManagementMonthlyReport = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            {/* Report Summary */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                Report Summary
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Report Summary"
+                value={formData.reportSummary || ""}
+                onChange={(value) => handleInputChange(null, "reportSummary", value)}
+              />
+            </Box>
+
+            {/* Report Recommendation */}
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                Report Recommendation
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Report Recommendation"
+                value={formData.reportRecommendation || ""}
+                onChange={(value) => handleInputChange(null, "reportRecommendation", value)}
+              />
+            </Box>
 
             <Divider sx={{ my: 4 }} />
 

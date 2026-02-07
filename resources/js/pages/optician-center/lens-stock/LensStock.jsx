@@ -93,21 +93,18 @@ const LensStock = () => {
   const safeLensTypes = Array.isArray(lensTypes) ? lensTypes : [];
   console.log("Safe lens types:", safeLensTypes);
 
-  const svLensTypes = safeLensTypes.filter(
-    (lt) => lt?.name === "Single Vision" || lt?.name === "SV"
-  );
-  const multifocalLensTypes = safeLensTypes.filter(
-    (lt) => ["Bifocal", "Progressive"].includes(lt?.name)
-  );
-
-  console.log("SV lens types:", svLensTypes);
-  console.log("Multifocal lens types:", multifocalLensTypes);
-
+  // Build lens type options dynamically from database
   const lensTypeOptions = [
     { label: "All Lens Types", value: "" },
-    { label: "SV (Single Vision)", value: "SV" },
-    { label: "Multifocal", value: "Multifocal" },
+    ...safeLensTypes.map((lt) => ({
+      label: lt.name,
+      value: lt.name,
+    })),
   ];
+
+  // Determine if current lens type is Single Vision (for SPH/CYL fields)
+  const isSingleVision = params.lens_type && 
+    (params.lens_type === "Single Vision" || params.lens_type === "SV");
 
   console.log("Lens type options:", lensTypeOptions);
   console.log("Current lens_type param:", params.lens_type);
@@ -150,7 +147,7 @@ const LensStock = () => {
                 optionsValue="value"
               />
             </Grid>
-            {params.lens_type === "SV" && (
+            {isSingleVision && (
               <>
                 <Grid item xs={12} md={3}>
                   <TextField
@@ -178,7 +175,7 @@ const LensStock = () => {
                 </Grid>
               </>
             )}
-            <Grid item xs={12} md={params.lens_type === "SV" ? 3 : 9}>
+            <Grid item xs={12} md={isSingleVision ? 3 : 9}>
               <TextField
                 fullWidth
                 label="Search by Name or Code"

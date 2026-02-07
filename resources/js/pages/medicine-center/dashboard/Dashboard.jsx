@@ -148,7 +148,45 @@ const Dashboard = () => {
 
           {/* Stock Alerts Cards */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    boxShadow: 4,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+                onClick={() => navigate('/medicine-center/medicines')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Total Medicine
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color={blue[600]}>
+                        {numberFormat(data.summary?.total_medicine_items || 0)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: '50%', 
+                      bgcolor: blue[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <MedicineIcon sx={{ fontSize: 32, color: blue[600] }} />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card 
                 elevation={2}
                 sx={{ 
@@ -186,7 +224,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card 
                 elevation={2}
                 sx={{ 
@@ -227,7 +265,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card 
                 elevation={2}
                 sx={{ 

@@ -201,6 +201,109 @@ class DirectorDashboardController extends Controller
             $data['summary']['revenue_all_consultations'] = 0;
         }
 
+        // Total Discount
+        try {
+            $discountQuery = PatientItemPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('discount', '>', 0);
+            
+            if ($clinic_id) {
+                $discountQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $data['summary']['discount'] = $discountQuery->sum('discount') ?? 0;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating total discount', ['error' => $e->getMessage()]);
+            $data['summary']['discount'] = 0;
+        }
+
+        // Consultation Revenue (from consultation type items)
+        try {
+            $consultationSalesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Consultation');
+            
+            if ($clinic_id) {
+                $consultationSalesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['consultation'] = $consultationSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating consultation sales', ['error' => $e->getMessage()]);
+            $data['summary']['consultation'] = 0;
+        }
+
+        // Pharmacy Sales
+        try {
+            $pharmacySalesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Pharmacy');
+            
+            if ($clinic_id) {
+                $pharmacySalesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['pharmacy'] = $pharmacySalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating pharmacy sales', ['error' => $e->getMessage()]);
+            $data['summary']['pharmacy'] = 0;
+        }
+
+        // Glass Sales
+        try {
+            $glassSalesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Glass');
+            
+            if ($clinic_id) {
+                $glassSalesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['glass'] = $glassSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating glass sales', ['error' => $e->getMessage()]);
+            $data['summary']['glass'] = 0;
+        }
+
+        // Consulted Patients (patients who have been consulted)
+        try {
+            $data['summary']['consulted_patients'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Consulted')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+        } catch (\Exception $e) {
+            \Log::error('Error calculating consulted patients', ['error' => $e->getMessage()]);
+            $data['summary']['consulted_patients'] = 0;
+        }
+
         // Total Transactions
         $data['summary']['total_transactions'] = PatientItemPayment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {

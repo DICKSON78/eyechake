@@ -22,6 +22,8 @@ import {
   DoneAllRounded as CompletedIcon,
   RefreshRounded as RefreshIcon,
   FilterAltRounded as FilterIcon,
+  HourglassEmptyRounded as WaitingIcon,
+  CheckCircleRounded as ServedIcon,
 } from "@mui/icons-material";
 
 import Page from "../../../components/Page";
@@ -171,6 +173,24 @@ const Dashboard = () => {
                 icon={<DoctorIcon />}
                 color={blue[500]}
                 onClick={() => navigate('/consultation-room/consultation-patients/pending')}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <InfoCard
+                title="Clients Waiting Dispensing"
+                count={numberFormat(data.summary.clients_waiting_for_dispensing || 0)}
+                icon={<WaitingIcon />}
+                color={orange[500]}
+                onClick={() => navigate('/optician-center/glass-patients')}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <InfoCard
+                title="Clients Ready Served"
+                count={numberFormat(data.summary.clients_already_served || 0)}
+                icon={<ServedIcon />}
+                color={green[500]}
+                onClick={() => navigate('/reception/patients')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>

@@ -112,7 +112,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       // Show error message if unauthorized
       if (errorSendToOptician?.response?.status === 403) {
         addToast({
-          message: errorSendToOptician?.response?.data?.message || "Only cashiers are authorized to send clients to the optician.",
+          message: errorSendToOptician?.response?.data?.message || "Only cashiers are authorized to send clients to the cashier.",
           severity: "error",
         });
       }
@@ -157,7 +157,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     modalRef.current.open(title, component, "lg");
   };
 
-  const confirmSendToOptician = () => {
+  const confirmSendToCashier = () => {
     setData(null);
     setError(null);
 
@@ -169,7 +169,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
     let component = (
       <ConfirmationDialog
-        message="Are you sure you want to perform this action?"
+        message="Are you sure you want to send this patient to the cashier?"
         onCancel={() => modalRef.current.close()}
         onOk={() => {
           modalRef.current.close();
@@ -182,7 +182,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       />
     );
 
-    modalRef.current.open("Confirm Send to Optician", component, "sm");
+    modalRef.current.open("Confirm Send to Cashier", component, "sm");
   };
 
   return (
@@ -300,7 +300,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         </Form>
         <Divider />
         {loadingSendToOptician && <LinearProgress />}
-        {/* Only show "Send to Optician" button if user has payment_center privilege (cashier) */}
+        {/* Only show "Send to Cashier" button if user has payment_center privilege (cashier) */}
         {window.user?.privileges?.payment_center && (
         <Stack
           direction="row"
@@ -313,9 +313,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
           <Button
             disabled={loadingSendToOptician}
             variant="contained"
-            onClick={confirmSendToOptician}
+            onClick={confirmSendToCashier}
           >
-            Send to Optician
+            Send to Cashier
           </Button>
         </Stack>
         )}

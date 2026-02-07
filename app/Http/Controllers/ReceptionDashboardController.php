@@ -170,6 +170,49 @@ class ReceptionDashboardController extends Controller
                 ->count();
         }, 0);
 
+        // Clients sent to doctor today - consultations with 'Pending' or 'In Progress' status
+        $data['summary']['clients_sent_to_doctor'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+            return \App\Models\Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('payment_cache_item.creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereIn('status', ['Pending', 'In Progress', 'Consulting'])
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+        }, 0);
+
+        // Clients waiting for dispensing - Glass consultations sent to optician but not completed
+        $data['summary']['clients_waiting_for_dispensing'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+            return \App\Models\Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('payment_cache_item.creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereNotNull('sent_to_optician_at')
+                ->whereNull('optician_completed_at')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+        }, 0);
+
+        // Clients already served - Glass consultations where optician has completed
+        $data['summary']['clients_already_served'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+            return \App\Models\Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('payment_cache_item.creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereNotNull('optician_completed_at')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+        }, 0);
+
         // Completed patients (approximation)
         $data['summary']['completed_patients'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
             return PatientCheckIn::query()
