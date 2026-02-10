@@ -80,14 +80,10 @@ class ReferralsController extends Controller
         try {
             $request->validate([
                 'consultation_id' => 'required|integer|exists:consultations,id',
-                'referred_to_name' => 'required|string|max:255',
-                'referred_to_type' => 'nullable|string|max:255',
-                'referral_reason' => 'nullable|string',
-                'clinical_summary' => 'nullable|string',
+                'referral_reason' => 'required|string',
+                'clinical_summary' => 'required|string',
                 'status' => 'nullable|in:Pending,Sent,Acknowledged,Completed',
                 'referral_date' => 'nullable|date_format:Y-m-d',
-                'appointment_date' => 'nullable|date_format:Y-m-d',
-                'notes' => 'nullable|string',
             ]);
 
             // Get consultation with patient relationship
@@ -142,14 +138,14 @@ class ReferralsController extends Controller
             $referral = Referral::create([
                 'consultation_id' => $request->consultation_id,
                 'patient_id' => $patientId,
-                'referred_to_name' => $request->referred_to_name,
-                'referred_to_type' => $request->referred_to_type,
+                'referred_to_name' => 'External Referral',
+                'referred_to_type' => null,
                 'referral_reason' => $request->referral_reason,
                 'clinical_summary' => $request->clinical_summary,
                 'status' => $request->status ?? 'Pending',
                 'referral_date' => $request->referral_date ?? now()->format('Y-m-d'),
-                'appointment_date' => $request->appointment_date,
-                'notes' => $request->notes,
+                'appointment_date' => null,
+                'notes' => null,
                 'created_by' => $request->user()->id,
             ]);
 

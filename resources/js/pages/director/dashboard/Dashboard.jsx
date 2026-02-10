@@ -301,145 +301,244 @@ const Dashboard = () => {
         <>
           <StockAlertsNotification />
 
-          {/* Summary Cards - Combined from all dashboards */}
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 2, md: 3 }}
-            sx={{ mb: 4 }}
-          >
-            {/* Patients Card */}
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <InfoCard
-                title="Today's Patients"
-                count={numberFormat(directorData?.summary?.today_patients || 0)}
-                icon={<PatientIcon />}
-                color={blue[500]}
-                onClick={() => navigate('/reception/patients')}
-              />
+          {/* Reception Department */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                mb: 2,
+                color: theme.palette.primary.main,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <PeopleIcon /> Reception Department
+            </Typography>
+            <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                <InfoCard
+                  title="Today's Patients"
+                  count={numberFormat(directorData?.summary?.today_patients || 0)}
+                  icon={<PatientIcon />}
+                  color={blue[500]}
+                  onClick={() => navigate('/reception/patients')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                <InfoCard
+                  title="Total Patients Registered"
+                  count={numberFormat(directorData?.summary?.total_patients_registered || 0)}
+                  icon={<PeopleIcon />}
+                  color={green[500]}
+                  onClick={() => navigate('/reception/patients')}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                <InfoCard
+                  title="Web Appointment Bookings"
+                  count={numberFormat(directorData?.summary?.web_appointment_bookings || 0)}
+                  icon={<ScheduleIcon />}
+                  color={orange[500]}
+                  onClick={() => navigate('/appointments')}
+                />
+              </Grid>
             </Grid>
+          </Box>
 
-            {/* Total Patients Registered Card */}
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <InfoCard
-                title="Total Patients Registered"
-                count={numberFormat(directorData?.summary?.total_patients_registered || 0)}
-                icon={<PeopleIcon />}
-                color={green[500]}
-                onClick={() => navigate('/reception/patients')}
-              />
-            </Grid>
-
-            {/* Web Appointment Bookings Card */}
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <InfoCard
-                title="Web Appointment Bookings"
-                count={numberFormat(directorData?.summary?.web_appointment_bookings || 0)}
-                icon={<ScheduleIcon />}
-                color={orange[500]}
-                onClick={() => navigate('/appointments')}
-              />
-            </Grid>
-
-            {/* Sales & Revenue Cards */}
-            {directorData && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Total Sales (Net)"
-                    count={numberFormat(directorData.summary?.total_sales || 0)}
-                    icon={<SalesIcon />}
-                    color={purple[400]}
-                    onClick={navigateToFinancialManagement}
-                  />
-                </Grid>
-                {financialData && (
-                  <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                    <InfoCard
-                      title="Total Revenue"
-                      count={numberFormat(financialData.summary?.total_revenue || 0)}
-                      icon={<RevenueIcon />}
-                      color={green[500]}
-                      onClick={() => navigate('/financial-management/reports/cash-collection')}
-                    />
-                  </Grid>
+          {/* Consultation Room Department */}
+          {(directorData || consultationData) && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <DoctorIcon /> Consultation Room Department
+              </Typography>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                {directorData && (
+                  <>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Revenue from New Consultations"
+                        count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
+                        icon={<ConsultationsIcon />}
+                        color={indigo[500]}
+                        onClick={() => navigate('/consultation-room/dashboard')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Revenue from Return Consultations"
+                        count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
+                        icon={<PatientIcon />}
+                        color={teal[500]}
+                        onClick={() => navigate('/consultation-room/dashboard')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Revenue from All Consultations"
+                        count={numberFormat(directorData.summary?.revenue_all_consultations || 0)}
+                        icon={<RevenueIcon />}
+                        color={lime[600]}
+                        onClick={() => navigate('/consultation-room/dashboard')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Consulted Patients"
+                        count={numberFormat(directorData.summary?.consulted_patients || 0)}
+                        icon={<DoneIcon />}
+                        color={green[500]}
+                        onClick={navigateToConsultationRoom}
+                      />
+                    </Grid>
+                  </>
                 )}
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Total Discount"
-                    count={numberFormat(directorData.summary?.discount || 0)}
-                    icon={<DiscountIcon />}
-                    color={pink[400]}
-                    onClick={navigateToFinancialManagement}
-                  />
-                </Grid>
+                {consultationData && (
+                  <>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Patients Seen"
+                        count={numberFormat(consultationData.summary?.total_patients_seen || 0)}
+                        icon={<PatientIcon />}
+                        color={green[400]}
+                        onClick={() => navigate('/consultation-room/patients-seen')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Patients Waiting"
+                        count={numberFormat(consultationData.summary?.total_patients_waiting || 0)}
+                        icon={<PeopleIcon />}
+                        color={orange[400]}
+                        onClick={() => navigate('/consultation-room/patients-waiting')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Consultations Today"
+                        count={numberFormat(consultationData.summary?.consultations_today || 0)}
+                        icon={<ConsultationsIcon />}
+                        color={cyan[400]}
+                        onClick={navigateToConsultationRoom}
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+            </Box>
+          )}
 
-                {/* Consultation Revenue Cards */}
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Revenue from New Consultations"
-                    count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
-                    icon={<ConsultationsIcon />}
-                    color={indigo[500]}
-                    onClick={() => navigate('/consultation-room/dashboard')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Revenue from Return Consultations"
-                    count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
-                    icon={<PatientIcon />}
-                    color={teal[500]}
-                    onClick={() => navigate('/consultation-room/dashboard')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Total Revenue from All Consultations"
-                    count={numberFormat(directorData.summary?.revenue_all_consultations || 0)}
-                    icon={<RevenueIcon />}
-                    color={lime[600]}
-                    onClick={() => navigate('/consultation-room/dashboard')}
-                  />
-                </Grid>
-              </>
-            )}
+          {/* Financial Management Department */}
+          {(directorData || financialData) && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <SalesIcon /> Financial Management Department
+              </Typography>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                {directorData && (
+                  <>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Sales (Net)"
+                        count={numberFormat(directorData.summary?.total_sales || 0)}
+                        icon={<SalesIcon />}
+                        color={purple[400]}
+                        onClick={navigateToFinancialManagement}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Discount"
+                        count={numberFormat(directorData.summary?.discount || 0)}
+                        icon={<DiscountIcon />}
+                        color={pink[400]}
+                        onClick={navigateToFinancialManagement}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Expenses"
+                        count={numberFormat(directorData.summary?.total_expenses || 0)}
+                        icon={<ExpensesIcon />}
+                        color={red[500]}
+                        onClick={() => navigate('/financial-management/expenses')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Net Profit"
+                        count={numberFormat(directorData.summary?.net_profit || 0)}
+                        icon={<NetProfitIcon />}
+                        color={directorData.summary?.net_profit >= 0 ? teal[500] : orange[500]}
+                        onClick={() => navigate('/financial-management/reports/balance-sheet')}
+                      />
+                    </Grid>
+                  </>
+                )}
+                {financialData && (
+                  <>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Revenue"
+                        count={numberFormat(financialData.summary?.total_revenue || 0)}
+                        icon={<RevenueIcon />}
+                        color={green[500]}
+                        onClick={() => navigate('/financial-management/reports/cash-collection')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Pending Bills"
+                        count={numberFormat(financialData.summary?.pending_bills || 0)}
+                        icon={<PendingIcon />}
+                        color={orange[500]}
+                        onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+            </Box>
+          )}
 
-            {/* Expenses & Profit Cards */}
-            {financialData && directorData && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Total Expenses"
-                    count={numberFormat(directorData.summary?.total_expenses || 0)}
-                    icon={<ExpensesIcon />}
-                    color={red[500]}
-                    onClick={() => navigate('/financial-management/expenses')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Net Profit"
-                    count={numberFormat(directorData.summary?.net_profit || 0)}
-                    icon={<NetProfitIcon />}
-                    color={directorData.summary?.net_profit >= 0 ? teal[500] : orange[500]}
-                    onClick={() => navigate('/financial-management/reports/balance-sheet')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Pending Bills"
-                    count={numberFormat(financialData.summary?.pending_bills || 0)}
-                    icon={<PendingIcon />}
-                    color={orange[500]}
-                    onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
-                  />
-                </Grid>
-              </>
-            )}
-
-            {/* Sales by Category Cards */}
-            {directorData && (
-              <>
+          {/* Sales by Department Category */}
+          {directorData && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <BillsIcon /> Sales by Department Category
+              </Typography>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
                 <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                   <InfoCard
                     title="Consultation"
@@ -465,51 +564,9 @@ const Dashboard = () => {
                     color={purple[300]}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Consulted Patients"
-                    count={numberFormat(directorData.summary?.consulted_patients || 0)}
-                    icon={<DoneIcon />}
-                    color={green[500]}
-                    onClick={navigateToConsultationRoom}
-                  />
-                </Grid>
-              </>
-            )}
-
-            {/* Consultation Room Cards */}
-            {consultationData && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Total Patients Seen"
-                    count={numberFormat(consultationData.summary?.total_patients_seen || 0)}
-                    icon={<PatientIcon />}
-                    color={green[400]}
-                    onClick={() => navigate('/consultation-room/patients-seen')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Patients Waiting"
-                    count={numberFormat(consultationData.summary?.total_patients_waiting || 0)}
-                    icon={<PeopleIcon />}
-                    color={orange[400]}
-                    onClick={() => navigate('/consultation-room/patients-waiting')}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Consultations Today"
-                    count={numberFormat(consultationData.summary?.consultations_today || 0)}
-                    icon={<ConsultationsIcon />}
-                    color={cyan[400]}
-                    onClick={navigateToConsultationRoom}
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
+              </Grid>
+            </Box>
+          )}
 
           {/* Main Content - Charts and Statistics */}
           <Grid
