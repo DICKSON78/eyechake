@@ -125,7 +125,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     date_from: new Date(),
     date_to: null,
     number_of_days: '',
-    remarks: '',
   });
   const [formData, setFormData] = useState({
     ...consultation,
@@ -425,6 +424,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const downloadClinicalNoteWithReferral = async (referral) => {
     try {
+      // Wait for consultation data to be fully loaded
+      if (!consultation || !patient) {
+        throw new Error('Missing consultation or patient data');
+      }
+
       const pdfBlob = await pdf(
         <PDFReportDocument
           patient={patient}
@@ -450,12 +454,18 @@ const ClinicalNotes = ({ patient, consultation }) => {
       addToast({ message: 'Clinical note with referral downloaded successfully', severity: 'success' });
     } catch (error) {
       console.error('Failed to generate/download clinical note with referral:', error);
-      addToast({ message: 'Failed to download clinical note. The referral was created successfully.', severity: 'warning' });
+      addToast({ message: `Failed to download clinical note: ${error.message}. The referral was created successfully.`, severity: 'warning' });
     }
   };
 
   const handleCreateSickSheet = async () => {
     try {
+      // Validate required fields
+      if (!sickSheetFormData.date_from || !sickSheetFormData.date_to) {
+        addToast({ message: 'Please select both start and end dates', severity: 'error' });
+        return;
+      }
+
       // Calculate number of days if both dates are provided
       let numberOfDays = sickSheetFormData.number_of_days;
       if (sickSheetFormData.date_from && sickSheetFormData.date_to) {
@@ -476,7 +486,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         date_from: formatDate(sickSheetFormData.date_from),
         date_to: formatDate(sickSheetFormData.date_to),
         number_of_days: numberOfDays || 'N/A',
-        remarks: sickSheetFormData.remarks || 'N/A',
+        doctor_recommendations: consultation.doctor_recommendations || 'N/A',
       };
 
       const pdfBlob = await pdf(
@@ -509,12 +519,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
         date_from: new Date(),
         date_to: null,
         number_of_days: '',
-        remarks: '',
       });
       setShowSickSheetForm(false);
     } catch (error) {
       console.error('Failed to generate/download sick sheet:', error);
-      addToast({ message: 'Failed to download sick sheet', severity: 'error' });
+      addToast({ message: `Failed to download sick sheet: ${error.message}`, severity: 'error' });
     }
   };
 
@@ -829,20 +838,20 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     label="Number of Days"
                     fullWidth
                     type="number"
-                    placeholder="Auto-calculated from dates or enter manually"
+                    placeholder="Auto-calculated from dates"
                     value={sickSheetFormData.number_of_days}
                     onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, number_of_days: value })}
+                    disabled
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField
-                    label="Remarks"
+                    label="Doctor Recommendations (from consultation)"
                     fullWidth
                     multiline
                     rows={3}
-                    placeholder="Additional notes for the sick sheet"
-                    value={sickSheetFormData.remarks}
-                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, remarks: value })}
+                    value={consultation.doctor_recommendations || 'No recommendations provided yet'}
+                    disabled
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
@@ -855,7 +864,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                           date_from: new Date(),
                           date_to: null,
                           number_of_days: '',
-                          remarks: '',
                         });
                       }}
                     >

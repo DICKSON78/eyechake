@@ -193,15 +193,6 @@ const Dashboard = () => {
                 onClick={() => navigate('/reception/patients')}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-              <InfoCard
-                title="Total Patients"
-                count={numberFormat(data.summary.total_patients || 0)}
-                icon={<PatientsIcon />}
-                color={purple[400]}
-                onClick={() => navigate('/reception/patients')}
-              />
-            </Grid>
 
             {/* Additional Metrics */}
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>

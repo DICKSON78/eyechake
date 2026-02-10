@@ -502,7 +502,6 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
                 { label: "Date From", value: sickSheetData.date_from || "N/A" },
                 { label: "Date To", value: sickSheetData.date_to || "N/A" },
                 { label: "Number of Days", value: sickSheetData.number_of_days || "N/A" },
-                { label: "Remarks", value: sickSheetData.remarks || "N/A" },
               ]}
               containerStyle={{
                 marginBottom: 8,
@@ -511,15 +510,15 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
           </React.Fragment>
         )}
 
-        {/* Remarks (if any) */}
-        {consultation.remarks && (
+        {/* Doctor Recommendations */}
+        {sickSheetData?.doctor_recommendations && (
           <React.Fragment>
             <Subheader
-              title="Remarks"
+              title="Doctor Recommendations"
               style={{ marginBottom: 8 }}
             />
             <Text style={[styles.text, { marginBottom: 8 }]}>
-              {consultation.remarks}
+              {sickSheetData.doctor_recommendations}
             </Text>
           </React.Fragment>
         )}
