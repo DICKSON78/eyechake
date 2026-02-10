@@ -112,14 +112,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [showReferralForm, setShowReferralForm] = useState(false);
   const [showSickSheetForm, setShowSickSheetForm] = useState(false);
   const [referralFormData, setReferralFormData] = useState({
-    referred_to_name: '',
-    referred_to_type: '',
     referral_reason: '',
     clinical_summary: '',
-    status: 'Pending',
-    referral_date: new Date(),
-    appointment_date: null,
-    notes: '',
   });
   const [sickSheetFormData, setSickSheetFormData] = useState({
     date_from: new Date(),
@@ -235,19 +229,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
     if (referralData) {
       addToast({ message: 'Referral created successfully', severity: 'success' });
       
-      // Download clinical note with the newly created referral
-      downloadClinicalNoteWithReferral(referralData.data);
+      // Download clinical note with the newly created referral (with delay to ensure data is ready)
+      setTimeout(() => {
+        downloadClinicalNoteWithReferral(referralData.data);
+      }, 500);
       
       // Reset form and hide it
       setReferralFormData({
-        referred_to_name: '',
-        referred_to_type: '',
         referral_reason: '',
         clinical_summary: '',
-        status: 'Pending',
-        referral_date: new Date(),
-        appointment_date: null,
-        notes: '',
       });
       setShowReferralForm(false);
     }
@@ -370,52 +360,21 @@ const ClinicalNotes = ({ patient, consultation }) => {
   };
 
   const handleCreateReferralSubmit = () => {
-    if (!referralFormData.referred_to_name || !referralFormData.referred_to_name.trim()) {
-      addToast({ message: 'Please enter the name of who/what you are referring to', severity: 'error' });
+    if (!referralFormData.referral_reason || !referralFormData.referral_reason.trim()) {
+      addToast({ message: 'Please enter the reason for referral', severity: 'error' });
       return;
     }
-
-    // Ensure referral_date is always provided and properly formatted
-    let referralDate = null;
-    if (referralFormData.referral_date) {
-      try {
-        const date = referralFormData.referral_date instanceof Date ? referralFormData.referral_date : new Date(referralFormData.referral_date);
-        if (!isNaN(date.getTime())) {
-          referralDate = formatDateForDb(date);
-        } else {
-          referralDate = formatDateForDb(new Date());
-        }
-      } catch (e) {
-        console.error('Error formatting referral_date:', e);
-        referralDate = formatDateForDb(new Date());
-      }
-    } else {
-      referralDate = formatDateForDb(new Date());
-    }
-    
-    // Format appointment_date if provided
-    let appointmentDate = null;
-    if (referralFormData.appointment_date) {
-      try {
-        const date = referralFormData.appointment_date instanceof Date ? referralFormData.appointment_date : new Date(referralFormData.appointment_date);
-        if (!isNaN(date.getTime())) {
-          appointmentDate = formatDateForDb(date);
-        }
-      } catch (e) {
-        console.error('Error formatting appointment_date:', e);
-      }
+    if (!referralFormData.clinical_summary || !referralFormData.clinical_summary.trim()) {
+      addToast({ message: 'Please enter action taken', severity: 'error' });
+      return;
     }
 
     const submitData = {
       consultation_id: consultation.id,
-      referred_to_name: referralFormData.referred_to_name?.trim() || '',
-      referred_to_type: referralFormData.referred_to_type && referralFormData.referred_to_type.trim() ? referralFormData.referred_to_type.trim() : null,
-      referral_reason: referralFormData.referral_reason && referralFormData.referral_reason.trim() ? referralFormData.referral_reason.trim() : null,
-      clinical_summary: referralFormData.clinical_summary && referralFormData.clinical_summary.trim() ? referralFormData.clinical_summary.trim() : null,
-      status: referralFormData.status || 'Pending',
-      referral_date: referralDate,
-      appointment_date: appointmentDate || null,
-      notes: referralFormData.notes && referralFormData.notes.trim() ? referralFormData.notes.trim() : null,
+      referral_reason: referralFormData.referral_reason.trim(),
+      clinical_summary: referralFormData.clinical_summary.trim(),
+      status: 'Pending',
+      referral_date: formatDateForDb(new Date()),
     };
 
     console.log('Submitting referral data:', submitData);
@@ -429,6 +388,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
         throw new Error('Missing consultation or patient data');
       }
 
+      // Ensure consultation has required nested data
+      if (!consultation.payment_cache_item) {
+        console.error('Consultation missing payment_cache_item:', consultation);
+        throw new Error('Consultation data is incomplete. Please refresh and try again.');
+      }
+
+      // Create PDF with loaded data
       const pdfBlob = await pdf(
         <PDFReportDocument
           patient={patient}
@@ -454,6 +420,9 @@ const ClinicalNotes = ({ patient, consultation }) => {
       addToast({ message: 'Clinical note with referral downloaded successfully', severity: 'success' });
     } catch (error) {
       console.error('Failed to generate/download clinical note with referral:', error);
+      console.error('Consultation data:', consultation);
+      console.error('Patient data:', patient);
+      console.error('Referral data:', referral);
       addToast({ message: `Failed to download clinical note: ${error.message}. The referral was created successfully.`, severity: 'warning' });
     }
   };
@@ -699,77 +668,28 @@ const ClinicalNotes = ({ patient, consultation }) => {
             </Typography>
             <Form ref={referralFormRef}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 7 }}>
-                  <TextField
-                    label="Referred To (Name) *"
-                    fullWidth
-                    required
-                    value={referralFormData.referred_to_name}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, referred_to_name: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 5 }}>
-                  <Select
-                    label="Type"
-                    fullWidth
-                    options={['Doctor', 'Specialist', 'Ophthalmologist', 'Hospital', 'Clinic', 'Facility', 'Other']}
-                    value={referralFormData.referred_to_type}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, referred_to_type: value })}
-                  />
-                </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField
-                    label="Reason for Referral"
+                    label="Reason for Referral *"
                     fullWidth
+                    required
                     multiline
                     rows={3}
+                    placeholder="Enter the reason for referring this patient"
                     value={referralFormData.referral_reason}
                     onChange={(value) => setReferralFormData({ ...referralFormData, referral_reason: value })}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField
-                    label="Clinical Summary"
+                    label="Action Taken *"
                     fullWidth
+                    required
                     multiline
-                    rows={3}
+                    rows={4}
+                    placeholder="Describe the action taken or recommended for this patient"
                     value={referralFormData.clinical_summary}
                     onChange={(value) => setReferralFormData({ ...referralFormData, clinical_summary: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  <Select
-                    label="Status"
-                    fullWidth
-                    options={['Pending', 'Sent', 'Acknowledged', 'Completed']}
-                    value={referralFormData.status}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, status: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  <DatePicker
-                    label="Referral Date"
-                    fullWidth
-                    value={referralFormData.referral_date}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, referral_date: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  <DatePicker
-                    label="Appointment Date (Optional)"
-                    fullWidth
-                    value={referralFormData.appointment_date}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, appointment_date: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    label="Remark and Comment"
-                    fullWidth
-                    multiline
-                    rows={3}
-                    value={referralFormData.notes}
-                    onChange={(value) => setReferralFormData({ ...referralFormData, notes: value })}
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
@@ -779,14 +699,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       onClick={() => {
                         setShowReferralForm(false);
                         setReferralFormData({
-                          referred_to_name: '',
-                          referred_to_type: '',
                           referral_reason: '',
                           clinical_summary: '',
-                          status: 'Pending',
-                          referral_date: new Date(),
-                          appointment_date: null,
-                          notes: '',
                         });
                       }}
                     >

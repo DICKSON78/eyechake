@@ -169,25 +169,26 @@ const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
             { label: "Address", value: patient.address },
             {
               label: "Payment Mode",
-              value: consultation.payment_cache_item.payment_mode.name,
+              value: consultation.payment_cache_item?.payment_mode?.name || "N/A",
             },
             {
               label: "Consultation Item",
-              value: consultation.payment_cache_item.item.name,
+              value: consultation.payment_cache_item?.item?.name || "N/A",
             },
             {
               label: "Consultant",
-              value: consultation.payment_cache_item.consultant?.full_name,
+              value: consultation.payment_cache_item?.consultant?.full_name || "N/A",
             },
             {
               label: "Consultation Date",
               value:
-                consultation.payment_cache_item.served_at ||
-                consultation.created_at,
+                consultation.payment_cache_item?.served_at ||
+                consultation.created_at ||
+                "N/A",
             },
-            { label: "Require Spectacle", value: consultation.require_glass },
-            { label: "To Return", value: consultation.patient_to_return },
-            { label: "Return Date", value: consultation.to_return_date },
+            { label: "Require Spectacle", value: consultation.require_glass || "No" },
+            { label: "To Return", value: consultation.patient_to_return || "No" },
+            { label: "Return Date", value: consultation.to_return_date || "N/A" },
           ]}
           containerStyle={{
             marginBottom: 8,
