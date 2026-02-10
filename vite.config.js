@@ -21,14 +21,19 @@ export default defineConfig({
     include: ["@mui/material", "@mui/icons-material"],
   },
   build: {
-    chunkSizeWarningLimit: 100,
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
-        // Prevent code splitting to avoid multiple chunks
-        manualChunks: undefined,
-        // Ensure single file output
+        // Enable code splitting for better performance
+        manualChunks: {
+          // Vendor chunks for large libraries
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material', '@mui/system'],
+          'vendor-pdf': ['@react-pdf/renderer'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
+        },
         entryFileNames: 'app-[hash].js',
-        chunkFileNames: 'app-[hash].js',
+        chunkFileNames: '[name]-[hash].js',
         assetFileNames: '[name]-[hash].[ext]'
       },
       onwarn(warning, warn) {

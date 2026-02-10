@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Navigate,
@@ -22,25 +22,27 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import SalesExpenses from "../pages/dashboard/sales-expenses/SalesExpenses";
 import PatientRegistration from "../pages/dashboard/patient-registration/PatientRegistration";
-import ReceptionRoutes from "../pages/reception/ReceptionRoutes";
-import PaymentCenterRoutes from "../pages/payment-center/PaymentCenterRoutes";
-import ConsultationRoomRoutes from "../pages/consultation-room/ConsultationRoomRoutes";
-import SalesCenterRoutes from "../pages/sales-center/SalesCenterRoutes";
-import SalesManagementRoutes from "../pages/sales-management/SalesManagementRoutes";
-import OpticianCenterRoutes from "../pages/optician-center/OpticianCenterRoutes";
-import MedicineCenterRoutes from "../pages/medicine-center/MedicineCenterRoutes";
-import ProcedureRoomRoutes from "../pages/procedure-room/ProcedureRoomRoutes";
-import OtherDispensingRoutes from "../pages/other-dispensing/OtherDispensingRoutes";
-import DispensingMainRoutes from "../pages/dispensing/DispensingMainRoutes";
-import InventoryManagementRoutes from "../pages/inventory-management/InventoryManagementRoutes";
-import MarketingRoutes from "../pages/marketing/MarketingRoutes";
-import FinancialManagementRoutes from "../pages/financial-management/FinancialManagementRoutes";
-import UserManagementRoutes from "../pages/user-management/UserManagementRoutes";
-import PatientRecordsRoutes from "../pages/patient-records/PatientRecordsRoutes";
-import DirectorRoutes from "../pages/director/DirectorRoutes";
-import SettingsRoutes from "../pages/settings/SettingsRoutes";
-import OfficeCalendarRoutes from "../pages/office-calendar/OfficeCalendarRoutes";
-import ExternalLinksRoutes from "../pages/external-links/ExternalLinksRoutes";
+
+// Lazy-load route modules to reduce initial bundle size
+const ReceptionRoutes = lazy(() => import("../pages/reception/ReceptionRoutes"));
+const PaymentCenterRoutes = lazy(() => import("../pages/payment-center/PaymentCenterRoutes"));
+const ConsultationRoomRoutes = lazy(() => import("../pages/consultation-room/ConsultationRoomRoutes"));
+const SalesCenterRoutes = lazy(() => import("../pages/sales-center/SalesCenterRoutes"));
+const SalesManagementRoutes = lazy(() => import("../pages/sales-management/SalesManagementRoutes"));
+const OpticianCenterRoutes = lazy(() => import("../pages/optician-center/OpticianCenterRoutes"));
+const MedicineCenterRoutes = lazy(() => import("../pages/medicine-center/MedicineCenterRoutes"));
+const ProcedureRoomRoutes = lazy(() => import("../pages/procedure-room/ProcedureRoomRoutes"));
+const OtherDispensingRoutes = lazy(() => import("../pages/other-dispensing/OtherDispensingRoutes"));
+const DispensingMainRoutes = lazy(() => import("../pages/dispensing/DispensingMainRoutes"));
+const InventoryManagementRoutes = lazy(() => import("../pages/inventory-management/InventoryManagementRoutes"));
+const MarketingRoutes = lazy(() => import("../pages/marketing/MarketingRoutes"));
+const FinancialManagementRoutes = lazy(() => import("../pages/financial-management/FinancialManagementRoutes"));
+const UserManagementRoutes = lazy(() => import("../pages/user-management/UserManagementRoutes"));
+const PatientRecordsRoutes = lazy(() => import("../pages/patient-records/PatientRecordsRoutes"));
+const DirectorRoutes = lazy(() => import("../pages/director/DirectorRoutes"));
+const SettingsRoutes = lazy(() => import("../pages/settings/SettingsRoutes"));
+const OfficeCalendarRoutes = lazy(() => import("../pages/office-calendar/OfficeCalendarRoutes"));
+const ExternalLinksRoutes = lazy(() => import("../pages/external-links/ExternalLinksRoutes"));
 
 import Home from "../Home";
 import About from "../About";
@@ -232,31 +234,31 @@ const App = () => {
                     <Route path="dashboard" element={<Dashboard setSmsBalance={setSmsBalance} />} />
                     <Route path="dashboard/sales-expenses" element={<SalesExpenses />} />
                     <Route path="dashboard/patient-registration" element={<PatientRegistration />} />
-                <Route path="reception/*" element={<ReceptionRoutes />} />
-                <Route path="payment-center/*" element={<PaymentCenterRoutes />} />
-                <Route path="consultation-room/*" element={<ConsultationRoomRoutes />} />
-                <Route path="sales-center/*" element={<SalesCenterRoutes />} />
-                <Route path="sales-management/*" element={<SalesManagementRoutes />} />
-                <Route path="optician-center/*" element={<OpticianCenterRoutes />} />
-                <Route path="medicine-center/*" element={<MedicineCenterRoutes />} />
-                <Route path="pharmacy/*" element={<MedicineCenterRoutes />} />
-                <Route path="procedure-room/*" element={<ProcedureRoomRoutes />} />
+                <Route path="reception/*" element={<Suspense fallback={<div>Loading...</div>}><ReceptionRoutes /></Suspense>} />
+                <Route path="payment-center/*" element={<Suspense fallback={<div>Loading...</div>}><PaymentCenterRoutes /></Suspense>} />
+                <Route path="consultation-room/*" element={<Suspense fallback={<div>Loading...</div>}><ConsultationRoomRoutes /></Suspense>} />
+                <Route path="sales-center/*" element={<Suspense fallback={<div>Loading...</div>}><SalesCenterRoutes /></Suspense>} />
+                <Route path="sales-management/*" element={<Suspense fallback={<div>Loading...</div>}><SalesManagementRoutes /></Suspense>} />
+                <Route path="optician-center/*" element={<Suspense fallback={<div>Loading...</div>}><OpticianCenterRoutes /></Suspense>} />
+                <Route path="medicine-center/*" element={<Suspense fallback={<div>Loading...</div>}><MedicineCenterRoutes /></Suspense>} />
+                <Route path="pharmacy/*" element={<Suspense fallback={<div>Loading...</div>}><MedicineCenterRoutes /></Suspense>} />
+                <Route path="procedure-room/*" element={<Suspense fallback={<div>Loading...</div>}><ProcedureRoomRoutes /></Suspense>} />
                 <Route
                   path="dispensing/*"
-                  element={<DispensingMainRoutes />}
+                  element={<Suspense fallback={<div>Loading...</div>}><DispensingMainRoutes /></Suspense>}
                 />
                 <Route
                   path="other-dispensing/*"
-                  element={<OtherDispensingRoutes />}
+                  element={<Suspense fallback={<div>Loading...</div>}><OtherDispensingRoutes /></Suspense>}
                 />
-                <Route path="inventory-management/*" element={<InventoryManagementRoutes />} />
-                <Route path="marketing/*" element={<MarketingRoutes />} />
-                <Route path="financial-management/*" element={<FinancialManagementRoutes />} />
-                <Route path="user-management/*" element={<UserManagementRoutes />} />
-                <Route path="director/*" element={<DirectorRoutes />} />
-                <Route path="office-calendar/*" element={<OfficeCalendarRoutes />} />
-                <Route path="external-links/*" element={<ExternalLinksRoutes />} />
-                <Route path="settings/*" element={<SettingsRoutes />} />
+                <Route path="inventory-management/*" element={<Suspense fallback={<div>Loading...</div>}><InventoryManagementRoutes /></Suspense>} />
+                <Route path="marketing/*" element={<Suspense fallback={<div>Loading...</div>}><MarketingRoutes /></Suspense>} />
+                <Route path="financial-management/*" element={<Suspense fallback={<div>Loading...</div>}><FinancialManagementRoutes /></Suspense>} />
+                <Route path="user-management/*" element={<Suspense fallback={<div>Loading...</div>}><UserManagementRoutes /></Suspense>} />
+                <Route path="director/*" element={<Suspense fallback={<div>Loading...</div>}><DirectorRoutes /></Suspense>} />
+                <Route path="office-calendar/*" element={<Suspense fallback={<div>Loading...</div>}><OfficeCalendarRoutes /></Suspense>} />
+                <Route path="external-links/*" element={<Suspense fallback={<div>Loading...</div>}><ExternalLinksRoutes /></Suspense>} />
+                <Route path="settings/*" element={<Suspense fallback={<div>Loading...</div>}><SettingsRoutes /></Suspense>} />
                 {/* Catch-all route for unmatched paths - redirect to dashboard */}
                 <Route 
                   path="*" 
