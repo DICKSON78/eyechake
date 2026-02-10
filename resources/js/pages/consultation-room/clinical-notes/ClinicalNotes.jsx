@@ -24,6 +24,7 @@ import {
   Download as DownloadIcon,
   Assignment as ReferralIcon,
   Save as SaveIcon,
+  Description as SickSheetIcon,
 } from "@mui/icons-material";
 
 import { Header as PageHeader } from "../../../components/Page";
@@ -44,6 +45,7 @@ import ConsultationItemsCard from "./ConsultationItemsCard";
 import SelectItems from "./SelectItems";
 import PatientFilePDF, { PDFReportDocument } from "../../patient-records/patient-file/PatientFilePDF";
 import PrescriptionPDF from "../prescriptions/PrescriptionPDF";
+import SickSheetDocument from "./SickSheetPDF";
 import { pdf } from "@react-pdf/renderer";
 
 import { useFetch, usePatch, usePost, useToast } from "../../../hooks";
@@ -108,6 +110,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const [data, setData] = useState();
   const [error, setError] = useState();
   const [showReferralForm, setShowReferralForm] = useState(false);
+  const [showSickSheetForm, setShowSickSheetForm] = useState(false);
   const [referralFormData, setReferralFormData] = useState({
     referred_to_name: '',
     referred_to_type: '',
@@ -117,6 +120,12 @@ const ClinicalNotes = ({ patient, consultation }) => {
     referral_date: new Date(),
     appointment_date: null,
     notes: '',
+  });
+  const [sickSheetFormData, setSickSheetFormData] = useState({
+    date_from: new Date(),
+    date_to: null,
+    number_of_days: '',
+    remarks: '',
   });
   const [formData, setFormData] = useState({
     ...consultation,
@@ -226,6 +235,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
   useEffect(() => {
     if (referralData) {
       addToast({ message: 'Referral created successfully', severity: 'success' });
+      
+      // Download clinical note with the newly created referral
+      downloadClinicalNoteWithReferral(referralData.data);
+      
       // Reset form and hide it
       setReferralFormData({
         referred_to_name: '',
@@ -410,6 +423,101 @@ const ClinicalNotes = ({ patient, consultation }) => {
     handleCreateReferral('api/referrals', submitData);
   };
 
+  const downloadClinicalNoteWithReferral = async (referral) => {
+    try {
+      const pdfBlob = await pdf(
+        <PDFReportDocument
+          patient={patient}
+          consultation={consultation}
+          includeReferral={referral}
+        />
+      ).toBlob();
+
+      if (!pdfBlob || pdfBlob.size === 0) {
+        throw new Error('Generated PDF is empty or invalid');
+      }
+
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `clinical-note-referral-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      addToast({ message: 'Clinical note with referral downloaded successfully', severity: 'success' });
+    } catch (error) {
+      console.error('Failed to generate/download clinical note with referral:', error);
+      addToast({ message: 'Failed to download clinical note. The referral was created successfully.', severity: 'warning' });
+    }
+  };
+
+  const handleCreateSickSheet = async () => {
+    try {
+      // Calculate number of days if both dates are provided
+      let numberOfDays = sickSheetFormData.number_of_days;
+      if (sickSheetFormData.date_from && sickSheetFormData.date_to) {
+        const from = new Date(sickSheetFormData.date_from);
+        const to = new Date(sickSheetFormData.date_to);
+        const diffTime = Math.abs(to - from);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        numberOfDays = diffDays.toString();
+      }
+
+      const formatDate = (date) => {
+        if (!date) return 'N/A';
+        const d = new Date(date);
+        return d.toLocaleDateString('en-GB');
+      };
+
+      const sickSheetData = {
+        date_from: formatDate(sickSheetFormData.date_from),
+        date_to: formatDate(sickSheetFormData.date_to),
+        number_of_days: numberOfDays || 'N/A',
+        remarks: sickSheetFormData.remarks || 'N/A',
+      };
+
+      const pdfBlob = await pdf(
+        <SickSheetDocument
+          patient={patient}
+          consultation={consultation}
+          sickSheetData={sickSheetData}
+        />
+      ).toBlob();
+
+      if (!pdfBlob || pdfBlob.size === 0) {
+        throw new Error('Generated PDF is empty or invalid');
+      }
+
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sick-sheet-${patient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      addToast({ message: 'Sick sheet downloaded successfully', severity: 'success' });
+      
+      // Reset form and hide it
+      setSickSheetFormData({
+        date_from: new Date(),
+        date_to: null,
+        number_of_days: '',
+        remarks: '',
+      });
+      setShowSickSheetForm(false);
+    } catch (error) {
+      console.error('Failed to generate/download sick sheet:', error);
+      addToast({ message: 'Failed to download sick sheet', severity: 'error' });
+    }
+  };
+
   const printReferralPDF = async (referral, patientData) => {
     try {
       const resolvedPatient = patientData || patient;
@@ -526,7 +634,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
               <Button
                 variant="outlined"
                 startIcon={<ReferralIcon />}
-                onClick={() => setShowReferralForm(!showReferralForm)}
+                onClick={() => {
+                  setShowReferralForm(!showReferralForm);
+                  if (showSickSheetForm) setShowSickSheetForm(false);
+                }}
                 sx={{
                   textTransform: 'none',
                   fontWeight: 500,
@@ -543,18 +654,29 @@ const ClinicalNotes = ({ patient, consultation }) => {
                   Referral
                 </Box>
               </Button>
-              <Box sx={{ 
-                '& > *': { 
+              <Button
+                variant="outlined"
+                startIcon={<SickSheetIcon />}
+                onClick={() => {
+                  setShowSickSheetForm(!showSickSheetForm);
+                  if (showReferralForm) setShowReferralForm(false);
+                }}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  minWidth: { xs: 'auto', sm: 140 },
                   fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  minWidth: { xs: 'auto', sm: 'auto' },
                   px: { xs: 1, sm: 2 },
-                }
-              }}>
-                <PatientFilePDF
-                  consultationId={consultation.id}
-                  patient={patient}
-                />
-              </Box>
+                  bgcolor: showSickSheetForm ? 'action.selected' : 'transparent',
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  Create Sick Sheet
+                </Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
+                  Sick Sheet
+                </Box>
+              </Button>
             </Box>
           }
         />
@@ -663,11 +785,88 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     </Button>
                     <Button
                       variant="contained"
-                      startIcon={<SaveIcon />}
+                      startIcon={<DownloadIcon />}
                       onClick={handleCreateReferralSubmit}
                       disabled={loadingReferral}
                     >
-                      {loadingReferral ? 'Creating...' : 'Create Referral'}
+                      {loadingReferral ? 'Creating...' : 'Create & Download Clinical Note'}
+                    </Button>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </Form>
+          </Box>
+        )}
+        
+        {/* Sick Sheet Form Section */}
+        {showSickSheetForm && (
+          <Box sx={{ p: 3, bgcolor: '#f0f7ff', borderBottom: '1px solid #e0e0e0' }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+              Create Sick Sheet
+            </Typography>
+            <Form ref={referralFormRef}>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <DatePicker
+                    label="Date From *"
+                    fullWidth
+                    required
+                    value={sickSheetFormData.date_from}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, date_from: value })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <DatePicker
+                    label="Date To *"
+                    fullWidth
+                    required
+                    value={sickSheetFormData.date_to}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, date_to: value })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Number of Days"
+                    fullWidth
+                    type="number"
+                    placeholder="Auto-calculated from dates or enter manually"
+                    value={sickSheetFormData.number_of_days}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, number_of_days: value })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    label="Remarks"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    placeholder="Additional notes for the sick sheet"
+                    value={sickSheetFormData.remarks}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, remarks: value })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <Stack direction="row" spacing={2} justifyContent="flex-end">
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setShowSickSheetForm(false);
+                        setSickSheetFormData({
+                          date_from: new Date(),
+                          date_to: null,
+                          number_of_days: '',
+                          remarks: '',
+                        });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="contained"
+                      startIcon={<DownloadIcon />}
+                      onClick={handleCreateSickSheet}
+                    >
+                      Download Sick Sheet
                     </Button>
                   </Stack>
                 </Grid>
