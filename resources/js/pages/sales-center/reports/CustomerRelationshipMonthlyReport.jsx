@@ -87,6 +87,9 @@ const getDefaultFormData = () => ({
   challenges: { ...challengesInitial },
   achievements: { ...achievementsInitial },
   recommendations: { ...recommendationsInitial },
+  reportSummary: "", // Added Summary
+  submittedToDirector: false,
+  directorSignature: "",
   signature: "",
   reportDate: new Date().toISOString().split("T")[0],
 });
@@ -477,6 +480,36 @@ const CustomerRelationshipMonthlyReport = () => {
           {formData.recommendations.supportResourcesNeeded || ""}
         </Box>
 
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 2, mt: 4, color: "#1976d2", fontFamily: "serif" }}>
+          6. Report Summary
+        </Typography>
+        <Box sx={{ borderBottom: "1px solid #000", minWidth: "300px", width: "100%", paddingBottom: "2px", minHeight: "100px", mb: 4, p: 1 }}>
+          {formData.reportSummary || ""}
+        </Box>
+
+        {/* SUBMIT TO DIRECTOR Section */}
+        <Box sx={{ mt: 4, mb: 4 }}>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}>
+            SUBMIT TO DIRECTOR
+          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Director Signature:</strong>{" "}
+              <span style={{ borderBottom: "1px solid #000", minWidth: "300px", display: "inline-block", paddingBottom: "2px" }}>
+                {formData.directorSignature || "_________________________"}
+              </span>
+            </Typography>
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Date Submitted:</strong>{" "}
+              <span style={{ borderBottom: "1px solid #000", minWidth: "300px", display: "inline-block", paddingBottom: "2px" }}>
+                {formData.submittedToDirector && formData.reportDate ? formData.reportDate : "_________________________"}
+              </span>
+            </Typography>
+          </Box>
+        </Box>
+
         <Box sx={{ mt: 4, mb: 2 }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
             <strong>Signature:</strong>{" "}
@@ -561,6 +594,43 @@ const CustomerRelationshipMonthlyReport = () => {
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <TextField fullWidth multiline rows={2} label="Support or resources needed" value={formData.recommendations.supportResourcesNeeded} onChange={(v) => handleInputChange("recommendations", "supportResourcesNeeded", v)} />
+              </Grid>
+
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>6. Report Summary</Typography>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField fullWidth multiline rows={4} label="Report Summary" value={formData.reportSummary} onChange={(v) => handleInputChange(null, "reportSummary", v)} />
+              </Grid>
+
+              {/* SUBMIT TO DIRECTOR Section */}
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                  SUBMIT TO DIRECTOR
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="Director Signature"
+                  value={formData.directorSignature}
+                  onChange={(value) => handleInputChange(null, "directorSignature", value)}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <DatePicker
+                  fullWidth
+                  label="Date Submitted to Director"
+                  value={formData.submittedToDirector && formData.reportDate ? new Date(formData.reportDate) : null}
+                  onChange={(value) => {
+                    handleInputChange(null, "submittedToDirector", value ? true : false);
+                    if (value) {
+                      handleInputChange(null, "reportDate", value.toISOString().split("T")[0]);
+                    }
+                  }}
+                />
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>

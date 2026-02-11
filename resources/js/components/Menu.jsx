@@ -465,12 +465,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: isPrivilegeGranted('payment_center'),
           items: [
             {
-              title: "Daily Cash Collection Report",
-              icon: <ReportsIcon />,
-              to: "/payment-center/reports/daily-cash-collection",
-              show: isPrivilegeGranted('payment_center'),
-            },
-            {
               title: "Daily Credit Collection Report",
               icon: <ReportsIcon />,
               to: "/payment-center/reports/daily-credit-collection",
@@ -582,12 +576,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/sales-management/reports",
           show: hasSalesCenterAccess,
           items: [
-            {
-              title: "Sales Report",
-              icon: <ReportsIcon />,
-              to: "/sales-center/reports/sales",
-              show: hasSalesCenterAccess,
-            },
             {
               title: "Sales Manager Monthly Report",
               icon: <ReportsIcon />,
