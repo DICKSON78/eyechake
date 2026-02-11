@@ -104,6 +104,11 @@ class PatientItemBillsController extends Controller
             $data->whereDate('created_at', '<=', $end_date);
         }
 
+        // Default to today if no date range is specified (Requests filtering to daily)
+        if (!$start_date && !$end_date) {
+            $data->whereDate('created_at', Carbon::today());
+        }
+
         $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');

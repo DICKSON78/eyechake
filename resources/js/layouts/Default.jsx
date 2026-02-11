@@ -535,7 +535,8 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
               sx={{
                 flexGrow: 1,
                 minHeight: "100vh",
-                overflow: "auto",
+                overflowX: "auto",
+                overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
                 bgcolor: "background.default",

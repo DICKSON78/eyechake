@@ -90,6 +90,19 @@ const HighValuePatients = () => {
                 valueGetter: (item) => numberFormat(item.total_payments),
               },
               {
+                field: "patient_class",
+                headerName: "Class",
+                renderCell: (item) => (
+                    <Chip
+                        label={item.patient_class}
+                        color={item.patient_class === 'Class 2' ? 'secondary' : 'primary'}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                ),
+              },
+              {
                 field: "region",
                 headerName: "Region",
               },

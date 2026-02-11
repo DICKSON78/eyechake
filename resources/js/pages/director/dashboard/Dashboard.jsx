@@ -568,6 +568,96 @@ const Dashboard = () => {
             </Box>
           )}
 
+          {/* Pharmacy Department Performance */}
+          {directorData && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <PharmacyIcon /> Pharmacy Department Performance
+              </Typography>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Medicine Sales"
+                    count={numberFormat(directorData.summary?.pharmacy || 0)}
+                    icon={<RevenueIcon />}
+                    color={teal[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Medicine Purchases (COGS)"
+                    count={numberFormat(directorData.summary?.pharmacy_purchases || 0)}
+                    icon={<ExpensesIcon />}
+                    color={orange[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Profit from Medicine"
+                    count={numberFormat(directorData.summary?.pharmacy_profit || 0)}
+                    icon={<NetProfitIcon />}
+                    color={directorData.summary?.pharmacy_profit >= 0 ? green[500] : red[500]}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          {/* Optical Department Performance */}
+          {directorData && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <GlassIcon /> Optical Department Performance
+              </Typography>
+              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Lens Sales"
+                    count={numberFormat(directorData.summary?.glass || 0)}
+                    icon={<RevenueIcon />}
+                    color={purple[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Lens Purchases (COGS)"
+                    count={numberFormat(directorData.summary?.glass_purchases || 0)}
+                    icon={<ExpensesIcon />}
+                    color={orange[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Profit from Sales (Lens)"
+                    count={numberFormat(directorData.summary?.glass_profit || 0)}
+                    icon={<NetProfitIcon />}
+                    color={directorData.summary?.glass_profit >= 0 ? green[500] : red[500]}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
           {/* Main Content - Charts and Statistics */}
           <Grid
             container

@@ -260,9 +260,30 @@ class DirectorDashboardController extends Controller
             }
             
             $data['summary']['pharmacy'] = $pharmacySalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+            
+            // Pharmacy Purchases (COGS)
+            $pharmacyPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Pharmacy');
+            
+            if ($clinic_id) {
+                $pharmacyPurchasesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['pharmacy_purchases'] = $pharmacyPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['pharmacy_profit'] = $data['summary']['pharmacy'] - $data['summary']['pharmacy_purchases'];
+            
         } catch (\Exception $e) {
-            \Log::error('Error calculating pharmacy sales', ['error' => $e->getMessage()]);
+            \Log::error('Error calculating pharmacy sales/purchases', ['error' => $e->getMessage()]);
             $data['summary']['pharmacy'] = 0;
+            $data['summary']['pharmacy_purchases'] = 0;
+            $data['summary']['pharmacy_profit'] = 0;
         }
 
         // Glass Sales
@@ -282,9 +303,30 @@ class DirectorDashboardController extends Controller
             }
             
             $data['summary']['glass'] = $glassSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+            
+            // Glass Purchases (COGS)
+            $glassPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Glass');
+            
+            if ($clinic_id) {
+                $glassPurchasesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['glass_purchases'] = $glassPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['glass_profit'] = $data['summary']['glass'] - $data['summary']['glass_purchases'];
+            
         } catch (\Exception $e) {
-            \Log::error('Error calculating glass sales', ['error' => $e->getMessage()]);
+            \Log::error('Error calculating glass sales/purchases', ['error' => $e->getMessage()]);
             $data['summary']['glass'] = 0;
+            $data['summary']['glass_purchases'] = 0;
+            $data['summary']['glass_profit'] = 0;
         }
 
         // Consulted Patients (patients who have been consulted)

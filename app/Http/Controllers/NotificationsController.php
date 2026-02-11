@@ -156,7 +156,9 @@ class NotificationsController extends Controller
                         ->whereHas('payment_mode', function ($q) {
                             $q->where('payment_type', 'Cash');
                         });
-                });
+                })
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count();
         } catch (\Exception $e) {
@@ -182,7 +184,7 @@ class NotificationsController extends Controller
                         });
                 })
                 ->whereNotNull('created_at')
-                ->where('created_at', '>=', Carbon::now()->startOfWeek()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct()->count();
@@ -241,7 +243,7 @@ class NotificationsController extends Controller
                     });
                 })
                 ->whereNotNull('created_at')
-                ->where('created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
 
             return $query->count();
         } catch (\Exception $e) {
@@ -292,7 +294,7 @@ class NotificationsController extends Controller
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
                 ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(3)->format('Y-m-d') . ' 00:00:00')
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
@@ -316,7 +318,7 @@ class NotificationsController extends Controller
                 ->where('consultation_types.name', 'Procedure')
                 ->whereIn('patient_payment_cache_items.status', ['Pending', 'Paid', 'Billed'])
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -341,7 +343,7 @@ class NotificationsController extends Controller
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
                 ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(3)->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -363,7 +365,7 @@ class NotificationsController extends Controller
                 ->where('status', 'Consulted')
                 ->where('patient_to_return', 'Yes')
                 ->whereNotNull('to_return_date')
-                ->whereBetween('to_return_date', [Carbon::today(), Carbon::now()->endOfWeek()]);
+                ->whereBetween('to_return_date', [Carbon::today()->format('Y-m-d'), Carbon::today()->format('Y-m-d')]);
 
             return $query->count();
         } catch (\Exception $e) {
@@ -388,7 +390,7 @@ class NotificationsController extends Controller
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
                 ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::now()->subDays(7)->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {

@@ -909,6 +909,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: isPrivilegeGranted('marketing'),
         },
         {
+          title: "High Value Patients",
+          icon: <VipIcon />,
+          to: "/marketing/high-value-patients",
+          show: isPrivilegeGranted('marketing'),
+        },
+        {
           title: "List of Glass Patients",
           icon: <PeopleIcon />,
           to: "/marketing/glass-patients",
@@ -1555,14 +1561,28 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
   };
 
   return (
-    <List
-      component="nav"
-      dense
-      disablePadding
-      {...rest}
+    <Box
+      sx={{
+        height: "100%",
+        overflowY: "auto",
+        "&::-webkit-scrollbar": {
+          width: "6px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "rgba(0,0,0,0.2)",
+          borderRadius: "3px",
+        },
+      }}
     >
-      {generateMenuTree(items)}
-    </List>
+      <List
+        component="nav"
+        dense
+        disablePadding
+        {...rest}
+      >
+        {generateMenuTree(items)}
+      </List>
+    </Box>
   );
 };
 

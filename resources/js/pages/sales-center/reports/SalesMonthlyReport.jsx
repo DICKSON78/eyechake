@@ -100,6 +100,8 @@ const getDefaultFormData = () => ({
   salesItemCategories: itemCategories.reduce((acc, c) => ({ ...acc, [c.key]: "" }), {}),
   resultsEvaluation: "",
   salesInformation: { ...salesInformationInitial },
+  reportSummary: "",
+  reportRecommendation: "",
   signature: "",
   reportDate: new Date().toISOString().split("T")[0],
 });
@@ -564,6 +566,36 @@ const SalesMonthlyReport = () => {
           onChange={(v) => handleInputChange(null, "resultsEvaluation", v)}
           sx={{ mb: 4 }}
         />
+
+        {/* Report Summary */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+            Report Summary
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Report Summary"
+            value={formData.reportSummary || ""}
+            onChange={(value) => handleInputChange(null, "reportSummary", value)}
+          />
+        </Box>
+
+        {/* Report Recommendation */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+            Report Recommendation
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Report Recommendation"
+            value={formData.reportRecommendation || ""}
+            onChange={(value) => handleInputChange(null, "reportRecommendation", value)}
+          />
+        </Box>
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>
