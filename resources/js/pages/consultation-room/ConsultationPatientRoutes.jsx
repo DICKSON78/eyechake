@@ -20,7 +20,10 @@ const ConsultationPatientRoutes = () => {
 
   const { data: consultation, loading: loadingConsultation } = useFetch(
     `api/consultations/${consultationId}`,
-    null,
+    {
+      with_diagnoses: "Yes",
+      with_items: "Yes",
+    },
     true,
     null,
     (response) => response.data.data

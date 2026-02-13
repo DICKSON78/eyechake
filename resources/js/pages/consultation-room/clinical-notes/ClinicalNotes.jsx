@@ -435,6 +435,29 @@ const ClinicalNotes = ({ patient, consultation }) => {
         return;
       }
 
+      // Fetch fresh consultation data to ensure we have all related data including visual_acuity
+      const response = await fetch(`/api/consultations/${consultation.id}?with_diagnoses=Yes&with_items=Yes`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch consultation data');
+      }
+      
+      const consultationData = await response.json();
+      const fullConsultation = consultationData.data;
+
+      // Debug: Log consultation data to check if visual_acuity is present
+      console.log('Sick Sheet - Consultation data:', {
+        hasVisualAcuity: !!fullConsultation.visual_acuity,
+        visualAcuity: fullConsultation.visual_acuity,
+        consultationId: fullConsultation.id,
+      });
+
       // Calculate number of days if both dates are provided
       let numberOfDays = sickSheetFormData.number_of_days;
       if (sickSheetFormData.date_from && sickSheetFormData.date_to) {
@@ -455,13 +478,13 @@ const ClinicalNotes = ({ patient, consultation }) => {
         date_from: formatDate(sickSheetFormData.date_from),
         date_to: formatDate(sickSheetFormData.date_to),
         number_of_days: numberOfDays || 'N/A',
-        doctor_recommendations: consultation.doctor_recommendations || 'N/A',
+        doctor_recommendations: fullConsultation.doctor_recommendations || 'N/A',
       };
 
       const pdfBlob = await pdf(
         <SickSheetDocument
           patient={patient}
-          consultation={consultation}
+          consultation={fullConsultation}
           sickSheetData={sickSheetData}
         />
       ).toBlob();
@@ -745,27 +768,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     required
                     value={sickSheetFormData.date_to}
                     onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, date_to: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField
-                    label="Number of Days"
-                    fullWidth
-                    type="number"
-                    placeholder="Auto-calculated from dates"
-                    value={sickSheetFormData.number_of_days}
-                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, number_of_days: value })}
-                    disabled
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    label="Doctor Recommendations (from consultation)"
-                    fullWidth
-                    multiline
-                    rows={3}
-                    value={consultation.doctor_recommendations || 'No recommendations provided yet'}
-                    disabled
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
