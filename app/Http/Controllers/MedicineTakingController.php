@@ -35,6 +35,15 @@ class MedicineTakingController extends Controller
             $per_page = $request->per_page ?? 25;
             $clinic_id = $request->clinic_id;
 
+            $start_date = $request->start_date;
+            $end_date = $request->end_date;
+            
+            if (!$start_date && !$end_date) {
+                // If no date provided, default to today
+                 $start_date = Carbon::today()->format('Y-m-d');
+                 $end_date = Carbon::today()->format('Y-m-d');
+            }
+
             $query = MedicineTaking::with(['patient', 'medicine', 'creator'])
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -48,10 +57,10 @@ class MedicineTakingController extends Controller
                 ->when($request->status, function ($query, $status) {
                     $query->where('status', $status);
                 })
-                ->when($request->start_date, function ($query, $start_date) {
+                ->when($start_date, function ($query, $start_date) {
                     $query->where('scheduled_date', '>=', $start_date);
                 })
-                ->when($request->end_date, function ($query, $end_date) {
+                ->when($end_date, function ($query, $end_date) {
                     $query->where('scheduled_date', '<=', $end_date);
                 });
 

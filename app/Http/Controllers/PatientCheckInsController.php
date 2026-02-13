@@ -42,6 +42,12 @@ class PatientCheckInsController extends Controller
         $start_date = $request->start_date;
         $end_date = $request->end_date;
 
+        // Default to today if no date filter is provided
+        if (!$start_date && !$end_date) {
+             $start_date = date('Y-m-d');
+             $end_date = date('Y-m-d');
+        }
+
         $data = PatientCheckIn::with(['patient' => function ($query) {
             $query->with(['region', 'district']);
         }, 'payment_mode', 'creator']);

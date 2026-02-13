@@ -540,6 +540,20 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
                 display: "flex",
                 flexDirection: "column",
                 bgcolor: "background.default",
+                '&::-webkit-scrollbar': {
+                  width: '8px',
+                  height: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'rgba(0,0,0,0.05)',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(0,0,0,0.2)',
+                  borderRadius: '4px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: 'rgba(0,0,0,0.3)',
+                },
               }}
             >
               <Toolbar />

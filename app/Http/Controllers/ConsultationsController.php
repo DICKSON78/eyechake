@@ -72,6 +72,13 @@ class ConsultationsController extends Controller
         $disease_id = $request->disease_id;
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+
+        // Default to today if no date filter is provided
+        if (!$start_date && !$end_date && !$patient_to_return && !$to_return_date && $view_period == 'daily') {
+             $start_date = Carbon::today()->format('Y-m-d');
+             $end_date = Carbon::today()->format('Y-m-d');
+        }
+
         $data = Consultation::with(['payment_cache_item' => function ($query) {
             $query->with(['payment_cache.check_in.patient' => function ($query2) {
                 $query2->with(['region', 'district', 'ward']);
@@ -614,12 +621,8 @@ class ConsultationsController extends Controller
 
                     $query->with(['item', 'payment_mode', 'consultant', 'server']);
                 }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
-                'to_optician_sender',
+                'to_optician_sender', 'diagnoses.disease'
             ]);
-
-            if ($with_diagnoses == 'Yes') {
-                $data->with(['diagnoses.disease']);
-            }
 
             // Load referral if requested (for clinical note PDF)
             if ($with_referral == 'Yes') {

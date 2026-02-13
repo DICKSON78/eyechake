@@ -49,7 +49,7 @@ class HighValuePatientsController extends Controller
             $directSums = DB::table(function ($query) use ($directPaymentMap) {
                 $query->fromSub($directPaymentMap, 'dpm');
             }, 'sub')
-            ->select('patient_id', DB::raw('SUM(amount - COALESCE(discount, 0)) as total_direct'))
+            ->select('patient_id', DB::raw('SUM(amount - COALESCE(discount, 0)) as amount'))
             ->groupBy('patient_id');
 
             // 2. Calculate BILL payments per patient
@@ -62,16 +62,13 @@ class HighValuePatientsController extends Controller
 
             $billSums = DB::table('patient_item_bill_payments as pibp')
                 ->joinSub($billToPatientMap, 'b2p', 'pibp.bill_id', '=', 'b2p.bill_id')
-                ->select('b2p.patient_id', DB::raw('SUM(pibp.amount) as total_bill'))
+                ->select('b2p.patient_id', DB::raw('SUM(pibp.amount) as amount'))
                 ->groupBy('b2p.patient_id');
 
             // 3. Union and Total Sum
             $allSums = DB::table(function ($query) use ($directSums, $billSums) {
                 $query->fromSub($directSums, 'ds')
-                      ->select('patient_id', 'total_direct as amount')
-                      ->unionAll(
-                          $billSums->select('patient_id', 'total_bill as amount')
-                      );
+                      ->unionAll($billSums);
             }, 'unioned_sums')
             ->select('patient_id', DB::raw('SUM(amount) as total_lifetime_value'))
             ->groupBy('patient_id')

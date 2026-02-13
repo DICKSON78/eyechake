@@ -1565,12 +1565,19 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
       sx={{
         height: "100%",
         overflowY: "auto",
+        overflowX: "hidden",
         "&::-webkit-scrollbar": {
-          width: "6px",
+          width: "8px",
+        },
+        "&::-webkit-scrollbar-track": {
+           background: "transparent"
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "rgba(0,0,0,0.2)",
-          borderRadius: "3px",
+          backgroundColor: "rgba(0,0,0,0.3)",
+          borderRadius: "4px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "rgba(0,0,0,0.5)",
         },
       }}
     >
