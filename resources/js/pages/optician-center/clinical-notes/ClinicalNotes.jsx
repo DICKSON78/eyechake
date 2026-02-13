@@ -351,21 +351,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 </Box>
               </Box>
             )}
-
-            {/* Doctor Recommendations - Show recommendations instead of remarks */}
-            <Subheader title="Doctor Recommendations" />
-            <Box sx={{ 
-              p: 2, 
-              bgcolor: 'grey.50', 
-              borderRadius: 1, 
-              border: '1px solid', 
-              borderColor: 'grey.200',
-              minHeight: 100
-            }}>
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                {consultation.doctor_comments_remarks || 'No recommendations provided'}
-              </Typography>
-            </Box>
           </CardContent>
         </Form>
         <Divider />

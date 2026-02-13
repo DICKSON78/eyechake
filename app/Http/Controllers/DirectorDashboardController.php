@@ -329,6 +329,59 @@ class DirectorDashboardController extends Controller
             $data['summary']['glass_profit'] = 0;
         }
 
+        // Frame Sales (items containing "frame" in their name)
+        try {
+            $frameSalesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Glass')
+                ->where(function($query) {
+                    $query->where('it.name', 'like', '%frame%')
+                          ->orWhere('it.name', 'like', '%Frame%')
+                          ->orWhere('it.name', 'like', '%FRAME%');
+                });
+            
+            if ($clinic_id) {
+                $frameSalesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['frame'] = $frameSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+            
+            // Frame Purchases (COGS)
+            $framePurchasesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Glass')
+                ->where(function($query) {
+                    $query->where('it.name', 'like', '%frame%')
+                          ->orWhere('it.name', 'like', '%Frame%')
+                          ->orWhere('it.name', 'like', '%FRAME%');
+                });
+            
+            if ($clinic_id) {
+                $framePurchasesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['frame_purchases'] = $framePurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['frame_profit'] = $data['summary']['frame'] - $data['summary']['frame_purchases'];
+            
+        } catch (\Exception $e) {
+            \Log::error('Error calculating frame sales/purchases', ['error' => $e->getMessage()]);
+            $data['summary']['frame'] = 0;
+            $data['summary']['frame_purchases'] = 0;
+            $data['summary']['frame_profit'] = 0;
+        }
+
         // Consulted Patients (patients who have been consulted)
         try {
             $data['summary']['consulted_patients'] = Consultation::query()

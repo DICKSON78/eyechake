@@ -194,7 +194,7 @@ const Dashboard = () => {
   );
 
   useEffect(() => {
-    document.title = `Director Dashboard - ${window.APP_NAME}`;
+    document.title = `Dashboard - ${window.APP_NAME}`;
   }, []);
 
   useEffect(() => {
@@ -252,11 +252,11 @@ const Dashboard = () => {
 
   return (
     <Page
-      title="Director Dashboard"
-      breadcrumbs={[{ title: "Home" }, { title: "Director" }, { title: "Director Dashboard" }]}
+      title="Dashboard"
+      breadcrumbs={[{ title: "Home" }, { title: "Dashboard" }]}
     >
       <CardHeader
-        title="Director Dashboard"
+        title="Dashboard"
         action={
           <Stack direction="row" spacing={1}>
             <Tooltip title="Show filters">
@@ -652,6 +652,30 @@ const Dashboard = () => {
                     count={numberFormat(directorData.summary?.glass_profit || 0)}
                     icon={<NetProfitIcon />}
                     color={directorData.summary?.glass_profit >= 0 ? green[500] : red[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Frame Sales"
+                    count={numberFormat(directorData.summary?.frame || 0)}
+                    icon={<RevenueIcon />}
+                    color={cyan[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Frame Purchases (COGS)"
+                    count={numberFormat(directorData.summary?.frame_purchases || 0)}
+                    icon={<ExpensesIcon />}
+                    color={deepOrange[500]}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <InfoCard
+                    title="Profit from Sales (Frame)"
+                    count={numberFormat(directorData.summary?.frame_profit || 0)}
+                    icon={<NetProfitIcon />}
+                    color={directorData.summary?.frame_profit >= 0 ? green[500] : red[500]}
                   />
                 </Grid>
               </Grid>

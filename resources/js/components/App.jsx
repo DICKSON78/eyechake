@@ -19,7 +19,7 @@ import navigationFix from "../utils/navigationFix";
 import AuthLayout from "../layouts/Auth";
 import DefaultLayout from "../layouts/Default";
 import Login from "../pages/auth/Login";
-import Dashboard from "../pages/dashboard/Dashboard";
+import Dashboard from "../pages/director/dashboard/Dashboard";
 import SalesExpenses from "../pages/dashboard/sales-expenses/SalesExpenses";
 import PatientRegistration from "../pages/dashboard/patient-registration/PatientRegistration";
 
