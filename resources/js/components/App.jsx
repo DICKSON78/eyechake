@@ -150,26 +150,61 @@ const App = () => {
             },
             html: {
               scrollBehavior: "smooth",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
+              scrollbarWidth: "auto", // Enable Firefox scrollbars
+              overflowX: "auto",
+              overflowY: "auto",
             },
             "html::-webkit-scrollbar": {
-              display: "none",
+              width: "10px",
+              height: "10px",
+            },
+            "html::-webkit-scrollbar-track": {
+              background: "rgba(0,0,0,0.05)",
+            },
+            "html::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "5px",
+            },
+            "html::-webkit-scrollbar-thumb:hover": {
+              background: "#555",
             },
             body: {
               overflowY: "auto",
-                  scrollbarWidth: "none",
-              msOverflowStyle: "none",
+              overflowX: "auto",
+              scrollbarWidth: "auto", // Enable Firefox scrollbars
             },
             "body::-webkit-scrollbar": {
-                  display: "none",
+              width: "10px",
+              height: "10px",
             },
+            "body::-webkit-scrollbar-track": {
+              background: "rgba(0,0,0,0.05)",
+            },
+            "body::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "5px",
+            },
+            "body::-webkit-scrollbar-thumb:hover": {
+              background: "#555",
+            },
+            // Global scrollbar styling for all elements
             "*": {
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
+              scrollbarWidth: "auto",
+              scrollbarColor: "#888 rgba(0,0,0,0.05)",
             },
             "*::-webkit-scrollbar": {
-              display: "none",
+              width: "10px",
+              height: "10px",
+            },
+            "*::-webkit-scrollbar-track": {
+              background: "rgba(0,0,0,0.05)",
+            },
+            "*::-webkit-scrollbar-thumb": {
+              background: "#888",
+              borderRadius: "5px",
+            },
+            "*::-webkit-scrollbar-thumb:hover": {
+              background: "#555",
             },
             // Text justify for all paragraphs and body text
             "p, .MuiTypography-body1, .MuiTypography-body2, .MuiTypography-paragraph": {
