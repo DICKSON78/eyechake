@@ -535,24 +535,24 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
               sx={{
                 flexGrow: 1,
                 minHeight: "100vh",
-                overflowX: "auto",
-                overflowY: "auto",
+                overflowX: "auto", // Horizontal when needed
+                overflowY: "scroll", // Vertical always visible
                 display: "flex",
                 flexDirection: "column",
                 bgcolor: "background.default",
                 '&::-webkit-scrollbar': {
-                  width: '8px',
-                  height: '8px',
+                  width: '10px',
+                  height: '10px',
                 },
                 '&::-webkit-scrollbar-track': {
                   background: 'rgba(0,0,0,0.05)',
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  background: 'rgba(0,0,0,0.2)',
+                  background: '#888',
                   borderRadius: '4px',
                 },
                 '&::-webkit-scrollbar-thumb:hover': {
-                  background: 'rgba(0,0,0,0.3)',
+                  background: '#555',
                 },
               }}
             >
