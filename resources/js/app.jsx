@@ -1,5 +1,6 @@
 import "./bootstrap";
 import "./echo"; // Initialize WebSocket connection
+import "../css/app.css"; // Global styles including scrollbars
 import React from "react";
 import ReactDOM from "react-dom/client";
 import {
