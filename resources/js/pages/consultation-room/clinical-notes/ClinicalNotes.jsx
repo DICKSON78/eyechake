@@ -277,9 +277,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   };
 
-  const openSelectDiagnoses
-
-Modal = (title, type) => {
+  const openSelectDiagnosesModal = (title, type) => {
     let component = (
       <SelectDiagnoses
         modal={modalRef.current}
