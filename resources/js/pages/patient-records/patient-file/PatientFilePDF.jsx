@@ -50,6 +50,9 @@ const Subheader = ({ title, style }) => {
 };
 
 const DiagnosisCard = ({ title, diagnosisType, items }) => {
+  // Safety check: ensure items is an array before filtering
+  const safeItems = Array.isArray(items) ? items : [];
+  
   return (
     <Table
       caption={title}
@@ -71,12 +74,15 @@ const DiagnosisCard = ({ title, diagnosisType, items }) => {
           valueGetter: (item, index) => item.disease?.code,
         },
       ]}
-      items={items.filter((e) => e.diagnosis_type === diagnosisType)}
+      items={safeItems.filter((e) => e.diagnosis_type === diagnosisType)}
     />
   );
 };
 
 const ConsultationItemsCard = ({ title, consultationType, items }) => {
+  // Safety check: ensure items is an array before filtering
+  const safeItems = Array.isArray(items) ? items : [];
+  
   const getStatusLabel = (status) => {
     if (status === "Pending") {
       return "Not Paid";
@@ -104,7 +110,7 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
         {
           field: "item_name",
           headerName: "Item Name",
-          valueGetter: (item, index) => item.item.name,
+          valueGetter: (item, index) => item.item?.name || "N/A",
         },
         {
           field: "quantity",
@@ -127,7 +133,7 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
           valueGetter: (item, index) => getStatusLabel(item.status),
         },
       ]}
-      items={items.filter((e) => e.consultation_type.name === consultationType)}
+      items={safeItems.filter((e) => e.consultation_type?.name === consultationType)}
     />
   );
 };

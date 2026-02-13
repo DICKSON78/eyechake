@@ -77,7 +77,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
     },
     false,
     [],
-    (response) => response.data.data.data
+    (response) => {
+      // Safely extract data with fallback
+      const data = response?.data?.data?.data || response?.data?.data || response?.data || [];
+      return Array.isArray(data) ? data : [];
+    }
   );
 
   const { handlePatch: handleAutoSave } = usePatch();
@@ -149,7 +153,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         modal={modalRef.current}
         consultation={consultation}
         consultationType={type}
-        selected={items.filter((e) => e.consultation_type.name === type)}
+        selected={Array.isArray(items) ? items.filter((e) => e.consultation_type?.name === type) : []}
         fetchItems={fetchItems}
       />
     );

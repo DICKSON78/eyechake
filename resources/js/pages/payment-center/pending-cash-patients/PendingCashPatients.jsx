@@ -30,8 +30,8 @@ const PendingCashPatients = () => {
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    start_date: undefined, // No date limit - show all pending patients
-    end_date: undefined, // No date limit - show all pending patients
+    start_date: new Date(), // Default to current day
+    end_date: new Date(), // Default to current day
     // Include both pharmacy and glass items to match notification count
     include_optician_glass: true,
   });

@@ -10,6 +10,9 @@ const Table = ({
   renderExpanded,
   repeatHead,
 }) => {
+  // Safety check: ensure items is an array
+  const safeItems = Array.isArray(items) ? items : [];
+  
   columns = columns.filter(
     (col) => typeof col.show === "undefined" || col.show
   );
@@ -47,7 +50,7 @@ const Table = ({
         </View>
       ) : null}
       {renderTableHeadRow()}
-      {items.map((item, index, array) => (
+      {safeItems.map((item, index, array) => (
         <React.Fragment key={index}>
           <View style={styles.tableRow}>
             {columns.map((col) => (
@@ -85,7 +88,7 @@ const Table = ({
           ) : null}
         </React.Fragment>
       ))}
-      {!items.length ? (
+      {!safeItems.length ? (
         <View style={styles.tableRow}>
           <Text
             style={[

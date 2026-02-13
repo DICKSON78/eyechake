@@ -277,13 +277,15 @@ const ClinicalNotes = ({ patient, consultation }) => {
     }
   };
 
-  const openSelectDiagnosesModal = (title, type) => {
+  const openSelectDiagnoses
+
+Modal = (title, type) => {
     let component = (
       <SelectDiagnoses
         modal={modalRef.current}
         consultationId={consultation.id}
         diagnosisType={type}
-        selected={diagnoses.filter((e) => e.diagnosis_type === type)}
+        selected={Array.isArray(diagnoses) ? diagnoses.filter((e) => e.diagnosis_type === type) : []}
         fetchDiagnoses={fetchDiagnoses}
       />
     );
@@ -297,7 +299,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         modal={modalRef.current}
         consultation={consultation}
         consultationType={type}
-        selected={items.filter((e) => e.consultation_type.name === type)}
+        selected={Array.isArray(items) ? items.filter((e) => e.consultation_type?.name === type) : []}
         fetchItems={fetchItems}
       />
     );
