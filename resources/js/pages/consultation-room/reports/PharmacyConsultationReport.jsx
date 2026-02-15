@@ -48,6 +48,8 @@ const getDefaultFormData = () => ({
   productTargets: defaultProducts.map((name) => ({ productName: name, target: "30", result: "" })),
   signature: "",
   reportDate: new Date().toISOString().split("T")[0],
+  reportSummary: "",
+  reportRecommendation: "",
 });
 
 const PharmacyConsultationReport = () => {
@@ -175,6 +177,8 @@ const PharmacyConsultationReport = () => {
       productTargets: Array.isArray(report.productTargets) && report.productTargets.length ? report.productTargets : getDefaultFormData().productTargets,
       signature: report.signature || "",
       reportDate: report.reportDate || getDefaultFormData().reportDate,
+      reportSummary: report.reportSummary || "",
+      reportRecommendation: report.reportRecommendation || "",
     });
     setCurrentReportId(report.id);
     if (report.selectedDate) setSelectedDate(new Date(report.selectedDate));
@@ -403,6 +407,42 @@ const PharmacyConsultationReport = () => {
         <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddMedicine} sx={{ mb: 4, "@media print": { display: "none" } }}>
           Add Medicine
         </Button>
+
+        <Divider sx={{ my: 3 }} />
+
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}>
+          Report Notes
+        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Report Summary:</strong>
+              </Typography>
+              <TextField 
+                fullWidth 
+                multiline 
+                rows={3} 
+                placeholder="Enter summary of findings and observations for this report..."
+                value={formData.reportSummary} 
+                onChange={(v) => setFormData((p) => ({ ...p, reportSummary: v }))} 
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Report Recommendation:</strong>
+              </Typography>
+              <TextField 
+                fullWidth 
+                multiline 
+                rows={3} 
+                placeholder="Enter recommendations based on the report data..."
+                value={formData.reportRecommendation} 
+                onChange={(v) => setFormData((p) => ({ ...p, reportRecommendation: v }))} 
+              />
+            </Grid>
+          </Grid>
+        </Box>
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>

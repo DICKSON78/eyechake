@@ -90,25 +90,25 @@ class PatientsController extends Controller
                 $query->where('info_source_id', $request->info_source_id);
             }
             
-            // Boolean filters
+            // Boolean filters (stored as enum 'Yes'/'No' in database)
             if ($request->has('is_vip') && $request->is_vip !== null) {
-                $query->where('is_vip', filter_var($request->is_vip, FILTER_VALIDATE_BOOLEAN));
+                $query->where('is_vip', filter_var($request->is_vip, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
             }
             
             if ($request->has('is_student') && $request->is_student !== null) {
-                $query->where('is_student', filter_var($request->is_student, FILTER_VALIDATE_BOOLEAN));
+                $query->where('is_student', filter_var($request->is_student, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
             }
             
             if ($request->has('is_businessperson') && $request->is_businessperson !== null) {
-                $query->where('is_businessperson', filter_var($request->is_businessperson, FILTER_VALIDATE_BOOLEAN));
+                $query->where('is_businessperson', filter_var($request->is_businessperson, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
             }
             
             if ($request->has('is_outreach') && $request->is_outreach !== null) {
-                $query->where('is_outreach', filter_var($request->is_outreach, FILTER_VALIDATE_BOOLEAN));
+                $query->where('is_outreach', filter_var($request->is_outreach, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
             }
             
             if ($request->has('is_employee') && $request->is_employee !== null) {
-                $query->where('is_employee', filter_var($request->is_employee, FILTER_VALIDATE_BOOLEAN));
+                $query->where('is_employee', filter_var($request->is_employee, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
             }
             
             // Date filters
@@ -125,20 +125,20 @@ class PatientsController extends Controller
                 switch ($request->client_type) {
                     case 'prestige':
                     case 'vip':
-                        $query->where('is_vip', true);
+                        $query->where('is_vip', 'Yes');
                         break;
                     case 'business':
                     case 'businessperson':
-                        $query->where('is_businessperson', true);
+                        $query->where('is_businessperson', 'Yes');
                         break;
                     case 'student':
-                        $query->where('is_student', true);
+                        $query->where('is_student', 'Yes');
                         break;
                     case 'outreach':
-                        $query->where('is_outreach', true);
+                        $query->where('is_outreach', 'Yes');
                         break;
                     case 'employee':
-                        $query->where('is_employee', true);
+                        $query->where('is_employee', 'Yes');
                         break;
                 }
             }

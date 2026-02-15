@@ -39,6 +39,7 @@ import {
   PeopleRounded as PeopleIcon,
   LocalHospitalRounded as DoctorIcon,
   ScheduleRounded as ScheduleIcon,
+  ShoppingCartRounded as PurchaseIcon,
 } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -399,7 +400,7 @@ const Dashboard = () => {
                         count={numberFormat(directorData.summary?.consulted_patients || 0)}
                         icon={<DoneIcon />}
                         color={green[500]}
-                        onClick={navigateToConsultationRoom}
+                        onClick={() => navigate('/consultation-room/reports/consultation')}
                       />
                     </Grid>
                   </>
@@ -483,6 +484,15 @@ const Dashboard = () => {
                         icon={<ExpensesIcon />}
                         color={red[500]}
                         onClick={() => navigate('/financial-management/expenses')}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                      <InfoCard
+                        title="Total Purchases"
+                        count={numberFormat(directorData.summary?.total_purchases || 0)}
+                        icon={<PurchaseIcon />}
+                        color={deepOrange[500]}
+                        onClick={() => navigate('/inventory-management/stocktaking')}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -757,7 +767,7 @@ const Dashboard = () => {
 
                 {/* Sales vs Expenses */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid size={{ xs: 12 }}>
                     <Card>
                       <CardHeader
                         title="Sales vs Expenses"
@@ -779,56 +789,63 @@ const Dashboard = () => {
                         }
                       />
                       <Divider />
-                      <ChartWrapper
-                        options={{
-                          chart: {
-                            fontFamily: theme.typography.fontFamily,
-                            foreColor: theme.palette.text.primary,
-                            background: "transparent",
-                            toolbar: { show: false },
-                          },
-                          plotOptions: {
-                            bar: {
-                              borderRadius: 8,
-                              borderRadiusApplication: "around",
-                              borderRadiusWhenStacked: "all",
-                            },
-                          },
-                          colors: [blue[700], yellow[600]],
-                          stroke: { show: false },
-                          dataLabels: { enabled: false },
-                          grid: { show: false, borderColor: theme.palette.divider },
-                          xaxis: {
-                            axisBorder: { show: false, color: theme.palette.divider },
-                            axisTicks: { show: true, color: theme.palette.divider, height: 6 },
-                          },
-                          yaxis: {
-                            axisBorder: { show: false, color: theme.palette.divider },
-                            axisTicks: { show: true, color: theme.palette.divider, width: 6 },
-                            labels: { formatter: (val) => numberFormat(val) },
-                          },
-                          tooltip: { theme: "dark", fillSeriesColor: true },
-                          legend: { markers: { width: 14, height: 8, radius: 4 } },
-                        }}
-                        series={[
-                          {
-                            name: "Sales",
-                            data: (financialData.statistics?.sales_expenses || []).map((e) => ({
-                              x: e.period,
-                              y: e.sales || 0,
-                            })),
-                          },
-                          {
-                            name: "Expenses",
-                            data: (financialData.statistics?.sales_expenses || []).map((e) => ({
-                              x: e.period,
-                              y: e.expenses || 0,
-                            })),
-                          },
-                        ]}
-                        type="bar"
-                        height="272"
-                      />
+                      <Box sx={{ overflowX: 'auto', width: '100%' }}>
+                        <Box sx={{ minWidth: salesExpensesPeriod === 'monthly' ? 900 : 'auto' }}>
+                          <ChartWrapper
+                            options={{
+                              chart: {
+                                fontFamily: theme.typography.fontFamily,
+                                foreColor: theme.palette.text.primary,
+                                background: "transparent",
+                                toolbar: { show: false },
+                              },
+                              plotOptions: {
+                                bar: {
+                                  borderRadius: 0,
+                                  columnWidth: '70%',
+                                },
+                              },
+                              colors: [blue[700], yellow[600]],
+                              stroke: { show: false },
+                              dataLabels: { enabled: false },
+                              grid: { show: false, borderColor: theme.palette.divider },
+                              xaxis: {
+                                axisBorder: { show: false, color: theme.palette.divider },
+                                axisTicks: { show: true, color: theme.palette.divider, height: 6 },
+                                labels: {
+                                  rotate: salesExpensesPeriod === 'monthly' ? -45 : 0,
+                                  rotateAlways: salesExpensesPeriod === 'monthly',
+                                },
+                              },
+                              yaxis: {
+                                axisBorder: { show: false, color: theme.palette.divider },
+                                axisTicks: { show: true, color: theme.palette.divider, width: 6 },
+                                labels: { formatter: (val) => numberFormat(val) },
+                              },
+                              tooltip: { theme: "dark", fillSeriesColor: true },
+                              legend: { markers: { width: 14, height: 8, radius: 0 } },
+                            }}
+                            series={[
+                              {
+                                name: "Sales",
+                                data: (financialData.statistics?.sales_expenses || []).map((e) => ({
+                                  x: e.period,
+                                  y: e.sales || 0,
+                                })),
+                              },
+                              {
+                                name: "Expenses",
+                                data: (financialData.statistics?.sales_expenses || []).map((e) => ({
+                                  x: e.period,
+                                  y: e.expenses || 0,
+                                })),
+                              },
+                            ]}
+                            type="bar"
+                            height="320"
+                          />
+                        </Box>
+                      </Box>
                     </Card>
                   </Grid>
                 )}

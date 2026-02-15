@@ -5,8 +5,14 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid2";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
+import TextField from "../../../components/TextField";
 import Filters from "../PatientFilters";
 import PatientFilePDF from "../../patient-records/patient-file/PatientFilePDF";
 
@@ -32,6 +38,9 @@ const Consultation = () => {
     end_date: undefined,
   });
 
+  const [reportSummary, setReportSummary] = useState("");
+  const [reportRecommendation, setReportRecommendation] = useState("");
+
   useEffect(() => {
     document.title = `Consultation Report - ${window.APP_NAME}`;
   }, []);
@@ -45,6 +54,39 @@ const Consultation = () => {
         { title: "Consultation Report" },
       ]}
     >
+      {/* Report Summary and Recommendation Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
+            Report Notes
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                label="Report Summary"
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Enter summary of findings and observations for this report..."
+                value={reportSummary}
+                onChange={(value) => setReportSummary(value)}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                label="Report Recommendation"
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Enter recommendations based on the consultation data..."
+                value={reportRecommendation}
+                onChange={(value) => setReportRecommendation(value)}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
       <Report
         title="Consultation Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
@@ -58,6 +100,8 @@ const Consultation = () => {
             ? formatDateForDb(params.end_date)
             : undefined,
         }}
+        reportSummary={reportSummary}
+        reportRecommendation={reportRecommendation}
         prependInner={
           <Filters
             params={params}

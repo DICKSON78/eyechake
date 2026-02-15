@@ -1081,50 +1081,54 @@ const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
           </View>
         </View>
 
-        {/* Remark & Doctor Recommendation - Matching form layout */}
-        <Subheader
-          title="Remark & Doctor Recommendation"
-          style={{ marginBottom: 8 }}
-        />
+        {/* Remark & Doctor Recommendation - Only show when not a referral document */}
+        {!referralData && (
+          <React.Fragment>
+            <Subheader
+              title="Remark & Doctor Recommendation"
+              style={{ marginBottom: 8 }}
+            />
 
-        <View style={{ flexDirection: "row", marginBottom: 8 }}>
-          <View style={{ width: "50%", paddingRight: 8 }}>
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontWeight: "bold",
-                  marginBottom: 4,
-                  fontSize: 9,
-                  color: "#039be5",
-                },
-              ]}
-            >
-              Remark
-            </Text>
-            <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
-              {consultation.remarks || ""}
-            </Text>
-          </View>
-          <View style={{ width: "50%", paddingLeft: 8 }}>
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontWeight: "bold",
-                  marginBottom: 4,
-                  fontSize: 9,
-                  color: "#039be5",
-                },
-              ]}
-            >
-              Doctor Recommendation
-            </Text>
-            <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
-              {consultation.doctor_comments_remarks || ""}
-            </Text>
-          </View>
-        </View>
+            <View style={{ flexDirection: "row", marginBottom: 8 }}>
+              <View style={{ width: "50%", paddingRight: 8 }}>
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      fontWeight: "bold",
+                      marginBottom: 4,
+                      fontSize: 9,
+                      color: "#039be5",
+                    },
+                  ]}
+                >
+                  Remark
+                </Text>
+                <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
+                  {consultation.remarks || ""}
+                </Text>
+              </View>
+              <View style={{ width: "50%", paddingLeft: 8 }}>
+                <Text
+                  style={[
+                    styles.text,
+                    {
+                      fontWeight: "bold",
+                      marginBottom: 4,
+                      fontSize: 9,
+                      color: "#039be5",
+                    },
+                  ]}
+                >
+                  Doctor Recommendation
+                </Text>
+                <Text style={[styles.text, { fontSize: 8, minHeight: 40 }]}>
+                  {consultation.doctor_comments_remarks || ""}
+                </Text>
+              </View>
+            </View>
+          </React.Fragment>
+        )}
 
         {consultation.status === "Consulted" && consultation.patient_to_return ? (
           <React.Fragment>
