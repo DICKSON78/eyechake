@@ -242,7 +242,7 @@ const PharmacyConsultationReport = () => {
         <Card>
           <CardContent>
             <Grid container spacing={2} alignItems="center">
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Select
                   fullWidth
                   label="Report Period"
@@ -258,13 +258,13 @@ const PharmacyConsultationReport = () => {
                   optionsValue="id"
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <DatePicker fullWidth label="Select Date" value={selectedDate} onChange={(v) => setSelectedDate(v || new Date())} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <DatePicker fullWidth label="Start Date" value={startDate} onChange={(v) => setStartDate(v)} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <DatePicker fullWidth label="End Date" value={endDate} onChange={(v) => setEndDate(v)} />
               </Grid>
             </Grid>
@@ -334,19 +334,19 @@ const PharmacyConsultationReport = () => {
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Employee Name:</strong>
               </Typography>
               <TextField fullWidth size="small" value={formData.employeeName} onChange={(v) => setFormData((p) => ({ ...p, employeeName: v }))} />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Month:</strong>
               </Typography>
               <TextField fullWidth size="small" value={formData.month} onChange={(v) => setFormData((p) => ({ ...p, month: v }))} />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Date Submitted:</strong>
               </Typography>
@@ -415,7 +415,7 @@ const PharmacyConsultationReport = () => {
         </Typography>
         <Box sx={{ mb: 4 }}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Report Summary:</strong>
               </Typography>
@@ -428,7 +428,7 @@ const PharmacyConsultationReport = () => {
                 onChange={(v) => setFormData((p) => ({ ...p, reportSummary: v }))} 
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Report Recommendation:</strong>
               </Typography>
@@ -446,13 +446,13 @@ const PharmacyConsultationReport = () => {
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Signature:</strong>
               </Typography>
               <TextField fullWidth size="small" value={formData.signature} onChange={(v) => setFormData((p) => ({ ...p, signature: v }))} />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Date:</strong>
               </Typography>
