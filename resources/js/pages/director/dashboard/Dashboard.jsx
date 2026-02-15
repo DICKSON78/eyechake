@@ -302,51 +302,110 @@ const Dashboard = () => {
         <>
           <StockAlertsNotification />
 
+          {/* Key Performance Metrics */}
+          <Card sx={{ mb: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+            <CardContent>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  mb: 3,
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <SalesIcon /> Key Performance Indicators
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <InfoCard
+                    title="Total Sales (Net)"
+                    count={numberFormat(directorData?.summary?.total_sales || 0)}
+                    icon={<SalesIcon />}
+                    color={purple[400]}
+                    onClick={navigateToFinancialManagement}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <InfoCard
+                    title="Total Expenses"
+                    count={numberFormat(directorData?.summary?.total_expenses || 0)}
+                    icon={<ExpensesIcon />}
+                    color={red[500]}
+                    onClick={() => navigate('/financial-management/expenses')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <InfoCard
+                    title="Total Purchases"
+                    count={numberFormat(directorData?.summary?.total_purchases || 0)}
+                    icon={<PurchaseIcon />}
+                    color={deepOrange[500]}
+                    onClick={() => navigate('/inventory-management/stocktaking')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <InfoCard
+                    title="Net Profit"
+                    count={numberFormat(directorData?.summary?.net_profit || 0)}
+                    icon={<NetProfitIcon />}
+                    color={directorData?.summary?.net_profit >= 0 ? teal[500] : orange[500]}
+                    onClick={() => navigate('/financial-management/reports/balance-sheet')}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
           {/* Reception Department */}
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 600,
-                mb: 2,
-                color: theme.palette.primary.main,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <PeopleIcon /> Reception Department
-            </Typography>
-            <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <InfoCard
-                  title="Today's Patients"
-                  count={numberFormat(directorData?.summary?.today_patients || 0)}
-                  icon={<PatientIcon />}
-                  color={blue[500]}
-                  onClick={() => navigate('/reception/patients')}
-                />
+          <Card sx={{ mb: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+            <CardContent>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 3,
+                  color: theme.palette.text.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <PeopleIcon /> Reception Department
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={4}>
+                  <InfoCard
+                    title="Today's Patients"
+                    count={numberFormat(directorData?.summary?.today_patients || 0)}
+                    icon={<PatientIcon />}
+                    color={blue[500]}
+                    onClick={() => navigate('/reception/patients')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <InfoCard
+                    title="Total Patients Registered"
+                    count={numberFormat(directorData?.summary?.total_patients_registered || 0)}
+                    icon={<PeopleIcon />}
+                    color={green[500]}
+                    onClick={() => navigate('/reception/patients')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <InfoCard
+                    title="Web Appointment Bookings"
+                    count={numberFormat(directorData?.summary?.web_appointment_bookings || 0)}
+                    icon={<ScheduleIcon />}
+                    color={orange[500]}
+                    onClick={() => navigate('/appointments')}
+                  />
+                </Grid>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <InfoCard
-                  title="Total Patients Registered"
-                  count={numberFormat(directorData?.summary?.total_patients_registered || 0)}
-                  icon={<PeopleIcon />}
-                  color={green[500]}
-                  onClick={() => navigate('/reception/patients')}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <InfoCard
-                  title="Web Appointment Bookings"
-                  count={numberFormat(directorData?.summary?.web_appointment_bookings || 0)}
-                  icon={<ScheduleIcon />}
-                  color={orange[500]}
-                  onClick={() => navigate('/appointments')}
-                />
-              </Grid>
-            </Grid>
-          </Box>
+            </CardContent>
+          </Card>
 
           {/* Consultation Room Department */}
           {(directorData || consultationData) && (
@@ -367,7 +426,7 @@ const Dashboard = () => {
               <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
                 {directorData && (
                   <>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from New Consultations"
                         count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
@@ -376,7 +435,7 @@ const Dashboard = () => {
                         onClick={() => navigate('/consultation-room/dashboard')}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from Return Consultations"
                         count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
@@ -385,7 +444,7 @@ const Dashboard = () => {
                         onClick={() => navigate('/consultation-room/dashboard')}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Total Revenue from All Consultations"
                         count={numberFormat(directorData.summary?.revenue_all_consultations || 0)}
@@ -394,7 +453,7 @@ const Dashboard = () => {
                         onClick={() => navigate('/consultation-room/dashboard')}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Consulted Patients"
                         count={numberFormat(directorData.summary?.consulted_patients || 0)}
@@ -407,7 +466,7 @@ const Dashboard = () => {
                 )}
                 {consultationData && (
                   <>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Total Patients Seen"
                         count={numberFormat(consultationData.summary?.total_patients_seen || 0)}
@@ -416,7 +475,7 @@ const Dashboard = () => {
                         onClick={() => navigate('/consultation-room/patients-seen')}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Patients Waiting"
                         count={numberFormat(consultationData.summary?.total_patients_waiting || 0)}
@@ -425,7 +484,7 @@ const Dashboard = () => {
                         onClick={() => navigate('/consultation-room/patients-waiting')}
                       />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Consultations Today"
                         count={numberFormat(consultationData.summary?.consultations_today || 0)}
@@ -440,256 +499,212 @@ const Dashboard = () => {
             </Box>
           )}
 
-          {/* Financial Management Department */}
-          {(directorData || financialData) && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  mb: 2,
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <SalesIcon /> Financial Management Department
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                {directorData && (
-                  <>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Total Sales (Net)"
-                        count={numberFormat(directorData.summary?.total_sales || 0)}
-                        icon={<SalesIcon />}
-                        color={purple[400]}
-                        onClick={navigateToFinancialManagement}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Total Discount"
-                        count={numberFormat(directorData.summary?.discount || 0)}
-                        icon={<DiscountIcon />}
-                        color={pink[400]}
-                        onClick={navigateToFinancialManagement}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Total Expenses"
-                        count={numberFormat(directorData.summary?.total_expenses || 0)}
-                        icon={<ExpensesIcon />}
-                        color={red[500]}
-                        onClick={() => navigate('/financial-management/expenses')}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Total Purchases"
-                        count={numberFormat(directorData.summary?.total_purchases || 0)}
-                        icon={<PurchaseIcon />}
-                        color={deepOrange[500]}
-                        onClick={() => navigate('/inventory-management/stocktaking')}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Net Profit"
-                        count={numberFormat(directorData.summary?.net_profit || 0)}
-                        icon={<NetProfitIcon />}
-                        color={directorData.summary?.net_profit >= 0 ? teal[500] : orange[500]}
-                        onClick={() => navigate('/financial-management/reports/balance-sheet')}
-                      />
-                    </Grid>
-                  </>
-                )}
-                {financialData && (
-                  <>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Total Revenue"
-                        count={numberFormat(financialData.summary?.total_revenue || 0)}
-                        icon={<RevenueIcon />}
-                        color={green[500]}
-                        onClick={() => navigate('/financial-management/reports/cash-collection')}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                      <InfoCard
-                        title="Pending Bills"
-                        count={numberFormat(financialData.summary?.pending_bills || 0)}
-                        icon={<PendingIcon />}
-                        color={orange[500]}
-                        onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
-                      />
-                    </Grid>
-                  </>
-                )}
-              </Grid>
-            </Box>
+          {/* Financial Management Additional Metrics */}
+          {financialData && (
+            <Card sx={{ mb: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 3,
+                    color: theme.palette.text.primary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <SalesIcon /> Additional Financial Metrics
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <InfoCard
+                      title="Total Revenue"
+                      count={numberFormat(financialData.summary?.total_revenue || 0)}
+                      icon={<RevenueIcon />}
+                      color={green[500]}
+                      onClick={() => navigate('/financial-management/reports/cash-collection')}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <InfoCard
+                      title="Pending Bills"
+                      count={numberFormat(financialData.summary?.pending_bills || 0)}
+                      icon={<PendingIcon />}
+                      color={orange[500]}
+                      onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <InfoCard
+                      title="Total Discount"
+                      count={numberFormat(directorData?.summary?.discount || 0)}
+                      icon={<DiscountIcon />}
+                      color={pink[400]}
+                      onClick={navigateToFinancialManagement}
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
           )}
 
-          {/* Sales by Department Category */}
+          {/* Sales by Department & Performance */}
           {directorData && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  mb: 2,
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <BillsIcon /> Sales by Department Category
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Consultation"
-                    count={numberFormat(directorData.summary?.consultation || 0)}
-                    icon={<ConsultationsIcon />}
-                    color={green[400]}
-                    onClick={navigateToConsultationRoom}
-                  />
+            <Card sx={{ mb: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 3,
+                    color: theme.palette.text.primary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <BillsIcon /> Sales by Department
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Consultation"
+                      count={numberFormat(directorData.summary?.consultation || 0)}
+                      icon={<ConsultationsIcon />}
+                      color={green[400]}
+                      onClick={navigateToConsultationRoom}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Pharmacy"
+                      count={numberFormat(directorData.summary?.pharmacy || 0)}
+                      icon={<PharmacyIcon />}
+                      color={teal[400]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Optical (Glass)"
+                      count={numberFormat(directorData.summary?.glass || 0)}
+                      icon={<GlassIcon />}
+                      color={purple[300]}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Pharmacy"
-                    count={numberFormat(directorData.summary?.pharmacy || 0)}
-                    icon={<PharmacyIcon />}
-                    color={teal[400]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Glass"
-                    count={numberFormat(directorData.summary?.glass || 0)}
-                    icon={<GlassIcon />}
-                    color={purple[300]}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          )}
 
-          {/* Pharmacy Department Performance */}
-          {directorData && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  mb: 2,
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <PharmacyIcon /> Pharmacy Department Performance
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Medicine Sales"
-                    count={numberFormat(directorData.summary?.pharmacy || 0)}
-                    icon={<RevenueIcon />}
-                    color={teal[500]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Medicine Purchases (COGS)"
-                    count={numberFormat(directorData.summary?.pharmacy_purchases || 0)}
-                    icon={<ExpensesIcon />}
-                    color={orange[500]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Profit from Medicine"
-                    count={numberFormat(directorData.summary?.pharmacy_profit || 0)}
-                    icon={<NetProfitIcon />}
-                    color={directorData.summary?.pharmacy_profit >= 0 ? green[500] : red[500]}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          )}
+                <Divider sx={{ my: 4 }} />
 
-          {/* Optical Department Performance */}
-          {directorData && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  mb: 2,
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <GlassIcon /> Optical Department Performance
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Lens Sales"
-                    count={numberFormat(directorData.summary?.glass || 0)}
-                    icon={<RevenueIcon />}
-                    color={purple[500]}
-                  />
+                {/* Pharmacy Performance */}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 3,
+                    color: theme.palette.text.secondary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <PharmacyIcon /> Pharmacy Performance
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Medicine Sales"
+                      count={numberFormat(directorData.summary?.pharmacy || 0)}
+                      icon={<RevenueIcon />}
+                      color={teal[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Medicine Purchases (COGS)"
+                      count={numberFormat(directorData.summary?.pharmacy_purchases || 0)}
+                      icon={<ExpensesIcon />}
+                      color={orange[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Profit from Medicine"
+                      count={numberFormat(directorData.summary?.pharmacy_profit || 0)}
+                      icon={<NetProfitIcon />}
+                      color={directorData.summary?.pharmacy_profit >= 0 ? green[500] : red[500]}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Lens Purchases (COGS)"
-                    count={numberFormat(directorData.summary?.glass_purchases || 0)}
-                    icon={<ExpensesIcon />}
-                    color={orange[500]}
-                  />
+
+                <Divider sx={{ my: 4 }} />
+
+                {/* Optical Performance */}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 3,
+                    color: theme.palette.text.secondary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <GlassIcon /> Optical Performance
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Lens Sales"
+                      count={numberFormat(directorData.summary?.glass || 0)}
+                      icon={<RevenueIcon />}
+                      color={purple[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Lens Purchases (COGS)"
+                      count={numberFormat(directorData.summary?.glass_purchases || 0)}
+                      icon={<ExpensesIcon />}
+                      color={orange[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Profit from Lens"
+                      count={numberFormat(directorData.summary?.glass_profit || 0)}
+                      icon={<NetProfitIcon />}
+                      color={directorData.summary?.glass_profit >= 0 ? green[500] : red[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Frame Sales"
+                      count={numberFormat(directorData.summary?.frame || 0)}
+                      icon={<RevenueIcon />}
+                      color={cyan[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Frame Purchases (COGS)"
+                      count={numberFormat(directorData.summary?.frame_purchases || 0)}
+                      icon={<ExpensesIcon />}
+                      color={deepOrange[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoCard
+                      title="Profit from Frame"
+                      count={numberFormat(directorData.summary?.frame_profit || 0)}
+                      icon={<NetProfitIcon />}
+                      color={directorData.summary?.frame_profit >= 0 ? green[500] : red[500]}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Profit from Sales (Lens)"
-                    count={numberFormat(directorData.summary?.glass_profit || 0)}
-                    icon={<NetProfitIcon />}
-                    color={directorData.summary?.glass_profit >= 0 ? green[500] : red[500]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Frame Sales"
-                    count={numberFormat(directorData.summary?.frame || 0)}
-                    icon={<RevenueIcon />}
-                    color={cyan[500]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Frame Purchases (COGS)"
-                    count={numberFormat(directorData.summary?.frame_purchases || 0)}
-                    icon={<ExpensesIcon />}
-                    color={deepOrange[500]}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InfoCard
-                    title="Profit from Sales (Frame)"
-                    count={numberFormat(directorData.summary?.frame_profit || 0)}
-                    icon={<NetProfitIcon />}
-                    color={directorData.summary?.frame_profit >= 0 ? green[500] : red[500]}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+              </CardContent>
+            </Card>
           )}
 
           {/* Main Content - Charts and Statistics */}
@@ -700,20 +715,20 @@ const Dashboard = () => {
           >
             {/* Patient Return Sidebar */}
             {financialData && (
-              <Grid size={{ xs: 12, md: 3 }}>
+              <Grid item xs={12} md={3}>
                 <PatientReturnSidebar />
               </Grid>
             )}
 
             {/* Main Charts Section */}
-            <Grid size={{ xs: 12, md: financialData ? 9 : 12 }}>
+            <Grid item xs={12} md={financialData ? 9 : 12}>
               <Grid
                 container
                 spacing={{ xs: 2, sm: 2, md: 3 }}
               >
                 {/* Sales by Category */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader title="Sales by Category" />
                       <Divider />
@@ -767,7 +782,7 @@ const Dashboard = () => {
 
                 {/* Sales vs Expenses */}
                 {financialData && (
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Card>
                       <CardHeader
                         title="Sales vs Expenses"
@@ -852,7 +867,7 @@ const Dashboard = () => {
 
                 {/* Patient Registration */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader
                         title="Patient Registration"
@@ -962,7 +977,7 @@ const Dashboard = () => {
 
                 {/* Payments by Channel */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 3 }}>
+                  <Grid item xs={12} md={3}>
                     <Card>
                       <CardHeader title="Payments by Channel" />
                       <Divider />
@@ -1011,7 +1026,7 @@ const Dashboard = () => {
 
                 {/* Expenses by Category */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 3 }}>
+                  <Grid item xs={12} md={3}>
                     <Card>
                       <CardHeader title="Expenses by Category" />
                       <Divider />
@@ -1060,7 +1075,7 @@ const Dashboard = () => {
 
                 {/* Client Statistics */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader title="Client Statistics" />
                       <Divider />
@@ -1109,7 +1124,7 @@ const Dashboard = () => {
 
                 {/* Return vs New Patient */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader title="Return vs New Patient" />
                       <Divider />
@@ -1176,7 +1191,7 @@ const Dashboard = () => {
 
                 {/* Financial Management: Revenue vs Expenses Trend */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 8 }}>
+                  <Grid item xs={12} md={8}>
                     <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
                       <CardHeader
                         title="Revenue vs Expenses Trend"
@@ -1239,7 +1254,7 @@ const Dashboard = () => {
 
                 {/* Financial Management: Expense Categories */}
                 {financialData && (
-                  <Grid size={{ xs: 12, md: 4 }}>
+                  <Grid item xs={12} md={4}>
                     <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
                       <CardHeader
                         title="Expense Categories"
@@ -1284,7 +1299,7 @@ const Dashboard = () => {
 
                 {/* Doctor Performance Section */}
                 {consultationData && (
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
                       <CardHeader
                         title="Doctor Performance"
@@ -1296,7 +1311,7 @@ const Dashboard = () => {
                         {consultationData.statistics?.consultations_by_doctor && consultationData.statistics.consultations_by_doctor.length > 0 ? (
                           <Grid container spacing={2}>
                             {consultationData.statistics.consultations_by_doctor.map((doctor, index) => (
-                              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                              <Grid item xs={12} sm={6} md={4} key={index}>
                                 <Paper
                                   elevation={0}
                                   sx={{
@@ -1353,7 +1368,7 @@ const Dashboard = () => {
 
                 {/* Consultations by Item */}
                 {financialData && (
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Card>
                       <CardHeader title="Consultations by Item" />
                       <Divider />
@@ -1435,7 +1450,7 @@ const Dashboard = () => {
 
                 {/* Top Diagnosis */}
                 {consultationData && (
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Card>
                       <CardHeader title="Top Diagnosis" />
                       <Divider />

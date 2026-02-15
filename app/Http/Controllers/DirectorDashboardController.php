@@ -130,20 +130,19 @@ class DirectorDashboardController extends Controller
             $data['summary']['total_expenses'] = 0;
         }
 
-        // Total Purchases (from stocktakes - buying price * quantity for new items added)
+        // Total Purchases (from items - buying price * new balance for new stock added)
         try {
-            $purchasesQuery = DB::table('stocktake_items')
-                ->join('stocktakes', 'stocktake_items.stocktake_id', '=', 'stocktakes.id')
-                ->join('users', 'stocktakes.created_by', '=', 'users.id')
-                ->whereNotNull('stocktakes.created_at')
-                ->where('stocktakes.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('stocktakes.created_at', '<=', $end_date . ' 23:59:59');
+            $purchasesQuery = DB::table('items')
+                ->where('is_stock_item', 'Yes')
+                ->where('status', 'Active')
+                ->whereNotNull('new_balance')
+                ->where('new_balance', '>', 0);
             
             if ($clinic_id) {
-                $purchasesQuery->where('users.clinic_id', $clinic_id);
+                $purchasesQuery->where('clinic_id', $clinic_id);
             }
             
-            $data['summary']['total_purchases'] = $purchasesQuery->sum(DB::raw('COALESCE(stocktake_items.unit_buying_price, 0) * stocktake_items.quantity')) ?? 0;
+            $data['summary']['total_purchases'] = $purchasesQuery->sum(DB::raw('COALESCE(unit_buying_price, 0) * COALESCE(new_balance, 0)')) ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating total purchases', ['error' => $e->getMessage()]);
             $data['summary']['total_purchases'] = 0;
