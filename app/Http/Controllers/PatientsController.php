@@ -123,7 +123,6 @@ class PatientsController extends Controller
             // Client type filter
             if ($request->filled('client_type')) {
                 switch ($request->client_type) {
-                    case 'prestige':
                     case 'vip':
                         $query->where('is_vip', 'Yes');
                         break;

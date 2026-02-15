@@ -1015,7 +1015,7 @@ const Dashboard = () => {
 
                 {/* Payments by Channel */}
                 {financialData && (
-                  <Grid item xs={12} md={3}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader title="Payments by Channel" />
                       <Divider />
@@ -1064,7 +1064,7 @@ const Dashboard = () => {
 
                 {/* Expenses by Category */}
                 {financialData && (
-                  <Grid item xs={12} md={3}>
+                  <Grid item xs={12} md={6}>
                     <Card>
                       <CardHeader title="Expenses by Category" />
                       <Divider />

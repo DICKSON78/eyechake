@@ -277,10 +277,8 @@ class ConsultationsController extends Controller
                     });
                 }
             } elseif ($status === 'Consulted') {
-                $data->whereHas('payment_cache_item', function ($query) use ($start_date) {
-                    $query->whereNotNull('served_at');
-                    $query->whereDate('served_at', '>=', $start_date);
-                });
+                $data->where('status', 'Consulted');
+                $data->whereDate('updated_at', '>=', $start_date);
             } else {
                 $data->whereDate('created_at', '>=', $start_date);
             }
@@ -327,10 +325,7 @@ class ConsultationsController extends Controller
                     });
                 }
             } elseif ($status === 'Consulted') {
-                $data->whereHas('payment_cache_item', function ($query) use ($end_date) {
-                    $query->whereNotNull('served_at');
-                    $query->whereDate('served_at', '<=', $end_date);
-                });
+                $data->whereDate('updated_at', '<=', $end_date);
             } else {
                 $data->whereDate('created_at', '<=', $end_date);
             }
