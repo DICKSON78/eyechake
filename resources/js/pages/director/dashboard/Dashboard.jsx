@@ -713,15 +713,8 @@ const Dashboard = () => {
             spacing={{ xs: 2, sm: 2, md: 3 }}
             sx={{ mt: 2 }}
           >
-            {/* Patient Return Sidebar */}
-            {financialData && (
-              <Grid item xs={12} md={3}>
-                <PatientReturnSidebar />
-              </Grid>
-            )}
-
             {/* Main Charts Section */}
-            <Grid item xs={12} md={financialData ? 9 : 12}>
+            <Grid item xs={12}>
               <Grid
                 container
                 spacing={{ xs: 2, sm: 2, md: 3 }}
@@ -794,6 +787,8 @@ const Dashboard = () => {
                               { label: "Monthly", value: "monthly" },
                               { label: "Yearly", value: "yearly" },
                             ]}
+                            optionsLabel="label"
+                            optionsValue="value"
                             value={salesExpensesPeriod}
                             onChange={(value) => {
                               setSalesExpensesPeriod(value);
@@ -1532,6 +1527,13 @@ const Dashboard = () => {
               </Grid>
             </Grid>
           </Grid>
+
+          {/* Patient Return Sidebar - Bottom Section */}
+          {financialData && (
+            <Box sx={{ mt: 4 }}>
+              <PatientReturnSidebar />
+            </Box>
+          )}
         </>
       )}
       <Modal ref={modalRef} />

@@ -26,7 +26,7 @@ const Consultation = () => {
   const [params, setParams] = useState({
     with_diagnoses: "Yes",
     patient_direction: "Direct to Doctor",
-    status: "Consulted",
+    status: undefined,
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
