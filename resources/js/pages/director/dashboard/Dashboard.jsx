@@ -596,6 +596,49 @@ const Dashboard = () => {
 
                 <Divider sx={{ my: 4 }} />
 
+                {/* Consultation Performance */}
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 3,
+                    color: theme.palette.text.secondary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <ConsultationsIcon /> Consultation Performance
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Consultation Sales"
+                      count={numberFormat(directorData.summary?.consultation || 0)}
+                      icon={<RevenueIcon />}
+                      color={green[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Consultation Purchases (COGS)"
+                      count={numberFormat(directorData.summary?.consultation_purchases || 0)}
+                      icon={<ExpensesIcon />}
+                      color={orange[500]}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <InfoCard
+                      title="Profit from Consultation"
+                      count={numberFormat(directorData.summary?.consultation_profit || 0)}
+                      icon={<NetProfitIcon />}
+                      color={directorData.summary?.consultation_profit >= 0 ? green[500] : red[500]}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 4 }} />
+
                 {/* Pharmacy Performance */}
                 <Typography
                   variant="subtitle1"
@@ -719,60 +762,6 @@ const Dashboard = () => {
                 container
                 spacing={{ xs: 2, sm: 2, md: 3 }}
               >
-                {/* Sales by Category */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
-                    <Card>
-                      <CardHeader title="Sales by Category" />
-                      <Divider />
-                      <ChartWrapper
-                        options={{
-                          chart: {
-                            fontFamily: theme.typography.fontFamily,
-                            foreColor: theme.palette.text.primary,
-                            background: "transparent",
-                            toolbar: { show: false },
-                          },
-                          plotOptions: {
-                            bar: {
-                              borderRadius: 0,
-                              borderRadiusApplication: "end",
-                              borderRadiusWhenStacked: "last",
-                              distributed: true,
-                            },
-                          },
-                          colors: [purple[600], teal[400], orange[300], blue[300], pink[300], green[400]],
-                          stroke: { show: false },
-                          dataLabels: { enabled: false },
-                          grid: { show: false, borderColor: theme.palette.divider },
-                          xaxis: {
-                            axisBorder: { show: false, color: theme.palette.divider },
-                            axisTicks: { show: true, color: theme.palette.divider, height: 6 },
-                          },
-                          yaxis: {
-                            axisBorder: { show: false, color: theme.palette.divider },
-                            axisTicks: { show: true, color: theme.palette.divider, width: 6 },
-                            labels: { formatter: (val) => numberFormat(val) },
-                          },
-                          tooltip: { theme: "dark", fillSeriesColor: true },
-                          legend: { show: false },
-                        }}
-                        series={[{
-                          name: "Sales",
-                          data: [
-                            { x: "Consultation", y: financialData.summary?.consultation || 0 },
-                            { x: "Pharmacy", y: financialData.summary?.pharmacy || 0 },
-                            { x: "Glass", y: financialData.summary?.glass || 0 },
-                            { x: "Others", y: (financialData.summary?.others || 0) - (financialData.summary?.consultation || 0) },
-                          ],
-                        }]}
-                        type="bar"
-                        height="272"
-                      />
-                    </Card>
-                  </Grid>
-                )}
-
                 {/* Sales vs Expenses */}
                 {financialData && (
                   <Grid item xs={12}>
@@ -856,6 +845,60 @@ const Dashboard = () => {
                           />
                         </Box>
                       </Box>
+                    </Card>
+                  </Grid>
+                )}
+
+                {/* Sales by Category */}
+                {financialData && (
+                  <Grid item xs={12} md={6}>
+                    <Card>
+                      <CardHeader title="Sales by Category" />
+                      <Divider />
+                      <ChartWrapper
+                        options={{
+                          chart: {
+                            fontFamily: theme.typography.fontFamily,
+                            foreColor: theme.palette.text.primary,
+                            background: "transparent",
+                            toolbar: { show: false },
+                          },
+                          plotOptions: {
+                            bar: {
+                              borderRadius: 0,
+                              borderRadiusApplication: "end",
+                              borderRadiusWhenStacked: "last",
+                              distributed: true,
+                            },
+                          },
+                          colors: [purple[600], teal[400], orange[300], blue[300], pink[300], green[400]],
+                          stroke: { show: false },
+                          dataLabels: { enabled: false },
+                          grid: { show: false, borderColor: theme.palette.divider },
+                          xaxis: {
+                            axisBorder: { show: false, color: theme.palette.divider },
+                            axisTicks: { show: true, color: theme.palette.divider, height: 6 },
+                          },
+                          yaxis: {
+                            axisBorder: { show: false, color: theme.palette.divider },
+                            axisTicks: { show: true, color: theme.palette.divider, width: 6 },
+                            labels: { formatter: (val) => numberFormat(val) },
+                          },
+                          tooltip: { theme: "dark", fillSeriesColor: true },
+                          legend: { show: false },
+                        }}
+                        series={[{
+                          name: "Sales",
+                          data: [
+                            { x: "Consultation", y: financialData.summary?.consultation || 0 },
+                            { x: "Pharmacy", y: financialData.summary?.pharmacy || 0 },
+                            { x: "Glass", y: financialData.summary?.glass || 0 },
+                            { x: "Others", y: (financialData.summary?.others || 0) - (financialData.summary?.consultation || 0) },
+                          ],
+                        }]}
+                        type="bar"
+                        height="272"
+                      />
                     </Card>
                   </Grid>
                 )}

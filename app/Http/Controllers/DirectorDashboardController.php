@@ -256,9 +256,30 @@ class DirectorDashboardController extends Controller
             }
             
             $data['summary']['consultation'] = $consultationSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+            
+            // Consultation Purchases (COGS)
+            $consultationPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('users as u', 'ppc.created_by', '=', 'u.id')
+                ->where('ppci.status', 'Served')
+                ->whereDate('ppci.served_at', '>=', $start_date)
+                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->where('ct.name', 'Consultation');
+            
+            if ($clinic_id) {
+                $consultationPurchasesQuery->where('u.clinic_id', $clinic_id);
+            }
+            
+            $data['summary']['consultation_purchases'] = $consultationPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['consultation_profit'] = $data['summary']['consultation'] - $data['summary']['consultation_purchases'];
+            
         } catch (\Exception $e) {
-            \Log::error('Error calculating consultation sales', ['error' => $e->getMessage()]);
+            \Log::error('Error calculating consultation sales/purchases', ['error' => $e->getMessage()]);
             $data['summary']['consultation'] = 0;
+            $data['summary']['consultation_purchases'] = 0;
+            $data['summary']['consultation_profit'] = 0;
         }
 
         // Pharmacy Sales

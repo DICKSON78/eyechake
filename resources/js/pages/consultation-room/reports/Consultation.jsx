@@ -23,6 +23,19 @@ import { formatDateForDb, getAge, getDateRangeTitle } from "../../../helpers";
 const Consultation = () => {
   const navigate = useNavigate();
 
+  // Set default dates: last month to today
+  const getDefaultDates = () => {
+    const today = new Date();
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    return {
+      start_date: lastMonth,
+      end_date: today,
+    };
+  };
+
+  const defaultDates = getDefaultDates();
+
   const [params, setParams] = useState({
     with_diagnoses: "Yes",
     patient_direction: "Direct to Doctor",
@@ -34,8 +47,8 @@ const Consultation = () => {
     item_payment_mode_id: undefined,
     disease_id: undefined,
     item_id: undefined,
-    start_date: undefined,
-    end_date: undefined,
+    start_date: defaultDates.start_date,
+    end_date: defaultDates.end_date,
   });
 
   const [reportSummary, setReportSummary] = useState("");

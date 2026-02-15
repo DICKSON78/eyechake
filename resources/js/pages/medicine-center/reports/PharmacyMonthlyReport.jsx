@@ -46,6 +46,8 @@ const getDefaultFormData = () => ({
   month: "",
   dateSubmitted: new Date().toISOString().split("T")[0],
   productTargets: defaultProducts.map((name) => ({ productName: name, target: "30", result: "" })),
+  reportSummary: "",
+  reportRecommendation: "",
   signature: "",
   reportDate: new Date().toISOString().split("T")[0],
 });
@@ -408,6 +410,38 @@ const PharmacyMonthlyReport = () => {
         <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddMedicine} sx={{ mb: 4, "@media print": { display: "none" } }}>
           Add Medicine
         </Button>
+
+        <Divider sx={{ my: 3 }} />
+
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 700, mb: 2, color: "#1976d2", fontFamily: "serif" }}>
+          Report Notes
+        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Report Summary"
+                placeholder="Enter summary of findings and observations for this report..."
+                value={formData.reportSummary}
+                onChange={(v) => setFormData((p) => ({ ...p, reportSummary: v }))}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Report Recommendation"
+                placeholder="Enter recommendations based on the report data..."
+                value={formData.reportRecommendation}
+                onChange={(v) => setFormData((p) => ({ ...p, reportRecommendation: v }))}
+              />
+            </Grid>
+          </Grid>
+        </Box>
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>
