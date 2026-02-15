@@ -756,15 +756,9 @@ const Dashboard = () => {
             spacing={{ xs: 2, sm: 2, md: 3 }}
             sx={{ mt: 2 }}
           >
-            {/* Main Charts Section */}
-            <Grid item xs={12}>
-              <Grid
-                container
-                spacing={{ xs: 2, sm: 2, md: 3 }}
-              >
-                {/* Sales vs Expenses */}
-                {financialData && (
-                  <Grid item xs={12}>
+            {/* Sales vs Expenses */}
+            {financialData && (
+              <Grid size={{ xs: 12 }}>
                     <Card>
                       <CardHeader
                         title="Sales vs Expenses"
@@ -849,9 +843,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Sales by Category */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Sales by Category */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader title="Sales by Category" />
                       <Divider />
@@ -903,9 +897,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Patient Registration */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Patient Registration */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader
                         title="Patient Registration"
@@ -1013,9 +1007,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Payments by Channel */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Payments by Channel */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader title="Payments by Channel" />
                       <Divider />
@@ -1062,9 +1056,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Expenses by Category */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Expenses by Category */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader title="Expenses by Category" />
                       <Divider />
@@ -1111,9 +1105,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Client Statistics */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Client Statistics */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader title="Client Statistics" />
                       <Divider />
@@ -1160,9 +1154,9 @@ const Dashboard = () => {
                   </Grid>
                 )}
 
-                {/* Return vs New Patient */}
-                {financialData && (
-                  <Grid item xs={12} md={6}>
+            {/* Return vs New Patient */}
+            {financialData && (
+              <Grid size={{ xs: 12, md: 6 }}>
                     <Card>
                       <CardHeader title="Return vs New Patient" />
                       <Divider />
@@ -1229,7 +1223,7 @@ const Dashboard = () => {
 
                 {/* Financial Management: Revenue vs Expenses Trend */}
                 {financialData && (
-                  <Grid item xs={12} md={8}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
                       <CardHeader
                         title="Revenue vs Expenses Trend"
@@ -1292,7 +1286,7 @@ const Dashboard = () => {
 
                 {/* Financial Management: Expense Categories */}
                 {financialData && (
-                  <Grid item xs={12} md={4}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
                       <CardHeader
                         title="Expense Categories"
@@ -1406,7 +1400,7 @@ const Dashboard = () => {
 
                 {/* Consultations by Item */}
                 {financialData && (
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Card>
                       <CardHeader title="Consultations by Item" />
                       <Divider />
@@ -1488,7 +1482,7 @@ const Dashboard = () => {
 
                 {/* Top Diagnosis */}
                 {consultationData && (
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Card>
                       <CardHeader title="Top Diagnosis" />
                       <Divider />
@@ -1567,8 +1561,6 @@ const Dashboard = () => {
                     </Card>
                   </Grid>
                 )}
-              </Grid>
-            </Grid>
           </Grid>
 
           {/* Patient Return Sidebar - Bottom Section */}
