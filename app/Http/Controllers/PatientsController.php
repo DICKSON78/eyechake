@@ -90,25 +90,25 @@ class PatientsController extends Controller
                 $query->where('info_source_id', $request->info_source_id);
             }
             
-            // Boolean filters (stored as enum 'Yes'/'No' in database)
+            // Boolean filters (stored as boolean in database)
             if ($request->has('is_vip') && $request->is_vip !== null) {
-                $query->where('is_vip', filter_var($request->is_vip, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
+                $query->where('is_vip', filter_var($request->is_vip, FILTER_VALIDATE_BOOLEAN));
             }
             
             if ($request->has('is_student') && $request->is_student !== null) {
-                $query->where('is_student', filter_var($request->is_student, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
+                $query->where('is_student', filter_var($request->is_student, FILTER_VALIDATE_BOOLEAN));
             }
             
             if ($request->has('is_businessperson') && $request->is_businessperson !== null) {
-                $query->where('is_businessperson', filter_var($request->is_businessperson, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
+                $query->where('is_businessperson', filter_var($request->is_businessperson, FILTER_VALIDATE_BOOLEAN));
             }
             
             if ($request->has('is_outreach') && $request->is_outreach !== null) {
-                $query->where('is_outreach', filter_var($request->is_outreach, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
+                $query->where('is_outreach', filter_var($request->is_outreach, FILTER_VALIDATE_BOOLEAN));
             }
             
             if ($request->has('is_employee') && $request->is_employee !== null) {
-                $query->where('is_employee', filter_var($request->is_employee, FILTER_VALIDATE_BOOLEAN) ? 'Yes' : 'No');
+                $query->where('is_employee', filter_var($request->is_employee, FILTER_VALIDATE_BOOLEAN));
             }
             
             // Date filters
@@ -124,20 +124,20 @@ class PatientsController extends Controller
             if ($request->filled('client_type')) {
                 switch ($request->client_type) {
                     case 'vip':
-                        $query->where('is_vip', 'Yes');
+                        $query->where('is_vip', true);
                         break;
                     case 'business':
                     case 'businessperson':
-                        $query->where('is_businessperson', 'Yes');
+                        $query->where('is_businessperson', true);
                         break;
                     case 'student':
-                        $query->where('is_student', 'Yes');
+                        $query->where('is_student', true);
                         break;
                     case 'outreach':
-                        $query->where('is_outreach', 'Yes');
+                        $query->where('is_outreach', true);
                         break;
                     case 'employee':
-                        $query->where('is_employee', 'Yes');
+                        $query->where('is_employee', true);
                         break;
                 }
             }
@@ -188,14 +188,9 @@ class PatientsController extends Controller
 
         try {
             // Get VIP patients who haven't checked in today
-            // Accept both legacy string values ('Yes') and boolean true
             $today = now()->toDateString();
             $data = Patient::with(['payment_mode', 'information_source', 'creator', 'region', 'district', 'ward'])
-                ->where(function ($q) {
-                    $q->where('is_vip', 'Yes')
-                      ->orWhere('is_vip', true)
-                      ->orWhere('is_vip', 1);
-                })
+                ->where('is_vip', true)
                 // Strong guard: exclude anyone with a check-in today
                 ->whereDoesntHave('check_ins', function ($query) use ($today) {
                     $query->whereDate('created_at', $today);
