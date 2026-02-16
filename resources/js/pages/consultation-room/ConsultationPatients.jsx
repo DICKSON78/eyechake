@@ -36,6 +36,11 @@ const ConsultationPatients = () => {
   const [params, setParams] = useState(() => {
     const isPending = String(status || '').toLowerCase() === 'pending';
     const isConsulted = String(status || '').toLowerCase() === 'consulted';
+    
+    // For consulted patients, default to showing last 1 month
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
     return {
       page: 1,
       per_page: 25,
@@ -48,8 +53,8 @@ const ConsultationPatients = () => {
       patient_phone: undefined,
       item_payment_mode_id: undefined,
       item_id: undefined,
-      // Remove default date filters to show all records - users can filter if needed
-      start_date: undefined,
+      // Set default start date for consulted patients to 1 month ago
+      start_date: isConsulted ? oneMonthAgo : undefined,
       end_date: undefined,
     };
   });
