@@ -1041,7 +1041,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Director Dashboard",
           icon: <DirectorIcon />,
           to: "/director/dashboard",
-          show: isPrivilegeGranted('director'),
+          show: false,
         },
         {
           title: "Employee Performance",

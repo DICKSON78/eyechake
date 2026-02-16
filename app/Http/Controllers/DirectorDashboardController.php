@@ -130,25 +130,10 @@ class DirectorDashboardController extends Controller
             $data['summary']['total_expenses'] = 0;
         }
 
-        // Total Purchases (from items - buying price * new balance for new stock added)
-        try {
-            $purchasesQuery = DB::table('items')
-                ->where('is_stock_item', 'Yes')
-                ->where('status', 'Active')
-                ->whereNotNull('new_balance')
-                ->where('new_balance', '>', 0);
-            
-            if ($clinic_id) {
-                $purchasesQuery->where('clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['total_purchases'] = $purchasesQuery->sum(DB::raw('COALESCE(unit_buying_price, 0) * COALESCE(new_balance, 0)')) ?? 0;
-        } catch (\Exception $e) {
-            \Log::error('Error calculating total purchases', ['error' => $e->getMessage()]);
-            $data['summary']['total_purchases'] = 0;
-        }
+        // Note: total_purchases will be calculated later as sum of all COGS categories
+        $data['summary']['total_purchases'] = 0;
 
-        // Net Profit
+        // Net Profit (will be recalculated later after COGS)
         $data['summary']['net_profit'] = $data['summary']['total_sales'] - $data['summary']['total_expenses'];
 
         // Revenue from New Consultation/Patient
@@ -420,6 +405,16 @@ class DirectorDashboardController extends Controller
             $data['summary']['frame_purchases'] = 0;
             $data['summary']['frame_profit'] = 0;
         }
+
+        // Calculate Total Purchases as sum of all COGS categories
+        $data['summary']['total_purchases'] = 
+            ($data['summary']['consultation_purchases'] ?? 0) +
+            ($data['summary']['pharmacy_purchases'] ?? 0) +
+            ($data['summary']['glass_purchases'] ?? 0) +
+            ($data['summary']['frame_purchases'] ?? 0);
+
+        // Recalculate Net Profit to account for COGS
+        $data['summary']['net_profit'] = $data['summary']['total_sales'] - $data['summary']['total_purchases'] - $data['summary']['total_expenses'];
 
         // Consulted Patients (patients who have been consulted)
         try {
