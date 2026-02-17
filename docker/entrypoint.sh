@@ -35,7 +35,7 @@ check_service "database"
 # Install/update composer dependencies
 echo ""
 echo "📦 Managing Composer dependencies..."
-if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
+if [ ! -f "vendor/autoload.php" ] || [ ! -d "vendor/symfony/polyfill-mbstring" ]; then
     echo "  Installing composer dependencies..."
     composer install --no-interaction --no-dev --optimize-autoloader --prefer-dist
 else
