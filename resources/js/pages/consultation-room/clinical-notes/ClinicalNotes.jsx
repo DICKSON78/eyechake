@@ -106,6 +106,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
   const doctorRecommendationsRef = useRef();
   const doctorCommentsRemarksRef = useRef();
   const referralFormRef = useRef();
+  const sickSheetFormRef = useRef();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
@@ -512,6 +513,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         date_from: new Date(),
         date_to: null,
         number_of_days: '',
+        doctor_comment: '',
       });
       setShowSickSheetForm(false);
     } catch (error) {
@@ -690,7 +692,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
               Create Referral
             </Typography>
-            <Form ref={referralFormRef}>
+            <Form ref={sickSheetFormRef}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12 }}>
                   <TextField

@@ -9,6 +9,8 @@ import {
   Grid,
   LinearProgress,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
@@ -52,11 +54,15 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
     paid_amount: undefined,
     description: undefined,
     expense_date: new Date(),
+    running_cost: false,
+    improvement_cost: false,
   });
 
   const { data, loading, error, handlePost } = usePost("api/expenses", {
     ...formData,
     expense_date: formatDateForDb(formData.expense_date),
+    running_cost: formData.running_cost,
+    improvement_cost: formData.improvement_cost,
   });
 
   useEffect(() => {
@@ -232,6 +238,31 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                     onChange={(value) =>
                       setFormData({ ...formData, description: value })
                     }
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={!!formData.running_cost}
+                        onChange={(e) =>
+                          setFormData({ ...formData, running_cost: e.target.checked })
+                        }
+                      />
+                    }
+                    label="Running Cost"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={!!formData.improvement_cost}
+                        onChange={(e) =>
+                          setFormData({ ...formData, improvement_cost: e.target.checked })
+                        }
+                      />
+                    }
+                    label="Improvement Costs"
+                    sx={{ ml: 2 }}
                   />
                 </Grid>
               </Grid>

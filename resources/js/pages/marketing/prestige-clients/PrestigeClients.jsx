@@ -25,7 +25,7 @@ import EditPatient from "../../reception/patients/EditPatient";
 
 import { useFetch, useToast } from "../../../hooks";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
-import { formatError, getAge } from "../../../helpers";
+import { formatError, getAge, numberFormat } from "../../../helpers";
 
 const PrestigeClients = () => {
   const addToast = useToast();
@@ -148,6 +148,11 @@ const PrestigeClients = () => {
             variant="outlined"
           />
         ),
+      },
+      {
+        field: "total_payments",
+        headerName: "Total Payments (TZS)",
+        valueGetter: (item) => numberFormat(item.total_payments || 0),
       },
       {
         field: "id",

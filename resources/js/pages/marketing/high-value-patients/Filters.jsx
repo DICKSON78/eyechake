@@ -49,7 +49,8 @@ const Filters = ({ params, setParams, ...rest }) => {
               options={thresholdOptions}
               value={params.threshold || "500000"}
               onChange={(value) =>
-                setParams({ ...params, threshold: value, page: 1 })
+                // when a threshold is selected, filter and sort ascending by total payments
+                setParams({ ...params, threshold: value, sort_by: 'total_payments', sort_order: 'asc', page: 1 })
               }
             />
           </Grid>
