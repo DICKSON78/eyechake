@@ -97,6 +97,8 @@ class ExpensesController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'paid_amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date_format:Y-m-d',
+            'running_cost' => 'sometimes|boolean',
+            'improvement_cost' => 'sometimes|boolean',
         ]);
 
         $input = $request->all();
@@ -139,6 +141,8 @@ class ExpensesController extends Controller
             'category_id' => 'sometimes|required|exists:expense_categories,id',
             'total_amount' => 'sometimes|required|numeric|min:0',
             'expense_date' => 'sometimes|required|date_format:Y-m-d',
+            'running_cost' => 'sometimes|boolean',
+            'improvement_cost' => 'sometimes|boolean',
         ]);
 
         $data = Expense::findOrFail($id);

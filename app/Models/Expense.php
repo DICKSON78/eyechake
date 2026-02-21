@@ -12,7 +12,7 @@ class Expense extends Model
 
     protected $table = 'expenses';
 
-    protected $fillable = ['category_id', 'total_amount', 'description', 'expense_date', 'created_by'];
+    protected $fillable = ['category_id', 'total_amount', 'description', 'expense_date', 'created_by', 'running_cost', 'improvement_cost'];
 
     public function category()
     {
