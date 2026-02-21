@@ -222,25 +222,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         <Divider />
         <Form ref={formRef}>
           <CardContent>
-            {/* History Taking - Read-only display */}
-            <Subheader
-              title="History Taking"
-              sx={{ mt: 0 }}
-            />
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <ReadOnlyField label="Chief Complaint" value={consultation.chief_complaint} multiline />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <ReadOnlyField label="History of Present Illness" value={consultation.history_present_illness} multiline />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <ReadOnlyField label="Family History" value={consultation.family_history} multiline />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <ReadOnlyField label="General Health" value={consultation.general_health} multiline />
-              </Grid>
-            </Grid>
+            {/* History Taking removed for workshop clinical notes */}
 
             {/* Diagnosis - Read-only display */}
             {consultation.diagnoses && consultation.diagnoses.length > 0 && (

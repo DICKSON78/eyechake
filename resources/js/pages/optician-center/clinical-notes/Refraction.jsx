@@ -17,39 +17,7 @@ const RefractionDetails = ({ consultation: { refraction } }, ref) => {
 
   return (
     <React.Fragment>
-      <Table sx={{ mb: 2, width: '100%' }}>
-        <TableHead>
-          <TableRow>
-            <TableCell colSpan={8}>Objective Refraction</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell colSpan={4}>RE</TableCell>
-            <TableCell colSpan={4}>LE</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          <TableRow>
-            <TableCell component="th">SPH</TableCell>
-            <TableCell component="th">CYL</TableCell>
-            <TableCell component="th">AXIS</TableCell>
-            <TableCell component="th">VA</TableCell>
-            <TableCell component="th">SPH</TableCell>
-            <TableCell component="th">CYL</TableCell>
-            <TableCell component="th">AXIS</TableCell>
-            <TableCell component="th">VA</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>{refraction ? refraction.ob_re_sph : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_re_cyl : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_re_axis : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_re_va : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_le_sph : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_le_cyl : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_le_axis : null}</TableCell>
-            <TableCell>{refraction ? refraction.ob_le_va : null}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      {/* Objective Refraction removed for workshop clinical notes */}
       <Table sx={{ width: '100%' }}>
         <TableHead>
           <TableRow>

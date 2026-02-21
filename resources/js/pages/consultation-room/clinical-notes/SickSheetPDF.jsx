@@ -510,15 +510,15 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
           </React.Fragment>
         )}
 
-        {/* Doctor Recommendations */}
-        {sickSheetData?.doctor_recommendations && (
+        {/* Doctor Comments (from sick sheet form) */}
+        {sickSheetData?.doctor_comment && (
           <React.Fragment>
             <Subheader
-              title="Doctor Recommendations"
+              title="Doctor Comments"
               style={{ marginBottom: 8 }}
             />
-            <Text style={[styles.text, { marginBottom: 8 }]}>
-              {sickSheetData.doctor_recommendations}
+            <Text style={[styles.text, { marginBottom: 8 }]}> 
+              {sickSheetData.doctor_comment}
             </Text>
           </React.Fragment>
         )}

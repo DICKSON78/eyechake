@@ -119,6 +119,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
     date_from: new Date(),
     date_to: null,
     number_of_days: '',
+    doctor_comment: '',
   });
   const [formData, setFormData] = useState({
     ...consultation,
@@ -478,7 +479,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         date_from: formatDate(sickSheetFormData.date_from),
         date_to: formatDate(sickSheetFormData.date_to),
         number_of_days: numberOfDays || 'N/A',
-        doctor_recommendations: fullConsultation.doctor_recommendations || 'N/A',
+        doctor_comment: sickSheetFormData.doctor_comment || fullConsultation.doctor_comments_remarks || fullConsultation.doctor_recommendations || 'N/A',
       };
 
       const pdfBlob = await pdf(
@@ -691,6 +692,17 @@ const ClinicalNotes = ({ patient, consultation }) => {
             </Typography>
             <Form ref={referralFormRef}>
               <Grid container spacing={2}>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    label="Doctor Comment"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    placeholder="Enter doctor comment to appear on sick sheet"
+                    value={sickSheetFormData.doctor_comment}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, doctor_comment: value })}
+                  />
+                </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField
                     label="Reason for Referral *"

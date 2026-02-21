@@ -996,90 +996,94 @@ const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
           </React.Fragment>
         ) : null}
 
-        <Subheader
-          title={
-            consultation.patient_direction === "Direct to Doctor"
-              ? "Diagnosis & Management"
-              : "Management"
-          }
-          style={{ marginBottom: 8 }}
-        />
+        {!referralData && (
+          <React.Fragment>
+            <Subheader
+              title={
+                consultation.patient_direction === "Direct to Doctor"
+                  ? "Diagnosis & Management"
+                  : "Management"
+              }
+              style={{ marginBottom: 8 }}
+            />
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-          {consultation.patient_direction === "Direct to Doctor" ? (
-            <View style={{ width: "50%", paddingRight: 4, marginBottom: 8 }}>
-              <DiagnosisCard
-                title="Diagnosis"
-                diagnosisType="Final"
-                items={consultation.diagnoses}
-              />
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {consultation.patient_direction === "Direct to Doctor" ? (
+                <View style={{ width: "50%", paddingRight: 4, marginBottom: 8 }}>
+                  <DiagnosisCard
+                    title="Diagnosis"
+                    diagnosisType="Final"
+                    items={consultation.diagnoses}
+                  />
+                </View>
+              ) : null}
+              <View
+                style={{
+                  width: "50%",
+                  paddingLeft:
+                    consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+                  paddingRight:
+                    consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+                  marginBottom: 8,
+                }}
+              >
+                <ConsultationItemsCard
+                  title="Medicine"
+                  consultationType="Pharmacy"
+                  items={consultation.items}
+                />
+              </View>
+              <View
+                style={{
+                  width: "50%",
+                  paddingLeft:
+                    consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+                  paddingRight:
+                    consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+                  marginBottom: 8,
+                }}
+              >
+                <ConsultationItemsCard
+                  title="Procedure"
+                  consultationType="Procedure"
+                  items={consultation.items}
+                />
+              </View>
+              <View
+                style={{
+                  width: "50%",
+                  paddingLeft:
+                    consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+                  paddingRight:
+                    consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+                  marginBottom: 8,
+                }}
+              >
+                <ConsultationItemsCard
+                  title="Glass"
+                  consultationType="Glass"
+                  items={consultation.items}
+                />
+              </View>
+              <View
+                style={{
+                  width: "50%",
+                  paddingLeft:
+                    consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
+                  paddingRight:
+                    consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
+                  marginBottom: 8,
+                }}
+              >
+                <ConsultationItemsCard
+                  title="Others"
+                  consultationType="Others"
+                  items={consultation.items}
+                />
+              </View>
             </View>
-          ) : null}
-          <View
-            style={{
-              width: "50%",
-              paddingLeft:
-                consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
-              paddingRight:
-                consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
-              marginBottom: 8,
-            }}
-          >
-            <ConsultationItemsCard
-              title="Medicine"
-              consultationType="Pharmacy"
-              items={consultation.items}
-            />
-          </View>
-          <View
-            style={{
-              width: "50%",
-              paddingLeft:
-                consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
-              paddingRight:
-                consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
-              marginBottom: 8,
-            }}
-          >
-            <ConsultationItemsCard
-              title="Procedure"
-              consultationType="Procedure"
-              items={consultation.items}
-            />
-          </View>
-          <View
-            style={{
-              width: "50%",
-              paddingLeft:
-                consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
-              paddingRight:
-                consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
-              marginBottom: 8,
-            }}
-          >
-            <ConsultationItemsCard
-              title="Glass"
-              consultationType="Glass"
-              items={consultation.items}
-            />
-          </View>
-          <View
-            style={{
-              width: "50%",
-              paddingLeft:
-                consultation.patient_direction === "Direct to Doctor" ? 0 : 4,
-              paddingRight:
-                consultation.patient_direction === "Direct to Doctor" ? 4 : 0,
-              marginBottom: 8,
-            }}
-          >
-            <ConsultationItemsCard
-              title="Others"
-              consultationType="Others"
-              items={consultation.items}
-            />
-          </View>
-        </View>
+          </React.Fragment>
+        )}
 
         {/* Remark & Doctor Recommendation - Only show when not a referral document */}
         {!referralData && (
