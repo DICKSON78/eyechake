@@ -78,16 +78,25 @@ chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 echo "  ✓ Permissions set"
 
-# Run migrations
+# Run migrations (skip if database already populated)
 echo ""
 echo "🗄️  Running database migrations..."
-if php artisan migrate:status >/dev/null 2>&1; then
-    php artisan migrate --force --no-interaction
-    echo "  ✓ Migrations completed"
+# Check how many tables exist in the `sikaf` schema; if >0 skip migrations to avoid
+# duplicate-table failures when the database was pre-populated by an init SQL dump.
+TABLE_COUNT=$(php -r "try{\n    \$pdo=new PDO('mysql:host=db;dbname=information_schema','isaac','Isaac@2025');\n    \$stmt=\$pdo->query(\"SELECT COUNT(*) FROM tables WHERE table_schema='sikaf'\");\n    echo (int)\$stmt->fetchColumn();\n}catch(Exception \$e){ echo '0'; }"
+)
+
+if [ "$TABLE_COUNT" -gt 0 ]; then
+    echo "  ✓ Database already contains tables (count=$TABLE_COUNT); skipping migrations"
 else
-    echo "  Running initial migrations..."
-    php artisan migrate --force --no-interaction
-    echo "  ✓ Initial migrations completed"
+    if php artisan migrate:status >/dev/null 2>&1; then
+        php artisan migrate --force --no-interaction
+        echo "  ✓ Migrations completed"
+    else
+        echo "  Running initial migrations..."
+        php artisan migrate --force --no-interaction
+        echo "  ✓ Initial migrations completed"
+    fi
 fi
 
 # Create storage link
