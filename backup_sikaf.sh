@@ -6,7 +6,7 @@
 DB_CONTAINER="eyechake_db"      # Your MySQL Docker container
 DB_NAME="sikaf"                 # Database to backup
 DB_USER="isaac"                 # MySQL user
-DB_PASSWORD="yourpassword"      # MySQL password
+DB_PASSWORD="Isaac@2025"      # MySQL password
 BACKUP_DIR="$(pwd)"             # Current folder (project root)
 
 # ------------------------------
