@@ -83,8 +83,7 @@ echo ""
 echo "🗄️  Running database migrations..."
 # Check how many tables exist in the `sikaf` schema; if >0 skip migrations to avoid
 # duplicate-table failures when the database was pre-populated by an init SQL dump.
-TABLE_COUNT=$(php -r "try{\n    \$pdo=new PDO('mysql:host=db;dbname=information_schema','isaac','Isaac@2025');\n    \$stmt=\$pdo->query(\"SELECT COUNT(*) FROM tables WHERE table_schema='sikaf'\");\n    echo (int)\$stmt->fetchColumn();\n}catch(Exception \$e){ echo '0'; }"
-)
+TABLE_COUNT=$(php -r 'try{ $pdo=new PDO("mysql:host=db;dbname=information_schema","isaac","Isaac@2025"); $stmt=$pdo->query("SELECT COUNT(*) FROM tables WHERE table_schema=\'sikaf\'"); echo (int)$stmt->fetchColumn(); } catch(Exception $e){ echo 0; }')
 
 if [ "$TABLE_COUNT" -gt 0 ]; then
     echo "  ✓ Database already contains tables (count=$TABLE_COUNT); skipping migrations"
