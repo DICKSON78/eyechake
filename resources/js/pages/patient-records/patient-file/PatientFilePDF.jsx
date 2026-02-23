@@ -1085,8 +1085,8 @@ const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
           </React.Fragment>
         )}
 
-        {/* Remark & Doctor Recommendation - Only show when not a referral document */}
-        {!referralData && (
+        {/* Remark & Doctor Recommendation - Always show (also include in referral documents) */}
+        (
           <React.Fragment>
             <Subheader
               title="Remark & Doctor Recommendation"
@@ -1132,7 +1132,7 @@ const PDFReportDocument = ({ consultation, patient, includeReferral }) => {
               </View>
             </View>
           </React.Fragment>
-        )}
+        )
 
         {consultation.status === "Consulted" && consultation.patient_to_return ? (
           <React.Fragment>

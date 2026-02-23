@@ -692,19 +692,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
               Create Referral
             </Typography>
-            <Form ref={sickSheetFormRef}>
+            <Form ref={referralFormRef}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    label="Doctor Comment"
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Enter doctor comment to appear on sick sheet"
-                    value={sickSheetFormData.doctor_comment}
-                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, doctor_comment: value })}
-                  />
-                </Grid>
                 <Grid size={{ xs: 12 }}>
                   <TextField
                     label="Reason for Referral *"
@@ -764,8 +753,19 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
               Create Sick Sheet
             </Typography>
-            <Form ref={referralFormRef}>
+            <Form ref={sickSheetFormRef}>
               <Grid container spacing={2}>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    label="Doctor Comment"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    placeholder="Enter doctor comment to appear on sick sheet"
+                    value={sickSheetFormData.doctor_comment}
+                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, doctor_comment: value })}
+                  />
+                </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <DatePicker
                     label="Date From *"
@@ -794,6 +794,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                           date_from: new Date(),
                           date_to: null,
                           number_of_days: '',
+                          doctor_comment: '',
                         });
                       }}
                     >
