@@ -11,6 +11,7 @@ import {
 } from "@react-pdf/renderer";
 import Header from "../../../components/pdf/Header";
 import Footer from "../../../components/pdf/Footer";
+import { PDFReportDocument } from "../../patient-records/patient-file/PatientFilePDF";
 
 const styles = StyleSheet.create({
   page: {
@@ -269,13 +270,39 @@ const ReferralPDF = ({ referral, patient, clinic, ...rest }) => {
 
     setLoading(true);
     try {
-      const pdfDocument = (
+      // If the referral is linked to a consultation, fetch that consultation
+      // and generate the full clinical notes PDF (excluding Diagnosis & Management
+      // because includeReferral is provided). Otherwise fall back to referral-only PDF.
+      let pdfDocument = (
         <ReferralPDFDocument
           referral={referral}
           patient={patient}
           clinic={clinic || window.user?.clinic}
         />
       );
+
+      if (referral.consultation_id) {
+        try {
+          const resp = await fetch(
+            `/api/consultations/${referral.consultation_id}?with_diagnoses=Yes&with_items=Yes&with_item_templates=Yes&with_referral=Yes`
+          );
+          if (resp.ok) {
+            const json = await resp.json();
+            const consultation = json?.data?.data;
+            if (consultation) {
+              pdfDocument = (
+                <PDFReportDocument
+                  consultation={consultation}
+                  patient={patient}
+                  includeReferral={referral}
+                />
+              );
+            }
+          }
+        } catch (fetchErr) {
+          console.warn("Failed to fetch consultation for referral PDF, falling back to referral-only:", fetchErr);
+        }
+      }
 
       const blob = await pdf(pdfDocument).toBlob();
 
