@@ -18,8 +18,7 @@ BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_backup_$DATE.sql.gz"
 # ------------------------------
 # Perform backup
 # ------------------------------
-docker exec $DB_CONTAINER sh -c "exec mysqldump -u $DB_USER -p'$DB_PASSWORD' $DB_NAME" | gzip > "$BACKUP_FILE"
-
+docker exec $DB_CONTAINER sh -c "exec mysqldump -u $DB_USER -p'$DB_PASSWORD' --no-tablespaces $DB_NAME" | gzip > "$BACKUP_FILE"
 # ------------------------------
 # Done
 # ------------------------------
