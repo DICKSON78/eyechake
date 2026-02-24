@@ -1065,7 +1065,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
               gridTemplateColumns: { 
                 xs: '1fr', 
                 sm: '1fr', 
-                md: '1fr 1fr' 
+                md: '1fr 1fr 1fr' 
               },
               '& > *': {
                 minWidth: 0, // Prevent overflow on small screens
@@ -1099,6 +1099,23 @@ const ClinicalNotes = ({ patient, consultation }) => {
                       <ConsultationItemsCard
                         title=""
                         consultationType="Pharmacy"
+                        loading={loadingItems}
+                        items={items}
+                        consultation={consultation}
+                        onClickAdd={(title, consultationType) => openSelectItemsModal(title, consultationType)}
+                      />
+                    </CardContent>
+                  </Card>
+                </Box>
+                <Box sx={{ width: '100%', maxWidth: '100%', minWidth: 0 }}>
+                  <Card variant="outlined" sx={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+                    <Box sx={{ backgroundColor: '#e3f2fd', p: { xs: 1.5, md: 2 }, textAlign: 'center' }}>
+                      <Typography variant="h6" fontWeight="bold" color="primary" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>Procedure</Typography>
+                    </Box>
+                    <CardContent sx={{ p: { xs: 1.5, md: 2 }, '&:last-child': { pb: { xs: 1.5, md: 2 } } }}>
+                      <ConsultationItemsCard
+                        title=""
+                        consultationType="Procedure"
                         loading={loadingItems}
                         items={items}
                         consultation={consultation}
