@@ -166,6 +166,50 @@ class DashboardController extends Controller
                 }, 0);
             });
 
+            // Running Cost & Improvement Cost (by category name match)
+            try {
+                if ($clinic_id) {
+                    $runningCostQuery = DB::table('expense_payments as expp')
+                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                        ->join('users as u', 'expp.created_by', '=', 'u.id')
+                        ->where('u.clinic_id', $clinic_id)
+                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                        ->where('expp.amount', '>', 0)
+                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
+
+                    $improvementCostQuery = DB::table('expense_payments as expp')
+                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                        ->join('users as u', 'expp.created_by', '=', 'u.id')
+                        ->where('u.clinic_id', $clinic_id)
+                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                        ->where('expp.amount', '>', 0)
+                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                } else {
+                    $runningCostQuery = DB::table('expense_payments as expp')
+                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                        ->where('expp.amount', '>', 0)
+                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
+
+                    $improvementCostQuery = DB::table('expense_payments as expp')
+                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                        ->where('expp.amount', '>', 0)
+                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                }
+
+                $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
+                $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');
+            } catch (\Exception $e) {
+                \Log::error('Error calculating running/improvement costs (dashboard)', ['error' => $e->getMessage()]);
+                $data['summary']['running_cost'] = 0;
+                $data['summary']['improvement_cost'] = 0;
+            }
+
             $cacheKey = "dashboard_new_patients_{$clinic_id}_{$start_date}_{$end_date}";
             $data['summary']['new_patients'] = Cache::remember($cacheKey, 300, function() use ($clinic_id, $start_date, $end_date) {
                 return $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {

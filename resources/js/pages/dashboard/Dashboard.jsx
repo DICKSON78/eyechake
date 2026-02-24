@@ -302,6 +302,24 @@ const Dashboard = ({ setSmsBalance }) => {
                 onClick={navigateToPendingBills}
               />
             </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <InfoCard
+                title="Running Cost"
+                count={numberFormat(data.summary.running_cost || 0)}
+                icon={<ExpensesIcon />}
+                color={pink[500]}
+                onClick={navigateToFinancialManagement}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+              <InfoCard
+                title="Improvement Cost"
+                count={numberFormat(data.summary.improvement_cost || 0)}
+                icon={<SalesIcon />}
+                color={lightBlue[500]}
+                onClick={navigateToFinancialManagement}
+              />
+            </Grid>
           </Grid>
 
           {/* Main Content and Sidebar */}
