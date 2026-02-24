@@ -375,6 +375,24 @@ const Dashboard = () => {
                 onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
               />
             </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <InfoCard
+                title="Running Cost"
+                count={numberFormat(data.summary?.running_cost || 0)}
+                icon={<ExpenseIcon />}
+                color={pink[500]}
+                onClick={() => navigate('/financial-management/expenses')}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <InfoCard
+                title="Improvement Cost"
+                count={numberFormat(data.summary?.improvement_cost || 0)}
+                icon={<AddIcon />}
+                color={purple[500]}
+                onClick={() => navigate('/financial-management/expenses')}
+              />
+            </Grid>
           </Grid>
 
           {/* Additional Stats Row */}
