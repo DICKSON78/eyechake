@@ -13,6 +13,7 @@ import {
   TextField as MuiTextField,
   Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
 import ClearIcon from "@mui/icons-material/CloseRounded";
 
@@ -167,6 +168,7 @@ const Select = (
           renderInput={(params) => (
             <MuiTextField
               {...params}
+              fullWidth
               placeholder={placeholder || "Select"}
               helperText={helperText}
               variant="outlined"
@@ -200,12 +202,23 @@ const Select = (
           )}
           clearIcon={<ClearIcon />}
           popupIcon={<DropDownIcon />}
-          PaperComponent={(params) => (
-            <Paper
-              elevation={8}
-              {...params}
-            />
-          )}
+          PaperComponent={(paperProps) => {
+            const theme = useTheme();
+            const { children, ...restPaper } = paperProps || {};
+            return (
+              <Paper
+                elevation={8}
+                {...restPaper}
+                style={{
+                  backgroundColor: theme.palette.background.paper,
+                  color: theme.palette.text.primary,
+                  ...restPaper.style,
+                }}
+              >
+                {children}
+              </Paper>
+            );
+          }}
           onChange={(event, value) => {
             if (
               typeof value === "object" &&
