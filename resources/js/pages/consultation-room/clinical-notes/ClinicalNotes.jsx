@@ -117,9 +117,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
     clinical_summary: '',
   });
   const [sickSheetFormData, setSickSheetFormData] = useState({
-    date_from: new Date(),
-    date_to: null,
-    number_of_days: '',
     doctor_comment: '',
   });
   const [formData, setFormData] = useState({
@@ -431,11 +428,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const handleCreateSickSheet = async () => {
     try {
-      // Validate required fields
-      if (!sickSheetFormData.date_from || !sickSheetFormData.date_to) {
-        addToast({ message: 'Please select both start and end dates', severity: 'error' });
-        return;
-      }
+      // Only doctor comment is required for sick sheet creation now
 
       // Fetch fresh consultation data to ensure we have all related data including visual_acuity
       const response = await fetch(`/api/consultations/${consultation.id}?with_diagnoses=Yes&with_items=Yes`, {
@@ -460,15 +453,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
         consultationId: fullConsultation.id,
       });
 
-      // Calculate number of days if both dates are provided
-      let numberOfDays = sickSheetFormData.number_of_days;
-      if (sickSheetFormData.date_from && sickSheetFormData.date_to) {
-        const from = new Date(sickSheetFormData.date_from);
-        const to = new Date(sickSheetFormData.date_to);
-        const diffTime = Math.abs(to - from);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        numberOfDays = diffDays.toString();
-      }
+      // Number of days and dates are not collected; default to 'N/A'
+      let numberOfDays = sickSheetFormData.number_of_days || 'N/A';
 
       const formatDate = (date) => {
         if (!date) return 'N/A';
@@ -477,8 +463,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
       };
 
       const sickSheetData = {
-        date_from: formatDate(sickSheetFormData.date_from),
-        date_to: formatDate(sickSheetFormData.date_to),
+        date_from: formatDate(null),
+        date_to: formatDate(null),
         number_of_days: numberOfDays || 'N/A',
         doctor_comment: sickSheetFormData.doctor_comment || fullConsultation.doctor_comments_remarks || fullConsultation.doctor_recommendations || 'N/A',
       };
@@ -510,9 +496,6 @@ const ClinicalNotes = ({ patient, consultation }) => {
       
       // Reset form and hide it
       setSickSheetFormData({
-        date_from: new Date(),
-        date_to: null,
-        number_of_days: '',
         doctor_comment: '',
       });
       setShowSickSheetForm(false);
@@ -766,24 +749,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                     onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, doctor_comment: value })}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <DatePicker
-                    label="Date From *"
-                    fullWidth
-                    required
-                    value={sickSheetFormData.date_from}
-                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, date_from: value })}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <DatePicker
-                    label="Date To *"
-                    fullWidth
-                    required
-                    value={sickSheetFormData.date_to}
-                    onChange={(value) => setSickSheetFormData({ ...sickSheetFormData, date_to: value })}
-                  />
-                </Grid>
+                {/* Dates removed — sick sheet only requires doctor comment */}
                 <Grid size={{ xs: 12 }}>
                   <Stack direction="row" spacing={2} justifyContent="flex-end">
                     <Button
