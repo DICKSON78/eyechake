@@ -58,7 +58,6 @@ const Select = (
   },
   ref
 ) => {
-  const theme = useTheme();
   const [state, setState] = useState({
     value,
     error: null,
@@ -217,14 +216,6 @@ const Select = (
                     {params.InputProps.endAdornment}
                   </Stack>
                 ),
-                sx: {
-                  color: theme.palette.text.primary,
-                },
-              }}
-              inputProps={{
-                ...params.inputProps,
-                style: { color: theme.palette.text.primary },
-                placeholder: placeholder || "Select",
               }}
             />
           )}

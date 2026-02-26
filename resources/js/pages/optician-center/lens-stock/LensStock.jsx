@@ -43,9 +43,8 @@ const LensStock = () => {
     true,
     [],
     (response) => {
-      console.log("Lens types API response:", response);
-      const extracted = safeExtractArray(response, 'data.data.data', []);
-      console.log("Extracted lens types:", extracted);
+      // safeExtractArray starts at response.data internally, so path is 'data.data' not 'data.data.data'
+      const extracted = safeExtractArray(response, 'data.data', []);
       return extracted;
     }
   );
@@ -91,7 +90,6 @@ const LensStock = () => {
   // Extract SV lens types and Multifocal lens types
   // Ensure lensTypes is always an array before filtering
   const safeLensTypes = Array.isArray(lensTypes) ? lensTypes : [];
-  console.log("Safe lens types:", safeLensTypes);
 
   // Build lens type options dynamically from database
   const lensTypeOptions = [
@@ -103,11 +101,8 @@ const LensStock = () => {
   ];
 
   // Determine if current lens type is Single Vision (for SPH/CYL fields)
-  const isSingleVision = params.lens_type && 
+  const isSingleVision = params.lens_type &&
     (params.lens_type === "Single Vision" || params.lens_type === "SV");
-
-  console.log("Lens type options:", lensTypeOptions);
-  console.log("Current lens_type param:", params.lens_type);
 
   return (
     <Page
@@ -133,7 +128,7 @@ const LensStock = () => {
         <CardContent>
           {/* Search Filters */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
               <Select
                 fullWidth
                 label="Lens Type"
@@ -149,7 +144,7 @@ const LensStock = () => {
             </Grid>
             {isSingleVision && (
               <>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Sphere (Sph)"
@@ -161,7 +156,7 @@ const LensStock = () => {
                     helperText="Search by sphere value"
                   />
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }}>
                   <TextField
                     fullWidth
                     label="Cylinder (Cyl)"
@@ -175,7 +170,7 @@ const LensStock = () => {
                 </Grid>
               </>
             )}
-            <Grid item xs={12} md={isSingleVision ? 3 : 9}>
+            <Grid size={{ xs: 12, md: isSingleVision ? 3 : 9 }}>
               <TextField
                 fullWidth
                 label="Search by Name or Code"
@@ -193,7 +188,7 @@ const LensStock = () => {
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Tooltip title="Search">
                   <IconButton
