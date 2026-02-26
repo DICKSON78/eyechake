@@ -489,26 +489,8 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
           </React.Fragment>
         ) : null}
 
-        {/* Sick Sheet Specific Information */}
-        {sickSheetData && (
-          <React.Fragment>
-            <Subheader
-              title="Sick Leave Details"
-              style={{ marginBottom: 8 }}
-            />
-            <Descriptions
-              columns={2}
-              items={[
-                { label: "Date From", value: sickSheetData.date_from || "N/A" },
-                { label: "Date To", value: sickSheetData.date_to || "N/A" },
-                { label: "Number of Days", value: sickSheetData.number_of_days || "N/A" },
-              ]}
-              containerStyle={{
-                marginBottom: 8,
-              }}
-            />
-          </React.Fragment>
-        )}
+        {/* Sick Sheet Specific Information (hidden: date range and number of days) */}
+        {/* The date-from, date-to and number-of-days fields have been removed from the PDF output as requested. */}
 
         {/* Doctor Comments (from sick sheet form) */}
         {sickSheetData?.doctor_comment && (
