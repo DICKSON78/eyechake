@@ -17,6 +17,25 @@ import { useTheme } from "@mui/material/styles";
 import DropDownIcon from "@mui/icons-material/ArrowDropDownRounded";
 import ClearIcon from "@mui/icons-material/CloseRounded";
 
+// Extracted as a proper component so useTheme hook is legal here
+const ThemedPaper = (props) => {
+  const theme = useTheme();
+  const { children, ...rest } = props;
+  return (
+    <Paper
+      elevation={8}
+      {...rest}
+      style={{
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        ...rest.style,
+      }}
+    >
+      {children}
+    </Paper>
+  );
+};
+
 const Select = (
   {
     containerProps,
@@ -202,23 +221,7 @@ const Select = (
           )}
           clearIcon={<ClearIcon />}
           popupIcon={<DropDownIcon />}
-          PaperComponent={(paperProps) => {
-            const theme = useTheme();
-            const { children, ...restPaper } = paperProps || {};
-            return (
-              <Paper
-                elevation={8}
-                {...restPaper}
-                style={{
-                  backgroundColor: theme.palette.background.paper,
-                  color: theme.palette.text.primary,
-                  ...restPaper.style,
-                }}
-              >
-                {children}
-              </Paper>
-            );
-          }}
+          PaperComponent={ThemedPaper}
           onChange={(event, value) => {
             if (
               typeof value === "object" &&

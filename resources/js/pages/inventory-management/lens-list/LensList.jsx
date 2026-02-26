@@ -98,9 +98,10 @@ const LensList = () => {
                     value: lt.name,
                   })),
                 ]}
+                optionsLabel="label"
                 optionsValue="value"
                 value={lensTypeFilter}
-                onChange={(value) => setLensTypeFilter(value)}
+                onChange={(value) => setLensTypeFilter(value || null)}
                 clearable
               />
             </Grid>
