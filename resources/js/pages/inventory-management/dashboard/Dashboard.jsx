@@ -77,6 +77,8 @@ const Dashboard = () => {
         lens_types: [],
         pharmacy_categories: [],
         pharmacy_stock_movement: { stock_in: [], stock_out: [] },
+        frame_monthly_sales: [],
+        medicine_monthly_sales: [],
       },
     },
     (response) => {
@@ -325,136 +327,59 @@ const Dashboard = () => {
 
             {/* Quick Actions removed for Stock Management Dashboard */}
 
-            {/* Inventory Statistics */}
+            {/* Sold Frames (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Stock Statistics
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <InventoryIcon sx={{ fontSize: 28.8, color: '#9C27B0', mb: 1 }} />
-                        <Typography variant="h6" color="#9C27B0" fontWeight="bold">
-                          {numberFormat(data.summary?.total_items || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Total Items</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <LowStockIcon sx={{ fontSize: 28.8, color: '#F44336', mb: 1 }} />
-                        <Typography variant="h6" color="#F44336" fontWeight="bold">
-                          {numberFormat(data.summary?.low_stock_items || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Low Stock</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <StockInIcon sx={{ fontSize: 28.8, color: '#4CAF50', mb: 1 }} />
-                        <Typography variant="h6" color="#4CAF50" fontWeight="bold">
-                          {numberFormat(data.summary?.stock_in_today || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Stock In Today</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2 }}>
-                        <StockOutIcon sx={{ fontSize: 28.8, color: '#FF9800', mb: 1 }} />
-                        <Typography variant="h6" color="#FF9800" fontWeight="bold">
-                          {numberFormat(data.summary?.stock_out_today || 0)}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">Stock Out Today</Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Lens Types Chart */}
-            <Grid size={{ md: 6, sm: 12, xs: 12 }}>
-              <Card>
-                <CardHeader title="Lens Types" />
+                <CardHeader title="Sold Frames (Monthly)" />
                 <Divider />
                 <CardContent>
                   <ChartWrapper
                     options={{
-                      labels: (data.statistics?.lens_types || []).map(
-                        (e) => e.lens_type || 'Unknown'
-                      ),
-                      chart: {
-                        fontFamily: theme.typography.fontFamily,
-                        background: "transparent",
-                        toolbar: {
-                          show: false,
-                        },
+                      chart: { toolbar: { show: false } },
+                      stroke: { curve: 'smooth' },
+                      xaxis: {
+                        categories: (data.statistics?.frame_monthly_sales || []).map((e) => e.label),
                       },
-                      plotOptions: {
-                        pie: {
-                          dataLabels: {
-                            offset: -16,
-                          },
-                        },
-                      },
-                      colors: [
-                        indigo[400],
-                        cyan[500],
-                        purple[400],
-                        teal[400],
-                        blue[400],
-                        green[500],
-                        orange[400],
-                        pink[400],
-                      ],
-                      stroke: {
-                        show: false,
-                        width: 3,
-                        colors: (data.statistics?.lens_types || []).map(
-                          (e) => theme.palette.background.paper
-                        ),
-                      },
-                      dataLabels: {
-                        style: {
-                          fontSize: 10,
-                          fontWeight: 400,
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
-                        formatter: function (val, opts) {
-                          return numberFormat(opts.w.globals.series[opts.seriesIndex]);
-                        },
-                      },
-                      tooltip: {
-                        y: {
-                          formatter: (val) => numberFormat(val),
-                        },
-                      },
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          colors: (data.statistics?.lens_types || []).map(
-                            (e) => theme.palette.text.secondary
-                          ),
-                          useSeriesColors: false,
-                        },
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
-                        },
-                      },
+                      tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                      colors: [purple[500]],
                     }}
-                    series={(data.statistics?.lens_types || []).map(
-                      (e) => Math.max(0, parseFloat(e.total_quantity) || 0)
-                    )}
-                    type="pie"
-                    height={
-                      (data.statistics?.lens_types || []).length ? 400 : 300
-                    }
+                    series={[
+                      {
+                        name: 'Frames Sold',
+                        data: (data.statistics?.frame_monthly_sales || []).map((e) => e.quantity_sold || 0),
+                      },
+                    ]}
+                    type="line"
+                    height={320}
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Sold Medicine (Monthly) */}
+            <Grid size={{ md: 6, sm: 12, xs: 12 }}>
+              <Card>
+                <CardHeader title="Sold Medicine (Monthly)" />
+                <Divider />
+                <CardContent>
+                  <ChartWrapper
+                    options={{
+                      chart: { toolbar: { show: false } },
+                      stroke: { curve: 'smooth' },
+                      xaxis: {
+                        categories: (data.statistics?.medicine_monthly_sales || []).map((e) => e.label),
+                      },
+                      tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                      colors: [teal[500]],
+                    }}
+                    series={[
+                      {
+                        name: 'Medicine Sold',
+                        data: (data.statistics?.medicine_monthly_sales || []).map((e) => e.quantity_sold || 0),
+                      },
+                    ]}
+                    type="line"
+                    height={320}
                   />
                 </CardContent>
               </Card>

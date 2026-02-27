@@ -602,6 +602,74 @@ class InventoryManagementDashboardController extends Controller
             ];
         }, []);
 
+        // Monthly sold frames (last 6 months)
+        $data['statistics']['frame_monthly_sales'] = $this->safe(function () use ($clinic_id) {
+            $months = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $dt = Carbon::now()->subMonths($i);
+                $label = $dt->format('M Y');
+                $year = $dt->year;
+                $month = $dt->month;
+
+                $total = DB::table('patient_payment_cache_items')
+                    ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                    ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                    ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                    ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                    ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->where('users.clinic_id', $clinic_id);
+                    })
+                    ->where('patient_payment_cache_items.status', 'Served')
+                    ->where('items.status', 'Active')
+                    ->where('item_types.name', 'Frame')
+                    ->where('consultation_types.name', 'Glass')
+                    ->whereYear('patient_payment_cache.created_at', $year)
+                    ->whereMonth('patient_payment_cache.created_at', $month)
+                    ->sum('patient_payment_cache_items.quantity');
+
+                $months[] = [
+                    'label' => $label,
+                    'quantity_sold' => (int) $total,
+                ];
+            }
+            return $months;
+        }, []);
+
+        // Monthly sold medicines (last 6 months)
+        $data['statistics']['medicine_monthly_sales'] = $this->safe(function () use ($clinic_id) {
+            $months = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $dt = Carbon::now()->subMonths($i);
+                $label = $dt->format('M Y');
+                $year = $dt->year;
+                $month = $dt->month;
+
+                $total = DB::table('patient_payment_cache_items')
+                    ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                    ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                    ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                    ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                    ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->where('users.clinic_id', $clinic_id);
+                    })
+                    ->where('patient_payment_cache_items.status', 'Served')
+                    ->where('items.status', 'Active')
+                    ->where('item_types.name', 'Medicine')
+                    ->where('consultation_types.name', 'Pharmacy')
+                    ->whereYear('patient_payment_cache.created_at', $year)
+                    ->whereMonth('patient_payment_cache.created_at', $month)
+                    ->sum('patient_payment_cache_items.quantity');
+
+                $months[] = [
+                    'label' => $label,
+                    'quantity_sold' => (int) $total,
+                ];
+            }
+            return $months;
+        }, []);
+
         // Pharmacy alerts (expired, expiring soon, out of stock)
         $data['statistics']['pharmacy_alerts'] = $this->safe(function () use ($clinic_id) {
             $expired = DB::table('items')
