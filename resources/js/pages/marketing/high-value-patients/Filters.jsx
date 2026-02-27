@@ -9,9 +9,9 @@ import TextField from "../../../components/TextField";
 import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
-  const thresholdOptions = [
-    { label: "500,000+ TZS", value: "500000" },
-    { label: "1,000,000+ TZS", value: "1000000" },
+  const highValueOptions = [
+    { label: "500k - 1M", value: "500000-1000000" },
+    { label: "1M and above", value: "1000000+" },
   ];
 
   return (
@@ -38,19 +38,18 @@ const Filters = ({ params, setParams, ...rest }) => {
                 ),
               }}
               onChange={(value) =>
-                throttle(() => setParams({ ...params, q: value }), 1000)
+                throttle(() => setParams({ ...params, q: value, page: 1 }), 1000)
               }
             />
           </Grid>
           <Grid item md sm={6} xs={12}>
             <Select
-              label="Payment Threshold"
+              label="Value Range"
               fullWidth
-              options={thresholdOptions}
-              value={params.threshold || "500000"}
+              options={highValueOptions}
+              value={params.high_value || "500000-1000000"}
               onChange={(value) =>
-                // when a threshold is selected, filter and sort ascending by total payments
-                setParams({ ...params, threshold: value, sort_by: 'total_payments', sort_order: 'asc', page: 1 })
+                setParams({ ...params, high_value: value, sort_by: 'total_payments', sort_order: 'asc', page: 1 })
               }
             />
           </Grid>
