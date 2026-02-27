@@ -17,7 +17,7 @@ const HighValuePatients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    threshold: "500000",
+    high_value: "500000-1000000",
     q: undefined,
   });
 
@@ -54,7 +54,13 @@ const HighValuePatients = () => {
       <Card>
         <PageHeader
           title="High Value Patients"
-          subtitle={`Patients who paid ${params.threshold === "1000000" ? "1,000,000+" : "500,000+"} TZS`}
+          subtitle={
+            params.high_value === '1000000+'
+              ? 'Patients who paid 1,000,000+ TZS'
+              : params.high_value === '500000-1000000'
+                ? 'Patients who paid 500,000 - 1,000,000 TZS'
+                : 'High Value Patients'
+          }
         />
         <Divider />
         <CardContent>

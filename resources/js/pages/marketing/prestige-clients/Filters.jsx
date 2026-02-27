@@ -64,8 +64,8 @@ const Filters = ({ params, setParams, ...rest }) => {
                 }}
               >
                 <MenuItem value="none">All</MenuItem>
-                <MenuItem value="500000">500k and above</MenuItem>
-                <MenuItem value="1000000">1M and above</MenuItem>
+                <MenuItem value="500000-1000000">500k - 1M</MenuItem>
+                <MenuItem value="1000000+">1M and above</MenuItem>
               </Select>
             </FormControl>
           </Grid>

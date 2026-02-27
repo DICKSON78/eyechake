@@ -340,7 +340,13 @@ const Dashboard = () => {
                       xaxis: {
                         categories: (data.statistics?.frame_monthly_sales || []).map((e) => e.label),
                       },
-                      tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                      yaxis: {
+                        min: 0,
+                        labels: {
+                          formatter: (val) => numberFormat(Math.round(val)),
+                        },
+                      },
+                      tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
                       colors: [purple[500]],
                     }}
                     series={[
@@ -369,7 +375,13 @@ const Dashboard = () => {
                       xaxis: {
                         categories: (data.statistics?.medicine_monthly_sales || []).map((e) => e.label),
                       },
-                      tooltip: { y: { formatter: (val) => numberFormat(val) } },
+                      yaxis: {
+                        min: 0,
+                        labels: {
+                          formatter: (val) => numberFormat(Math.round(val)),
+                        },
+                      },
+                      tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
                       colors: [teal[500]],
                     }}
                     series={[

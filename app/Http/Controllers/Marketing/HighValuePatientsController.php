@@ -19,6 +19,8 @@ class HighValuePatientsController extends Controller
             $request->validate([
                 'per_page' => 'sometimes|integer|min:0',
                 'page' => 'sometimes|integer|min:1',
+                // Support a high_value filter with explicit ranges
+                'high_value' => 'sometimes|string|in:500000-1000000,1000000+',
                 'threshold' => 'sometimes|in:500000,1000000',
                 'class' => 'sometimes|string|in:class1,class2,all',
                 'q' => 'sometimes|string',
@@ -31,11 +33,28 @@ class HighValuePatientsController extends Controller
             
             $per_page = $request->per_page ?? 25;
             $clinic_id = $user->is_admin ? ($request->clinic_id ?? null) : ($user->clinic_id ?? null);
-            $thresholdRaw = $request->threshold ?? 500000;
-            
-            if ($request->has('class')) {
-                if ($request->class === 'class2') $thresholdRaw = 1000000;
-                else if ($request->class === 'class1') $thresholdRaw = 500000;
+            // Determine min/max filters for lifetime value
+            $minValue = null;
+            $maxValue = null;
+
+            if ($request->has('high_value')) {
+                $hv = $request->high_value;
+                if ($hv === '500000-1000000') {
+                    $minValue = 500000;
+                    $maxValue = 1000000; // exclusive upper bound
+                } elseif ($hv === '1000000+') {
+                    $minValue = 1000000;
+                }
+            }
+
+            // Backwards compatibility with threshold/class params
+            if (is_null($minValue)) {
+                $thresholdRaw = $request->threshold ?? 500000;
+                if ($request->has('class')) {
+                    if ($request->class === 'class2') $thresholdRaw = 1000000;
+                    else if ($request->class === 'class1') $thresholdRaw = 500000;
+                }
+                $minValue = (int) $thresholdRaw;
             }
 
             // 1. Calculate DIRECT payments per patient
@@ -71,8 +90,16 @@ class HighValuePatientsController extends Controller
                       ->unionAll($billSums);
             }, 'unioned_sums')
             ->select('patient_id', DB::raw('SUM(amount) as total_lifetime_value'))
-            ->groupBy('patient_id')
-            ->having('total_lifetime_value', '>=', $thresholdRaw);
+            ->groupBy('patient_id');
+
+            // Apply having filters for min/max lifetime value
+            if (!is_null($minValue)) {
+                $allSums->havingRaw('SUM(amount) >= ?', [$minValue]);
+            }
+            if (!is_null($maxValue)) {
+                // make upper bound exclusive so 1,000,000 goes to the 1M+ bucket
+                $allSums->havingRaw('SUM(amount) < ?', [$maxValue]);
+            }
 
             // 4. Get the patient IDs and Values
             $highValuePatients = $allSums->get()->keyBy('patient_id');
