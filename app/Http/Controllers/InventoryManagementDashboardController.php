@@ -124,7 +124,7 @@ class InventoryManagementDashboardController extends Controller
                 })
                 ->where('items.status', 'Active')
                 ->where('items.is_stock_item', 'Yes')
-                ->where('item_types.name', 'Medicine')
+                ->where('item_types.name', 'Pharmaceutical')
                 ->where('consultation_types.name', 'Pharmacy')
                 ->sum('items.balance');
         }, 0);
@@ -673,7 +673,7 @@ class InventoryManagementDashboardController extends Controller
                 })
                 ->where('items.status', 'Active')
                 ->where('items.is_stock_item', 'Yes')
-                ->where('item_types.name', 'Medicine')
+                ->where('item_types.name', 'Pharmaceutical')
                 ->where('consultation_types.name', 'Pharmacy')
                 ->select('items.id', 'items.name')
                 ->orderBy('items.name')
@@ -700,7 +700,7 @@ class InventoryManagementDashboardController extends Controller
                     })
                     ->where('patient_payment_cache_items.status', 'Served')
                     ->where('items.status', 'Active')
-                    ->where('item_types.name', 'Medicine')
+                    ->where('item_types.name', 'Pharmaceutical')
                     ->where('consultation_types.name', 'Pharmacy')
                     ->whereYear('patient_payment_cache.created_at', $year)
                     ->whereMonth('patient_payment_cache.created_at', $month);
