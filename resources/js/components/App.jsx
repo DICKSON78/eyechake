@@ -74,30 +74,7 @@ const App = () => {
 
   const [user, setUser] = useState();
   const [smsBalance, setSmsBalance] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Hide loading screen once React app is mounted
-  useEffect(() => {
-    // Small delay to ensure smooth transition
-    const timer = setTimeout(() => {
-      const rootElement = document.getElementById('root');
-      if (rootElement) {
-        const loadingContainer = rootElement.querySelector('.loading-container');
-        if (loadingContainer) {
-          loadingContainer.style.opacity = '0';
-          loadingContainer.style.transition = 'opacity 0.5s ease-out';
-          setTimeout(() => {
-            loadingContainer.style.display = 'none';
-            setIsLoading(false);
-          }, 500);
-        } else {
-          setIsLoading(false);
-        }
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [isLoading, setIsLoading] = useState(false); // Loader removed, set to false
 
   // Global error handler to catch unhandled errors
   useEffect(() => {

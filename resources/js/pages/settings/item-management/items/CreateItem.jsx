@@ -86,6 +86,7 @@ const CreateItem = ({ modal, fetchItems }) => {
     is_consultation_item: "No",
     is_stock_item: "No",
     templates: [],
+    unit_buying_price: undefined,
     selling_price: undefined,
     expiration_date: undefined,
   });
@@ -280,6 +281,18 @@ const CreateItem = ({ modal, fetchItems }) => {
                   />
                 }
                 label="Stock Item"
+              />
+            </Grid>
+            <Grid
+              size={{ xs: 12, sm: 12, md: 6 }}
+            >
+              <TextField
+                label="Buying Price / Cost"
+                fullWidth
+                type="number"
+                placeholder="0.00"
+                onChange={(value) => setFormData({ ...formData, unit_buying_price: value })}
+                helperText="Cost price for profit calculation"
               />
             </Grid>
             <Grid

@@ -83,6 +83,7 @@ const EditItem = ({ item, modal, fetchItems }) => {
     lens_type_id: item.lens_type_id,
     is_consultation_item: item.is_consultation_item,
     is_stock_item: item.is_stock_item,
+    unit_buying_price: item.unit_buying_price,
     templates: (item.templates || "").split(","),
     status: item.status,
   });
@@ -164,6 +165,22 @@ const EditItem = ({ item, modal, fetchItems }) => {
                 placeholder="Enter category"
                 defaultValue={item.category}
                 onChange={(value) => setFormData({ ...formData, category: value })}
+              />
+            </Grid>
+            <Grid
+              item
+              md={6}
+              sm={12}
+              xs={12}
+            >
+              <TextField
+                label="Buying Price / Cost"
+                fullWidth
+                type="number"
+                placeholder="0.00"
+                defaultValue={item.unit_buying_price}
+                onChange={(value) => setFormData({ ...formData, unit_buying_price: value })}
+                helperText="Cost price for profit calculation"
               />
             </Grid>
             <Grid

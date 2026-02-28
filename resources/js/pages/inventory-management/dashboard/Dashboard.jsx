@@ -441,7 +441,7 @@ const Dashboard = () => {
                     <ChartWrapper
                       options={{
                         chart: { toolbar: { show: false } },
-                        stroke: { curve: 'smooth' },
+                        stroke: { curve: 'smooth', width: [2, 0] },
                         xaxis: {
                           categories: frameMonthlySales.map((e) => e.label),
                         },
@@ -451,14 +451,41 @@ const Dashboard = () => {
                             formatter: (val) => numberFormat(Math.round(val)),
                           },
                         },
-                        tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
-                        colors: [purple[500]],
+                        tooltip: {
+                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                            const data = frameMonthlySales[dataPointIndex];
+                            if (!data) return '';
+                            
+                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
+                            html += `<strong>${data.label}</strong><br/>`;
+                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
+                            
+                            if (data.top_product_name && !selectedFrameId) {
+                              html += `<br/><strong style="color: ${purple[500]}">🏆 Top Product:</strong><br/>`;
+                              html += `${data.top_product_name}<br/>`;
+                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
+                            }
+                            
+                            html += `</div>`;
+                            return html;
+                          }
+                        },
+                        colors: [purple[500], purple[700]],
+                        markers: {
+                          size: [0, 6],
+                        },
                       }}
                       series={[
                         {
                           name: 'Frames Sold',
+                          type: 'line',
                           data: frameMonthlySales.map((e) => e.quantity_sold || 0),
                         },
+                        ...(selectedFrameId ? [] : [{
+                          name: 'Top Product',
+                          type: 'scatter',
+                          data: frameMonthlySales.map((e) => e.top_product_quantity || 0),
+                        }])
                       ]}
                       type="line"
                       height={320}
@@ -502,7 +529,7 @@ const Dashboard = () => {
                     <ChartWrapper
                       options={{
                         chart: { toolbar: { show: false } },
-                        stroke: { curve: 'smooth' },
+                        stroke: { curve: 'smooth', width: [2, 0] },
                         xaxis: {
                           categories: medicineMonthlySales.map((e) => e.label),
                         },
@@ -512,14 +539,41 @@ const Dashboard = () => {
                             formatter: (val) => numberFormat(Math.round(val)),
                           },
                         },
-                        tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
-                        colors: [teal[500]],
+                        tooltip: {
+                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                            const data = medicineMonthlySales[dataPointIndex];
+                            if (!data) return '';
+                            
+                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
+                            html += `<strong>${data.label}</strong><br/>`;
+                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
+                            
+                            if (data.top_product_name && !selectedMedicineId) {
+                              html += `<br/><strong style="color: ${teal[500]}">🏆 Top Product:</strong><br/>`;
+                              html += `${data.top_product_name}<br/>`;
+                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
+                            }
+                            
+                            html += `</div>`;
+                            return html;
+                          }
+                        },
+                        colors: [teal[500], teal[700]],
+                        markers: {
+                          size: [0, 6],
+                        },
                       }}
                       series={[
                         {
                           name: 'Medicine Sold',
+                          type: 'line',
                           data: medicineMonthlySales.map((e) => e.quantity_sold || 0),
                         },
+                        ...(selectedMedicineId ? [] : [{
+                          name: 'Top Product',
+                          type: 'scatter',
+                          data: medicineMonthlySales.map((e) => e.top_product_quantity || 0),
+                        }])
                       ]}
                       type="line"
                       height={320}

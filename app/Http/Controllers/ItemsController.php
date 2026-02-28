@@ -162,6 +162,7 @@ class ItemsController extends Controller
             'is_stock_item' => 'required|in:Yes,No',
             'balance' => 'nullable|numeric|min:0',
             'new_balance' => 'nullable|numeric|min:0',
+            'unit_buying_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
             'expiration_date' => 'nullable|date',
         ]);
@@ -178,6 +179,7 @@ class ItemsController extends Controller
             'is_stock_item',
             'balance',
             'new_balance',
+            'unit_buying_price',
             'templates',
             'expiration_date',
         );
@@ -244,6 +246,7 @@ class ItemsController extends Controller
             'is_stock_item' => 'sometimes|required|in:Yes,No',
             'balance' => 'nullable|numeric|min:0',
             'new_balance' => 'nullable|numeric|min:0',
+            'unit_buying_price' => 'nullable|numeric|min:0',
             'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 

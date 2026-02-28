@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   InputAdornment,
-  LinearProgress,
   Typography,
   Divider,
 } from "@mui/material";

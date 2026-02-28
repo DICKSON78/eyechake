@@ -260,16 +260,7 @@
     </div>
 </noscript>
 <div id="root">
-    <div class="loading-container">
-        <div style="text-align: center; padding: 40px 20px; max-width: 600px;">
-            <img src="/logo.png" alt="SIKAF Eye Care" class="loading-logo" onerror="this.style.display='none'">
-            <div class="loading-spinner"></div>
-            <h1 class="loading-title">SIKAF Eye Care</h1>
-            <p class="loading-subtitle">
-                Loading your eye care experience<span class="loading-dots"><span></span><span></span><span></span></span>
-            </p>
-        </div>
-    </div>
+    <!-- Loading container removed per user request -->
 </div>
 </body>
 </html>

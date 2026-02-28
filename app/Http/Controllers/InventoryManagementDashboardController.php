@@ -651,14 +651,44 @@ class InventoryManagementDashboardController extends Controller
                 // Filter by specific frame if provided
                 if ($frame_id) {
                     $query->where('items.id', $frame_id);
+                    $total = $query->sum('patient_payment_cache_items.quantity');
+                    
+                    $months[] = [
+                        'label' => $label,
+                        'quantity_sold' => (int) $total,
+                    ];
+                } else {
+                    // When showing all frames, get total and identify top product
+                    $total = $query->sum('patient_payment_cache_items.quantity');
+                    
+                    // Get the top selling frame for this month
+                    $topProduct = DB::table('patient_payment_cache_items')
+                        ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                        ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                        ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                        ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                        ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                        ->when($clinic_id, function ($query) use ($clinic_id) {
+                            $query->where('users.clinic_id', $clinic_id);
+                        })
+                        ->where('patient_payment_cache_items.status', 'Served')
+                        ->where('items.status', 'Active')
+                        ->where('item_types.name', 'Frame')
+                        ->where('consultation_types.name', 'Glass')
+                        ->whereYear('patient_payment_cache.created_at', $year)
+                        ->whereMonth('patient_payment_cache.created_at', $month)
+                        ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_qty'))
+                        ->groupBy('items.id', 'items.name')
+                        ->orderBy('total_qty', 'desc')
+                        ->first();
+                    
+                    $months[] = [
+                        'label' => $label,
+                        'quantity_sold' => (int) $total,
+                        'top_product_name' => $topProduct->name ?? null,
+                        'top_product_quantity' => (int) ($topProduct->total_qty ?? 0),
+                    ];
                 }
-
-                $total = $query->sum('patient_payment_cache_items.quantity');
-
-                $months[] = [
-                    'label' => $label,
-                    'quantity_sold' => (int) $total,
-                ];
             }
             return $months;
         }, []);
@@ -708,14 +738,44 @@ class InventoryManagementDashboardController extends Controller
                 // Filter by specific medicine if provided
                 if ($medicine_id) {
                     $query->where('items.id', $medicine_id);
+                    $total = $query->sum('patient_payment_cache_items.quantity');
+                    
+                    $months[] = [
+                        'label' => $label,
+                        'quantity_sold' => (int) $total,
+                    ];
+                } else {
+                    // When showing all medicines, get total and identify top product
+                    $total = $query->sum('patient_payment_cache_items.quantity');
+                    
+                    // Get the top selling medicine for this month
+                    $topProduct = DB::table('patient_payment_cache_items')
+                        ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                        ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                        ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                        ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                        ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                        ->when($clinic_id, function ($query) use ($clinic_id) {
+                            $query->where('users.clinic_id', $clinic_id);
+                        })
+                        ->where('patient_payment_cache_items.status', 'Served')
+                        ->where('items.status', 'Active')
+                        ->where('item_types.name', 'Pharmaceutical')
+                        ->where('consultation_types.name', 'Pharmacy')
+                        ->whereYear('patient_payment_cache.created_at', $year)
+                        ->whereMonth('patient_payment_cache.created_at', $month)
+                        ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_qty'))
+                        ->groupBy('items.id', 'items.name')
+                        ->orderBy('total_qty', 'desc')
+                        ->first();
+                    
+                    $months[] = [
+                        'label' => $label,
+                        'quantity_sold' => (int) $total,
+                        'top_product_name' => $topProduct->name ?? null,
+                        'top_product_quantity' => (int) ($topProduct->total_qty ?? 0),
+                    ];
                 }
-
-                $total = $query->sum('patient_payment_cache_items.quantity');
-
-                $months[] = [
-                    'label' => $label,
-                    'quantity_sold' => (int) $total,
-                ];
             }
             return $months;
         }, []);
