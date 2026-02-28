@@ -47,6 +47,8 @@ const Filters = ({ params, setParams, ...rest }) => {
               label="Value Range"
               fullWidth
               options={highValueOptions}
+              optionsLabel="label"
+              optionsValue="value"
               value={params.high_value || "500000-1000000"}
               onChange={(value) =>
                 setParams({ ...params, high_value: value, sort_by: 'total_payments', sort_order: 'asc', page: 1 })

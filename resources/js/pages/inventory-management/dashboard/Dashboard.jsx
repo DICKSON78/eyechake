@@ -11,6 +11,10 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select as MuiSelect,
+  MenuItem,
 } from "@mui/material";
 import {
   InventoryRounded as InventoryIcon,
@@ -57,9 +61,17 @@ const Dashboard = () => {
     end_date: getWeekEndDate().toISOString().split('T')[0],
   });
 
+  // Selected item filters for individual performance charts
+  const [selectedFrameId, setSelectedFrameId] = useState('');
+  const [selectedMedicineId, setSelectedMedicineId] = useState('');
+
   const { data, loading, error, handleFetch } = useFetch(
     "api/inventory-management/dashboard",
-    dateParams,
+    {
+      ...dateParams,
+      frame_id: selectedFrameId || undefined,
+      medicine_id: selectedMedicineId || undefined,
+    },
     true,
     {
       summary: {
@@ -79,6 +91,8 @@ const Dashboard = () => {
         pharmacy_stock_movement: { stock_in: [], stock_out: [] },
         frame_monthly_sales: [],
         medicine_monthly_sales: [],
+        frame_items: [],
+        medicine_items: [],
       },
     },
     (response) => {
@@ -93,6 +107,11 @@ const Dashboard = () => {
   useEffect(() => {
     document.title = `Stock Management Dashboard - ${window.APP_NAME}`;
   }, []);
+
+  // Refetch when filter selections change
+  useEffect(() => {
+    handleFetch();
+  }, [selectedFrameId, selectedMedicineId]);
 
   // Auto-refresh when page becomes visible
   useEffect(() => {
@@ -330,7 +349,27 @@ const Dashboard = () => {
             {/* Sold Frames (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
-                <CardHeader title="Sold Frames (Monthly)" />
+                <CardHeader
+                  title={selectedFrameId
+                    ? `Sold: ${(data.statistics?.frame_items || []).find(f => f.id === selectedFrameId)?.name || 'Frame'} (Monthly)`
+                    : "Sold Frames (Monthly)"}
+                  action={
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel id="frame-filter-label">Filter by Frame</InputLabel>
+                      <MuiSelect
+                        labelId="frame-filter-label"
+                        label="Filter by Frame"
+                        value={selectedFrameId}
+                        onChange={(e) => setSelectedFrameId(e.target.value)}
+                      >
+                        <MenuItem value="">All Frames</MenuItem>
+                        {(data.statistics?.frame_items || []).map((item) => (
+                          <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                        ))}
+                      </MuiSelect>
+                    </FormControl>
+                  }
+                />
                 <Divider />
                 <CardContent>
                   <ChartWrapper
@@ -365,7 +404,27 @@ const Dashboard = () => {
             {/* Sold Medicine (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
-                <CardHeader title="Sold Medicine (Monthly)" />
+                <CardHeader
+                  title={selectedMedicineId
+                    ? `Sold: ${(data.statistics?.medicine_items || []).find(m => m.id === selectedMedicineId)?.name || 'Medicine'} (Monthly)`
+                    : "Sold Medicine (Monthly)"}
+                  action={
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel id="medicine-filter-label">Filter by Medicine</InputLabel>
+                      <MuiSelect
+                        labelId="medicine-filter-label"
+                        label="Filter by Medicine"
+                        value={selectedMedicineId}
+                        onChange={(e) => setSelectedMedicineId(e.target.value)}
+                      >
+                        <MenuItem value="">All Medicines</MenuItem>
+                        {(data.statistics?.medicine_items || []).map((item) => (
+                          <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                        ))}
+                      </MuiSelect>
+                    </FormControl>
+                  }
+                />
                 <Divider />
                 <CardContent>
                   <ChartWrapper

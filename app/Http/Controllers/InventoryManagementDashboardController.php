@@ -40,6 +40,10 @@ class InventoryManagementDashboardController extends Controller
             $clinic_id = $user->clinic_id ?? null;
         }
 
+        // Optional filters for individual item performance
+        $frame_id = $request->frame_id ? (int) $request->frame_id : null;
+        $medicine_id = $request->medicine_id ? (int) $request->medicine_id : null;
+
         $data = [
             'summary' => [],
             'statistics' => [],
@@ -602,8 +606,25 @@ class InventoryManagementDashboardController extends Controller
             ];
         }, []);
 
-        // Monthly sold frames (last 6 months)
-        $data['statistics']['frame_monthly_sales'] = $this->safe(function () use ($clinic_id) {
+        // List of available frames for the filter dropdown
+        $data['statistics']['frame_items'] = $this->safe(function () use ($clinic_id) {
+            return DB::table('items')
+                ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('items.clinic_id', $clinic_id);
+                })
+                ->where('items.status', 'Active')
+                ->where('items.is_stock_item', 'Yes')
+                ->where('item_types.name', 'Frame')
+                ->where('consultation_types.name', 'Glass')
+                ->select('items.id', 'items.name')
+                ->orderBy('items.name')
+                ->get();
+        }, []);
+
+        // Monthly sold frames (last 6 months) - optionally filtered by specific frame
+        $data['statistics']['frame_monthly_sales'] = $this->safe(function () use ($clinic_id, $frame_id) {
             $months = [];
             for ($i = 5; $i >= 0; $i--) {
                 $dt = Carbon::now()->subMonths($i);
@@ -611,7 +632,7 @@ class InventoryManagementDashboardController extends Controller
                 $year = $dt->year;
                 $month = $dt->month;
 
-                $total = DB::table('patient_payment_cache_items')
+                $query = DB::table('patient_payment_cache_items')
                     ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                     ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
                     ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
@@ -625,8 +646,14 @@ class InventoryManagementDashboardController extends Controller
                     ->where('item_types.name', 'Frame')
                     ->where('consultation_types.name', 'Glass')
                     ->whereYear('patient_payment_cache.created_at', $year)
-                    ->whereMonth('patient_payment_cache.created_at', $month)
-                    ->sum('patient_payment_cache_items.quantity');
+                    ->whereMonth('patient_payment_cache.created_at', $month);
+
+                // Filter by specific frame if provided
+                if ($frame_id) {
+                    $query->where('items.id', $frame_id);
+                }
+
+                $total = $query->sum('patient_payment_cache_items.quantity');
 
                 $months[] = [
                     'label' => $label,
@@ -636,8 +663,25 @@ class InventoryManagementDashboardController extends Controller
             return $months;
         }, []);
 
-        // Monthly sold medicines (last 6 months)
-        $data['statistics']['medicine_monthly_sales'] = $this->safe(function () use ($clinic_id) {
+        // List of available medicines for the filter dropdown
+        $data['statistics']['medicine_items'] = $this->safe(function () use ($clinic_id) {
+            return DB::table('items')
+                ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('items.clinic_id', $clinic_id);
+                })
+                ->where('items.status', 'Active')
+                ->where('items.is_stock_item', 'Yes')
+                ->where('item_types.name', 'Medicine')
+                ->where('consultation_types.name', 'Pharmacy')
+                ->select('items.id', 'items.name')
+                ->orderBy('items.name')
+                ->get();
+        }, []);
+
+        // Monthly sold medicines (last 6 months) - optionally filtered by specific medicine
+        $data['statistics']['medicine_monthly_sales'] = $this->safe(function () use ($clinic_id, $medicine_id) {
             $months = [];
             for ($i = 5; $i >= 0; $i--) {
                 $dt = Carbon::now()->subMonths($i);
@@ -645,7 +689,7 @@ class InventoryManagementDashboardController extends Controller
                 $year = $dt->year;
                 $month = $dt->month;
 
-                $total = DB::table('patient_payment_cache_items')
+                $query = DB::table('patient_payment_cache_items')
                     ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                     ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
                     ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
@@ -659,8 +703,14 @@ class InventoryManagementDashboardController extends Controller
                     ->where('item_types.name', 'Medicine')
                     ->where('consultation_types.name', 'Pharmacy')
                     ->whereYear('patient_payment_cache.created_at', $year)
-                    ->whereMonth('patient_payment_cache.created_at', $month)
-                    ->sum('patient_payment_cache_items.quantity');
+                    ->whereMonth('patient_payment_cache.created_at', $month);
+
+                // Filter by specific medicine if provided
+                if ($medicine_id) {
+                    $query->where('items.id', $medicine_id);
+                }
+
+                $total = $query->sum('patient_payment_cache_items.quantity');
 
                 $months[] = [
                     'label' => $label,
