@@ -224,17 +224,16 @@ class DirectorDashboardController extends Controller
             $data['summary']['discount'] = 0;
         }
 
-        // Consultation Revenue (from consultation type items)
+        // Consultation Revenue (consultation_type_id = 4 = 'Others' in database)
         try {
             $consultationSalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Consultation');
+                ->where('ppci.consultation_type_id', 4);
             
             if ($clinic_id) {
                 $consultationSalesQuery->where('u.clinic_id', $clinic_id);
@@ -245,19 +244,18 @@ class DirectorDashboardController extends Controller
             // Consultation Purchases (COGS)
             $consultationPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Consultation');
+                ->where('ppci.consultation_type_id', 4);
             
             if ($clinic_id) {
                 $consultationPurchasesQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['consultation_purchases'] = $consultationPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['consultation_purchases'] = $consultationPurchasesQuery->sum(DB::raw('COALESCE(it.unit_buying_price, 0) * ppci.quantity')) ?? 0;
             $data['summary']['consultation_profit'] = $data['summary']['consultation'] - $data['summary']['consultation_purchases'];
             
         } catch (\Exception $e) {
@@ -267,17 +265,16 @@ class DirectorDashboardController extends Controller
             $data['summary']['consultation_profit'] = 0;
         }
 
-        // Pharmacy Sales
+        // Pharmacy Sales (consultation_type_id = 1 = 'Pharmacy')
         try {
             $pharmacySalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Pharmacy');
+                ->where('ppci.consultation_type_id', 1);
             
             if ($clinic_id) {
                 $pharmacySalesQuery->where('u.clinic_id', $clinic_id);
@@ -288,19 +285,18 @@ class DirectorDashboardController extends Controller
             // Pharmacy Purchases (COGS)
             $pharmacyPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Pharmacy');
+                ->where('ppci.consultation_type_id', 1);
             
             if ($clinic_id) {
                 $pharmacyPurchasesQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['pharmacy_purchases'] = $pharmacyPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['pharmacy_purchases'] = $pharmacyPurchasesQuery->sum(DB::raw('COALESCE(it.unit_buying_price, 0) * ppci.quantity')) ?? 0;
             $data['summary']['pharmacy_profit'] = $data['summary']['pharmacy'] - $data['summary']['pharmacy_purchases'];
             
         } catch (\Exception $e) {
@@ -310,17 +306,17 @@ class DirectorDashboardController extends Controller
             $data['summary']['pharmacy_profit'] = 0;
         }
 
-        // Glass Sales
+        // Glass Sales (consultation_type_id = 2 = 'Glass')
         try {
             $glassSalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Glass');
+                ->where('ppci.consultation_type_id', 2)
+                ->where('it.item_type_id', '!=', 4); // Exclude frames
             
             if ($clinic_id) {
                 $glassSalesQuery->where('u.clinic_id', $clinic_id);
@@ -331,19 +327,19 @@ class DirectorDashboardController extends Controller
             // Glass Purchases (COGS)
             $glassPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Glass');
+                ->where('ppci.consultation_type_id', 2)
+                ->where('it.item_type_id', '!=', 4); // Exclude frames
             
             if ($clinic_id) {
                 $glassPurchasesQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['glass_purchases'] = $glassPurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['glass_purchases'] = $glassPurchasesQuery->sum(DB::raw('COALESCE(it.unit_buying_price, 0) * ppci.quantity')) ?? 0;
             $data['summary']['glass_profit'] = $data['summary']['glass'] - $data['summary']['glass_purchases'];
             
         } catch (\Exception $e) {
@@ -353,22 +349,16 @@ class DirectorDashboardController extends Controller
             $data['summary']['glass_profit'] = 0;
         }
 
-        // Frame Sales (items containing "frame" in their name)
+        // Frame Sales (item_type_id = 4 = 'Frame')
         try {
             $frameSalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Glass')
-                ->where(function($query) {
-                    $query->where('it.name', 'like', '%frame%')
-                          ->orWhere('it.name', 'like', '%Frame%')
-                          ->orWhere('it.name', 'like', '%FRAME%');
-                });
+                ->where('it.item_type_id', 4);
             
             if ($clinic_id) {
                 $frameSalesQuery->where('u.clinic_id', $clinic_id);
@@ -379,24 +369,18 @@ class DirectorDashboardController extends Controller
             // Frame Purchases (COGS)
             $framePurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('consultation_types as ct', 'it.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ct.name', 'Glass')
-                ->where(function($query) {
-                    $query->where('it.name', 'like', '%frame%')
-                          ->orWhere('it.name', 'like', '%Frame%')
-                          ->orWhere('it.name', 'like', '%FRAME%');
-                });
+                ->where('it.item_type_id', 4);
             
             if ($clinic_id) {
                 $framePurchasesQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['frame_purchases'] = $framePurchasesQuery->sum(DB::raw('it.unit_buying_price * ppci.quantity')) ?? 0;
+            $data['summary']['frame_purchases'] = $framePurchasesQuery->sum(DB::raw('COALESCE(it.unit_buying_price, 0) * ppci.quantity')) ?? 0;
             $data['summary']['frame_profit'] = $data['summary']['frame'] - $data['summary']['frame_purchases'];
             
         } catch (\Exception $e) {

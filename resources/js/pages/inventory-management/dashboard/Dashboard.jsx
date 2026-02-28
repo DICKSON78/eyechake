@@ -56,7 +56,7 @@ const Dashboard = () => {
   const theme = useTheme();
 
   // Set up date parameters for weekly filtering
-  const [dateParams, setDateParams] = useState({
+  const [dateParams] = useState({
     start_date: getWeekStartDate().toISOString().split('T')[0],
     end_date: getWeekEndDate().toISOString().split('T')[0],
   });
@@ -64,14 +64,23 @@ const Dashboard = () => {
   // Selected item filters for individual performance charts
   const [selectedFrameId, setSelectedFrameId] = useState('');
   const [selectedMedicineId, setSelectedMedicineId] = useState('');
+  
+  // Store item lists separately so they persist during chart refetch
+  const [frameItems, setFrameItems] = useState([]);
+  const [medicineItems, setMedicineItems] = useState([]);
+  
+  // Loading states for individual charts
+  const [frameChartLoading, setFrameChartLoading] = useState(false);
+  const [medicineChartLoading, setMedicineChartLoading] = useState(false);
+  
+  // Store chart data separately
+  const [frameMonthlySales, setFrameMonthlySales] = useState([]);
+  const [medicineMonthlySales, setMedicineMonthlySales] = useState([]);
 
+  // Main dashboard data fetch (without filter params - for summary and static data)
   const { data, loading, error, handleFetch } = useFetch(
     "api/inventory-management/dashboard",
-    {
-      ...dateParams,
-      frame_id: selectedFrameId || undefined,
-      medicine_id: selectedMedicineId || undefined,
-    },
+    dateParams,
     true,
     {
       summary: {
@@ -96,11 +105,22 @@ const Dashboard = () => {
       },
     },
     (response) => {
-      console.log('Stock Management Dashboard API Response:', response);
-      console.log('Statistics data:', response?.data?.data?.statistics);
-      console.log('Frame categories:', response?.data?.data?.statistics?.frame_categories);
-      console.log('Lens types:', response?.data?.data?.statistics?.lens_types);
-      return response.data.data;
+      const result = response.data.data;
+      // Store item lists when main data loads
+      if (result?.statistics?.frame_items) {
+        setFrameItems(result.statistics.frame_items);
+      }
+      if (result?.statistics?.medicine_items) {
+        setMedicineItems(result.statistics.medicine_items);
+      }
+      // Initialize chart data
+      if (result?.statistics?.frame_monthly_sales) {
+        setFrameMonthlySales(result.statistics.frame_monthly_sales);
+      }
+      if (result?.statistics?.medicine_monthly_sales) {
+        setMedicineMonthlySales(result.statistics.medicine_monthly_sales);
+      }
+      return result;
     }
   );
 
@@ -108,10 +128,51 @@ const Dashboard = () => {
     document.title = `Stock Management Dashboard - ${window.APP_NAME}`;
   }, []);
 
-  // Refetch when filter selections change
+  // Fetch frame chart data when frame filter changes
   useEffect(() => {
-    handleFetch();
-  }, [selectedFrameId, selectedMedicineId]);
+    if (selectedFrameId === '') {
+      // Reset to original data when "All Frames" is selected
+      if (data?.statistics?.frame_monthly_sales) {
+        setFrameMonthlySales(data.statistics.frame_monthly_sales);
+      }
+      return;
+    }
+    
+    setFrameChartLoading(true);
+    window.axios.get('/api/inventory-management/dashboard', {
+      params: { ...dateParams, frame_id: selectedFrameId }
+    }).then((response) => {
+      const chartData = response.data?.data?.statistics?.frame_monthly_sales || [];
+      setFrameMonthlySales(chartData);
+    }).catch((err) => {
+      console.error('Error fetching frame chart data:', err);
+    }).finally(() => {
+      setFrameChartLoading(false);
+    });
+  }, [selectedFrameId]);
+
+  // Fetch medicine chart data when medicine filter changes
+  useEffect(() => {
+    if (selectedMedicineId === '') {
+      // Reset to original data when "All Medicines" is selected
+      if (data?.statistics?.medicine_monthly_sales) {
+        setMedicineMonthlySales(data.statistics.medicine_monthly_sales);
+      }
+      return;
+    }
+    
+    setMedicineChartLoading(true);
+    window.axios.get('/api/inventory-management/dashboard', {
+      params: { ...dateParams, medicine_id: selectedMedicineId }
+    }).then((response) => {
+      const chartData = response.data?.data?.statistics?.medicine_monthly_sales || [];
+      setMedicineMonthlySales(chartData);
+    }).catch((err) => {
+      console.error('Error fetching medicine chart data:', err);
+    }).finally(() => {
+      setMedicineChartLoading(false);
+    });
+  }, [selectedMedicineId]);
 
   // Auto-refresh when page becomes visible
   useEffect(() => {
@@ -351,7 +412,7 @@ const Dashboard = () => {
               <Card>
                 <CardHeader
                   title={selectedFrameId
-                    ? `Sold: ${(data.statistics?.frame_items || []).find(f => f.id === selectedFrameId)?.name || 'Frame'} (Monthly)`
+                    ? `Sold: ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame'} (Monthly)`
                     : "Sold Frames (Monthly)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
@@ -363,7 +424,7 @@ const Dashboard = () => {
                         onChange={(e) => setSelectedFrameId(e.target.value)}
                       >
                         <MenuItem value="">All Frames</MenuItem>
-                        {(data.statistics?.frame_items || []).map((item) => (
+                        {frameItems.map((item) => (
                           <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                         ))}
                       </MuiSelect>
@@ -372,31 +433,37 @@ const Dashboard = () => {
                 />
                 <Divider />
                 <CardContent>
-                  <ChartWrapper
-                    options={{
-                      chart: { toolbar: { show: false } },
-                      stroke: { curve: 'smooth' },
-                      xaxis: {
-                        categories: (data.statistics?.frame_monthly_sales || []).map((e) => e.label),
-                      },
-                      yaxis: {
-                        min: 0,
-                        labels: {
-                          formatter: (val) => numberFormat(Math.round(val)),
+                  {frameChartLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <CircularProgress size={40} />
+                    </Box>
+                  ) : (
+                    <ChartWrapper
+                      options={{
+                        chart: { toolbar: { show: false } },
+                        stroke: { curve: 'smooth' },
+                        xaxis: {
+                          categories: frameMonthlySales.map((e) => e.label),
                         },
-                      },
-                      tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
-                      colors: [purple[500]],
-                    }}
-                    series={[
-                      {
-                        name: 'Frames Sold',
-                        data: (data.statistics?.frame_monthly_sales || []).map((e) => e.quantity_sold || 0),
-                      },
-                    ]}
-                    type="line"
-                    height={320}
-                  />
+                        yaxis: {
+                          min: 0,
+                          labels: {
+                            formatter: (val) => numberFormat(Math.round(val)),
+                          },
+                        },
+                        tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
+                        colors: [purple[500]],
+                      }}
+                      series={[
+                        {
+                          name: 'Frames Sold',
+                          data: frameMonthlySales.map((e) => e.quantity_sold || 0),
+                        },
+                      ]}
+                      type="line"
+                      height={320}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -406,7 +473,7 @@ const Dashboard = () => {
               <Card>
                 <CardHeader
                   title={selectedMedicineId
-                    ? `Sold: ${(data.statistics?.medicine_items || []).find(m => m.id === selectedMedicineId)?.name || 'Medicine'} (Monthly)`
+                    ? `Sold: ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine'} (Monthly)`
                     : "Sold Medicine (Monthly)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
@@ -418,7 +485,7 @@ const Dashboard = () => {
                         onChange={(e) => setSelectedMedicineId(e.target.value)}
                       >
                         <MenuItem value="">All Medicines</MenuItem>
-                        {(data.statistics?.medicine_items || []).map((item) => (
+                        {medicineItems.map((item) => (
                           <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                         ))}
                       </MuiSelect>
@@ -427,31 +494,37 @@ const Dashboard = () => {
                 />
                 <Divider />
                 <CardContent>
-                  <ChartWrapper
-                    options={{
-                      chart: { toolbar: { show: false } },
-                      stroke: { curve: 'smooth' },
-                      xaxis: {
-                        categories: (data.statistics?.medicine_monthly_sales || []).map((e) => e.label),
-                      },
-                      yaxis: {
-                        min: 0,
-                        labels: {
-                          formatter: (val) => numberFormat(Math.round(val)),
+                  {medicineChartLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <CircularProgress size={40} />
+                    </Box>
+                  ) : (
+                    <ChartWrapper
+                      options={{
+                        chart: { toolbar: { show: false } },
+                        stroke: { curve: 'smooth' },
+                        xaxis: {
+                          categories: medicineMonthlySales.map((e) => e.label),
                         },
-                      },
-                      tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
-                      colors: [teal[500]],
-                    }}
-                    series={[
-                      {
-                        name: 'Medicine Sold',
-                        data: (data.statistics?.medicine_monthly_sales || []).map((e) => e.quantity_sold || 0),
-                      },
-                    ]}
-                    type="line"
-                    height={320}
-                  />
+                        yaxis: {
+                          min: 0,
+                          labels: {
+                            formatter: (val) => numberFormat(Math.round(val)),
+                          },
+                        },
+                        tooltip: { y: { formatter: (val) => numberFormat(Math.round(val)) } },
+                        colors: [teal[500]],
+                      }}
+                      series={[
+                        {
+                          name: 'Medicine Sold',
+                          data: medicineMonthlySales.map((e) => e.quantity_sold || 0),
+                        },
+                      ]}
+                      type="line"
+                      height={320}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </Grid>
