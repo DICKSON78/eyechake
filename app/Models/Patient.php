@@ -20,7 +20,6 @@ class Patient extends Model
     ];
 
     protected $casts = [
-        'is_vip' => 'boolean',
         'is_student' => 'boolean',
         'is_businessperson' => 'boolean',
         'is_outreach' => 'boolean',
@@ -111,6 +110,12 @@ class Patient extends Model
             $this->last_name
         ]);
         return implode(' ', $parts);
+    }
+
+    // Custom accessor to properly convert enum 'Yes'/'No' to boolean
+    public function getIsVipAttribute($value)
+    {
+        return $value === 'Yes' || $value === true || $value === 1;
     }
 
     public function scopeFullName($query, $value)
