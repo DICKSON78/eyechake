@@ -123,7 +123,7 @@ const WhatsAppExport = () => {
                         }
                       />
                     }
-                    label="Prestige Clients Only"
+                    label="VIP Clients Only"
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>

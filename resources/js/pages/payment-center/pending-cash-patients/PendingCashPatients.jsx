@@ -172,7 +172,7 @@ const PendingCashPatients = () => {
                       {isVip === true && (
                         <Chip
                           icon={<StarIcon />}
-                          label="Prestige"
+                          label="VIP"
                           color="warning"
                           size="small"
                         />

@@ -61,12 +61,12 @@ const Eyeware = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const eyewareImages = [
-    // Children Frames (10 frames using existing gallery images)
+    // Children Frames (16 frames - new images)
     {
       id: 1,
       title: 'Kids Adventure Frames',
       category: 'Children Frames',
-      image: '/images/galarry/1.jpeg',
+      image: '/images/eyeware/children/children-1.jpeg',
       description: 'Fun and colorful frames designed for active children',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -74,7 +74,7 @@ const Eyeware = () => {
       id: 2,
       title: 'Youth Explorer Frames',
       category: 'Children Frames',
-      image: '/images/galarry/2.jpeg',
+      image: '/images/eyeware/children/children-2.jpeg',
       description: 'Durable frames perfect for school and play activities',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -82,7 +82,7 @@ const Eyeware = () => {
       id: 3,
       title: 'Junior Sport Frames',
       category: 'Children Frames',
-      image: '/images/galarry/3.jpeg',
+      image: '/images/eyeware/children/children-3.jpeg',
       description: 'Lightweight frames with UV protection for outdoor activities',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -90,7 +90,7 @@ const Eyeware = () => {
       id: 4,
       title: 'Kids Classic Frames',
       category: 'Children Frames',
-      image: '/images/galarry/4.jpeg',
+      image: '/images/eyeware/children/children-4.jpeg',
       description: 'Timeless designs that grow with your child',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -98,7 +98,7 @@ const Eyeware = () => {
       id: 5,
       title: 'Youth Trendy Frames',
       category: 'Children Frames',
-      image: '/images/galarry/5.jpeg',
+      image: '/images/eyeware/children/children-5.jpeg',
       description: 'Modern styles that kids love to wear',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -106,7 +106,7 @@ const Eyeware = () => {
       id: 6,
       title: 'Children Comfort Frames',
       category: 'Children Frames',
-      image: '/images/galarry/6.jpeg',
+      image: '/images/eyeware/children/children-6.jpeg',
       description: 'Soft nose pads and lightweight materials for comfort',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -114,7 +114,7 @@ const Eyeware = () => {
       id: 7,
       title: 'Kids Durable Frames',
       category: 'Children Frames',
-      image: '/images/galarry/7.jpeg',
+      image: '/images/eyeware/children/children-7.jpeg',
       description: 'Strong frames that can handle rough play',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -122,7 +122,7 @@ const Eyeware = () => {
       id: 8,
       title: 'Youth Stylish Frames',
       category: 'Children Frames',
-      image: '/images/galarry/8.jpeg',
+      image: '/images/eyeware/children/children-8.jpeg',
       description: 'Fashionable frames for confident young wearers',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -130,7 +130,7 @@ const Eyeware = () => {
       id: 9,
       title: 'Children Premium Frames',
       category: 'Children Frames',
-      image: '/images/galarry/9.jpeg',
+      image: '/images/eyeware/children/children-9.jpeg',
       description: 'High-quality frames with excellent craftsmanship',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -138,8 +138,56 @@ const Eyeware = () => {
       id: 10,
       title: 'Kids Ultimate Frames',
       category: 'Children Frames',
-      image: '/images/galarry/10.jpeg',
+      image: '/images/eyeware/children/children-10.jpeg',
       description: 'The perfect combination of style, comfort, and durability',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 31,
+      title: 'Kids Flex Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-11.jpeg',
+      description: 'Flexible frames that adjust to active lifestyles',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 32,
+      title: 'Youth Outdoor Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-12.jpeg',
+      description: 'Designed for outdoor adventures and sports',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 33,
+      title: 'Kids Colorful Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-13.jpeg',
+      description: 'Bright and vibrant frames kids adore',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 34,
+      title: 'Youth Round Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-14.jpeg',
+      description: 'Classic round frames for a fun look',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 35,
+      title: 'Kids Lightweight Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-15.jpeg',
+      description: 'Super light frames that feel like nothing is there',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 36,
+      title: 'Youth Smart Frames',
+      category: 'Children Frames',
+      image: '/images/eyeware/children/children-16.jpeg',
+      description: 'Smart-looking frames for the school-going child',
       whatsappNumber: WHATSAPP_NUMBER,
     },
 
@@ -225,12 +273,12 @@ const Eyeware = () => {
       whatsappNumber: WHATSAPP_NUMBER,
     },
 
-    // Executive Collections (10 frames using existing gallery images)
+    // Executive Collections (11 frames - new images)
     {
       id: 21,
       title: 'Premium Executive Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/8.jpeg',
+      image: '/images/eyeware/executive/executive-1.jpeg',
       description: 'Luxury frames crafted with premium materials for executives',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -238,7 +286,7 @@ const Eyeware = () => {
       id: 22,
       title: 'Designer Executive Eyewear',
       category: 'Executive Collections',
-      image: '/images/galarry/9.jpeg',
+      image: '/images/eyeware/executive/executive-2.jpeg',
       description: 'High-end designer frames for the discerning professional',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -246,7 +294,7 @@ const Eyeware = () => {
       id: 23,
       title: 'Luxury Executive Collection',
       category: 'Executive Collections',
-      image: '/images/galarry/10.jpeg',
+      image: '/images/eyeware/executive/executive-3.jpeg',
       description: 'Exclusive executive frames with premium finishes',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -254,7 +302,7 @@ const Eyeware = () => {
       id: 24,
       title: 'Elite Professional Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/11.jpeg',
+      image: '/images/eyeware/executive/executive-4.jpeg',
       description: 'Elite frames designed for executives who demand the finest',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -262,7 +310,7 @@ const Eyeware = () => {
       id: 25,
       title: 'Executive Titanium Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/12.jpeg',
+      image: '/images/eyeware/executive/executive-5.jpeg',
       description: 'Lightweight titanium frames with superior craftsmanship',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -270,7 +318,7 @@ const Eyeware = () => {
       id: 26,
       title: 'Prestige Executive Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/13.jpeg',
+      image: '/images/eyeware/executive/executive-6.jpeg',
       description: 'Prestige frames that command attention and respect',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -278,7 +326,7 @@ const Eyeware = () => {
       id: 27,
       title: 'Executive Luxury Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/1.jpeg',
+      image: '/images/eyeware/executive/executive-7.jpeg',
       description: 'Luxury frames that reflect success and sophistication',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -286,7 +334,7 @@ const Eyeware = () => {
       id: 28,
       title: 'Premium Executive Collection',
       category: 'Executive Collections',
-      image: '/images/galarry/2.jpeg',
+      image: '/images/eyeware/executive/executive-8.jpeg',
       description: 'Premium collection for the modern executive',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -294,7 +342,7 @@ const Eyeware = () => {
       id: 29,
       title: 'Elite Executive Frames',
       category: 'Executive Collections',
-      image: '/images/galarry/3.jpeg',
+      image: '/images/eyeware/executive/executive-9.jpeg',
       description: 'Elite craftsmanship for elite professionals',
       whatsappNumber: WHATSAPP_NUMBER,
     },
@@ -302,18 +350,24 @@ const Eyeware = () => {
       id: 30,
       title: 'Executive Master Collection',
       category: 'Executive Collections',
-      image: '/images/galarry/4.jpeg',
+      image: '/images/eyeware/executive/executive-10.jpeg',
       description: 'The ultimate in executive eyewear excellence',
+      whatsappNumber: WHATSAPP_NUMBER,
+    },
+    {
+      id: 37,
+      title: 'Executive Signature Frames',
+      category: 'Executive Collections',
+      image: '/images/eyeware/executive/executive-11.jpeg',
+      description: 'Signature collection for the distinguished executive',
       whatsappNumber: WHATSAPP_NUMBER,
     },
   ];
 
-  const categories = ['All', 'Children Frames', 'Medium Budget Frames', 'Executive Collections'];
-  const [activeCategory, setActiveCategory] = useState('All');
+  const categories = ['Children Frames', 'Medium Budget Frames', 'Executive Collections'];
+  const [activeCategory, setActiveCategory] = useState('Children Frames');
 
-  const filteredImages = activeCategory === 'All'
-    ? eyewareImages
-    : eyewareImages.filter(img => img.category === activeCategory);
+  const filteredImages = eyewareImages.filter(img => img.category === activeCategory);
 
   const openModal = (image, index) => {
     setSelectedImage(image);

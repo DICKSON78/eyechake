@@ -138,22 +138,21 @@ class DirectorDashboardController extends Controller
 
         // Revenue from New Consultation/Patient
         try {
-            $newConsultationQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items', 'patient_item_payments.id', '=', 'patient_payment_cache_items.item_payment_id')
-                ->join('consultations', 'patient_payment_cache_items.id', '=', 'consultations.payment_cache_item_id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->where('consultations.patient_direction', 'Direct to Doctor');
+            $newConsultationQuery = DB::table('patient_item_payments as pip')
+                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
+                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+                ->join('users as u', 'pip.created_by', '=', 'u.id')
+                ->whereNotNull('pip.created_at')
+                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('pip.amount', '>', 0)
+                ->where('c.patient_direction', 'Direct to Doctor');
             
             if ($clinic_id) {
-                $newConsultationQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
+                $newConsultationQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['revenue_new_consultation'] = $newConsultationQuery->sum('patient_item_payments.amount') ?? 0;
+            $data['summary']['revenue_new_consultation'] = $newConsultationQuery->sum('pip.amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating revenue from new consultation', ['error' => $e->getMessage()]);
             $data['summary']['revenue_new_consultation'] = 0;
@@ -161,22 +160,21 @@ class DirectorDashboardController extends Controller
 
         // Revenue from Return Consultation
         try {
-            $returnConsultationQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items', 'patient_item_payments.id', '=', 'patient_payment_cache_items.item_payment_id')
-                ->join('consultations', 'patient_payment_cache_items.id', '=', 'consultations.payment_cache_item_id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->where('consultations.patient_to_return', 'Yes');
+            $returnConsultationQuery = DB::table('patient_item_payments as pip')
+                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
+                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+                ->join('users as u', 'pip.created_by', '=', 'u.id')
+                ->whereNotNull('pip.created_at')
+                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('pip.amount', '>', 0)
+                ->where('c.patient_to_return', 'Yes');
             
             if ($clinic_id) {
-                $returnConsultationQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
+                $returnConsultationQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['revenue_return_consultation'] = $returnConsultationQuery->sum('patient_item_payments.amount') ?? 0;
+            $data['summary']['revenue_return_consultation'] = $returnConsultationQuery->sum('pip.amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating revenue from return consultation', ['error' => $e->getMessage()]);
             $data['summary']['revenue_return_consultation'] = 0;
@@ -184,21 +182,20 @@ class DirectorDashboardController extends Controller
 
         // Total Revenue from All Consultations
         try {
-            $allConsultationsQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items', 'patient_item_payments.id', '=', 'patient_payment_cache_items.item_payment_id')
-                ->join('consultations', 'patient_payment_cache_items.id', '=', 'consultations.payment_cache_item_id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0);
+            $allConsultationsQuery = DB::table('patient_item_payments as pip')
+                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
+                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+                ->join('users as u', 'pip.created_by', '=', 'u.id')
+                ->whereNotNull('pip.created_at')
+                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('pip.amount', '>', 0);
             
             if ($clinic_id) {
-                $allConsultationsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
+                $allConsultationsQuery->where('u.clinic_id', $clinic_id);
             }
             
-            $data['summary']['revenue_all_consultations'] = $allConsultationsQuery->sum('patient_item_payments.amount') ?? 0;
+            $data['summary']['revenue_all_consultations'] = $allConsultationsQuery->sum('pip.amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating revenue from all consultations', ['error' => $e->getMessage()]);
             $data['summary']['revenue_all_consultations'] = 0;

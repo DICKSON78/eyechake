@@ -193,10 +193,10 @@ const PatientsToReturn = () => {
           <Grid size={{ xs: 12 }}>
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
               {patient.is_vip && (
-                <Chip icon={<VipIcon />} label="Prestige" color="warning" size="small" />
+                <Chip icon={<VipIcon />} label="VIP" color="warning" size="small" />
               )}
               {patient.is_businessperson && (
-                <Chip icon={<BusinessIcon />} label="Prestige" color="warning" size="small" />
+                <Chip icon={<BusinessIcon />} label="Business" color="warning" size="small" />
               )}
               {patient.is_outreach && (
                 <Chip icon={<OutreachIcon />} label="Outreach" color="success" size="small" />
@@ -425,7 +425,7 @@ const PatientsToReturn = () => {
                                 </Box>
                                 <Stack direction="row" spacing={0.5}>
                                   {patient.is_vip === true && (
-                                    <Chip icon={<VipIcon />} label="Prestige" color="warning" size="small" sx={{ height: 20 }} />
+                                    <Chip icon={<VipIcon />} label="VIP" color="warning" size="small" sx={{ height: 20 }} />
                                   )}
                                   {patient.is_businessperson === true && (
                                     <Chip icon={<BusinessIcon />} label="Business" color="info" size="small" sx={{ height: 20 }} />

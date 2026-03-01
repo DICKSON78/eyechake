@@ -272,7 +272,7 @@ const Patients = () => {
                       <Chip
                         key="vip"
                         icon={<StarIcon sx={{ fontSize: 14 }} />}
-                        label="Prestige"
+                        label="VIP"
                         size="small"
                         sx={{ 
                           mr: 0.5,

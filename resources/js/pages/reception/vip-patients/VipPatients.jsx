@@ -171,7 +171,7 @@ const VipPatients = () => {
                 renderCell: (item) => (
                   <Chip
                     icon={<StarIcon />}
-                    label="Prestige"
+                    label="VIP"
                     color="warning"
                     variant="filled"
                     size="small"

@@ -429,7 +429,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                     }
                   />
                 }
-                  label="Prestige"
+                  label="VIP"
                 />
                 <FormControlLabel
                   control={

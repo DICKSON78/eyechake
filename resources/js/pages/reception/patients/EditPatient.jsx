@@ -357,7 +357,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                     }
                   />
                 }
-                  label="Prestige"
+                  label="VIP"
                 />
                 <FormControlLabel
                   control={

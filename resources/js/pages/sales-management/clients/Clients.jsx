@@ -186,7 +186,7 @@ const Clients = () => {
                     {item.is_vip === true && (
                       <Chip
                         icon={<StarIcon />}
-                        label="Prestige"
+                        label="VIP"
                         color="warning"
                         size="small"
                       />

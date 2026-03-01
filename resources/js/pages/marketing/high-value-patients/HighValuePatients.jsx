@@ -118,20 +118,20 @@ const HighValuePatients = () => {
               },
               {
                 field: "is_vip",
-                headerName: "Prestige",
+                headerName: "VIP",
                 renderCell: (item) =>
                   item.is_vip ? (
-                    <Chip label="Prestige" size="small" color="primary" />
+                    <Chip label="VIP" size="small" color="primary" />
                   ) : (
                     "-"
                   ),
               },
               {
                 field: "is_businessperson",
-                headerName: "Prestige",
+                headerName: "Business",
                 renderCell: (item) =>
                   item.is_businessperson ? (
-                    <Chip label="Prestige" size="small" color="warning" />
+                    <Chip label="Business" size="small" color="warning" />
                   ) : (
                     "-"
                   ),

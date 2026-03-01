@@ -273,7 +273,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
         {row.isVip && (
           <Chip
             icon={<StarIcon />}
-            label="Prestige"
+            label="VIP"
             color="warning"
             size="small"
             sx={{ 
@@ -337,7 +337,7 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
               {row.isVip && (
                 <Chip
                   icon={<StarIcon />}
-                  label="Prestige"
+                  label="VIP"
                   color="warning"
                   size="small"
                   sx={{ 
