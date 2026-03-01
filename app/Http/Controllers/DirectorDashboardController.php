@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
 use App\Models\PatientItemPayment;
+use App\Models\PatientItemBill;
 use App\Models\PatientItemBillPayment;
 use App\Models\ExpensePayment;
 use App\Models\Patient;
@@ -74,37 +75,38 @@ class DirectorDashboardController extends Controller
             })
             ->count();
 
-        // Total Sales (from payments and bill payments)
+        // Total Revenue (from payments + cleared bills) - matching Financial Management logic
         try {
-            $itemPaymentsQuery = PatientItemPayment::query()
+            $revenueQuery = PatientItemPayment::query()
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
                 ->where('created_at', '<=', $end_date . ' 23:59:59')
                 ->where('amount', '>', 0);
             
             if ($clinic_id) {
-                $itemPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                $revenueQuery->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             }
             
-            $itemPayments = $itemPaymentsQuery->sum(DB::raw('COALESCE(amount, 0) - COALESCE(discount, 0)')) ?? 0;
+            $itemPayments = $revenueQuery->sum('amount') ?? 0;
             
-            $billPaymentsQuery = PatientItemBillPayment::query()
+            // Add cleared bills to total revenue
+            $clearedBillsQuery = PatientItemBill::query()
+                ->where('status', 'Cleared')
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+                ->where('created_at', '<=', $end_date . ' 23:59:59');
             
             if ($clinic_id) {
-                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                $clearedBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             }
             
-            $billPayments = $billPaymentsQuery->sum('amount') ?? 0;
+            $clearedBills = $clearedBillsQuery->sum('amount') ?? 0;
             
-            $data['summary']['total_sales'] = $itemPayments + $billPayments;
+            $data['summary']['total_sales'] = $itemPayments + $clearedBills;
         } catch (\Exception $e) {
             \Log::error('Error calculating total sales', ['error' => $e->getMessage()]);
             $data['summary']['total_sales'] = 0;
@@ -387,15 +389,15 @@ class DirectorDashboardController extends Controller
             $data['summary']['frame_profit'] = 0;
         }
 
-        // Calculate Total Purchases as sum of all COGS categories
+        // Calculate Total Purchases as sum of all COGS categories (for display only)
         $data['summary']['total_purchases'] = 
             ($data['summary']['consultation_purchases'] ?? 0) +
             ($data['summary']['pharmacy_purchases'] ?? 0) +
             ($data['summary']['glass_purchases'] ?? 0) +
             ($data['summary']['frame_purchases'] ?? 0);
 
-        // Recalculate Net Profit to account for COGS
-        $data['summary']['net_profit'] = $data['summary']['total_sales'] - $data['summary']['total_purchases'] - $data['summary']['total_expenses'];
+        // Net Profit = Revenue - Expenses (simple formula matching Financial Management)
+        // Note: COGS is tracked separately for reporting but not deducted from net profit
 
         // Consulted Patients (patients who have been consulted)
         try {
