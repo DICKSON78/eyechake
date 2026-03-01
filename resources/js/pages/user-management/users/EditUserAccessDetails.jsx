@@ -31,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import Select from "../../../components/Select";
 
 import { usePatch, useToast } from "../../../hooks";
 import { formatError, getPrivileges } from "../../../helpers";
@@ -66,6 +67,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
     password: undefined,
     privileges: normalizePrivileges(item.privileges),
     status: item.status,
+    role: item.role || "Client",
   });
 
   const { data, loading, error, handlePatch } = usePatch(
@@ -387,6 +389,33 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                       </Stack>
                     </Box>
                   )}
+                </Grid>
+                <Grid item xs={12}>
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    <Typography variant="body2">
+                      <strong>Admin Role:</strong> Admins have full system access across all clinics/branches and can manage all settings.
+                      <br />
+                      <strong>Client Role:</strong> Standard employees with access based on assigned privileges below.
+                    </Typography>
+                  </Alert>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Select
+                    label="Role"
+                    fullWidth
+                    required
+                    value={formData.role}
+                    options={[
+                      { label: "Client (Standard)", value: "Client" },
+                      { label: "Admin (Full Access)", value: "Admin" },
+                    ]}
+                    optionsLabel="label"
+                    optionsValue="value"
+                    onChange={(value) =>
+                      setFormData({ ...formData, role: value })
+                    }
+                    helperText="Admin users have access to all clinics and settings"
+                  />
                 </Grid>
               </Grid>
             </CardContent>

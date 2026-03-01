@@ -197,6 +197,7 @@ class UsersController extends Controller
                 'job_title_id' => 'nullable|exists:job_titles,id',
                 'employee_number' => 'nullable|string|unique:users,employee_number|max:50',
                 'password' => 'required|string|min:6',
+                'role' => 'sometimes|in:Admin,Client',
                 'privileges' => 'sometimes|array',
             ];
 
@@ -263,6 +264,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|unique:users,employee_number,' . $id,
             'status' => 'sometimes|required|in:Active,Inactive',
+            'role' => 'sometimes|in:Admin,Client',
             'privileges' => 'sometimes|array',
         ]);
 
