@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -26,6 +26,7 @@ import {
   MoneyRounded as NetProfitIcon,
   TrendingDownRounded as ExpensesIcon,
   ReceiptRounded as BillsIcon,
+  RefreshRounded as RefreshIcon,
 } from "@mui/icons-material";
 
 import Page from "../../components/Page";
@@ -37,6 +38,7 @@ import StockAlertsNotification from "../../components/StockAlertsNotification";
 import ChartWrapper from "../../components/ChartWrapper";
 import Select from "../../components/Select";
 import PatientReturnSidebar from "./PatientReturnSidebar";
+import notificationEvents from "../../utils/notificationEvents";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -72,8 +74,8 @@ const Dashboard = ({ setSmsBalance }) => {
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: getWeekStartDate(),
-    end_date: undefined,
+    start_date: new Date(), // Default to today
+    end_date: new Date(),   // Default to today
   });
 
   const [salesExpensesPeriod, setSalesExpensesPeriod] = useState('yearly');
@@ -109,6 +111,45 @@ const Dashboard = ({ setSmsBalance }) => {
     null,
     (response) => response.data.data
   );
+
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+
+  // Memoize refresh handler to prevent unnecessary re-renders
+  const handleRefresh = useCallback(() => {
+    if (!loading) {
+      setIsAutoRefreshing(true);
+      handleFetch();
+      setLastRefresh(Date.now());
+      // Reset auto-refreshing flag after a short delay
+      setTimeout(() => setIsAutoRefreshing(false), 1000);
+    }
+  }, [handleFetch, loading]);
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading) {
+        handleRefresh();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [handleRefresh, loading]);
+
+  // Listen to notification events to refresh dashboard when something changes
+  useEffect(() => {
+    const unsubscribe = notificationEvents.subscribe(() => {
+      // Debounce refresh to prevent too many rapid refreshes
+      setTimeout(() => {
+        if (!loading) {
+          handleRefresh();
+        }
+      }, 500);
+    });
+
+    return () => unsubscribe();
+  }, [handleRefresh, loading]);
 
   useEffect(() => {
     document.title = `Dashboard - ${window.APP_NAME}`;
@@ -179,11 +220,30 @@ const Dashboard = ({ setSmsBalance }) => {
       <CardHeader
         title="Dashboard"
         action={
-          <Tooltip title="Show filters">
-            <IconButton onClick={openFiltersModal}>
-              <FilterIcon />
-            </IconButton>
-          </Tooltip>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Tooltip title={loading || isAutoRefreshing ? "Refreshing..." : "Refresh data"}>
+              <span>
+                <IconButton 
+                  onClick={handleRefresh} 
+                  disabled={loading || isAutoRefreshing}
+                  sx={{
+                    animation: (loading || isAutoRefreshing) ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Show filters">
+              <IconButton onClick={openFiltersModal}>
+                <FilterIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         }
         titleTypographyProps={{
           variant: "h4",

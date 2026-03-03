@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import {
   LocalHospitalRounded as DoctorIcon,
@@ -31,6 +32,7 @@ import Modal from "../../../components/Modal";
 import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
+import notificationEvents from "../../../utils/notificationEvents";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -68,7 +70,7 @@ const Dashboard = () => {
     document.title = `Reception Dashboard - ${window.APP_NAME}`;
   }, []);
 
-  const { data, loading, error } = useFetch(
+  const { data, loading, error, handleFetch } = useFetch(
     "api/reception/dashboard",
     {
       ...params,
@@ -102,6 +104,41 @@ const Dashboard = () => {
     },
     (response) => response.data.data
   );
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Memoize refresh handler
+  const handleRefresh = useCallback(() => {
+    if (!loading) {
+      setIsRefreshing(true);
+      handleFetch();
+      setTimeout(() => setIsRefreshing(false), 1000);
+    }
+  }, [handleFetch, loading]);
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading) {
+        handleFetch();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [handleFetch, loading]);
+
+  // Listen to notification events to refresh data
+  useEffect(() => {
+    const unsubscribe = notificationEvents.subscribe(() => {
+      setTimeout(() => {
+        if (!loading) {
+          handleFetch();
+        }
+      }, 500);
+    });
+
+    return () => unsubscribe();
+  }, [handleFetch, loading]);
 
   useEffect(() => {
     if (error) {
@@ -143,11 +180,30 @@ const Dashboard = () => {
       <CardHeader
         title="Reception Dashboard"
         action={
-          <Tooltip title="Show filters">
-            <IconButton onClick={openFiltersModal}>
-              <FilterIcon />
-            </IconButton>
-          </Tooltip>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Tooltip title={loading || isRefreshing ? "Refreshing..." : "Refresh data"}>
+              <span>
+                <IconButton 
+                  onClick={handleRefresh} 
+                  disabled={loading || isRefreshing}
+                  sx={{
+                    animation: (loading || isRefreshing) ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Show filters">
+              <IconButton onClick={openFiltersModal}>
+                <FilterIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         }
         titleTypographyProps={{
           variant: "h4",

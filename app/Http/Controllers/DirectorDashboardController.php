@@ -28,9 +28,9 @@ class DirectorDashboardController extends Controller
 
         $user = $request->user();
         
-        // Default to current week if no dates provided
-        $start_date = $request->start_date ?? Carbon::now()->startOfWeek()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::now()->endOfWeek()->format('Y-m-d');
+        // Default to today if no dates provided
+        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
         // Default allow: if user missing or role unspecified, do not restrict by clinic
         if (!$user || $user->is_admin) {
@@ -137,6 +137,102 @@ class DirectorDashboardController extends Controller
 
         // Net Profit (will be recalculated later after COGS)
         $data['summary']['net_profit'] = $data['summary']['total_sales'] - $data['summary']['total_expenses'];
+
+        // Alias total_revenue for Financial Management compatibility
+        $data['summary']['total_revenue'] = $data['summary']['total_sales'];
+
+        // Daily collections: sum of all payments (item payments + bill payments) matching Financial Management
+        try {
+            $dailyCollectionsQuery = PatientItemPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0);
+            
+            if ($clinic_id) {
+                $dailyCollectionsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $dailyCollections = $dailyCollectionsQuery->sum('amount') ?? 0;
+
+            // Add bill payments to daily collections
+            $billPaymentsQuery = PatientItemBillPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0);
+            
+            if ($clinic_id) {
+                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $billPaymentsCollections = $billPaymentsQuery->sum('amount') ?? 0;
+            $data['summary']['daily_collections'] = $dailyCollections + $billPaymentsCollections;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating daily collections', ['error' => $e->getMessage()]);
+            $data['summary']['daily_collections'] = 0;
+        }
+
+        // Pending bills: total amount of bills with status 'Pending'
+        $data['summary']['pending_bills'] = PatientItemBill::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->where('status', 'Pending')
+            ->sum('amount');
+
+        // Running Cost & Improvement Cost (by expense category name match) - matching Financial Management
+        try {
+            if ($clinic_id) {
+                $runningCostQuery = DB::table('expense_payments as expp')
+                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                    ->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id)
+                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                    ->where('expp.amount', '>', 0)
+                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
+
+                $improvementCostQuery = DB::table('expense_payments as expp')
+                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                    ->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id)
+                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                    ->where('expp.amount', '>', 0)
+                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+            } else {
+                $runningCostQuery = DB::table('expense_payments as expp')
+                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                    ->where('expp.amount', '>', 0)
+                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
+
+                $improvementCostQuery = DB::table('expense_payments as expp')
+                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                    ->where('expp.amount', '>', 0)
+                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+            }
+
+            $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
+            $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');
+        } catch (\Exception $e) {
+            \Log::error('Error calculating running/improvement costs', ['error' => $e->getMessage()]);
+            $data['summary']['running_cost'] = 0;
+            $data['summary']['improvement_cost'] = 0;
+        }
+
+        // Expense payments total (alias for Financial Management compatibility)
+        $data['summary']['expense_payments'] = $data['summary']['total_expenses'];
 
         // Revenue from New Consultation/Patient
         try {

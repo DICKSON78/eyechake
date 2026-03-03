@@ -63,9 +63,9 @@ class SalesCenterDashboardController extends Controller
                 return $this->sendError('You do not have permission to access Sales Center', Response::HTTP_FORBIDDEN);
             }
             
-            // Default to current week if no dates provided
-            $start_date = $request->start_date ?? Carbon::now()->startOfWeek()->format('Y-m-d');
-            $end_date = $request->end_date ?? Carbon::now()->endOfWeek()->format('Y-m-d');
+            // Default to today if no dates provided
+            $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+            $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
             // Default allow: if user missing or role unspecified, do not restrict by clinic
             if ($user->is_admin) {

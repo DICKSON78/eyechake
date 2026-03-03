@@ -64,10 +64,10 @@ const Dashboard = () => {
   const theme = useTheme();
   const modalRef = useRef();
 
-  // Set up date parameters for weekly filtering
+  // Set up date parameters for daily filtering (default to today)
   const [dateParams, setDateParams] = useState({
-    start_date: getWeekStartDate(),
-    end_date: getWeekEndDate(),
+    start_date: new Date(),
+    end_date: new Date(),
     clinic_id: undefined,
   });
 

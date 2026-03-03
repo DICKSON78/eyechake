@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Card, CardContent, Chip, Divider, Stack, Badge, Box } from "@mui/material";
+import { Button, Card, CardContent, Chip, Divider, Stack, Badge, Box, IconButton, Tooltip } from "@mui/material";
 import {
   VisibilityRounded as VisibilityIcon,
   Star as StarIcon,
   Business as BusinessIcon,
+  RefreshRounded as RefreshIcon,
 } from "@mui/icons-material";
 import Page, { Header as PageHeader } from "../../../components/Page";
 import Table from "../../../components/Table";
@@ -15,6 +16,7 @@ import Filters from "../PatientFilters";
 import { useFetch, useToast } from "../../../hooks";
 import { formatDateForDb, formatError, getAge, getWeekStartDate } from "../../../helpers";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
+import notificationEvents from "../../../utils/notificationEvents";
 
 const PendingCashPatients = () => {
   const addToast = useToast();
@@ -101,6 +103,41 @@ const PendingCashPatients = () => {
     }
   }, [data]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Memoize refresh handler
+  const handleRefresh = useCallback(() => {
+    if (!loading) {
+      setIsRefreshing(true);
+      handleFetch();
+      setTimeout(() => setIsRefreshing(false), 1000);
+    }
+  }, [handleFetch, loading]);
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading) {
+        handleFetch();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [handleFetch, loading]);
+
+  // Listen to notification events to refresh data
+  useEffect(() => {
+    const unsubscribe = notificationEvents.subscribe(() => {
+      setTimeout(() => {
+        if (!loading) {
+          handleFetch();
+        }
+      }, 500);
+    });
+
+    return () => unsubscribe();
+  }, [handleFetch, loading]);
+
   // Refresh data when notifications change to ensure real-time updates
   useEffect(() => {
     if (notifications && !notificationsLoading && handleFetch) {
@@ -137,8 +174,27 @@ const PendingCashPatients = () => {
                 },
               }}
             >
-              <span>{`${(data && typeof data.total === 'number') ? data.total : 0} pending`}</span>
+              <span>{`${(data && typeof data.total === 'number') ? data.total : 0} total`}</span>
             </Badge>
+          }
+          trailing={
+            <Tooltip title={loading || isRefreshing ? "Refreshing..." : "Refresh data"}>
+              <span>
+                <IconButton 
+                  onClick={handleRefresh} 
+                  disabled={loading || isRefreshing}
+                  sx={{
+                    animation: (loading || isRefreshing) ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
           }
         />
         <Divider />

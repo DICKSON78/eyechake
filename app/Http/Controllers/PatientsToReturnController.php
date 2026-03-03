@@ -29,9 +29,9 @@ class PatientsToReturnController extends Controller
 
             $user = $request->user();
             
-            // Default to this week if not provided
-            $start_date = $request->start_date ?? Carbon::now()->startOfWeek()->format('Y-m-d');
-            $end_date = $request->end_date ?? Carbon::now()->endOfWeek()->format('Y-m-d');
+            // Default to today if not provided
+            $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+            $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
             $clinic_id = ($user && ($user->is_admin ?? false)) ? $request->clinic_id : ($user->clinic_id ?? null);
 

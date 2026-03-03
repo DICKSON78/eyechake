@@ -61,7 +61,7 @@ const Dashboard = () => {
   const theme = useTheme();
 
   // Filter type: 'daily', 'weekly', 'monthly'
-  const [filterType, setFilterType] = useState('weekly');
+  const [filterType, setFilterType] = useState('daily');
 
   // Set up date parameters based on filter type
   const getDateRangeForFilter = (type) => {
@@ -84,16 +84,16 @@ const Dashboard = () => {
         };
       default:
         return {
-          start_date: getWeekStartDate().toISOString().split('T')[0],
-          end_date: getWeekEndDate().toISOString().split('T')[0],
+          start_date: today.toISOString().split('T')[0],
+          end_date: today.toISOString().split('T')[0],
         };
     }
   };
 
-  const [dateParams, setDateParams] = useState(getDateRangeForFilter('weekly'));
+  const [dateParams, setDateParams] = useState(getDateRangeForFilter('daily'));
 
-  const [startDate, setStartDate] = useState(getWeekStartDate());
-  const [endDate, setEndDate] = useState(getWeekEndDate());
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/financial-management/dashboard",

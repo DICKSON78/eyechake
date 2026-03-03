@@ -55,10 +55,10 @@ const Dashboard = () => {
   const addToast = useToast();
   const theme = useTheme();
 
-  // Set up date parameters for weekly filtering
+  // Set up date parameters for daily filtering (default to today)
   const [dateParams] = useState({
-    start_date: getWeekStartDate().toISOString().split('T')[0],
-    end_date: getWeekEndDate().toISOString().split('T')[0],
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date().toISOString().split('T')[0],
   });
 
   // Selected item filters for individual performance charts

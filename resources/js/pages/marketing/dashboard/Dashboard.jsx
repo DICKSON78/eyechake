@@ -67,8 +67,8 @@ const Dashboard = () => {
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: getWeekStartDate(),
-    end_date: undefined,
+    start_date: new Date(), // Default to today
+    end_date: new Date(),   // Default to today
   });
 
   const [clientTab, setClientTab] = useState(0);

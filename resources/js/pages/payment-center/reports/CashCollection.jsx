@@ -47,8 +47,8 @@ const CashCollection = ({ module }) => {
     patient_gender: undefined,
     patient_phone: undefined,
     payment_channel_id: undefined,
-    start_date: getWeekStartDate(),
-    end_date: undefined,
+    start_date: new Date(), // Default to today
+    end_date: new Date(),   // Default to today
   });
 
   useEffect(() => {

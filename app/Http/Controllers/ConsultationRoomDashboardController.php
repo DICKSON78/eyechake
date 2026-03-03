@@ -35,9 +35,9 @@ class ConsultationRoomDashboardController extends Controller
                 $clinic_id = $user->clinic_id ?? null;
             }
 
-        // Default to current week if no dates provided
-        $start_date = $request->start_date ?? Carbon::now()->startOfWeek()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::now()->endOfWeek()->format('Y-m-d');
+        // Default to today if no dates provided
+        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
         $data = [
             'summary' => [

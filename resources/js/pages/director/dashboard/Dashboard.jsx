@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -54,6 +54,7 @@ import StockAlertsNotification from "../../../components/StockAlertsNotification
 import ChartWrapper from "../../../components/ChartWrapper";
 import Select from "../../../components/Select";
 import PatientReturnSidebar from "../../dashboard/PatientReturnSidebar";
+import notificationEvents from "../../../utils/notificationEvents";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -88,9 +89,15 @@ const DEFAULT_DIRECTOR_DATA = {
     total_patients_registered: 0,
     web_appointment_bookings: 0,
     total_sales: 0,
+    total_revenue: 0,
     total_expenses: 0,
     total_purchases: 0,
     net_profit: 0,
+    daily_collections: 0,
+    pending_bills: 0,
+    running_cost: 0,
+    improvement_cost: 0,
+    expense_payments: 0,
     revenue_new_consultation: 0,
     revenue_return_consultation: 0,
     revenue_all_consultations: 0,
@@ -230,6 +237,8 @@ const Dashboard = () => {
 
   const loading = directorLoading || financialLoading;
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const openFiltersModal = () => {
     const component = (
       <Filters
@@ -241,11 +250,40 @@ const Dashboard = () => {
     modalRef.current.open("Filter", component, "sm");
   };
 
-  const handleRefresh = () => {
-    fetchDirector();
-    fetchFinancial();
-    addToast({ message: "Dashboard refreshed", severity: "success" });
-  };
+  const handleRefresh = useCallback(() => {
+    if (!loading) {
+      setIsRefreshing(true);
+      fetchDirector();
+      fetchFinancial();
+      setTimeout(() => setIsRefreshing(false), 1000);
+    }
+  }, [fetchDirector, fetchFinancial, loading]);
+
+  // Auto-refresh every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading) {
+        fetchDirector();
+        fetchFinancial();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [fetchDirector, fetchFinancial, loading]);
+
+  // Listen to notification events to refresh data
+  useEffect(() => {
+    const unsubscribe = notificationEvents.subscribe(() => {
+      setTimeout(() => {
+        if (!loading) {
+          fetchDirector();
+          fetchFinancial();
+        }
+      }, 500);
+    });
+
+    return () => unsubscribe();
+  }, [fetchDirector, fetchFinancial, loading]);
 
   const navigateToFinancialManagement = () => navigate('/financial-management/dashboard');
   const navigateToConsultationRoom = () => navigate('/consultation-room/dashboard');
@@ -317,7 +355,7 @@ const Dashboard = () => {
         <>
           <StockAlertsNotification />
 
-          {/* Key Performance Metrics */}
+          {/* Key Performance Metrics - Financial Overview (Replica of Financial Management) */}
           <Card sx={{ mb: 4, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
             <CardContent>
               <Typography
@@ -331,19 +369,28 @@ const Dashboard = () => {
                   gap: 1,
                 }}
               >
-                <SalesIcon /> Key Performance Indicators
+                <SalesIcon /> Financial Overview
               </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={2.4}>
                   <InfoCard
-                    title="Total Sales (Net)"
-                    count={numberFormat(directorData?.summary?.total_sales || 0)}
-                    icon={<SalesIcon />}
-                    color={purple[400]}
-                    onClick={navigateToFinancialManagement}
+                    title="Collections"
+                    count={numberFormat(directorData?.summary?.daily_collections || 0)}
+                    icon={<RevenueIcon />}
+                    color={cyan[500]}
+                    onClick={() => navigate('/financial-management/reports/cash-collection')}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <InfoCard
+                    title="Total Revenue"
+                    count={numberFormat(directorData?.summary?.total_revenue || 0)}
+                    icon={<SalesIcon />}
+                    color={green[500]}
+                    onClick={() => navigate('/financial-management/reports/cash-collection')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
                   <InfoCard
                     title="Total Expenses"
                     count={numberFormat(directorData?.summary?.total_expenses || 0)}
@@ -352,22 +399,40 @@ const Dashboard = () => {
                     onClick={() => navigate('/financial-management/expenses')}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <InfoCard
-                    title="Total Purchases"
-                    count={numberFormat(directorData?.summary?.total_purchases || 0)}
-                    icon={<PurchaseIcon />}
-                    color={deepOrange[500]}
-                    onClick={() => navigate('/inventory-management/stocktaking')}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={2.4}>
                   <InfoCard
                     title="Net Profit"
                     count={numberFormat(directorData?.summary?.net_profit || 0)}
                     icon={<NetProfitIcon />}
                     color={directorData?.summary?.net_profit >= 0 ? teal[500] : orange[500]}
                     onClick={() => navigate('/financial-management/reports/balance-sheet')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <InfoCard
+                    title="Pending Bills"
+                    count={numberFormat(directorData?.summary?.pending_bills || 0)}
+                    icon={<PendingIcon />}
+                    color={orange[500]}
+                    onClick={() => navigate('/financial-management/reports/pending-patient-bills')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <InfoCard
+                    title="Running Cost"
+                    count={numberFormat(directorData?.summary?.running_cost || 0)}
+                    icon={<ExpensesIcon />}
+                    color={pink[500]}
+                    onClick={() => navigate('/financial-management/expenses')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <InfoCard
+                    title="Improvement Cost"
+                    count={numberFormat(directorData?.summary?.improvement_cost || 0)}
+                    icon={<PurchaseIcon />}
+                    color={purple[500]}
+                    onClick={() => navigate('/financial-management/expenses')}
                   />
                 </Grid>
               </Grid>
