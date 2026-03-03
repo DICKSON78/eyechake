@@ -107,6 +107,7 @@ class NotificationsController extends Controller
 
     /**
      * Count payment caches that are "sent to sales" (consulted, with Pending/Billed items) - matches Patients Sent to Sales list.
+     * Only counts today's patients.
      */
     private function getPatientsSentToSalesCount($clinic_id)
     {
@@ -128,7 +129,10 @@ class NotificationsController extends Controller
                 ->whereHas('items', function ($itemQuery) {
                     $itemQuery->whereIn('status', ['Pending', 'Billed'])
                               ->whereNull('item_payment_id');
-                });
+                })
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -243,7 +247,8 @@ class NotificationsController extends Controller
                     });
                 })
                 ->whereNotNull('created_at')
-                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->count();
         } catch (\Exception $e) {
@@ -318,7 +323,8 @@ class NotificationsController extends Controller
                 ->where('consultation_types.name', 'Procedure')
                 ->whereIn('patient_payment_cache_items.status', ['Pending', 'Paid', 'Billed'])
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -343,7 +349,8 @@ class NotificationsController extends Controller
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
                 ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -390,7 +397,8 @@ class NotificationsController extends Controller
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
                 ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
-                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00');
+                ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
 
             return $query->distinct('patient_payment_cache.id')->count('patient_payment_cache.id');
         } catch (\Exception $e) {
@@ -458,10 +466,13 @@ class NotificationsController extends Controller
     private function getWaitingPatientsCount($clinic_id)
     {
         try {
-            // Count patients waiting in consultation room
+            // Count patients waiting in consultation room today
             $query = PatientWaitingTime::query()
                 ->whereIn('status', ['waiting', 'in_treatment'])
                 ->where('current_department', 'consultation')
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59')
                 ->when($clinic_id, function ($q) use ($clinic_id) {
                     $q->whereHas('patient.check_ins', function ($subQuery) use ($clinic_id) {
                         $subQuery->whereHas('payment_cache', function ($pcQuery) use ($clinic_id) {

@@ -345,8 +345,8 @@ class DashboardController extends Controller
                     ->sum(DB::raw('it.unit_price * it.quantity'));
             }, 0);
 
-            // Pending bills: total outstanding amount of bills with status 'Pending' (amount - discount - payments > 0)
-            $data['summary']['pending_bills'] = $this->safeQuery(function() use ($clinic_id) {
+            // Pending bills: total outstanding amount of bills with status 'Pending' created in date range (amount - discount - payments > 0)
+            $data['summary']['pending_bills'] = $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
                 $pendingBills = PatientItemBill::query()
                     ->when($clinic_id, function ($query) use ($clinic_id) {
                         $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -354,6 +354,8 @@ class DashboardController extends Controller
                         });
                     })
                     ->where('status', 'Pending')
+                    ->whereDate('created_at', '>=', $start_date)
+                    ->whereDate('created_at', '<=', $end_date)
                     ->with('items') // Load related items to calculate payments
                     ->get();
 

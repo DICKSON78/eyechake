@@ -320,7 +320,7 @@ class ConsultationRoomDashboardController extends Controller
             $data['statistics']['consultations_trend'] = [];
         }
 
-        // Total patients seen (consultations with status 'Consulted')
+        // Total patients seen (consultations with status 'Consulted') in date range
         try {
             $data['summary']['total_patients_seen'] = Consultation::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -329,7 +329,8 @@ class ConsultationRoomDashboardController extends Controller
                     });
                 })
                 ->where('status', 'Consulted')
-                ->whereDate('created_at', $today)
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
                 ->distinct()
                 ->count('payment_cache_item_id');
         } catch (\Exception $e) {

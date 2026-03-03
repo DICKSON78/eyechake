@@ -141,7 +141,7 @@ class FinancialManagementDashboardController extends Controller
             $data['summary']['daily_collections'] = 0;
         }
 
-        // Pending bills: total amount of bills with status 'Pending'
+        // Pending bills: total amount of bills with status 'Pending' created in date range
         $data['summary']['pending_bills'] = PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -149,6 +149,8 @@ class FinancialManagementDashboardController extends Controller
                 });
             })
             ->where('status', 'Pending')
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
             ->sum('amount');
 
         // Get expense payments count (for statistics)

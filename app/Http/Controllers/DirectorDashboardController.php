@@ -53,10 +53,11 @@ class DirectorDashboardController extends Controller
                     });
                 });
             })
-            ->whereDate('created_at', Carbon::today())
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        // Total Patients Registered (all time)
+        // Total Patients Registered in date range
         $data['summary']['total_patients_registered'] = Patient::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('checkIns', function ($query) use ($clinic_id) {
@@ -65,14 +66,18 @@ class DirectorDashboardController extends Controller
                     });
                 });
             })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        // Web Appointment Bookings (all time)
+        // Web Appointment Bookings in date range
         $data['summary']['web_appointment_bookings'] = Appointment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 // Assuming appointments are clinic-specific or we can add clinic filtering later
                 // For now, return all web appointments
             })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
             ->count();
 
         // Total Revenue (from payments + cleared bills) - matching Financial Management logic
@@ -177,7 +182,7 @@ class DirectorDashboardController extends Controller
             $data['summary']['daily_collections'] = 0;
         }
 
-        // Pending bills: total amount of bills with status 'Pending'
+        // Pending bills: total amount of bills with status 'Pending' created in date range
         $data['summary']['pending_bills'] = PatientItemBill::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -185,6 +190,8 @@ class DirectorDashboardController extends Controller
                 });
             })
             ->where('status', 'Pending')
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
             ->sum('amount');
 
         // Running Cost & Improvement Cost (by expense category name match) - matching Financial Management

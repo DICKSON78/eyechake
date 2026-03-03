@@ -198,10 +198,12 @@ class PaymentCenterDashboardController extends Controller
             $data['summary']['credit_payments'] = 0;
         }
 
-        // Pending bills count (only PatientItemBill records to match the pending bills page)
+        // Pending bills count (only PatientItemBill records to match the pending bills page) in date range
         try {
             $pendingBillsQuery = PatientItemBill::query()
-                ->where('status', 'Pending');
+                ->where('status', 'Pending')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
             
             if ($clinic_id) {
                 $pendingBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
@@ -215,7 +217,7 @@ class PaymentCenterDashboardController extends Controller
             $data['summary']['pending_bills'] = 0;
         }
             
-        // Pending payment cache count (for separate tracking) - should match pending cash patients page
+        // Pending payment cache count (for separate tracking) - should match pending cash patients page, filtered by date range
         try {
             $pendingCacheQuery = PatientPaymentCache::query()
                 ->whereHas('items', function ($query) {
@@ -223,7 +225,9 @@ class PaymentCenterDashboardController extends Controller
                     $query->whereHas('payment_mode', function ($q) {
                         $q->where('payment_type', 'Cash');
                     });
-                });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
             
             if ($clinic_id) {
                 $pendingCacheQuery->whereHas('creator', function ($query) use ($clinic_id) {
@@ -237,10 +241,12 @@ class PaymentCenterDashboardController extends Controller
             $data['summary']['pending_payment_cache'] = 0;
         }
 
-        // Cleared bills - show all cleared bills (no date filter to match the bills page)
+        // Cleared bills - filtered by date range
         try {
             $clearedBillsQuery = PatientItemBill::query()
-                ->where('status', 'Cleared');
+                ->where('status', 'Cleared')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
             
             if ($clinic_id) {
                 $clearedBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {

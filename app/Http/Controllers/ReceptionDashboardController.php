@@ -72,14 +72,16 @@ class ReceptionDashboardController extends Controller
             ],
         ];
 
-        // Total patients
-        $data['summary']['total_patients'] = $this->safe(function () use ($clinic_id) {
+        // Total patients in date range
+        $data['summary']['total_patients'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
             return Patient::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($query) use ($clinic_id) {
                         $query->where('clinic_id', $clinic_id);
                     });
                 })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
                 ->count();
         }, 0);
 
@@ -142,15 +144,19 @@ class ReceptionDashboardController extends Controller
                 ->count();
         }, 0);
 
-        // Patients to return (approximation based on recent patients)
-        $data['summary']['patients_to_return'] = $this->safe(function () use ($clinic_id) {
-            return Patient::query()
+        // Patients to return - count patients whose return date is today
+        $data['summary']['patients_to_return'] = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+            return \App\Models\Consultation::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($query) use ($clinic_id) {
                         $query->where('clinic_id', $clinic_id);
                     });
                 })
-                ->whereDate('created_at', '>=', Carbon::now()->subDays(30))
+                ->where('status', 'Consulted')
+                ->where('patient_to_return', 'Yes')
+                ->whereNotNull('to_return_date')
+                ->whereDate('to_return_date', '>=', $start_date)
+                ->whereDate('to_return_date', '<=', $end_date)
                 ->count();
         }, 0);
 
