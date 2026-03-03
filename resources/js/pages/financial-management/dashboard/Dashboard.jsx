@@ -60,6 +60,13 @@ const Dashboard = () => {
   const addToast = useToast();
   const theme = useTheme();
 
+  const formatLocalDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Filter type: 'daily', 'weekly', 'monthly'
   const [filterType, setFilterType] = useState('daily');
 
@@ -69,23 +76,23 @@ const Dashboard = () => {
     switch (type) {
       case 'daily':
         return {
-          start_date: today.toISOString().split('T')[0],
-          end_date: today.toISOString().split('T')[0],
+          start_date: formatLocalDate(today),
+          end_date: formatLocalDate(today),
         };
       case 'weekly':
         return {
-          start_date: getWeekStartDate().toISOString().split('T')[0],
-          end_date: getWeekEndDate().toISOString().split('T')[0],
+          start_date: formatLocalDate(getWeekStartDate()),
+          end_date: formatLocalDate(getWeekEndDate()),
         };
       case 'monthly':
         return {
-          start_date: getMonthStartDate().toISOString().split('T')[0],
-          end_date: getMonthEndDate().toISOString().split('T')[0],
+          start_date: formatLocalDate(getMonthStartDate()),
+          end_date: formatLocalDate(getMonthEndDate()),
         };
       default:
         return {
-          start_date: today.toISOString().split('T')[0],
-          end_date: today.toISOString().split('T')[0],
+          start_date: formatLocalDate(today),
+          end_date: formatLocalDate(today),
         };
     }
   };
@@ -144,8 +151,8 @@ const Dashboard = () => {
   const handleDateChange = () => {
     if (startDate && endDate && startDate <= endDate) {
       setDateParams({
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0],
+        start_date: formatLocalDate(startDate),
+        end_date: formatLocalDate(endDate),
       });
     } else {
       addToast({ message: "Please select valid date range", severity: "warning" });
