@@ -124,7 +124,7 @@ class DashboardController extends Controller
                         })
                         ->whereDate('created_at', '>=', $start_date)
                         ->whereDate('created_at', '<=', $end_date)
-                        ->sum(DB::raw('amount - discount')) + PatientItemBillPayment::query()
+                        ->sum('amount') + PatientItemBillPayment::query()
                         ->when($clinic_id, function ($query) use ($clinic_id) {
                             $query->whereHas('creator', function ($query) use ($clinic_id) {
                                 $query->where('clinic_id', $clinic_id);
@@ -347,7 +347,7 @@ class DashboardController extends Controller
 
             // Pending bills: total outstanding amount of bills with status 'Pending' created in date range (amount - discount - payments > 0)
             $data['summary']['pending_bills'] = $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                $pendingBills = PatientItemBill::query()
+                return PatientItemBill::query()
                     ->when($clinic_id, function ($query) use ($clinic_id) {
                         $query->whereHas('creator', function ($query) use ($clinic_id) {
                             $query->where('clinic_id', $clinic_id);
@@ -356,19 +356,7 @@ class DashboardController extends Controller
                     ->where('status', 'Pending')
                     ->whereDate('created_at', '>=', $start_date)
                     ->whereDate('created_at', '<=', $end_date)
-                    ->with('items') // Load related items to calculate payments
-                    ->get();
-
-                $totalOutstanding = 0;
-                foreach ($pendingBills as $bill) {
-                    $amountPaid = PatientItemBillPayment::where('bill_id', $bill->id)->sum('amount');
-                    $outstanding = ($bill->amount - $bill->discount) - $amountPaid;
-                    if ($outstanding > 0) {
-                        $totalOutstanding += $outstanding;
-                    }
-                }
-
-                return $totalOutstanding;
+                    ->sum('amount');
             }, 0);
 
             $data['summary']['sms_balance'] = ($user && $user->clinic) ? $user->clinic->sms_balance : 0;

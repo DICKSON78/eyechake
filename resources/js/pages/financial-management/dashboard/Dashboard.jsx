@@ -31,8 +31,6 @@ import {
   AssessmentRounded as AnalyticsIcon,
   CheckCircleRounded as ClearedIcon,
   HourglassEmptyRounded as PendingIcon,
-  TodayRounded as TodayIcon,
-  CalendarMonthRounded as CalendarMonthIcon,
 } from "@mui/icons-material";
 import {
   blue,
@@ -52,7 +50,7 @@ import Page from "../../../components/Page";
 import InfoCard from "../../../pages/dashboard/InfoCard";
 import ChartWrapper from "../../../components/ChartWrapper";
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, numberFormat, getWeekStartDate, getWeekEndDate, getMonthStartDate, getMonthEndDate } from "../../../helpers";
+import { formatError, numberFormat, formatDateForDb } from "../../../helpers";
 import { useTheme } from "@mui/material/styles";
 
 const Dashboard = () => {
@@ -60,44 +58,10 @@ const Dashboard = () => {
   const addToast = useToast();
   const theme = useTheme();
 
-  const formatLocalDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Filter type: 'daily', 'weekly', 'monthly'
-  const [filterType, setFilterType] = useState('daily');
-
-  // Set up date parameters based on filter type
-  const getDateRangeForFilter = (type) => {
-    const today = new Date();
-    switch (type) {
-      case 'daily':
-        return {
-          start_date: formatLocalDate(today),
-          end_date: formatLocalDate(today),
-        };
-      case 'weekly':
-        return {
-          start_date: formatLocalDate(getWeekStartDate()),
-          end_date: formatLocalDate(getWeekEndDate()),
-        };
-      case 'monthly':
-        return {
-          start_date: formatLocalDate(getMonthStartDate()),
-          end_date: formatLocalDate(getMonthEndDate()),
-        };
-      default:
-        return {
-          start_date: formatLocalDate(today),
-          end_date: formatLocalDate(today),
-        };
-    }
-  };
-
-  const [dateParams, setDateParams] = useState(getDateRangeForFilter('daily'));
+  const [dateParams, setDateParams] = useState({
+    start_date: formatDateForDb(new Date()),
+    end_date: formatDateForDb(new Date()),
+  });
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -151,8 +115,8 @@ const Dashboard = () => {
   const handleDateChange = () => {
     if (startDate && endDate && startDate <= endDate) {
       setDateParams({
-        start_date: formatLocalDate(startDate),
-        end_date: formatLocalDate(endDate),
+        start_date: formatDateForDb(startDate),
+        end_date: formatDateForDb(endDate),
       });
     } else {
       addToast({ message: "Please select valid date range", severity: "warning" });
@@ -160,22 +124,13 @@ const Dashboard = () => {
   };
 
   const handleResetDates = () => {
-    const dateRange = getDateRangeForFilter(filterType);
-    const start = new Date(dateRange.start_date);
-    const end = new Date(dateRange.end_date);
-    setStartDate(start);
-    setEndDate(end);
-    setDateParams(dateRange);
-  };
-
-  const handleFilterChange = (newFilterType) => {
-    setFilterType(newFilterType);
-    const dateRange = getDateRangeForFilter(newFilterType);
-    const start = new Date(dateRange.start_date);
-    const end = new Date(dateRange.end_date);
-    setStartDate(start);
-    setEndDate(end);
-    setDateParams(dateRange);
+    const today = new Date();
+    setStartDate(today);
+    setEndDate(today);
+    setDateParams({
+      start_date: formatDateForDb(today),
+      end_date: formatDateForDb(today),
+    });
   };
 
   const profitMargin = data.summary?.total_revenue > 0 
@@ -222,60 +177,6 @@ const Dashboard = () => {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          {/* Filter Type Selector */}
-          <Stack direction="row" spacing={0.5} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 0.5 }}>
-            <Button
-              size="small"
-              variant={filterType === 'daily' ? 'contained' : 'text'}
-              onClick={() => handleFilterChange('daily')}
-              startIcon={<TodayIcon />}
-              sx={{
-                minWidth: { xs: 80, sm: 100 },
-                ...(filterType === 'daily' && {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #653a8f 100%)',
-                  },
-                }),
-              }}
-            >
-              Daily
-            </Button>
-            <Button
-              size="small"
-              variant={filterType === 'weekly' ? 'contained' : 'text'}
-              onClick={() => handleFilterChange('weekly')}
-              startIcon={<DateRangeIcon />}
-              sx={{
-                minWidth: { xs: 80, sm: 100 },
-                ...(filterType === 'weekly' && {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #653a8f 100%)',
-                  },
-                }),
-              }}
-            >
-              Weekly
-            </Button>
-            <Button
-              size="small"
-              variant={filterType === 'monthly' ? 'contained' : 'text'}
-              onClick={() => handleFilterChange('monthly')}
-              startIcon={<CalendarMonthIcon />}
-              sx={{
-                minWidth: { xs: 80, sm: 100 },
-                ...(filterType === 'monthly' && {
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #653a8f 100%)',
-                  },
-                }),
-              }}
-            >
-              Monthly
-            </Button>
-          </Stack>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Start Date"
@@ -339,7 +240,7 @@ const Dashboard = () => {
           >
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <InfoCard
-                title={filterType === 'daily' ? 'Daily Collections' : filterType === 'weekly' ? 'Weekly Collections' : 'Monthly Collections'}
+                title="Collections"
                 count={numberFormat(data.summary?.daily_collections || 0)}
                 icon={<PaymentsIcon />}
                 color={cyan[500]}
