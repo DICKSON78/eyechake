@@ -19,8 +19,9 @@ const useFetch = (
     setError(null);
 
     const normalizedUri = String(uri || "").replace(/^\/+/, "");
+    const fetchParams = params ? JSON.parse(queryString) : null;
     window.axios
-      .get("/" + normalizedUri, { params })
+      .get("/" + normalizedUri, { params: fetchParams })
       .then((response) => {
         if (!ignore.current) {
           try {
