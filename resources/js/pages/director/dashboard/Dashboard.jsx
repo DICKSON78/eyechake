@@ -527,7 +527,10 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Total Revenue from All Consultations"
-                        count={numberFormat(directorData.summary?.revenue_all_consultations || 0)}
+                        count={numberFormat(
+                          (directorData.summary?.revenue_new_consultation || 0)
+                          + (directorData.summary?.revenue_return_consultation || 0)
+                        )}
                         icon={<RevenueIcon />}
                         color={lime[600]}
                         onClick={() => navigate('/consultation-room/dashboard')}

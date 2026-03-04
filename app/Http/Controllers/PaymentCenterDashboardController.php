@@ -126,75 +126,54 @@ class PaymentCenterDashboardController extends Controller
             ? ($paymentsSum + $billPaymentsSum)
             : $billsSum;
 
-        // Cash payments - include both item payments and bill payments via common cash-like channels
-        $cashNames = ['Cash', 'Cash in Hand', 'Cash Payment'];
+        // Cash payments count by payment type (matches cashier payment type cards)
         try {
-            $cashItemPaymentsQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0)
-                ->whereHas('channel', function ($query) use ($cashNames) {
-                    $query->whereIn('name', $cashNames);
-                });
-            
+            $cashPaymentsQuery = PatientPaymentCache::query()
+                ->whereHas('items', function ($query) {
+                    $query->where('status', 'Pending')
+                        ->whereHas('payment_mode', function ($q) {
+                            $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                        });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
+
             if ($clinic_id) {
-                $cashItemPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                $cashPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             }
-            
-            $cashItemPayments = $cashItemPaymentsQuery->sum('amount') ?? 0;
+
+            $data['summary']['cash_payments'] = $cashPaymentsQuery->count();
         } catch (\Exception $e) {
-            \Log::error('Error calculating cash item payments', ['error' => $e->getMessage()]);
-            $cashItemPayments = 0;
+            \Log::error('Error calculating cash payment type count', ['error' => $e->getMessage()]);
+            $data['summary']['cash_payments'] = 0;
         }
-        
-        try {
-            $cashBillPaymentsQuery = PatientItemBillPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0)
-                ->whereHas('channel', function ($query) use ($cashNames) {
-                    $query->whereIn('name', $cashNames);
-                });
-            
-            if ($clinic_id) {
-                $cashBillPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $cashBillPayments = $cashBillPaymentsQuery->sum('amount') ?? 0;
-        } catch (\Exception $e) {
-            \Log::error('Error calculating cash bill payments', ['error' => $e->getMessage()]);
-            $cashBillPayments = 0;
-        }
-        
-        $data['summary']['cash_payments'] = $cashItemPayments + $cashBillPayments;
 
         // Cash available (collected cash) - same as cash payments for now
         $data['summary']['cash_available'] = $data['summary']['cash_payments'];
 
-        // Credit amounts (billed to credit/insurance): sum items where payment mode has payment_type = 'Credit'
+        // Credit payments count by payment type (matches cashier payment type cards)
         try {
-            $creditQuery = DB::table('patient_payment_cache_items as it')
-                ->join('payment_modes as pm', 'it.payment_mode_id', '=', 'pm.id')
-                ->where('pm.payment_type', 'Credit')
-                ->whereNotNull('it.created_at')
-                ->whereDate('it.created_at', '>=', $start_date)
-                ->whereDate('it.created_at', '<=', $end_date);
-            
+            $creditQuery = PatientPaymentCache::query()
+                ->whereHas('items', function ($query) {
+                    $query->where('status', 'Pending')
+                        ->whereHas('payment_mode', function ($q) {
+                            $q->whereRaw('LOWER(payment_type) = ?', ['credit']);
+                        });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date);
+
             if ($clinic_id) {
-                $creditQuery->join('patient_payment_cache as ppc', 'it.payment_cache_id', '=', 'ppc.id')
-                  ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                  ->where('u.clinic_id', $clinic_id);
+                $creditQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
             }
-            
-            $data['summary']['credit_payments'] = (float) $creditQuery->sum(DB::raw('it.unit_price * it.quantity')) ?? 0;
+
+            $data['summary']['credit_payments'] = $creditQuery->count();
         } catch (\Exception $e) {
-            \Log::error('Error calculating credit payments', ['error' => $e->getMessage()]);
+            \Log::error('Error calculating credit payment type count', ['error' => $e->getMessage()]);
             $data['summary']['credit_payments'] = 0;
         }
 

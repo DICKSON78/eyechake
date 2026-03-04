@@ -285,26 +285,10 @@ class DirectorDashboardController extends Controller
             $data['summary']['revenue_return_consultation'] = 0;
         }
 
-        // Total Revenue from All Consultations
-        try {
-            $allConsultationsQuery = DB::table('patient_item_payments as pip')
-                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
-                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
-                ->join('users as u', 'pip.created_by', '=', 'u.id')
-                ->whereNotNull('pip.created_at')
-                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('pip.amount', '>', 0);
-            
-            if ($clinic_id) {
-                $allConsultationsQuery->where('u.clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['revenue_all_consultations'] = $allConsultationsQuery->sum('pip.amount') ?? 0;
-        } catch (\Exception $e) {
-            \Log::error('Error calculating revenue from all consultations', ['error' => $e->getMessage()]);
-            $data['summary']['revenue_all_consultations'] = 0;
-        }
+        // Total Revenue from All Consultations (must equal New + Return consultation cards)
+        $data['summary']['revenue_all_consultations'] =
+            ($data['summary']['revenue_new_consultation'] ?? 0)
+            + ($data['summary']['revenue_return_consultation'] ?? 0);
 
         // Total Discount
         try {
