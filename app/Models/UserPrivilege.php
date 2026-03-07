@@ -65,6 +65,35 @@ class UserPrivilege extends Model
     }
 
     /**
+     * Detect whether the live DB uses row-based (user_id, privilege) or
+     * column-based (one boolean column per privilege) schema.
+     *
+     * Uses information_schema directly to bypass Doctrine DBAL schema caching,
+     * which can incorrectly report column existence after a DB restore.
+     * Result is cached in a static variable for the request lifetime.
+     */
+    private static function isRowBasedSchema(): bool
+    {
+        static $result = null;
+        if ($result !== null) {
+            return $result;
+        }
+        try {
+            $row = DB::selectOne("
+                SELECT COUNT(*) as cnt
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME   = 'user_privileges'
+                  AND COLUMN_NAME  = 'privilege'
+            ");
+            $result = $row && ((int) $row->cnt) > 0;
+        } catch (\Exception $e) {
+            $result = false;
+        }
+        return $result;
+    }
+
+    /**
      * Convert to array format for frontend.
      * Supports both schemas:
      * - Row-based: table has (user_id, privilege) with one row per privilege
@@ -77,8 +106,12 @@ class UserPrivilege extends Model
         }
 
         // Row-based schema: (user_id, privilege) with multiple rows per user
-        if (Schema::hasColumn('user_privileges', 'privilege')) {
-            return self::where('user_id', $userId)->pluck('privilege')->values()->toArray();
+        if (self::isRowBasedSchema()) {
+            return DB::table('user_privileges')
+                ->where('user_id', $userId)
+                ->pluck('privilege')
+                ->values()
+                ->toArray();
         }
 
         // Column-based schema: one row per user, boolean columns
@@ -107,7 +140,7 @@ class UserPrivilege extends Model
         }
 
         // Row-based schema: replace all rows for user
-        if (Schema::hasColumn('user_privileges', 'privilege')) {
+        if (self::isRowBasedSchema()) {
             self::where('user_id', $userId)->delete();
             foreach ($privileges as $priv) {
                 if (is_string($priv) && $priv !== '') {

@@ -264,8 +264,8 @@ class UsersController extends Controller
                         'privileges' => $normalized,
                     ]);
                     UserPrivilege::updateFromArray($user->id, $normalized);
-                    // Verify write succeeded
-                    $saved = UserPrivilege::where('user_id', $user->id)->pluck('privilege')->toArray();
+                    // Verify write succeeded (schema-safe: handles both row-based and column-based)
+                    $saved = UserPrivilege::getPrivilegesAsArray($user->id);
                     Log::info('Privileges saved successfully', [
                         'user_id' => $user->id,
                         'saved'   => $saved,
@@ -353,7 +353,7 @@ class UsersController extends Controller
                         'privileges' => $normalized,
                     ]);
                     UserPrivilege::updateFromArray($data->id, $normalized);
-                    $saved = UserPrivilege::where('user_id', $data->id)->pluck('privilege')->toArray();
+                    $saved = UserPrivilege::getPrivilegesAsArray($data->id);
                     Log::info('Privileges updated successfully', [
                         'user_id' => $data->id,
                         'saved'   => $saved,
