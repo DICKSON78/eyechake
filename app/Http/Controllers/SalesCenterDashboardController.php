@@ -53,7 +53,10 @@ class SalesCenterDashboardController extends Controller
                         ->where('user_id', $user->id)
                         ->first();
                     
-                    if ($privilegeRow && isset($privilegeRow->sales_center) && $privilegeRow->sales_center) {
+                    if ($privilegeRow && (
+                        (isset($privilegeRow->sales_center) && $privilegeRow->sales_center) ||
+                        (isset($privilegeRow->customer_relationship_management) && $privilegeRow->customer_relationship_management)
+                    )) {
                         $hasPrivilege = true;
                     }
                 }

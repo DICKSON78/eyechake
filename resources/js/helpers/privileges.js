@@ -218,7 +218,7 @@ export const getDefaultRoute = (user) => {
     { privilege: 'medicine_center', route: '/medicine-center/dashboard' },
     { privilege: 'procedure_room', route: '/procedure-room/dashboard' },
     { privilege: 'inventory_management', route: '/inventory-management/dashboard' },
-    { privilege: 'sales_center', route: '/sales-center/dashboard' },
+    { privilege: 'sales_center', route: '/sales-management/dashboard' },
     { privilege: 'marketing', route: '/marketing/dashboard' },
     { privilege: 'financial_management', route: '/financial-management/dashboard' },
     { privilege: 'user_management', route: '/user-management/users' },

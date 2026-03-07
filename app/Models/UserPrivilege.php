@@ -11,6 +11,11 @@ class UserPrivilege extends Model
 {
     use HasFactory;
 
+    private const LEGACY_COLUMN_ALIASES = [
+        'sales_center' => ['customer_relationship_management'],
+        'user_management' => ['employee_management'],
+    ];
+
     public $timestamps = false;
     protected $primaryKey = 'user_id';
     public $incrementing = false;
@@ -126,6 +131,20 @@ class UserPrivilege extends Model
                 $privileges[] = $priv;
             }
         }
+
+        foreach (self::LEGACY_COLUMN_ALIASES as $modernPrivilege => $legacyColumns) {
+            if (in_array($modernPrivilege, $privileges, true)) {
+                continue;
+            }
+
+            foreach ($legacyColumns as $legacyColumn) {
+                if (isset($record->$legacyColumn) && $record->$legacyColumn == 1) {
+                    $privileges[] = $modernPrivilege;
+                    break;
+                }
+            }
+        }
+
         return $privileges;
     }
 
@@ -178,6 +197,14 @@ class UserPrivilege extends Model
         foreach ($privileges as $priv) {
             if (in_array($priv, $cachedColumns, true)) {
                 $updateData[$priv] = 1;
+                continue;
+            }
+
+            $legacyColumns = self::LEGACY_COLUMN_ALIASES[$priv] ?? [];
+            foreach ($legacyColumns as $legacyColumn) {
+                if (in_array($legacyColumn, $cachedColumns, true)) {
+                    $updateData[$legacyColumn] = 1;
+                }
             }
         }
 
