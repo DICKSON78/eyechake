@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class UserPrivilege extends Model
@@ -110,10 +111,15 @@ class UserPrivilege extends Model
             self::where('user_id', $userId)->delete();
             foreach ($privileges as $priv) {
                 if (is_string($priv) && $priv !== '') {
-                    self::create(['user_id' => $userId, 'privilege' => $priv]);
+                    // Use insert() directly to avoid Eloquent's broken PK assumption
+                    // (primaryKey = 'user_id' conflicts with multi-row row-based schema)
+                    \Illuminate\Support\Facades\DB::table('user_privileges')->insert([
+                        'user_id'   => $userId,
+                        'privilege' => $priv,
+                    ]);
                 }
             }
-            return null; // Row-based has multiple rows; no single "record"
+            return null;
         }
 
         // Column-based schema: one row per user

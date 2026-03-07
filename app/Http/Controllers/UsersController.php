@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends Controller
 {
@@ -251,12 +252,28 @@ class UsersController extends Controller
             $input['clinic_id'] = $clinic_id;
             $input['password'] = Hash::make($request->password);
             $input['created_by'] = $request->user()->id;
-            $data = User::create($input);
 
-            if ($data && $request->has('privileges')) {
-                // Set privileges for new user using the boolean column structure
-                UserPrivilege::updateFromArray($data->id, $this->normalizePrivilegesInput($request->input('privileges', [])));
-            }
+            $data = DB::transaction(function () use ($input, $request) {
+                $user = User::create($input);
+
+                if ($user && $request->has('privileges')) {
+                    $normalized = $this->normalizePrivilegesInput($request->input('privileges', []));
+                    Log::info('Saving privileges for new user', [
+                        'user_id'    => $user->id,
+                        'username'   => $user->username,
+                        'privileges' => $normalized,
+                    ]);
+                    UserPrivilege::updateFromArray($user->id, $normalized);
+                    // Verify write succeeded
+                    $saved = UserPrivilege::where('user_id', $user->id)->pluck('privilege')->toArray();
+                    Log::info('Privileges saved successfully', [
+                        'user_id' => $user->id,
+                        'saved'   => $saved,
+                    ]);
+                }
+
+                return $user;
+            });
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -312,21 +329,36 @@ class UsersController extends Controller
             'privileges' => 'sometimes|array',
         ]);
 
-        $data = User::findOrFail($id);
-        $input = $request->except('privileges');
+        $result = DB::transaction(function () use ($request, $id) {
+            $data = User::findOrFail($id);
+            $input = $request->except('privileges');
 
-        if ($request->password) {
-            $input['password'] = Hash::make($request->password);
-        }
+            if ($request->password) {
+                $input['password'] = Hash::make($request->password);
+            }
 
-        $data->update($input);
+            $data->update($input);
 
-        if ($request->has('privileges')) {
-            // Update privileges using the new boolean column structure
-            UserPrivilege::updateFromArray($data->id, $this->normalizePrivilegesInput($request->input('privileges', [])));
-        }
+            if ($request->has('privileges')) {
+                $normalized = $this->normalizePrivilegesInput($request->input('privileges', []));
+                Log::info('Updating privileges for user', [
+                    'user_id'    => $data->id,
+                    'username'   => $data->username,
+                    'privileges' => $normalized,
+                ]);
+                UserPrivilege::updateFromArray($data->id, $normalized);
+                // Verify write succeeded
+                $saved = UserPrivilege::where('user_id', $data->id)->pluck('privilege')->toArray();
+                Log::info('Privileges updated successfully', [
+                    'user_id' => $data->id,
+                    'saved'   => $saved,
+                ]);
+            }
 
-        return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
+            return $data;
+        });
+
+        return $this->sendResponse($result, Response::HTTP_OK, 'Saved successfully.');
     }
 
     /**
