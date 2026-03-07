@@ -314,51 +314,78 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'first_name' => 'sometimes|required',
-            'last_name' => 'sometimes|required',
-            'username' => 'sometimes|required|unique:users,username,' . $id,
-            'gender' => 'sometimes|required|in:Male,Female',
-            'date_of_birth' => 'nullable|date_format:Y-m-d',
-            'designation' => 'nullable|in:Doctor,Other',
-            'department_id' => 'nullable|exists:departments,id',
-            'job_title_id' => 'nullable|exists:job_titles,id',
-            'employee_number' => 'nullable|unique:users,employee_number,' . $id,
-            'status' => 'sometimes|required|in:Active,Inactive',
-            'role' => 'sometimes|in:Admin,Client',
-            'privileges' => 'sometimes|array',
-        ]);
+        try {
+            $request->validate([
+                'first_name'      => 'sometimes|required',
+                'last_name'       => 'sometimes|required',
+                'username'        => 'sometimes|required|unique:users,username,' . $id,
+                'gender'          => 'sometimes|required|in:Male,Female',
+                'date_of_birth'   => 'nullable|date_format:Y-m-d',
+                'designation'     => 'nullable|in:Doctor,Other',
+                'department_id'   => 'nullable|exists:departments,id',
+                'job_title_id'    => 'nullable|exists:job_titles,id',
+                'employee_number' => 'nullable|unique:users,employee_number,' . $id,
+                'status'          => 'sometimes|required|in:Active,Inactive',
+                'role'            => 'sometimes|in:Admin,Client',
+                'privileges'      => 'sometimes|array',
+                'password'        => 'sometimes|nullable|string|min:6',
+            ]);
 
-        $result = DB::transaction(function () use ($request, $id) {
-            $data = User::findOrFail($id);
-            $input = $request->except('privileges');
+            $result = DB::transaction(function () use ($request, $id) {
+                $data = User::findOrFail($id);
 
-            if ($request->password) {
-                $input['password'] = Hash::make($request->password);
-            }
+                // Never let `password` silently overwrite via mass-assignment.
+                // Always exclude it from the general update; handle it explicitly below.
+                $input = $request->except(['privileges', 'password']);
 
-            $data->update($input);
+                // Only update password when the caller explicitly sends a non-empty value.
+                if ($request->filled('password')) {
+                    $input['password'] = Hash::make($request->password);
+                }
 
-            if ($request->has('privileges')) {
-                $normalized = $this->normalizePrivilegesInput($request->input('privileges', []));
-                Log::info('Updating privileges for user', [
-                    'user_id'    => $data->id,
-                    'username'   => $data->username,
-                    'privileges' => $normalized,
-                ]);
-                UserPrivilege::updateFromArray($data->id, $normalized);
-                // Verify write succeeded
-                $saved = UserPrivilege::where('user_id', $data->id)->pluck('privilege')->toArray();
-                Log::info('Privileges updated successfully', [
-                    'user_id' => $data->id,
-                    'saved'   => $saved,
-                ]);
-            }
+                $data->update($input);
 
-            return $data;
-        });
+                if ($request->has('privileges')) {
+                    $normalized = $this->normalizePrivilegesInput($request->input('privileges', []));
+                    Log::info('Updating privileges for user', [
+                        'user_id'    => $data->id,
+                        'username'   => $data->username,
+                        'privileges' => $normalized,
+                    ]);
+                    UserPrivilege::updateFromArray($data->id, $normalized);
+                    $saved = UserPrivilege::where('user_id', $data->id)->pluck('privilege')->toArray();
+                    Log::info('Privileges updated successfully', [
+                        'user_id' => $data->id,
+                        'saved'   => $saved,
+                    ]);
+                }
 
-        return $this->sendResponse($result, Response::HTTP_OK, 'Saved successfully.');
+                return $data;
+            });
+
+            return $this->sendResponse($result, Response::HTTP_OK, 'Saved successfully.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('User update validation failed', [
+                'user_id' => $id,
+                'errors'  => $e->errors(),
+            ]);
+            return $this->sendError(
+                'Validation failed. Please check all required fields.',
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $e->errors()
+            );
+        } catch (\Exception $e) {
+            Log::error('User update failed', [
+                'user_id' => $id,
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return $this->sendError(
+                'Failed to save changes: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     /**
