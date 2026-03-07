@@ -35,7 +35,7 @@ const DailyCreditCollection = ({ module }) => {
   const [params, setParams] = useState({
     with_patient: "Yes",
     transaction_type: "Credit",
-    status: "Paid,Served",
+    status: "Paid",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
