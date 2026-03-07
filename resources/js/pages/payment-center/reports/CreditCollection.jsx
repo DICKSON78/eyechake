@@ -16,7 +16,6 @@ import {
   formatDateForDb,
   getDateRangeTitle,
   numberFormat,
-  throttle,
   getWeekStartDate,
 } from "../../../helpers";
 
@@ -142,10 +141,7 @@ const CreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -167,10 +163,7 @@ const CreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>
@@ -226,7 +219,7 @@ const CreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(() => setParams({ ...params, q: value }), 1000)
+                        setParams({ ...params, q: value })
                       }
                     />
                   </Grid>

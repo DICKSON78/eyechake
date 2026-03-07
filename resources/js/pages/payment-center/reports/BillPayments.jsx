@@ -16,7 +16,6 @@ import {
   formatDateForDb,
   getDateRangeTitle,
   numberFormat,
-  throttle,
   getWeekStartDate,
 } from "../../../helpers";
 
@@ -139,10 +138,7 @@ const BillPayments = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -164,10 +160,7 @@ const BillPayments = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>
@@ -223,10 +216,7 @@ const BillPayments = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, bill_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, bill_id: value })
                       }
                     />
                   </Grid>

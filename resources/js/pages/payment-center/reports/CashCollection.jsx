@@ -18,7 +18,6 @@ import {
   getDateRangeTitle,
   getFullName,
   numberFormat,
-  throttle,
   getWeekStartDate,
 } from "../../../helpers";
 
@@ -145,10 +144,7 @@ const CashCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -170,10 +166,7 @@ const CashCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>

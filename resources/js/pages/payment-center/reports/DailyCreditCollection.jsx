@@ -7,6 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
+import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
@@ -16,7 +17,6 @@ import {
   getDateRangeTitle,
   numberFormat,
   throttle,
-  getWeekStartDate,
 } from "../../../helpers";
 
 const DailyCreditCollection = ({ module }) => {
@@ -42,7 +42,8 @@ const DailyCreditCollection = ({ module }) => {
     patient_phone: undefined,
     payment_mode_id: undefined,
     q: undefined,
-    start_date: getWeekStartDate(),
+    start_date: new Date(),
+    end_date: new Date(),
     sort_direction: "desc",
   });
 
@@ -88,6 +89,42 @@ const DailyCreditCollection = ({ module }) => {
                 >
                   <Grid
                     item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <DatePicker
+                      fullWidth
+                      label="Start Date"
+                      value={params.start_date || null}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <DatePicker
+                      fullWidth
+                      label="End Date"
+                      value={params.end_date || null}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
                     md
                     sm={6}
                     xs={12}
@@ -104,10 +141,7 @@ const DailyCreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -129,10 +163,7 @@ const DailyCreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>
@@ -188,7 +219,7 @@ const DailyCreditCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(() => setParams({ ...params, q: value }), 1000)
+                        setParams({ ...params, q: value })
                       }
                     />
                   </Grid>

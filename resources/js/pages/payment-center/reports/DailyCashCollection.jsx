@@ -7,6 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/SearchRounded";
 import Page from "../../../components/Page";
 import Report from "../../../components/reports/Report";
+import DatePicker from "../../../components/DatePicker";
 import Select from "../../../components/Select";
 import TextField from "../../../components/TextField";
 
@@ -16,7 +17,6 @@ import {
   getDateRangeTitle,
   getFullName,
   numberFormat,
-  throttle,
 } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
@@ -87,6 +87,42 @@ const DailyCashCollection = ({ module }) => {
                     sm={6}
                     xs={12}
                   >
+                    <DatePicker
+                      fullWidth
+                      label="Start Date"
+                      value={params.start_date || null}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          start_date: !isNaN(value) ? value : null,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
+                    <DatePicker
+                      fullWidth
+                      label="End Date"
+                      value={params.end_date || null}
+                      onChange={(value) =>
+                        setParams({
+                          ...params,
+                          end_date: !isNaN(value) ? value : null,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    md={3}
+                    sm={6}
+                    xs={12}
+                  >
                     <TextField
                       fullWidth
                       label="Patient Name"
@@ -99,10 +135,7 @@ const DailyCashCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -124,10 +157,7 @@ const DailyCashCollection = ({ module }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>

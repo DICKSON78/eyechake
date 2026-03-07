@@ -14,7 +14,6 @@ import {
   formatDateForDb,
   getDateRangeTitle,
   numberFormat,
-  throttle,
 } from "../../../helpers";
 
 const PatientBills = ({ module, status }) => {
@@ -124,10 +123,7 @@ const PatientBills = ({ module, status }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_name: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_name: value })
                       }
                     />
                   </Grid>
@@ -149,10 +145,7 @@ const PatientBills = ({ module, status }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, patient_id: value }),
-                          1000
-                        )
+                        setParams({ ...params, patient_id: value })
                       }
                     />
                   </Grid>
@@ -190,10 +183,7 @@ const PatientBills = ({ module, status }) => {
                         ),
                       }}
                       onChange={(value) =>
-                        throttle(
-                          () => setParams({ ...params, id: value }),
-                          1000
-                        )
+                        setParams({ ...params, id: value })
                       }
                     />
                   </Grid>

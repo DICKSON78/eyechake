@@ -28,6 +28,83 @@ export const isAdmin = (user) => {
          user.is_admin === "1";
 };
 
+const PRIVILEGE_ALIASES = {
+  sales_center: ["sales"],
+  sales: ["sales_center"],
+  user_management: ["employee_management"],
+  employee_management: ["user_management"],
+};
+
+const ROLE_FALLBACK_PRIVILEGES = {
+  sales: ["sales_center", "sales"],
+  "sales manager": ["sales_center", "sales"],
+};
+
+const normalizePrivilegePayload = (payload) => {
+  if (!payload) return {};
+
+  let normalized = payload;
+
+  if (typeof normalized === "string") {
+    try {
+      normalized = JSON.parse(normalized);
+    } catch (e) {
+      return {};
+    }
+  }
+
+  if (Array.isArray(normalized)) {
+    const result = {};
+    normalized.forEach((item) => {
+      if (typeof item === "string") {
+        result[item] = true;
+        return;
+      }
+      if (item && typeof item === "object") {
+        if (typeof item.privilege === "string") {
+          result[item.privilege] = true;
+          return;
+        }
+        Object.keys(item).forEach((key) => {
+          result[key] = item[key];
+        });
+      }
+    });
+    return result;
+  }
+
+  if (normalized && typeof normalized === "object") {
+    if (
+      normalized.original &&
+      typeof normalized.original === "object" &&
+      Object.keys(normalized).length === 1
+    ) {
+      return normalizePrivilegePayload(normalized.original);
+    }
+    return normalized;
+  }
+
+  return {};
+};
+
+const getNormalizedPrivileges = (user) => {
+  const rawPrivileges =
+    user?.privileges ?? user?.access ?? user?.user_privileges ?? {};
+
+  const normalized = normalizePrivilegePayload(rawPrivileges);
+  const hasAnyExplicitPrivilege = Object.keys(normalized).length > 0;
+
+  if (!hasAnyExplicitPrivilege) {
+    const roleKey = (user?.role || "").toString().trim().toLowerCase();
+    const fallbackPrivileges = ROLE_FALLBACK_PRIVILEGES[roleKey] || [];
+    fallbackPrivileges.forEach((privilege) => {
+      normalized[privilege] = true;
+    });
+  }
+
+  return normalized;
+};
+
 /**
  * Check if user has a specific privilege
  * Admins always have access to all privileges
@@ -48,43 +125,14 @@ export const hasPrivilege = (user, privilegeKey) => {
     return true;
   }
   
-  // Check privileges object
   const privileges = user.privileges || {};
-  
-  // Handle string privileges (if backend sends as JSON string)
-  let normalizedPrivileges = privileges;
-  if (typeof privileges === "string") {
-    try {
-      normalizedPrivileges = JSON.parse(privileges);
-    } catch (e) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`[hasPrivilege] Failed to parse privileges string:`, e);
-      }
-      normalizedPrivileges = {};
-    }
-  }
-  
-  // Handle array format (if backend sends as array)
-  if (Array.isArray(normalizedPrivileges)) {
-    const arrayPrivileges = {};
-    normalizedPrivileges.forEach(priv => {
-      arrayPrivileges[priv] = true;
-    });
-    normalizedPrivileges = arrayPrivileges;
-  }
+  const normalizedPrivileges = getNormalizedPrivileges(user);
   
   const privilegeValue = normalizedPrivileges[privilegeKey];
   let granted = isPrivilegeGranted(privilegeValue);
 
   if (!granted) {
-    const aliases = {
-      sales_center: ['sales'],
-      sales: ['sales_center'],
-      user_management: ['employee_management'],
-      employee_management: ['user_management'],
-    };
-
-    const aliasKeys = aliases[privilegeKey] || [];
+    const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
     for (const aliasKey of aliasKeys) {
       if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
         granted = true;
@@ -132,28 +180,12 @@ export const hasReportAccess = (user, parentPrivilege, reportPrivilege) => {
     return true;
   }
   
-  const privileges = user.privileges || {};
-  
-  // Handle string privileges
-  let normalizedPrivileges = privileges;
-  if (typeof privileges === "string") {
-    try {
-      normalizedPrivileges = JSON.parse(privileges);
-    } catch (e) {
-      normalizedPrivileges = {};
-    }
-  }
+  const normalizedPrivileges = getNormalizedPrivileges(user);
   
   // Check parent privilege OR specific report privilege
   const hasParent = (() => {
     if (isPrivilegeGranted(normalizedPrivileges[parentPrivilege])) return true;
-    const aliases = {
-      sales_center: ['sales'],
-      sales: ['sales_center'],
-      user_management: ['employee_management'],
-      employee_management: ['user_management'],
-    };
-    const aliasKeys = aliases[parentPrivilege] || [];
+    const aliasKeys = PRIVILEGE_ALIASES[parentPrivilege] || [];
     return aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
   })();
   const hasReport = reportPrivilege ? isPrivilegeGranted(normalizedPrivileges[reportPrivilege]) : false;
@@ -174,17 +206,7 @@ export const getDefaultRoute = (user) => {
     return "/dashboard";
   }
   
-  const privileges = user.privileges || {};
-  
-  // Handle string privileges
-  let normalizedPrivileges = privileges;
-  if (typeof privileges === "string") {
-    try {
-      normalizedPrivileges = JSON.parse(privileges);
-    } catch (e) {
-      normalizedPrivileges = {};
-    }
-  }
+  const normalizedPrivileges = getNormalizedPrivileges(user);
   
   // Priority order for routes
   const routeCandidates = [
@@ -205,7 +227,7 @@ export const getDefaultRoute = (user) => {
   
   // Find first route user has access to
   for (const candidate of routeCandidates) {
-    if (hasPrivilege(user, candidate.privilege)) {
+    if (hasPrivilege({ ...user, privileges: normalizedPrivileges }, candidate.privilege)) {
       return candidate.route;
     }
   }
