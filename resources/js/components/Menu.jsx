@@ -395,18 +395,13 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/reception/reports/patient-registration",
               show: isPrivilegeGranted('reception'),
             },
-            {
-              title: "Items Dispensed",
-              icon: <ReportsIcon />,
-              to: "/reception/reports/items-dispensed",
-              show: isPrivilegeGranted('reception'),
-            },
           ],
         },
         {
           title: "Website Appointments",
           icon: <AppointmentsIcon />,
           to: "/external-links/website-appointments",
+          badge: notifications && typeof notifications.website_appointments !== 'undefined' && notifications.website_appointments != null ? (Number(notifications.website_appointments) || 0) : (loading ? '...' : 0),
           show: isPrivilegeGranted('reception'),
         },
         {
@@ -525,18 +520,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               icon: <ReportsIcon />,
               to: "/consultation-room/reports/pharmacy-consultation-report",
               show: isPrivilegeGranted('consultation_room') || isPrivilegeGranted('medicine_center'),
-            },
-            {
-              title: "Served Procedures Report",
-              icon: <ReportsIcon />,
-              to: "/consultation-room/reports/served-procedures",
-              show: isPrivilegeGranted('consultation_room') || isPrivilegeGranted('procedure_room'),
-            },
-            {
-              title: "Pending Procedures Report",
-              icon: <ReportsIcon />,
-              to: "/consultation-room/reports/pending-procedures",
-              show: isPrivilegeGranted('consultation_room') || isPrivilegeGranted('procedure_room'),
             },
           ],
         },

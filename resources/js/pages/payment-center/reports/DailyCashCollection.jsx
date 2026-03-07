@@ -17,7 +17,6 @@ import {
   getFullName,
   numberFormat,
   throttle,
-  getWeekStartDate,
 } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
@@ -38,7 +37,8 @@ const DailyCashCollection = ({ module }) => {
     patient_gender: undefined,
     patient_phone: undefined,
     payment_channel_id: undefined,
-    start_date: getWeekStartDate(),
+    start_date: new Date(),
+    end_date: new Date(),
   });
 
   useEffect(() => {

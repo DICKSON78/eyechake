@@ -15,6 +15,7 @@ import Page, { Header as PageHeader } from "../../components/Page";
 import Table from "../../components/Table";
 import Modal from "../../components/Modal";
 import Filters from "./PatientFilters";
+import PatientDetails from "../reception/patients/PatientDetails";
 
 import { useFetch, useToast } from "../../hooks";
 import {
@@ -115,6 +116,15 @@ const ConsultationPatients = () => {
     if (status === "consulted") {
       return "Consulted Patients";
     }
+  };
+
+  const openPatientRecord = (patientId) => {
+    const component = (
+      <PatientDetails
+        patientId={patientId}
+      />
+    );
+    modalRef.current.open("Patient Record", component, "md");
   };
 
   return (
@@ -293,6 +303,21 @@ const ConsultationPatients = () => {
                         }
                         spacing={1}
                       >
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() =>
+                            openPatientRecord(
+                              item.payment_cache_item?.payment_cache?.check_in?.patient_id
+                            )
+                          }
+                          sx={{
+                            fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                            px: { xs: 1, sm: 2 },
+                          }}
+                        >
+                          Record
+                        </Button>
                         <Button
                           variant="contained"
                           size="small"

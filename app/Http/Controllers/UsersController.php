@@ -15,6 +15,50 @@ class UsersController extends Controller
 {
     use ApiResponse;
 
+    private function normalizePrivilegesInput($rawPrivileges)
+    {
+        if (is_string($rawPrivileges)) {
+            $decoded = json_decode($rawPrivileges, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $rawPrivileges = $decoded;
+            } else {
+                $rawPrivileges = [];
+            }
+        }
+
+        if (!is_array($rawPrivileges)) {
+            return [];
+        }
+
+        $isAssoc = array_keys($rawPrivileges) !== range(0, count($rawPrivileges) - 1);
+
+        if ($isAssoc) {
+            $rawPrivileges = array_keys(array_filter($rawPrivileges, function ($value) {
+                return $value === true || $value === 1 || $value === '1' || $value === 'true';
+            }));
+        }
+
+        $normalized = [];
+        foreach ($rawPrivileges as $privilege) {
+            if (!is_string($privilege) || trim($privilege) === '') {
+                continue;
+            }
+
+            $privilege = trim($privilege);
+
+            if ($privilege === 'sales') {
+                $privilege = 'sales_center';
+            }
+            if ($privilege === 'employee_management') {
+                $privilege = 'user_management';
+            }
+
+            $normalized[] = $privilege;
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -211,7 +255,7 @@ class UsersController extends Controller
 
             if ($data && $request->has('privileges')) {
                 // Set privileges for new user using the boolean column structure
-                UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
+                UserPrivilege::updateFromArray($data->id, $this->normalizePrivilegesInput($request->input('privileges', [])));
             }
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -279,7 +323,7 @@ class UsersController extends Controller
 
         if ($request->has('privileges')) {
             // Update privileges using the new boolean column structure
-            UserPrivilege::updateFromArray($data->id, $request->privileges ?? []);
+            UserPrivilege::updateFromArray($data->id, $this->normalizePrivilegesInput($request->input('privileges', [])));
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

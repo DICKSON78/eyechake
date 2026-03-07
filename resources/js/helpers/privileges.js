@@ -74,7 +74,24 @@ export const hasPrivilege = (user, privilegeKey) => {
   }
   
   const privilegeValue = normalizedPrivileges[privilegeKey];
-  const granted = isPrivilegeGranted(privilegeValue);
+  let granted = isPrivilegeGranted(privilegeValue);
+
+  if (!granted) {
+    const aliases = {
+      sales_center: ['sales'],
+      sales: ['sales_center'],
+      user_management: ['employee_management'],
+      employee_management: ['user_management'],
+    };
+
+    const aliasKeys = aliases[privilegeKey] || [];
+    for (const aliasKey of aliasKeys) {
+      if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
+        granted = true;
+        break;
+      }
+    }
+  }
   
   // Debug logging (always log for debugging privilege issues)
   if (!granted) {
@@ -128,7 +145,17 @@ export const hasReportAccess = (user, parentPrivilege, reportPrivilege) => {
   }
   
   // Check parent privilege OR specific report privilege
-  const hasParent = isPrivilegeGranted(normalizedPrivileges[parentPrivilege]);
+  const hasParent = (() => {
+    if (isPrivilegeGranted(normalizedPrivileges[parentPrivilege])) return true;
+    const aliases = {
+      sales_center: ['sales'],
+      sales: ['sales_center'],
+      user_management: ['employee_management'],
+      employee_management: ['user_management'],
+    };
+    const aliasKeys = aliases[parentPrivilege] || [];
+    return aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
+  })();
   const hasReport = reportPrivilege ? isPrivilegeGranted(normalizedPrivileges[reportPrivilege]) : false;
   
   return hasParent || hasReport;
@@ -169,6 +196,7 @@ export const getDefaultRoute = (user) => {
     { privilege: 'medicine_center', route: '/medicine-center/dashboard' },
     { privilege: 'procedure_room', route: '/procedure-room/dashboard' },
     { privilege: 'inventory_management', route: '/inventory-management/dashboard' },
+    { privilege: 'sales', route: '/sales-center/dashboard' },
     { privilege: 'marketing', route: '/marketing/dashboard' },
     { privilege: 'financial_management', route: '/financial-management/dashboard' },
     { privilege: 'user_management', route: '/user-management/users' },

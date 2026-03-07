@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -31,8 +32,8 @@ class PaymentCenterReportsController extends Controller
         $patient_id = $request->patient_id;
         $patient_gender = $request->patient_gender;
         $patient_phone = $request->patient_phone;
-        $start_date = $request->start_date;
-        $end_date = $request->end_date;
+        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
         $item_payments = PatientItemPayment::with(['channel', 'creator'])
             ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
@@ -105,7 +106,7 @@ class PaymentCenterReportsController extends Controller
         $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
         $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
 
-        $data = $item_payments->union($bill_payments);
+        $data = $item_payments->unionAll($bill_payments);
         $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');

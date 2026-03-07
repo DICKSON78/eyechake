@@ -355,12 +355,13 @@ class DirectorDashboardController extends Controller
         try {
             $pharmacySalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ppci.consultation_type_id', 1);
+                ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
             
             if ($clinic_id) {
                 $pharmacySalesQuery->where('u.clinic_id', $clinic_id);
@@ -371,12 +372,13 @@ class DirectorDashboardController extends Controller
             // Pharmacy Purchases (COGS)
             $pharmacyPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ppci.consultation_type_id', 1);
+                ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
             
             if ($clinic_id) {
                 $pharmacyPurchasesQuery->where('u.clinic_id', $clinic_id);
@@ -396,12 +398,13 @@ class DirectorDashboardController extends Controller
         try {
             $glassSalesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ppci.consultation_type_id', 2)
+                ->whereRaw('LOWER(ct.name) = ?', ['glass'])
                 ->where('it.item_type_id', '!=', 4); // Exclude frames
             
             if ($clinic_id) {
@@ -413,12 +416,13 @@ class DirectorDashboardController extends Controller
             // Glass Purchases (COGS)
             $glassPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
                 ->whereDate('ppci.served_at', '>=', $start_date)
                 ->whereDate('ppci.served_at', '<=', $end_date)
-                ->where('ppci.consultation_type_id', 2)
+                ->whereRaw('LOWER(ct.name) = ?', ['glass'])
                 ->where('it.item_type_id', '!=', 4); // Exclude frames
             
             if ($clinic_id) {

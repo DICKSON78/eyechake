@@ -45,9 +45,18 @@ class ClientCallingStatusController extends Controller
 
         // Filter by calling status
         if ($request->status) {
-            $query->whereHas('calling_status', function ($q) use ($request) {
-                $q->where('status', $request->status);
-            });
+            if ($request->status === 'need_to_call') {
+                // Need to Call includes explicit status and patients with no status record yet
+                $query->where(function ($q) {
+                    $q->whereHas('calling_status', function ($sq) {
+                        $sq->where('status', 'need_to_call');
+                    })->orWhereDoesntHave('calling_status');
+                });
+            } else {
+                $query->whereHas('calling_status', function ($q) use ($request) {
+                    $q->where('status', $request->status);
+                });
+            }
         }
         // If no status filter, show all patients (with() will handle null calling_status automatically)
 

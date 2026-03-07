@@ -28,6 +28,7 @@ export const NotificationProvider = ({ children }) => {
     spectacle_patients: 0,
     waiting_patients: 0,
     patients_sent_to_sales: 0,
+    website_appointments: 0,
   });
   const [loading, setLoading] = useState(false);
   const [currentParams, setCurrentParams] = useState({});
@@ -140,6 +141,7 @@ export const NotificationProvider = ({ children }) => {
           spectacle_patients: 0,
           waiting_patients: 0,
           patients_sent_to_sales: 0,
+          website_appointments: 0,
         };
         
         // Merge server data with defaults to ensure all keys exist
@@ -195,6 +197,7 @@ export const NotificationProvider = ({ children }) => {
         spectacle_patients: 0,
         waiting_patients: 0,
         patients_sent_to_sales: 0,
+        website_appointments: 0,
       });
       return null;
     } finally {

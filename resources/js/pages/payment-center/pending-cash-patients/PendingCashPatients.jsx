@@ -26,7 +26,7 @@ const PendingCashPatients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    item_status: "Pending,Served", // Include both pending and served items for billing
+    item_status: "Pending,Billed,Served", // Include pending/billed/served items routed to cashier
     item_transaction_type: "Cash",
     patient_id: undefined,
     patient_name: undefined,

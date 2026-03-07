@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
+use App\Models\Appointment;
 use App\Models\Consultation;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
@@ -70,6 +71,7 @@ class NotificationsController extends Controller
                 'spectacle_patients' => $this->getSpectaclePatientsCount($clinic_id),
                 'waiting_patients' => $this->getWaitingPatientsCount($clinic_id),
                 'patients_sent_to_sales' => $this->getPatientsSentToSalesCount($clinic_id),
+                'website_appointments' => $this->getWebsiteAppointmentsCount(),
             ];
 
             // Cache for 2 seconds (reduced for more real-time updates)
@@ -102,7 +104,23 @@ class NotificationsController extends Controller
             'spectacle_patients' => 0,
             'waiting_patients' => 0,
             'patients_sent_to_sales' => 0,
+            'website_appointments' => 0,
         ];
+    }
+
+    private function getWebsiteAppointmentsCount()
+    {
+        try {
+            return Appointment::query()
+                ->where('status', 'Pending')
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
+                ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59')
+                ->count();
+        } catch (\Exception $e) {
+            Log::error('Error counting website_appointments: ' . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -144,9 +162,7 @@ class NotificationsController extends Controller
     private function getPatientsSentToCashierCount($clinic_id)
     {
         try {
-            // Count patients with pending cash items that need payment
-            // Only include patients who have at least one Pending item (not yet paid)
-            // Exclude patients where all items are already Paid or Served
+            // Count patients routed to cashier with cash-type items (match cashier queue rules)
             $query = PatientPaymentCache::query()
                 ->when($clinic_id, function ($q) use ($clinic_id) {
                     $q->whereHas('creator', function ($query) use ($clinic_id) {
@@ -154,11 +170,10 @@ class NotificationsController extends Controller
                     });
                 })
                 ->whereHas('items', function ($query) {
-                    // Must have at least one Pending item that needs payment
-                    $query->where('status', 'Pending')
+                    $query->whereIn('status', ['Pending', 'Billed', 'Served'])
                         ->whereNull('item_payment_id')
                         ->whereHas('payment_mode', function ($q) {
-                            $q->where('payment_type', 'Cash');
+                            $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
                         });
                 })
                 ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
