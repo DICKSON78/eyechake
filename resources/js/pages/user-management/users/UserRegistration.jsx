@@ -42,7 +42,7 @@ import Select from "../../../components/Select";
 import SelectClinic from "../../../components/SelectClinic";
 
 import { useFetch, usePost, useToast } from "../../../hooks";
-import { formatDateForDb, formatError, getPrivileges } from "../../../helpers";
+import { formatDateForDb, formatError, getPrivileges, getPrivilegesForDepartment } from "../../../helpers";
 
 const UserRegistration = () => {
   const addToast = useToast();
@@ -561,9 +561,16 @@ const UserRegistration = () => {
                         options={departments}
                         optionsLabel="name"
                         optionsValue="id"
-                        onChange={(value) =>
-                          setFormData({ ...formData, department_id: value })
-                        }
+                        onChange={(value) => {
+                          const dept = departments.find((d) => d.id === value);
+                          const suggested = dept ? getPrivilegesForDepartment(dept.name) : [];
+                          setFormData({
+                            ...formData,
+                            department_id: value,
+                            // Auto-suggest privileges based on department (merge, don't overwrite existing choices)
+                            privileges: [...new Set([...formData.privileges, ...suggested])],
+                          });
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>

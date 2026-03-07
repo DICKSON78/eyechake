@@ -475,19 +475,18 @@ export const getPrivileges = (preferences) => {
         { label: "Optometrist Monthly Report", value: "optometrist_monthly_report" }
       ]
     },
+    { label: "Optician Center", value: "optician_center" },
+    { label: "Medicine Center", value: "medicine_center" },
+    { label: "Dispensing", value: "dispensing" },
+    { label: "Other Dispensing", value: "other_dispensing" },
     { 
-      label: "Stock Management", 
+      label: "Sales Center", 
       value: "sales_center",
       children: [
         { label: "Sales Manager Monthly Report", value: "sales_manager_monthly_report" }
       ]
     },
-    { label: "Optician Center", value: "optician_center" },
-    { label: "Medicine Center", value: "medicine_center" },
-    { label: "Dispensing", value: "dispensing" },
-    { label: "Other Dispensing", value: "other_dispensing" },
-    { label: "Sales", value: "sales" },
-    { label: "Stock Management", value: "inventory_management" },
+    { label: "Inventory Management", value: "inventory_management" },
     {
       label: "Marketing",
       value: "marketing",
@@ -505,4 +504,40 @@ export const getPrivileges = (preferences) => {
     { label: "Calendar Edit", value: "calendar_edit" },
     { label: "Settings", value: "settings" },
   ];
+};
+
+/**
+ * Get suggested privileges for a given department name.
+ * Used to auto-suggest checkboxes when a department is selected during employee creation.
+ */
+export const getPrivilegesForDepartment = (departmentName) => {
+  if (!departmentName) return [];
+  const name = departmentName.toString().toLowerCase();
+
+  if (name.includes('reception') || name.includes('front desk'))
+    return ['reception'];
+  if (name.includes('cashier') || name.includes('payment') || name.includes('billing'))
+    return ['payment_center'];
+  if (name.includes('consultation') || name.includes('doctor') || name.includes('clinical'))
+    return ['consultation_room'];
+  if (name.includes('optician') || name.includes('dispensing'))
+    return ['optician_center', 'dispensing'];
+  if (name.includes('pharmacy') || name.includes('medicine'))
+    return ['medicine_center'];
+  if (name.includes('sales'))
+    return ['sales_center'];
+  if (name.includes('inventory') || name.includes('stock') || name.includes('store'))
+    return ['inventory_management'];
+  if (name.includes('marketing') || name.includes('crm') || name.includes('client relation'))
+    return ['marketing'];
+  if (name.includes('finance') || name.includes('account'))
+    return ['financial_management'];
+  if (name.includes('hr') || name.includes('human resource') || name.includes('admin'))
+    return ['user_management'];
+  if (name.includes('director') || name.includes('management') || name.includes('executive'))
+    return ['director'];
+  if (name.includes('procedure') || name.includes('surgery') || name.includes('theatre'))
+    return ['procedure_room'];
+
+  return [];
 };
