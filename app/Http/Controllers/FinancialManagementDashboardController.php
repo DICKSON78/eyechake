@@ -47,37 +47,47 @@ class FinancialManagementDashboardController extends Controller
         ];
 
         // Get financial statistics
-        // Total revenue: sum of all payments + cleared bills
+        // Total revenue: actual payments linked to cache items (no orphans, no bill face values)
         try {
             $revenueQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+                ->whereNotNull('patient_item_payments.created_at')
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
             if ($clinic_id) {
-                $revenueQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $revenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $data['summary']['total_revenue'] = $revenueQuery->sum('amount') ?? 0;
+            $itemPaymentsRevenue = (float) $revenueQuery->sum('patient_item_payments.amount');
 
-            // Add cleared bills to total revenue
-            $clearedBillsQuery = PatientItemBill::query()
-                ->where('status', 'Cleared')
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59');
+            // Add actual bill payments
+            $billRevenueQuery = PatientItemBillPayment::query()
+                ->whereNotNull('patient_item_bill_payments.created_at')
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
             
             if ($clinic_id) {
-                $clearedBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $billRevenueQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $cleared_bills_revenue = $clearedBillsQuery->sum('amount') ?? 0;
-            $data['summary']['total_revenue'] += $cleared_bills_revenue;
+            $billPaymentsRevenue = (float) $billRevenueQuery->sum('patient_item_bill_payments.amount');
+            $data['summary']['total_revenue'] = $itemPaymentsRevenue + $billPaymentsRevenue;
         } catch (\Exception $e) {
             \Log::error('Error calculating total revenue', ['error' => $e->getMessage()]);
             $data['summary']['total_revenue'] = 0;
@@ -105,36 +115,46 @@ class FinancialManagementDashboardController extends Controller
 
         $data['summary']['net_profit'] = $data['summary']['total_revenue'] - $data['summary']['total_expenses'];
 
-        // Daily collections: sum of all payments (item payments + bill payments) within the date range
+        // Daily collections: actual payments linked to cache items
         try {
-            $dailyCollectionsQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+            $dailyItemQuery = PatientItemPayment::query()
+                ->whereNotNull('patient_item_payments.created_at')
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
             if ($clinic_id) {
-                $dailyCollectionsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $dailyItemQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $dailyCollections = $dailyCollectionsQuery->sum('amount') ?? 0;
+            $dailyCollections = (float) $dailyItemQuery->sum('patient_item_payments.amount');
 
-            // Add bill payments to daily collections
-            $billPaymentsQuery = PatientItemBillPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+            // Add bill payments
+            $dailyBillQuery = PatientItemBillPayment::query()
+                ->whereNotNull('patient_item_bill_payments.created_at')
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
             
             if ($clinic_id) {
-                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $dailyBillQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $billPaymentsCollections = $billPaymentsQuery->sum('amount') ?? 0;
+            $billPaymentsCollections = (float) $dailyBillQuery->sum('patient_item_bill_payments.amount');
             $data['summary']['daily_collections'] = $dailyCollections + $billPaymentsCollections;
         } catch (\Exception $e) {
             \Log::error('Error calculating daily collections', ['error' => $e->getMessage()]);
@@ -520,7 +540,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Consultation');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -535,7 +554,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Pharmacy');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -550,7 +568,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Glass');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -565,7 +582,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -580,7 +596,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Consultation');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
@@ -592,7 +607,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Pharmacy');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
@@ -604,7 +618,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Glass');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
@@ -616,7 +629,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
