@@ -20,11 +20,10 @@ import {
 } from "../../../helpers";
 
 const DailyCashCollection = ({ module }) => {
-  const { data: paymentModes } = useFetch(
-    "api/payment-modes",
+  const { data: paymentChannels } = useFetch(
+    "api/payment-channels",
     {
       status: "Active",
-      transaction_type: "Cash",
       per_page: 500,
     },
     true,
@@ -33,15 +32,11 @@ const DailyCashCollection = ({ module }) => {
   );
 
   const [params, setParams] = useState({
-    with_patient: "Yes",
-    transaction_type: "Cash",
-    status: "Paid,Served",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    payment_mode_id: undefined,
-    q: undefined,
+    payment_channel_id: undefined,
     start_date: new Date(),
     end_date: new Date(),
     sort_direction: "desc",
@@ -63,7 +58,7 @@ const DailyCashCollection = ({ module }) => {
       <Report
         title="Daily Cash Collection Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
-        uri="api/patient-payment-cache-items"
+        uri="api/reports/payment-center/cash-collection"
         params={{
           ...params,
           start_date: params.start_date
@@ -190,36 +185,14 @@ const DailyCashCollection = ({ module }) => {
                     xs={12}
                   >
                     <Select
-                      label="Payment Mode"
+                      label="Payment Channel"
                       fullWidth
-                      options={paymentModes}
+                      options={paymentChannels}
                       optionsLabel="name"
                       optionsValue="id"
                       clearable
                       onChange={(value) =>
-                        setParams({ ...params, payment_mode_id: value })
-                      }
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md
-                    sm={6}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Item Name/Code"
-                      placeholder="Search"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon fontSize="small" />
-                          </InputAdornment>
-                        ),
-                      }}
-                      onChange={(value) =>
-                        setParams({ ...params, q: value })
+                        setParams({ ...params, payment_channel_id: value })
                       }
                     />
                   </Grid>
@@ -230,64 +203,68 @@ const DailyCashCollection = ({ module }) => {
         }
         columns={[
           {
-            field: "created_at",
-            headerName: "Date",
-          },
-          {
             field: "patient_name",
             headerName: "Patient Name",
             valueGetter: (item, index) =>
-              item.payment_cache.check_in.patient.full_name,
+              `${item.first_name} ${item.middle_name || ""} ${item.last_name}`,
           },
           {
             field: "patient_id",
             headerName: "Patient Number",
-            valueGetter: (item, index) =>
-              item.payment_cache.check_in.patient_id,
           },
           {
-            field: "name",
+            field: "items",
             headerName: "Item Name",
-            valueGetter: (item, index) => item.item.name,
           },
           {
-            field: "code",
-            headerName: "Item Code",
-            valueGetter: (item, index) => item.item.code,
+            field: "amount",
+            headerName: "Amount",
+            valueGetter: (item, index) => numberFormat(item.amount),
           },
           {
-            field: "unit_of_measure_id",
-            headerName: "Unit of Measure",
-            valueGetter: (item, index) => item.item.unit_of_measure?.name,
-          },
-          {
-            field: "quantity",
-            headerName: "Quantity",
-            valueGetter: (item, index) => numberFormat(item.quantity),
-          },
-          {
-            field: "unit_price",
-            headerName: "Unit Price",
-            valueGetter: (item, index) => numberFormat(item.unit_price),
+            field: "discount",
+            headerName: "Discount",
+            valueGetter: (item, index) => numberFormat(item.discount),
           },
           {
             field: "subtotal",
-            headerName: "Total Amount",
+            headerName: "Subtotal",
             valueGetter: (item, index) =>
-              numberFormat(item.unit_price * item.quantity),
+              numberFormat(parseFloat(item.amount) - parseFloat(item.discount)),
           },
           {
-            field: "created_by",
+            field: "channel",
+            headerName: "Payment Channel",
+            valueGetter: (item) => item.channel?.name,
+          },
+          {
+            field: "creator",
             headerName: "Created By",
             valueGetter: (item) => item.creator?.full_name,
           },
+          {
+            field: "created_at",
+            headerName: "Date",
+          },
+          {
+            field: "transaction_type",
+            headerName: "Type",
+          },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 9, index: 1 },
+          { value: "TOTAL", span: 3, index: 1 },
+          {
+            reducer: (acc, item, index) => acc + parseFloat(item.amount),
+            index: 4,
+          },
+          {
+            reducer: (acc, item, index) => acc + parseFloat(item.discount),
+            index: 5,
+          },
           {
             reducer: (acc, item, index) =>
-              acc + (parseFloat(item.unit_price) * parseFloat(item.quantity)),
-            index: 9,
+              acc + (parseFloat(item.amount) - parseFloat(item.discount)),
+            index: 6,
           },
         ]}
       />
