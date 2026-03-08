@@ -358,8 +358,8 @@ class DashboardController extends Controller
                     })
                     ->where('consultations.patient_direction', 'Direct to Doctor')
                     ->whereIn('it.status', ['Paid', 'Billed', 'Served'])
-                    ->whereDate('it.served_at', '>=', $start_date)
-                    ->whereDate('it.served_at', '<=', $end_date)
+                    ->whereDate(DB::raw('COALESCE(it.served_at, it.created_at)'), '>=', $start_date)
+                    ->whereDate(DB::raw('COALESCE(it.served_at, it.created_at)'), '<=', $end_date)
                     ->sum(DB::raw('it.unit_price * it.quantity'));
             }, 0);
 

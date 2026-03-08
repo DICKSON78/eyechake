@@ -535,9 +535,10 @@ class FinancialManagementDashboardController extends Controller
         // Calculate consultation, pharmacy, glass, others from payment cache items
         try {
             if ($clinic_id) {
+                // Consultation fees are stored under consultation_type 'Others' (ID 4)
                 $consultationQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Consultation');
+                        $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
                     ->whereNotNull('created_at')
@@ -577,9 +578,10 @@ class FinancialManagementDashboardController extends Controller
                 
                 $data['summary']['glass'] = $glassQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
                 
+                // Procedures are the 'others' category (consultation_type 'Procedure', ID 3)
                 $othersQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Others');
+                        $query->where('name', 'Procedure');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
                     ->whereNotNull('created_at')
@@ -591,9 +593,10 @@ class FinancialManagementDashboardController extends Controller
                 
                 $data['summary']['others'] = $othersQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
             } else {
+                // Consultation fees are stored under consultation_type 'Others' (ID 4)
                 $consultationQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Consultation');
+                        $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
                     ->whereNotNull('created_at')
@@ -624,9 +627,10 @@ class FinancialManagementDashboardController extends Controller
                 
                 $data['summary']['glass'] = $glassQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
                 
+                // Procedures are the 'others' category (consultation_type 'Procedure', ID 3)
                 $othersQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Others');
+                        $query->where('name', 'Procedure');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
                     ->whereNotNull('created_at')

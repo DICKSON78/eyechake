@@ -336,9 +336,9 @@ class DirectorDashboardController extends Controller
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('ppci.consultation_type_id', 4);
             
             if ($clinic_id) {
@@ -352,9 +352,9 @@ class DirectorDashboardController extends Controller
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('ppci.consultation_type_id', 4);
             
             if ($clinic_id) {
@@ -378,7 +378,7 @@ class DirectorDashboardController extends Controller
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
@@ -395,7 +395,7 @@ class DirectorDashboardController extends Controller
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
@@ -421,7 +421,7 @@ class DirectorDashboardController extends Controller
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
@@ -439,7 +439,7 @@ class DirectorDashboardController extends Controller
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
@@ -465,7 +465,7 @@ class DirectorDashboardController extends Controller
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('it.item_type_id', 4);
@@ -481,7 +481,7 @@ class DirectorDashboardController extends Controller
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->where('ppci.status', 'Served')
+                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('it.item_type_id', 4);
@@ -560,12 +560,12 @@ class DirectorDashboardController extends Controller
                 INNER JOIN patient_payment_cache as ppc ON ppci.payment_cache_id = ppc.id
                 INNER JOIN users as u ON ppc.created_by = u.id
                 WHERE u.clinic_id = ? 
-                    AND ppci.status = ?
-                    AND DATE(ppci.served_at) >= ?
-                    AND DATE(ppci.served_at) <= ?
+                    AND ppci.status IN (?, ?, ?)
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
                 GROUP BY it.item_type_id, itt.name
                 ORDER BY total_sales DESC
-            ', [$clinic_id, 'Served', $start_date, $end_date]);
+            ', [$clinic_id, 'Paid', 'Billed', 'Served', $start_date, $end_date]);
         } else {
             $data['statistics']['sales_by_category'] = DB::select('
                 SELECT 
@@ -576,12 +576,12 @@ class DirectorDashboardController extends Controller
                 FROM patient_payment_cache_items as ppci
                 INNER JOIN items as it ON ppci.item_id = it.id
                 INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                WHERE ppci.status = ?
-                    AND DATE(ppci.served_at) >= ?
-                    AND DATE(ppci.served_at) <= ?
+                WHERE ppci.status IN (?, ?, ?)
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
                 GROUP BY it.item_type_id, itt.name
                 ORDER BY total_sales DESC
-            ', ['Served', $start_date, $end_date]);
+            ', ['Paid', 'Billed', 'Served', $start_date, $end_date]);
         }
 
         // Top Selling Items
@@ -599,13 +599,13 @@ class DirectorDashboardController extends Controller
                 INNER JOIN patient_payment_cache as ppc ON ppci.payment_cache_id = ppc.id
                 INNER JOIN users as u ON ppc.created_by = u.id
                 WHERE u.clinic_id = ? 
-                    AND ppci.status = ?
-                    AND DATE(ppci.served_at) >= ?
-                    AND DATE(ppci.served_at) <= ?
+                    AND ppci.status IN (?, ?, ?)
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
                 GROUP BY it.id, it.name, itt.name
                 ORDER BY total_sales DESC
                 LIMIT 10
-            ', [$clinic_id, 'Served', $start_date, $end_date]);
+            ', [$clinic_id, 'Paid', 'Billed', 'Served', $start_date, $end_date]);
         } else {
             $data['statistics']['top_selling_items'] = DB::select('
                 SELECT 
@@ -617,13 +617,13 @@ class DirectorDashboardController extends Controller
                 FROM patient_payment_cache_items as ppci
                 INNER JOIN items as it ON ppci.item_id = it.id
                 INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                WHERE ppci.status = ?
-                    AND DATE(ppci.served_at) >= ?
-                    AND DATE(ppci.served_at) <= ?
+                WHERE ppci.status IN (?, ?, ?)
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
+                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
                 GROUP BY it.id, it.name, itt.name
                 ORDER BY total_sales DESC
                 LIMIT 10
-            ', ['Served', $start_date, $end_date]);
+            ', ['Paid', 'Billed', 'Served', $start_date, $end_date]);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Director Dashboard data retrieved successfully.');
