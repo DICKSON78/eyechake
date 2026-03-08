@@ -135,7 +135,6 @@ const Dashboard = () => {
                 count={numberFormat(data.summary?.completed_today || 0)}
                 icon={<CompletedIcon />}
                 color={green[400]}
-                onClick={() => navigate('/procedure-room/reports/served-procedures')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -144,7 +143,6 @@ const Dashboard = () => {
                 count={numberFormat(data.summary?.pending_procedures || 0)}
                 icon={<RequestsIcon />}
                 color={teal[400]}
-                onClick={() => navigate('/procedure-room/reports/pending-procedures')}
               />
             </Grid>
           </Grid>
@@ -170,18 +168,7 @@ const Dashboard = () => {
                         <Typography variant="subtitle2">Patient Records</Typography>
                       </Box>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/procedure-room/reports/served-procedures')}>
-                        <CompletedIcon sx={{ fontSize: 28.8, color: green[400], mb: 1 }} />
-                        <Typography variant="subtitle2">Completed Procedures</Typography>
-                      </Box>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid #e0e0e0', borderRadius: 2, cursor: 'pointer' }} onClick={() => navigate('/procedure-room/reports/pending-procedures')}>
-                        <ScheduledIcon sx={{ fontSize: 28.8, color: teal[400], mb: 1 }} />
-                        <Typography variant="subtitle2">Pending Procedures</Typography>
-                      </Box>
-                    </Grid>
+
                   </Grid>
                 </CardContent>
               </Card>
