@@ -52,7 +52,9 @@ class PaymentCenterReportsController extends Controller
 
         $item_payments->with(['creator.clinic']);
 
-        $effective_clinic_id = $user->is_admin ? $clinic_id : $user->clinic_id;
+        // Align cashier behavior with admin: only filter by clinic when explicitly requested
+        // so pagination+union stays stable for non-admins as well.
+        $effective_clinic_id = $clinic_id; // apply clinic scoping only when provided
         if ($effective_clinic_id) {
             $item_payments->whereIn('patient_item_payments.created_by', function($q) use ($effective_clinic_id) {
                 $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
@@ -60,9 +62,6 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereIn('patient_item_bill_payments.created_by', function($q) use ($effective_clinic_id) {
                 $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
             });
-        } elseif (!$user->is_admin) {
-            $item_payments->where('patient_item_payments.created_by', $user->id);
-            $bill_payments->where('patient_item_bill_payments.created_by', $user->id);
         }
 
         if ($payment_channel_id) {
@@ -133,13 +132,11 @@ class PaymentCenterReportsController extends Controller
 
         $data->with(['creator.clinic']);
 
-        $effective_clinic_id = $user->is_admin ? $clinic_id : $user->clinic_id;
+        $effective_clinic_id = $clinic_id; // only apply clinic filter when explicitly requested
         if ($effective_clinic_id) {
             $data->whereIn('expense_payments.created_by', function($q) use ($effective_clinic_id) {
                 $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
             });
-        } elseif (!$user->is_admin) {
-            $data->where('expense_payments.created_by', $user->id);
         }
 
         if ($payment_channel_id) {
