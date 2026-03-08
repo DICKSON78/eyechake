@@ -92,15 +92,15 @@ const PatientRoutes = () => {
           >
             <Tab
               label="Patient File"
-              onClick={() => navigate("patient-file")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/patient-file`)}
             />
             <Tab
               label="Payment History"
-              onClick={() => navigate("payment-history")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/payment-history`)}
             />
             <Tab
               label="Attachments"
-              onClick={() => navigate("attachments")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/attachments`)}
             />
           </Tabs>
           <Routes>
