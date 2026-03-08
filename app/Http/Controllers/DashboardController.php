@@ -116,23 +116,50 @@ class DashboardController extends Controller
             $cacheKey = "dashboard_total_sales_{$clinic_id}_{$start_date}_{$end_date}";
             $data['summary']['total_sales'] = Cache::remember($cacheKey, 300, function() use ($clinic_id, $start_date, $end_date) {
                 return $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                    return PatientItemPayment::query()
-                        ->when($clinic_id, function ($query) use ($clinic_id) {
-                            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                                $query->where('clinic_id', $clinic_id);
-                            });
-                        })
-                        ->whereDate('created_at', '>=', $start_date)
-                        ->whereDate('created_at', '<=', $end_date)
-                        ->sum('amount') + PatientItemBillPayment::query()
-                        ->when($clinic_id, function ($query) use ($clinic_id) {
-                            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                                $query->where('clinic_id', $clinic_id);
-                            });
-                        })
-                        ->whereDate('created_at', '>=', $start_date)
-                        ->whereDate('created_at', '<=', $end_date)
-                        ->sum('amount');
+                    $paymentsSum = 0;
+                    $billPaymentsSum = 0;
+
+                    // Use the same joined scope as Daily Cash Collection to avoid orphan rows
+                    $paymentsQuery = PatientItemPayment::query()
+                        ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
+                        ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                        ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                        ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+                        ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+                        ->whereNotNull('patient_item_payments.created_at')
+                        ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                        ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                        ->where('patient_item_payments.amount', '>', 0);
+
+                    if ($clinic_id) {
+                        $paymentsQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                        });
+                    }
+
+                    $paymentsSum = (float) $paymentsQuery->sum('patient_item_payments.amount');
+
+                    $billPaymentsQuery = PatientItemBillPayment::query()
+                        ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
+                        ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
+                        ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                        ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                        ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+                        ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+                        ->whereNotNull('patient_item_bill_payments.created_at')
+                        ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                        ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                        ->where('patient_item_bill_payments.amount', '>', 0);
+
+                    if ($clinic_id) {
+                        $billPaymentsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                        });
+                    }
+
+                    $billPaymentsSum = (float) $billPaymentsQuery->sum('patient_item_bill_payments.amount');
+
+                    return $paymentsSum + $billPaymentsSum;
                 }, 0);
             });
 
