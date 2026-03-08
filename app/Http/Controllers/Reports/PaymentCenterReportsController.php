@@ -132,11 +132,14 @@ class PaymentCenterReportsController extends Controller
 
         $data->with(['creator.clinic']);
 
-        $effective_clinic_id = $clinic_id; // only apply clinic filter when explicitly requested
+        // Mirror financial-management behavior: admins can scope by clinic_id; cashiers are scoped to their clinic
+        $effective_clinic_id = $user->is_admin ? $clinic_id : $user->clinic_id;
         if ($effective_clinic_id) {
             $data->whereIn('expense_payments.created_by', function($q) use ($effective_clinic_id) {
                 $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
             });
+        } elseif (!$user->is_admin) {
+            $data->where('expense_payments.created_by', $user->id);
         }
 
         if ($payment_channel_id) {
