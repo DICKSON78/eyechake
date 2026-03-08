@@ -35,34 +35,30 @@ class PaymentCenterReportsController extends Controller
         $patient_phone = $request->patient_phone;
         $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
-        
-        $item_payments = PatientItemPayment::query()
+        $item_payments = PatientItemPayment::with(['channel', 'creator'])
             ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
             ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-            ->leftJoin('payment_channels as pc', 'patient_item_payments.channel_id', '=', 'pc.id')
-            ->leftJoin('users as u', 'patient_item_payments.created_by', '=', 'u.id');
-            
-        $bill_payments = PatientItemBillPayment::query()
+            ->join('users as u1', 'patient_item_payments.created_by', '=', 'u1.id');
+        $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
             ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
             ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
             ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-            ->leftJoin('payment_channels as pc', 'patient_item_bill_payments.channel_id', '=', 'pc.id')
-            ->leftJoin('users as u', 'patient_item_bill_payments.created_by', '=', 'u.id');
+            ->join('users as u2', 'patient_item_bill_payments.created_by', '=', 'u2.id');
 
         if ($user->is_admin) {
             if ($clinic_id) {
-                $item_payments->where('u.clinic_id', $clinic_id);
-                $bill_payments->where('u.clinic_id', $clinic_id);
+                $item_payments->where('u1.clinic_id', $clinic_id);
+                $bill_payments->where('u2.clinic_id', $clinic_id);
             }
         } else {
-            $item_payments->where('u.clinic_id', $user->clinic_id);
-            $bill_payments->where('u.clinic_id', $user->clinic_id);
+            $item_payments->where('u1.clinic_id', $user->clinic_id);
+            $bill_payments->where('u2.clinic_id', $user->clinic_id);
         }
 
         if ($payment_channel_id) {
@@ -100,55 +96,12 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
         }
 
-        $item_payments->select(
-            DB::raw("'Cash' as transaction_type"),
-            DB::raw('ANY_VALUE(pt.first_name) as first_name'),
-            DB::raw('ANY_VALUE(pt.middle_name) as middle_name'),
-            DB::raw('ANY_VALUE(pt.last_name) as last_name'),
-            DB::raw('ANY_VALUE(pch.patient_id) as patient_id'),
-            DB::raw('ANY_VALUE(patient_item_payments.channel_id) as channel_id'),
-            DB::raw('ANY_VALUE(patient_item_payments.amount) as amount'),
-            DB::raw('ANY_VALUE(patient_item_payments.discount) as discount'),
-            DB::raw('ANY_VALUE(patient_item_payments.created_at) as created_at'),
-            DB::raw('ANY_VALUE(patient_item_payments.created_by) as created_by'),
-            DB::raw('group_concat(it.name separator ", ") as items'),
-            DB::raw('ANY_VALUE(pc.name) as channel_name'),
-            DB::raw("ANY_VALUE(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name)) as creator_name")
-        )->groupBy('patient_item_payments.id');
-        
-        $bill_payments->select(
-            DB::raw("'Bill' as transaction_type"),
-            DB::raw('ANY_VALUE(pt.first_name) as first_name'),
-            DB::raw('ANY_VALUE(pt.middle_name) as middle_name'),
-            DB::raw('ANY_VALUE(pt.last_name) as last_name'),
-            DB::raw('ANY_VALUE(pch.patient_id) as patient_id'),
-            DB::raw('ANY_VALUE(patient_item_bill_payments.channel_id) as channel_id'),
-            DB::raw('ANY_VALUE(patient_item_bill_payments.amount) as amount'),
-            DB::raw('0 as discount'),
-            DB::raw('ANY_VALUE(patient_item_bill_payments.created_at) as created_at'),
-            DB::raw('ANY_VALUE(patient_item_bill_payments.created_by) as created_by'),
-            DB::raw('group_concat(it.name separator ", ") as items'),
-            DB::raw('ANY_VALUE(pc.name) as channel_name'),
-            DB::raw("ANY_VALUE(CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name)) as creator_name")
-        )->groupBy('patient_item_bill_payments.id');
+        $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
+        $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
 
         $data = $item_payments->unionAll($bill_payments);
         $data->orderBy('created_at', 'desc');
         $data = $data->paginate($per_page);
-        
-        // Transform the data to match expected frontend structure
-        $data->getCollection()->transform(function ($item) {
-            $item->channel = (object)[
-                'id' => $item->channel_id,
-                'name' => $item->channel_name
-            ];
-            $item->creator = (object)[
-                'id' => $item->created_by,
-                'full_name' => $item->creator_name
-            ];
-            return $item;
-        });
-        
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
@@ -171,11 +124,9 @@ class PaymentCenterReportsController extends Controller
         $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
-        $data = ExpensePayment::query()
+        $data = ExpensePayment::with(['expense.category', 'channel', 'creator'])
             ->join('expenses as e', 'expense_payments.expense_id', '=', 'e.id')
-            ->leftJoin('expense_categories as ec', 'e.category_id', '=', 'ec.id')
-            ->leftJoin('payment_channels as pc', 'expense_payments.channel_id', '=', 'pc.id')
-            ->leftJoin('users as u', 'expense_payments.created_by', '=', 'u.id');
+            ->join('users as u', 'expense_payments.created_by', '=', 'u.id');
 
         if ($user->is_admin) {
             if ($clinic_id) {
@@ -214,35 +165,11 @@ class PaymentCenterReportsController extends Controller
             'expense_payments.created_at',
             'e.description',
             'e.category_id',
-            'e.expense_date',
-            'ec.name as category_name',
-            'pc.name as channel_name',
-            DB::raw("CONCAT(u.first_name, ' ', COALESCE(u.middle_name, ''), ' ', u.last_name) as creator_name")
+            'e.expense_date'
         );
 
         $data->orderBy('expense_payments.created_at', 'desc');
         $data = $data->paginate($per_page);
-        
-        // Transform the data to match expected frontend structure
-        $data->getCollection()->transform(function ($item) {
-            $item->expense = (object)[
-                'id' => $item->expense_id,
-                'description' => $item->description,
-                'category' => (object)[
-                    'id' => $item->category_id,
-                    'name' => $item->category_name
-                ]
-            ];
-            $item->channel = (object)[
-                'id' => $item->channel_id,
-                'name' => $item->channel_name
-            ];
-            $item->creator = (object)[
-                'id' => $item->created_by,
-                'full_name' => $item->creator_name
-            ];
-            return $item;
-        });
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
