@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\EmailService;
 use App\Models\Appointment;
+use App\Events\NotificationUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class AppointmentsController extends Controller
 {
@@ -76,6 +78,10 @@ class AppointmentsController extends Controller
         // Send email notification to clinic admins if enabled
         $this->sendNewAppointmentNotificationToAdmins($appointment);
 
+        // Broadcast notification update so reception sees web bookings immediately
+        Cache::flush();
+        event(new NotificationUpdate());
+
         return $this->sendResponse($appointment, Response::HTTP_OK, 'Appointment request submitted successfully. We will contact you soon.');
     }
 
@@ -121,6 +127,10 @@ class AppointmentsController extends Controller
         if (($oldStatus !== ($request->status ?? $oldStatus)) || ($request->admin_reply && !empty($appointment->email))) {
             $this->sendAppointmentUpdateEmail($appointment, $request->status ?? $oldStatus);
         }
+
+        // Clear notification cache and broadcast so counts drop when processed
+        Cache::flush();
+        event(new NotificationUpdate());
 
         return $this->sendResponse($appointment, Response::HTTP_OK, 'Appointment updated successfully.');
     }

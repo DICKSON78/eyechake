@@ -359,8 +359,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
             
             if ($clinic_id) {
@@ -376,8 +376,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
             
             if ($clinic_id) {
@@ -402,8 +402,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
                 ->where('it.item_type_id', '!=', 4); // Exclude frames
             
@@ -420,8 +420,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
                 ->where('it.item_type_id', '!=', 4); // Exclude frames
             
@@ -446,8 +446,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('it.item_type_id', 4);
             
             if ($clinic_id) {
@@ -462,8 +462,8 @@ class DirectorDashboardController extends Controller
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('users as u', 'ppc.created_by', '=', 'u.id')
                 ->where('ppci.status', 'Served')
-                ->whereDate('ppci.served_at', '>=', $start_date)
-                ->whereDate('ppci.served_at', '<=', $end_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
+                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->where('it.item_type_id', 4);
             
             if ($clinic_id) {

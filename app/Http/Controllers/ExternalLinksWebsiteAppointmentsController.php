@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Traits\ApiResponse;
 use App\Http\Services\EmailService;
 use App\Models\Appointment;
+use App\Events\NotificationUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class ExternalLinksWebsiteAppointmentsController extends Controller
 {
@@ -71,6 +73,10 @@ class ExternalLinksWebsiteAppointmentsController extends Controller
         if ($oldStatus !== $request->status && !empty($appointment->email)) {
             $this->sendAppointmentStatusEmail($appointment, $request->status);
         }
+
+        // Clear notification cache and broadcast updates so dashboards reflect changes
+        Cache::flush();
+        event(new NotificationUpdate());
 
         return $this->sendResponse($appointment, Response::HTTP_OK, 'Appointment status updated successfully.');
     }
