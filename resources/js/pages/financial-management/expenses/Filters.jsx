@@ -18,6 +18,17 @@ const Filters = ({ params, setParams, ...rest }) => {
     (response) => response.data.data.data
   );
 
+  const { data: paymentChannels } = useFetch(
+    "api/payment-channels",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+
   return (
     <Card
       variant="outlined"
@@ -79,6 +90,22 @@ const Filters = ({ params, setParams, ...rest }) => {
               optionsValue="id"
               clearable
               onChange={(value) => setParams({ ...params, category_id: value })}
+            />
+          </Grid>
+          <Grid
+            item
+            md
+            sm={6}
+            xs={12}
+          >
+            <Select
+              label="Payment Channel"
+              fullWidth
+              options={paymentChannels}
+              optionsLabel="name"
+              optionsValue="id"
+              clearable
+              onChange={(value) => setParams({ ...params, payment_channel_id: value })}
             />
           </Grid>
           <Grid
