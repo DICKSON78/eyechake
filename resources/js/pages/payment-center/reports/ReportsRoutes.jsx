@@ -1,7 +1,6 @@
 import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import DailyCashCollection from "./DailyCashCollection";
-import DailyCreditCollection from "./DailyCreditCollection";
+import DailyCashCollection from "./DailyCreditCollection";
 import Expenses from "../../financial-management/reports/Expenses";
 import CashierMonthlyReport from "./CashierMonthlyReport";
 
@@ -18,7 +17,7 @@ const ReportsRoutes = () => {
       />
       <Route
         path="/daily-credit-collection"
-        element={<DailyCreditCollection />}
+        element={<DailyCashCollection />}
       />
       <Route
         path="/expenses"

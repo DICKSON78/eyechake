@@ -19,12 +19,12 @@ import {
   throttle,
 } from "../../../helpers";
 
-const DailyCreditCollection = ({ module }) => {
+const DailyCashCollection = ({ module }) => {
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
     {
       status: "Active",
-      transaction_type: "Credit",
+      transaction_type: "Cash",
       per_page: 500,
     },
     true,
@@ -34,8 +34,8 @@ const DailyCreditCollection = ({ module }) => {
 
   const [params, setParams] = useState({
     with_patient: "Yes",
-    transaction_type: "Credit",
-    status: "Billed",
+    transaction_type: "Cash",
+    status: "Paid,Served",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
@@ -48,7 +48,7 @@ const DailyCreditCollection = ({ module }) => {
   });
 
   useEffect(() => {
-    document.title = `Daily Credit Collection Report - ${window.APP_NAME}`;
+    document.title = `Daily Cash Collection Report - ${window.APP_NAME}`;
   }, []);
 
   return (
@@ -57,11 +57,11 @@ const DailyCreditCollection = ({ module }) => {
         { title: "Home" },
         { title: module || "Payment Center" },
         { title: "Reports" },
-        { title: "Daily Credit Collection Report" },
+        { title: "Daily Cash Collection Report" },
       ]}
     >
       <Report
-        title="Daily Credit Collection Report"
+        title="Daily Cash Collection Report"
         subtitle={getDateRangeTitle(params.start_date, params.end_date)}
         uri="api/patient-payment-cache-items"
         params={{
@@ -230,6 +230,10 @@ const DailyCreditCollection = ({ module }) => {
         }
         columns={[
           {
+            field: "created_at",
+            headerName: "Date",
+          },
+          {
             field: "patient_name",
             headerName: "Patient Name",
             valueGetter: (item, index) =>
@@ -262,8 +266,13 @@ const DailyCreditCollection = ({ module }) => {
             valueGetter: (item, index) => numberFormat(item.quantity),
           },
           {
+            field: "unit_price",
+            headerName: "Unit Price",
+            valueGetter: (item, index) => numberFormat(item.unit_price),
+          },
+          {
             field: "subtotal",
-            headerName: "Subtotal",
+            headerName: "Total Amount",
             valueGetter: (item, index) =>
               numberFormat(item.unit_price * item.quantity),
           },
@@ -272,17 +281,13 @@ const DailyCreditCollection = ({ module }) => {
             headerName: "Created By",
             valueGetter: (item) => item.creator?.full_name,
           },
-          {
-            field: "created_at",
-            headerName: "Date Created",
-          },
         ]}
         summationFooterColumns={[
-          { value: "TOTAL", span: 7, index: 1 },
+          { value: "TOTAL", span: 9, index: 1 },
           {
             reducer: (acc, item, index) =>
-              acc + item.unit_price * item.quantity,
-            index: 7,
+              acc + (parseFloat(item.unit_price) * parseFloat(item.quantity)),
+            index: 9,
           },
         ]}
       />
@@ -290,4 +295,4 @@ const DailyCreditCollection = ({ module }) => {
   );
 };
 
-export default DailyCreditCollection;
+export default DailyCashCollection;

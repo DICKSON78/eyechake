@@ -7,7 +7,7 @@ import ReceptionistMonthlyReport from "../../reception/reports/ReceptionistMonth
 
 // Payment Center Reports
 import DailyCashCollection from "../../payment-center/reports/DailyCashCollection";
-import DailyCreditCollection from "../../payment-center/reports/DailyCreditCollection";
+import DailyCashCollection from "../../payment-center/reports/DailyCreditCollection";
 import CashierMonthlyReport from "../../payment-center/reports/CashierMonthlyReport";
 import Expenses from "../../financial-management/reports/Expenses";
 
@@ -77,7 +77,7 @@ const ReportsRoutes = () => {
       />
       <Route
         path="/payment-center/daily-credit-collection"
-        element={<DailyCreditCollection />}
+        element={<DailyCashCollection />}
       />
       <Route
         path="/payment-center/expenses"
