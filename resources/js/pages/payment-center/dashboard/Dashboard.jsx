@@ -11,7 +11,6 @@ import {
   CircularProgress,
   Stack,
   alpha,
-  Button,
 } from "@mui/material";
 import {
   PaymentRounded as PaymentIcon,
@@ -27,10 +26,6 @@ import {
   TrendingDownRounded as ExpenseIcon,
   PhoneAndroidRounded as MobileIcon,
 } from "@mui/icons-material";
-
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
@@ -63,9 +58,6 @@ const Dashboard = () => {
     start_date: new Date(), // Default to today for daily view
     end_date: new Date(),   // Default to today for daily view
   });
-
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
 
   useEffect(() => {
     document.title = `Payment Center Dashboard - ${window.APP_NAME}`;
@@ -221,31 +213,6 @@ const Dashboard = () => {
     }
   }, [error, addToast]);
 
-  const handleApplyDates = () => {
-    if (startDate && endDate && startDate <= endDate) {
-      setParams((prev) => ({
-        ...prev,
-        start_date: startDate,
-        end_date: endDate,
-      }));
-      handleFetch();
-    } else {
-      addToast({ message: "Please select a valid date range", severity: "warning" });
-    }
-  };
-
-  const handleResetDates = () => {
-    const today = new Date();
-    setStartDate(today);
-    setEndDate(today);
-    setParams((prev) => ({
-      ...prev,
-      start_date: today,
-      end_date: today,
-    }));
-    handleFetch();
-  };
-
   // Safety check: ensure data structure is valid
   const isValidData = !loading && 
     data && 
@@ -289,51 +256,17 @@ const Dashboard = () => {
         { title: "Dashboard" },
       ]}
     >
-      <Box
+      <CardHeader
+        title="Payment Center Dashboard"
+        titleTypographyProps={{
+          variant: "h4",
+          fontWeight: 700,
+        }}
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          gap: 2,
+          p: 0,
           mb: 2,
         }}
-      >
-        <CardHeader
-          title="Payment Center Dashboard"
-          titleTypographyProps={{
-            variant: "h4",
-            fontWeight: 700,
-          }}
-          sx={{
-            p: 0,
-          }}
-        />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems="center">
-            <DatePicker
-              label="Start date"
-              value={startDate}
-              onChange={(date) => setStartDate(date)}
-              slotProps={{ textField: { size: "small" } }}
-            />
-            <DatePicker
-              label="End date"
-              value={endDate}
-              onChange={(date) => setEndDate(date)}
-              slotProps={{ textField: { size: "small" } }}
-            />
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Button variant="contained" size="small" onClick={handleApplyDates}>
-                Apply
-              </Button>
-              <Button variant="outlined" size="small" onClick={handleResetDates}>
-                Today
-              </Button>
-            </Stack>
-          </Stack>
-        </LocalizationProvider>
-      </Box>
+      />
       {!loading && isValidData ? (
         <React.Fragment>
           <Grid

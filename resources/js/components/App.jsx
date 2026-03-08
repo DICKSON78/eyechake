@@ -38,10 +38,10 @@ const InventoryManagementRoutes = lazy(() => import("../pages/inventory-manageme
 const MarketingRoutes = lazy(() => import("../pages/marketing/MarketingRoutes"));
 const FinancialManagementRoutes = lazy(() => import("../pages/financial-management/FinancialManagementRoutes"));
 const UserManagementRoutes = lazy(() => import("../pages/user-management/UserManagementRoutes"));
-const PatientRecordsRoutes = lazy(() => import("../pages/patient-records/PatientRecordsRoutes"));
 const DirectorRoutes = lazy(() => import("../pages/director/DirectorRoutes"));
 const SettingsRoutes = lazy(() => import("../pages/settings/SettingsRoutes"));
 const OfficeCalendarRoutes = lazy(() => import("../pages/office-calendar/OfficeCalendarRoutes"));
+const PatientRecordsRoutes = lazy(() => import("../pages/patient-records/PatientRecordsRoutes"));
 const ExternalLinksRoutes = lazy(() => import("../pages/external-links/ExternalLinksRoutes"));
 
 import Home from "../Home";
@@ -249,6 +249,7 @@ const App = () => {
                 <Route path="reception/*" element={<Suspense fallback={<div>Loading...</div>}><ReceptionRoutes /></Suspense>} />
                 <Route path="payment-center/*" element={<Suspense fallback={<div>Loading...</div>}><PaymentCenterRoutes /></Suspense>} />
                 <Route path="consultation-room/*" element={<Suspense fallback={<div>Loading...</div>}><ConsultationRoomRoutes /></Suspense>} />
+                <Route path="patient-records/*" element={<Suspense fallback={<div>Loading...</div>}><PatientRecordsRoutes /></Suspense>} />
                 <Route path="sales-center/*" element={<Suspense fallback={<div>Loading...</div>}><SalesCenterRoutes /></Suspense>} />
                 <Route path="sales-management/*" element={<Suspense fallback={<div>Loading...</div>}><SalesManagementRoutes /></Suspense>} />
                 <Route path="optician-center/*" element={<Suspense fallback={<div>Loading...</div>}><OpticianCenterRoutes /></Suspense>} />
