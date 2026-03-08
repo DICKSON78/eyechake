@@ -10,17 +10,17 @@ class PaymentMode extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['clinic_id', 'name', 'description', 'transaction_type', 'status'];
+    protected $fillable = ['clinic_id', 'name', 'description', 'payment_type', 'status'];
     
-    // Alias for backward compatibility - transaction_type is the actual column name
-    public function getPaymentTypeAttribute()
+    // Alias for backward compatibility - payment_type is the actual column name
+    public function getTransactionTypeAttribute()
     {
-        return $this->transaction_type;
+        return $this->payment_type;
     }
     
-    public function setPaymentTypeAttribute($value)
+    public function setTransactionTypeAttribute($value)
     {
-        $this->attributes['transaction_type'] = $value;
+        $this->attributes['payment_type'] = $value;
     }
 
     public function clinic()

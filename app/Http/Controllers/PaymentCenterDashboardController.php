@@ -184,7 +184,7 @@ class PaymentCenterDashboardController extends Controller
                 ->where('created_at', '<=', $end_date . ' 23:59:59')
                 ->where('amount', '>', 0)
                 ->whereHas('items.payment_mode', function ($query) {
-                    $query->whereRaw('LOWER(transaction_type) = ?', ['credit']);
+                    $query->whereRaw('LOWER(payment_type) = ?', ['credit']);
                 })
                 ->distinct('patient_item_payments.id');
 
@@ -225,7 +225,7 @@ class PaymentCenterDashboardController extends Controller
                 ->whereHas('items', function ($query) {
                     $query->where('status', 'Pending');
                     $query->whereHas('payment_mode', function ($q) {
-                        $q->where('transaction_type', 'Cash');
+                        $q->where('payment_type', 'Cash');
                     });
                 })
                 ->whereDate('created_at', '>=', $start_date)

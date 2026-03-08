@@ -112,7 +112,7 @@ class PatientPaymentCacheItemsController extends Controller
 
         if ($transaction_type) {
             $data->whereHas('payment_mode', function ($query) use ($transaction_type) {
-                $query->where('transaction_type', $transaction_type);
+                $query->where('payment_type', $transaction_type);
             });
         }
 

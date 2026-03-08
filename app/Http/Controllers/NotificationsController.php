@@ -173,7 +173,7 @@ class NotificationsController extends Controller
                     $query->whereIn('status', ['Pending', 'Billed', 'Served'])
                         ->whereNull('item_payment_id')
                         ->whereHas('payment_mode', function ($q) {
-                            $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
+                            $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
                         });
                 })
                 ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
@@ -199,7 +199,7 @@ class NotificationsController extends Controller
                 ->whereHas('items', function ($query) {
                     $query->where('status', 'Pending')
                         ->whereHas('payment_mode', function ($q) {
-                            $q->where('transaction_type', 'Credit');
+                            $q->where('payment_type', 'Credit');
                         });
                 })
                 ->whereNotNull('created_at')
