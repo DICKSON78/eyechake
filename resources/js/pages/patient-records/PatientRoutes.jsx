@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -104,15 +105,19 @@ const PatientRoutes = () => {
           </Tabs>
           <Routes>
             <Route
-              path="/patient-file"
+              index
+              element={<Navigate to="patient-file" replace />}
+            />
+            <Route
+              path="patient-file"
               element={<PatientFile patient={patient} />}
             />
             <Route
-              path="/payment-history"
+              path="payment-history"
               element={<PatientPaymentHistory patient={patient} />}
             />
             <Route
-              path="/attachments"
+              path="attachments"
               element={<PatientAttachments patient={patient} />}
             />
           </Routes>
