@@ -140,7 +140,7 @@ class PatientPaymentCacheController extends Controller
                         
                         if ($item_transaction_type) {
                             $subQuery->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
-                                $query2->whereRaw('LOWER(payment_type) = ?', [strtolower($item_transaction_type)]);
+                                $query2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
                             });
                         }
                     });
@@ -162,7 +162,7 @@ class PatientPaymentCacheController extends Controller
                             });
                             
                             $itemQuery->whereHas('payment_mode', function ($modeQuery) {
-                                $modeQuery->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                                $modeQuery->whereRaw('LOWER(transaction_type) = ?', ['cash']);
                             });
                         })
                         ->whereHas('consultation', function ($consultationQuery) {
@@ -214,7 +214,7 @@ class PatientPaymentCacheController extends Controller
                     // Transaction type filter - this is critical for cash patients
                     if ($item_transaction_type) {
                         $query->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
-                            $query2->whereRaw('LOWER(payment_type) = ?', [strtolower($item_transaction_type)]);
+                            $query2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
                         });
                     }
                 });
@@ -264,7 +264,7 @@ class PatientPaymentCacheController extends Controller
             
             // Debug: Check if there are any items with pending cash status
             $totalPendingCashItems = \App\Models\PatientPaymentCacheItem::whereHas('payment_mode', function ($q) {
-                $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
             })->where('status', 'Pending')->count();
             
             // Debug: Check payment caches that should appear in the query
@@ -295,7 +295,7 @@ class PatientPaymentCacheController extends Controller
                 }
                 if ($item_transaction_type) {
                     $q->whereHas('payment_mode', function ($q2) use ($item_transaction_type) {
-                        $q2->whereRaw('LOWER(payment_type) = ?', [strtolower($item_transaction_type)]);
+                        $q2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
                     });
                 }
             });
