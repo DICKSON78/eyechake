@@ -7,6 +7,7 @@ use App\Http\Traits\ApiResponse;
 use App\Models\PatientItemBillPayment;
 use App\Models\PatientItemPayment;
 use App\Models\ExpensePayment;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -40,25 +41,28 @@ class PaymentCenterReportsController extends Controller
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-            ->join('users as u1', 'patient_item_payments.created_by', '=', 'u1.id');
+            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
         $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
             ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
             ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-            ->join('users as u2', 'patient_item_bill_payments.created_by', '=', 'u2.id');
+            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
 
-        if ($user->is_admin) {
-            if ($clinic_id) {
-                $item_payments->where('u1.clinic_id', $clinic_id);
-                $bill_payments->where('u2.clinic_id', $clinic_id);
-            }
-        } else {
-            $item_payments->where('u1.clinic_id', $user->clinic_id);
-            $bill_payments->where('u2.clinic_id', $user->clinic_id);
+        $item_payments->with(['creator.clinic']);
+
+        $effective_clinic_id = $user->is_admin ? $clinic_id : $user->clinic_id;
+        if ($effective_clinic_id) {
+            $item_payments->whereIn('patient_item_payments.created_by', function($q) use ($effective_clinic_id) {
+                $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
+            });
+            $bill_payments->whereIn('patient_item_bill_payments.created_by', function($q) use ($effective_clinic_id) {
+                $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
+            });
+        } elseif (!$user->is_admin) {
+            $item_payments->where('patient_item_payments.created_by', $user->id);
+            $bill_payments->where('patient_item_bill_payments.created_by', $user->id);
         }
 
         if ($payment_channel_id) {
@@ -125,15 +129,17 @@ class PaymentCenterReportsController extends Controller
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
         $data = ExpensePayment::with(['expense.category', 'channel', 'creator'])
-            ->join('expenses as e', 'expense_payments.expense_id', '=', 'e.id')
-            ->join('users as u', 'expense_payments.created_by', '=', 'u.id');
+            ->join('expenses as e', 'expense_payments.expense_id', '=', 'e.id');
 
-        if ($user->is_admin) {
-            if ($clinic_id) {
-                $data->where('u.clinic_id', $clinic_id);
-            }
-        } else {
-            $data->where('u.clinic_id', $user->clinic_id);
+        $data->with(['creator.clinic']);
+
+        $effective_clinic_id = $user->is_admin ? $clinic_id : $user->clinic_id;
+        if ($effective_clinic_id) {
+            $data->whereIn('expense_payments.created_by', function($q) use ($effective_clinic_id) {
+                $q->select('id')->from('users')->where('clinic_id', $effective_clinic_id);
+            });
+        } elseif (!$user->is_admin) {
+            $data->where('expense_payments.created_by', $user->id);
         }
 
         if ($payment_channel_id) {
