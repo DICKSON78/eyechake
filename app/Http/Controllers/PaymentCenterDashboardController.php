@@ -27,12 +27,8 @@ class PaymentCenterDashboardController extends Controller
             $start_date = $request->start_date ?? $today;
             $end_date = $request->end_date ?? $today;
 
-            // Default allow: if user missing or role unspecified, do not restrict by clinic
-            if (!$user || ($user->is_admin ?? false)) {
-                $clinic_id = $request->clinic_id;
-            } else {
-                $clinic_id = $user->clinic_id ?? null;
-            }
+            // Clinic scoping: only apply when explicitly provided, to mirror admin totals for cashiers unless filtered
+            $clinic_id = $request->clinic_id ?? null;
             
             \Log::info('PaymentCenterDashboard request', [
                 'user_id' => $user->id ?? null,
@@ -119,7 +115,7 @@ class PaymentCenterDashboardController extends Controller
             ->where('status', 'Cleared')
             ->where('created_at', '>=', $start_date . ' 00:00:00')
             ->where('created_at', '<=', $end_date . ' 23:59:59')
-            ->sum('amount') ?? 0;
+            ->sum(DB::raw('coalesce(amount,0) - coalesce(discount,0)')) ?? 0;
             
         // Prefer actual payments if present; otherwise fall back to cleared bills
         $data['summary']['total_revenue'] = ($paymentsSum + $billPaymentsSum) > 0
@@ -133,8 +129,13 @@ class PaymentCenterDashboardController extends Controller
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
                 ->where('created_at', '<=', $end_date . ' 23:59:59')
                 ->where('amount', '>', 0)
-                ->whereHas('channel', function ($query) {
-                    $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                ->where(function ($q) {
+                    $q->whereHas('channel', function ($query) {
+                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                    })
+                    ->orWhereHas('items.payment_mode', function ($query) {
+                        $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    });
                 });
 
             if ($clinic_id) {
@@ -155,8 +156,13 @@ class PaymentCenterDashboardController extends Controller
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
                 ->where('created_at', '<=', $end_date . ' 23:59:59')
                 ->where('amount', '>', 0)
-                ->whereHas('channel', function ($query) {
-                    $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                ->where(function ($q) {
+                    $q->whereHas('channel', function ($query) {
+                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                    })
+                    ->orWhereHas('items.payment_mode', function ($query) {
+                        $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    });
                 });
 
             if ($clinic_id) {
