@@ -119,12 +119,9 @@ const ConsultationPatients = () => {
   };
 
   const openPatientRecord = (patientId) => {
-    const component = (
-      <PatientDetails
-        patientId={patientId}
-      />
-    );
-    modalRef.current.open("Patient Record", component, "md");
+    if (!patientId) return;
+    // Reuse the full patient records page (file, payments, attachments)
+    navigate(`/patient-records/patients/${patientId}/patient-file`);
   };
 
   return (

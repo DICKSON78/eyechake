@@ -216,7 +216,7 @@ class NotificationsController extends Controller
     private function getPatientsSentToDoctorCount($clinic_id)
     {
         try {
-            // Count consultations with status 'Pending'
+            // Match Pending list in Consultation Room: only paid consultation items that require consultation
             $query = Consultation::query()
                 ->when($clinic_id, function ($q) use ($clinic_id) {
                     $q->whereHas('creator', function ($query) use ($clinic_id) {
@@ -224,6 +224,12 @@ class NotificationsController extends Controller
                     });
                 })
                 ->where('status', 'Pending')
+                ->whereHas('payment_cache_item', function ($q) {
+                    $q->whereHas('item', function ($itemQuery) {
+                        $itemQuery->where('is_consultation_item', 'Yes');
+                    });
+                    $q->where('status', 'Paid');
+                })
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
