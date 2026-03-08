@@ -63,22 +63,22 @@ class PaymentCenterDashboardController extends Controller
             ],
         ];
 
-        // Align dashboard totals with Daily Cash Collection report (only actual payments in range)
+        // Align dashboard totals with Daily Cash Collection report (only actual payments in range), avoiding duplication from item joins
         $paymentsSum = 0;
         $billPaymentsSum = 0;
 
-        // Base scope for item payments (joins mirror the report so orphan payments are excluded)
         try {
             $itemPaymentsBase = PatientItemPayment::query()
-                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                 ->whereNotNull('patient_item_payments.created_at')
                 ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0);
+                ->where('patient_item_payments.amount', '>', 0)
+                // Ensure payment is tied to a payment cache item (mirrors report) without multiplying rows
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
 
             if ($clinic_id) {
                 $itemPaymentsBase->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
@@ -93,16 +93,15 @@ class PaymentCenterDashboardController extends Controller
 
         try {
             $billPaymentsBase = PatientItemBillPayment::query()
-                ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                 ->whereNotNull('patient_item_bill_payments.created_at')
                 ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0);
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
 
             if ($clinic_id) {
                 $billPaymentsBase->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
@@ -115,11 +114,11 @@ class PaymentCenterDashboardController extends Controller
             \Log::error('Error calculating bill payments sum (dashboard)', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
 
-        // Dashboard total revenue now matches Daily Cash Collection (no cleared-bill fallback)
+        // Dashboard total revenue now matches Daily Cash Collection (no cleared-bill fallback, no duplication)
         $data['summary']['total_revenue'] = $paymentsSum + $billPaymentsSum;
 
         // Cash payments amount (must match cash in hand)
-        // Cash payments: mirror report scope, then filter by cash channel/payment type
+        // Cash payments: filter payments once, require linkage, avoid join multiplication
         $cashItemPayments = 0;
         $cashBillPayments = 0;
 
@@ -127,16 +126,25 @@ class PaymentCenterDashboardController extends Controller
 
         try {
             $cashItemPaymentsQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->leftJoin('payment_channels as ch', 'patient_item_payments.channel_id', '=', 'ch.id')
                 ->whereNotNull('patient_item_payments.created_at')
                 ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
                 ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                })
                 ->where(function ($q) use ($cashChannelNames) {
                     $q->whereIn(DB::raw('LOWER(COALESCE(ch.name, ""))'), $cashChannelNames)
-                      ->orWhereRaw('LOWER(COALESCE(it.payment_type, "")) = ?', ['cash']);
+                      ->orWhereExists(function($qq) {
+                          $qq->select(DB::raw(1))
+                             ->from('patient_payment_cache_items as ppci2')
+                             ->join('items as it2', 'ppci2.item_id', '=', 'it2.id')
+                             ->whereColumn('ppci2.item_payment_id', 'patient_item_payments.id')
+                             ->whereRaw('LOWER(COALESCE(it2.payment_type, "")) = ?', ['cash']);
+                      });
                 });
 
             if ($clinic_id) {
@@ -152,17 +160,25 @@ class PaymentCenterDashboardController extends Controller
 
         try {
             $cashBillPaymentsQuery = PatientItemBillPayment::query()
-                ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->leftJoin('payment_channels as ch', 'patient_item_bill_payments.channel_id', '=', 'ch.id')
                 ->whereNotNull('patient_item_bill_payments.created_at')
                 ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
                 ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                })
                 ->where(function ($q) use ($cashChannelNames) {
                     $q->whereIn(DB::raw('LOWER(COALESCE(ch.name, ""))'), $cashChannelNames)
-                      ->orWhereRaw('LOWER(COALESCE(it.payment_type, "")) = ?', ['cash']);
+                      ->orWhereExists(function($qq) {
+                          $qq->select(DB::raw(1))
+                             ->from('patient_payment_cache_items as ppci2')
+                             ->join('items as it2', 'ppci2.item_id', '=', 'it2.id')
+                             ->whereColumn('ppci2.bill_id', 'patient_item_bill_payments.bill_id')
+                             ->whereRaw('LOWER(COALESCE(it2.payment_type, "")) = ?', ['cash']);
+                      });
                 });
 
             if ($clinic_id) {
@@ -181,19 +197,28 @@ class PaymentCenterDashboardController extends Controller
         // Cash available (collected cash) - same as cash payments for now
         $data['summary']['cash_available'] = $data['summary']['cash_payments'];
 
-        // Credit payments amount (billed/credited items)
+        // Credit payments amount (billed/credited items) without duplication
         try {
             $creditQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->leftJoin('payment_channels as ch', 'patient_item_payments.channel_id', '=', 'ch.id')
                 ->whereNotNull('patient_item_payments.created_at')
                 ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
                 ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                })
                 ->where(function ($q) {
-                    $q->whereRaw('LOWER(COALESCE(it.payment_type, "")) = ?', ['credit'])
-                      ->orWhereRaw('LOWER(COALESCE(ch.name, "")) = ?', ['credit']);
+                    $q->whereRaw('LOWER(COALESCE(ch.name, "")) = ?', ['credit'])
+                      ->orWhereExists(function($qq) {
+                          $qq->select(DB::raw(1))
+                             ->from('patient_payment_cache_items as ppci2')
+                             ->join('items as it2', 'ppci2.item_id', '=', 'it2.id')
+                             ->whereColumn('ppci2.item_payment_id', 'patient_item_payments.id')
+                             ->whereRaw('LOWER(COALESCE(it2.payment_type, "")) = ?', ['credit']);
+                      });
                 })
                 ->distinct('patient_item_payments.id');
 
@@ -348,21 +373,21 @@ class PaymentCenterDashboardController extends Controller
         
         $data['summary']['today_collections'] = $todayItems + $todayBills;
 
-        // Payment trends (last 7 days) - use the same scoped joins to match report data
+        // Payment trends (last 7 days) - use exists filter to avoid duplication
         $data['statistics']['payment_trends'] = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             
             try {
                 $itemRevenueQuery = PatientItemPayment::query()
-                    ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                    ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                    ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                    ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                    ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                     ->whereNotNull('patient_item_payments.created_at')
                     ->whereDate('patient_item_payments.created_at', $date)
-                    ->where('patient_item_payments.amount', '>', 0);
+                    ->where('patient_item_payments.amount', '>', 0)
+                    ->whereExists(function($q) {
+                        $q->select(DB::raw(1))
+                          ->from('patient_payment_cache_items as ppci')
+                          ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                    });
                 
                 if ($clinic_id) {
                     $itemRevenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
@@ -378,15 +403,14 @@ class PaymentCenterDashboardController extends Controller
                 
             try {
                 $billRevenueQuery = PatientItemBillPayment::query()
-                    ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-                    ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-                    ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                    ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                    ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                    ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                     ->whereNotNull('patient_item_bill_payments.created_at')
                     ->whereDate('patient_item_bill_payments.created_at', $date)
-                    ->where('patient_item_bill_payments.amount', '>', 0);
+                    ->where('patient_item_bill_payments.amount', '>', 0)
+                    ->whereExists(function($q) {
+                        $q->select(DB::raw(1))
+                          ->from('patient_payment_cache_items as ppci')
+                          ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                    });
                 
                 if ($clinic_id) {
                     $billRevenueQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
@@ -411,16 +435,16 @@ class PaymentCenterDashboardController extends Controller
         // Revenue by payment channel (combine item payments and bill payments)
         try {
             $itemChannelQuery = PatientItemPayment::query()
-                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                 ->whereNotNull('patient_item_payments.channel_id')
                 ->whereNotNull('patient_item_payments.created_at')
                 ->where('patient_item_payments.amount', '>', 0)
                 ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59');
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
             if ($clinic_id) {
                 $itemChannelQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
@@ -442,17 +466,16 @@ class PaymentCenterDashboardController extends Controller
         
         try {
             $billChannelQuery = PatientItemBillPayment::query()
-                ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
                 ->whereNotNull('patient_item_bill_payments.channel_id')
                 ->whereNotNull('patient_item_bill_payments.created_at')
                 ->where('patient_item_bill_payments.amount', '>', 0)
                 ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59');
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
             
             if ($clinic_id) {
                 $billChannelQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
