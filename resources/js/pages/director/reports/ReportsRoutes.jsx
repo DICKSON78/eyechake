@@ -6,7 +6,6 @@ import PatientRegistration from "../../reception/reports/PatientRegistration";
 import ReceptionistMonthlyReport from "../../reception/reports/ReceptionistMonthlyReport";
 
 // Payment Center Reports
-import DailyCashCollection from "../../payment-center/reports/DailyCashCollection";
 import DailyCashCollection from "../../payment-center/reports/DailyCreditCollection";
 import CashierMonthlyReport from "../../payment-center/reports/CashierMonthlyReport";
 import Expenses from "../../financial-management/reports/Expenses";
