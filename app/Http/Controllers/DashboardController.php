@@ -134,7 +134,8 @@ class DashboardController extends Controller
                         });
                     }
 
-                    $paymentsSum = (float) $paymentsQuery->sum('patient_item_payments.amount');
+                    // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                    $paymentsSum = (float) ($paymentsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
 
                     $billPaymentsQuery = PatientItemBillPayment::query()
                         ->whereNotNull('patient_item_bill_payments.created_at')

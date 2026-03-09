@@ -99,7 +99,8 @@ class DirectorDashboardController extends Controller
                 });
             }
             
-            $itemPayments = (float) $revenueQuery->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $itemPayments = (float) ($revenueQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
             
             // Add actual bill payments (not bill face values)
             $billPaymentsQuery = PatientItemBillPayment::query()
@@ -175,7 +176,8 @@ class DirectorDashboardController extends Controller
                 });
             }
             
-            $dailyCollections = (float) $dailyItemQuery->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $dailyCollections = (float) ($dailyItemQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
 
             // Add bill payments
             $dailyBillQuery = PatientItemBillPayment::query()

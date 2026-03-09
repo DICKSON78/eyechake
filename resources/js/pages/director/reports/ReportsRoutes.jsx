@@ -245,7 +245,7 @@ const ReportsRoutes = () => {
         element={<DispensingItemBalance />}
       />
 
-      {/* Optician Center Reports */
+      {/* Optician Center Reports */}
       <Route
         path="/optician-center/items-dispensed"
         element={

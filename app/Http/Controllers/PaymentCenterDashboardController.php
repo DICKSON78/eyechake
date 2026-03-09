@@ -86,7 +86,8 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
 
-            $paymentsSum = (float) $itemPaymentsBase->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $paymentsSum = (float) ($itemPaymentsBase->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating item payments sum (dashboard)', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
@@ -144,7 +145,8 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
 
-            $cashItemPayments = (float) $cashItemPaymentsQuery->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $cashItemPayments = (float) ($cashItemPaymentsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating cash item payments', ['error' => $e->getMessage()]);
         }
@@ -204,7 +206,8 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
 
-            $creditItemPayments = (float) $creditItemQuery->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $creditItemPayments = (float) ($creditItemQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating credit item payments', ['error' => $e->getMessage()]);
         }
@@ -354,7 +357,8 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
             
-            $todayItems = (float) $todayItemsQuery->sum('patient_item_payments.amount');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $todayItems = (float) ($todayItemsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating today items', ['error' => $e->getMessage()]);
             $todayItems = 0;
@@ -407,7 +411,8 @@ class PaymentCenterDashboardController extends Controller
                     });
                 }
                 
-                $itemRevenue = (float) $itemRevenueQuery->sum('patient_item_payments.amount');
+                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                $itemRevenue = (float) ($itemRevenueQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
             } catch (\Exception $e) {
                 \Log::error('Error calculating item revenue for date', ['date' => $date, 'error' => $e->getMessage()]);
                 $itemRevenue = 0;
