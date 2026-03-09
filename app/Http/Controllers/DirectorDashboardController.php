@@ -263,45 +263,89 @@ class DirectorDashboardController extends Controller
         // Expense payments total (alias for Financial Management compatibility)
         $data['summary']['expense_payments'] = $data['summary']['total_expenses'];
 
-        // Revenue from New Consultation/Patient
+        // Revenue from New Consultation/Patient - sum consultation item amounts, not full payment
         try {
-            $newConsultationQuery = DB::table('patient_item_payments as pip')
-                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
+            // Cash payments - calculate proportional amount for consultation items
+            $newCashQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pip', 'ppci.item_payment_id', '=', 'pip.id')
                 ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
-                ->join('users as u', 'pip.created_by', '=', 'u.id')
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
                 ->whereNotNull('pip.created_at')
                 ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('pip.amount', '>', 0)
                 ->where('c.patient_direction', 'Direct to Doctor');
             
             if ($clinic_id) {
-                $newConsultationQuery->where('u.clinic_id', $clinic_id);
+                $newCashQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
             }
             
-            $data['summary']['revenue_new_consultation'] = $newConsultationQuery->sum('pip.amount') ?? 0;
+            $newCash = (float) ($newCashQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0))) as net')->first()->net ?? 0);
+
+            // Bill payments
+            $newBillQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pip', 'ppci.bill_id', '=', 'pip.bill_id')
+                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->whereNotNull('pip.created_at')
+                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('c.patient_direction', 'Direct to Doctor');
+            
+            if ($clinic_id) {
+                $newBillQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $newBill = (float) ($newBillQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pip.amount) as net')->first()->net ?? 0);
+
+            $data['summary']['revenue_new_consultation'] = $newCash + $newBill;
         } catch (\Exception $e) {
             \Log::error('Error calculating revenue from new consultation', ['error' => $e->getMessage()]);
             $data['summary']['revenue_new_consultation'] = 0;
         }
 
-        // Revenue from Return Consultation
+        // Revenue from Return Consultation - sum return consultation item amounts, not full payment
         try {
-            $returnConsultationQuery = DB::table('patient_item_payments as pip')
-                ->join('patient_payment_cache_items as ppci', 'pip.id', '=', 'ppci.item_payment_id')
+            // Cash payments
+            $returnCashQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pip', 'ppci.item_payment_id', '=', 'pip.id')
                 ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
-                ->join('users as u', 'pip.created_by', '=', 'u.id')
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
                 ->whereNotNull('pip.created_at')
                 ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('pip.amount', '>', 0)
                 ->where('c.patient_to_return', 'Yes');
             
             if ($clinic_id) {
-                $returnConsultationQuery->where('u.clinic_id', $clinic_id);
+                $returnCashQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
             }
             
-            $data['summary']['revenue_return_consultation'] = $returnConsultationQuery->sum('pip.amount') ?? 0;
+            $returnCash = (float) ($returnCashQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0))) as net')->first()->net ?? 0);
+
+            // Bill payments
+            $returnBillQuery = DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pip', 'ppci.bill_id', '=', 'pip.bill_id')
+                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->whereNotNull('pip.created_at')
+                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('c.patient_to_return', 'Yes');
+            
+            if ($clinic_id) {
+                $returnBillQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $returnBill = (float) ($returnBillQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pip.amount) as net')->first()->net ?? 0);
+
+            $data['summary']['revenue_return_consultation'] = $returnCash + $returnBill;
         } catch (\Exception $e) {
             \Log::error('Error calculating revenue from return consultation', ['error' => $e->getMessage()]);
             $data['summary']['revenue_return_consultation'] = 0;
@@ -548,84 +592,208 @@ class DirectorDashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->count();
 
-        // Sales by Product Category (Item Types)
+        // Sales by Product Category (Item Types) - Calculate from actual payments with proportional net amounts
         if ($clinic_id) {
-            $data['statistics']['sales_by_category'] = DB::select('
+            $data['statistics']['sales_by_category'] = DB::select("
                 SELECT 
-                    it.item_type_id,
-                    itt.name,
-                    COALESCE(SUM(ppci.unit_price * ppci.quantity), 0) as total_sales,
-                    COUNT(DISTINCT ppci.id) as transaction_count
-                FROM patient_payment_cache_items as ppci
-                INNER JOIN items as it ON ppci.item_id = it.id
-                INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                INNER JOIN patient_payment_cache as ppc ON ppci.payment_cache_id = ppc.id
-                INNER JOIN users as u ON ppc.created_by = u.id
-                WHERE u.clinic_id = ? 
-                    AND ppci.status IN (?, ?, ?)
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
-                GROUP BY it.item_type_id, itt.name
+                    category_name as name,
+                    SUM(net_amount) as total_sales,
+                    COUNT(*) as transaction_count
+                FROM (
+                    -- Cash payments with proportional allocation
+                    SELECT 
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT item_payment_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE item_payment_id IS NOT NULL 
+                        GROUP BY item_payment_id
+                    ) as totals ON ppci.item_payment_id = totals.item_payment_id
+                    WHERE pip.created_at >= ? AND pip.created_at <= ?
+                        AND pip.created_by IN (SELECT id FROM users WHERE clinic_id = ?)
+                    
+                    UNION ALL
+                    
+                    -- Bill payments with proportional allocation
+                    SELECT 
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT bill_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE bill_id IS NOT NULL 
+                        GROUP BY bill_id
+                    ) as totals ON ppci.bill_id = totals.bill_id
+                    WHERE pibp.created_at >= ? AND pibp.created_at <= ?
+                        AND pibp.created_by IN (SELECT id FROM users WHERE clinic_id = ?)
+                ) as combined
+                GROUP BY category_name
                 ORDER BY total_sales DESC
-            ', [$clinic_id, 'Paid', 'Billed', 'Served', $start_date, $end_date]);
+            ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $clinic_id, $start_date . ' 00:00:00', $end_date . ' 23:59:59', $clinic_id]);
         } else {
-            $data['statistics']['sales_by_category'] = DB::select('
+            $data['statistics']['sales_by_category'] = DB::select("
                 SELECT 
-                    it.item_type_id,
-                    itt.name,
-                    COALESCE(SUM(ppci.unit_price * ppci.quantity), 0) as total_sales,
-                    COUNT(DISTINCT ppci.id) as transaction_count
-                FROM patient_payment_cache_items as ppci
-                INNER JOIN items as it ON ppci.item_id = it.id
-                INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                WHERE ppci.status IN (?, ?, ?)
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
-                GROUP BY it.item_type_id, itt.name
+                    category_name as name,
+                    SUM(net_amount) as total_sales,
+                    COUNT(*) as transaction_count
+                FROM (
+                    -- Cash payments with proportional allocation
+                    SELECT 
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT item_payment_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE item_payment_id IS NOT NULL 
+                        GROUP BY item_payment_id
+                    ) as totals ON ppci.item_payment_id = totals.item_payment_id
+                    WHERE pip.created_at >= ? AND pip.created_at <= ?
+                    
+                    UNION ALL
+                    
+                    -- Bill payments with proportional allocation
+                    SELECT 
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT bill_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE bill_id IS NOT NULL 
+                        GROUP BY bill_id
+                    ) as totals ON ppci.bill_id = totals.bill_id
+                    WHERE pibp.created_at >= ? AND pibp.created_at <= ?
+                ) as combined
+                GROUP BY category_name
                 ORDER BY total_sales DESC
-            ', ['Paid', 'Billed', 'Served', $start_date, $end_date]);
+            ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $start_date . ' 00:00:00', $end_date . ' 23:59:59']);
         }
 
-        // Top Selling Items
+        // Top Selling Items - Calculate from actual payments with proportional net amounts
         if ($clinic_id) {
-            $data['statistics']['top_selling_items'] = DB::select('
+            $data['statistics']['top_selling_items'] = DB::select("
                 SELECT 
-                    it.id,
-                    it.name,
-                    itt.name as category_name,
-                    COALESCE(SUM(ppci.unit_price * ppci.quantity), 0) as total_sales,
-                    SUM(ppci.quantity) as total_quantity
-                FROM patient_payment_cache_items as ppci
-                INNER JOIN items as it ON ppci.item_id = it.id
-                INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                INNER JOIN patient_payment_cache as ppc ON ppci.payment_cache_id = ppc.id
-                INNER JOIN users as u ON ppc.created_by = u.id
-                WHERE u.clinic_id = ? 
-                    AND ppci.status IN (?, ?, ?)
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
-                GROUP BY it.id, it.name, itt.name
+                    item_id as id,
+                    item_name as name,
+                    category_name,
+                    SUM(net_amount) as total_sales,
+                    SUM(qty) as total_quantity
+                FROM (
+                    -- Cash payments with proportional allocation
+                    SELECT 
+                        it.id as item_id,
+                        it.name as item_name,
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount,
+                        ppci.quantity as qty
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT item_payment_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE item_payment_id IS NOT NULL 
+                        GROUP BY item_payment_id
+                    ) as totals ON ppci.item_payment_id = totals.item_payment_id
+                    WHERE pip.created_at >= ? AND pip.created_at <= ?
+                        AND pip.created_by IN (SELECT id FROM users WHERE clinic_id = ?)
+                    
+                    UNION ALL
+                    
+                    -- Bill payments with proportional allocation
+                    SELECT 
+                        it.id as item_id,
+                        it.name as item_name,
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount,
+                        ppci.quantity as qty
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT bill_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE bill_id IS NOT NULL 
+                        GROUP BY bill_id
+                    ) as totals ON ppci.bill_id = totals.bill_id
+                    WHERE pibp.created_at >= ? AND pibp.created_at <= ?
+                        AND pibp.created_by IN (SELECT id FROM users WHERE clinic_id = ?)
+                ) as combined
+                GROUP BY item_id, item_name, category_name
                 ORDER BY total_sales DESC
                 LIMIT 10
-            ', [$clinic_id, 'Paid', 'Billed', 'Served', $start_date, $end_date]);
+            ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $clinic_id, $start_date . ' 00:00:00', $end_date . ' 23:59:59', $clinic_id]);
         } else {
-            $data['statistics']['top_selling_items'] = DB::select('
+            $data['statistics']['top_selling_items'] = DB::select("
                 SELECT 
-                    it.id,
-                    it.name,
-                    itt.name as category_name,
-                    COALESCE(SUM(ppci.unit_price * ppci.quantity), 0) as total_sales,
-                    SUM(ppci.quantity) as total_quantity
-                FROM patient_payment_cache_items as ppci
-                INNER JOIN items as it ON ppci.item_id = it.id
-                INNER JOIN item_types as itt ON it.item_type_id = itt.id
-                WHERE ppci.status IN (?, ?, ?)
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) >= ?
-                    AND DATE(COALESCE(ppci.served_at, ppci.created_at)) <= ?
-                GROUP BY it.id, it.name, itt.name
+                    item_id as id,
+                    item_name as name,
+                    category_name,
+                    SUM(net_amount) as total_sales,
+                    SUM(qty) as total_quantity
+                FROM (
+                    -- Cash payments with proportional allocation
+                    SELECT 
+                        it.id as item_id,
+                        it.name as item_name,
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount,
+                        ppci.quantity as qty
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT item_payment_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE item_payment_id IS NOT NULL 
+                        GROUP BY item_payment_id
+                    ) as totals ON ppci.item_payment_id = totals.item_payment_id
+                    WHERE pip.created_at >= ? AND pip.created_at <= ?
+                    
+                    UNION ALL
+                    
+                    -- Bill payments with proportional allocation
+                    SELECT 
+                        it.id as item_id,
+                        it.name as item_name,
+                        itt.name as category_name,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount,
+                        ppci.quantity as qty
+                    FROM patient_payment_cache_items as ppci
+                    INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
+                    INNER JOIN items as it ON ppci.item_id = it.id
+                    INNER JOIN item_types as itt ON it.item_type_id = itt.id
+                    INNER JOIN (
+                        SELECT bill_id, SUM(unit_price * quantity) as gross_total 
+                        FROM patient_payment_cache_items 
+                        WHERE bill_id IS NOT NULL 
+                        GROUP BY bill_id
+                    ) as totals ON ppci.bill_id = totals.bill_id
+                    WHERE pibp.created_at >= ? AND pibp.created_at <= ?
+                ) as combined
+                GROUP BY item_id, item_name, category_name
                 ORDER BY total_sales DESC
                 LIMIT 10
-            ', ['Paid', 'Billed', 'Served', $start_date, $end_date]);
+            ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $start_date . ' 00:00:00', $end_date . ' 23:59:59']);
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Director Dashboard data retrieved successfully.');
