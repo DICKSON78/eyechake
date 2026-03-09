@@ -10,7 +10,6 @@ import { throttle } from "../../../helpers";
 
 const Filters = ({ params, setParams, ...rest }) => {
   const statusOptions = [
-    { label: "All Statuses", value: "" },
     { label: "Need to Call", value: "need_to_call" },
     { label: "Called", value: "called" },
     { label: "Unreachable", value: "unreachable" },
