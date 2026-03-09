@@ -40,7 +40,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                 ),
               }}
               onChange={(value) =>
-                throttle(() => setParams({ ...params, q: value }), 1000)
+                throttle(() => setParams((prev) => ({ ...prev, q: value || undefined, page: 1 })), 1000)
               }
             />
           </Grid>
@@ -49,10 +49,12 @@ const Filters = ({ params, setParams, ...rest }) => {
               label="Status"
               fullWidth
               options={statusOptions}
+              optionsLabel="label"
+              optionsValue="value"
               clearable
               value={params.status || ""}
               onChange={(value) =>
-                setParams({ ...params, status: value || undefined })
+                setParams((prev) => ({ ...prev, status: value || undefined, page: 1 }))
               }
             />
           </Grid>

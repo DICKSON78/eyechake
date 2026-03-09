@@ -307,8 +307,9 @@ class NotificationsController extends Controller
     private function getDispensingRequestsCount($clinic_id)
     {
         try {
-            // Count pharmacy items with status Paid/Billed (pending dispensing)
-            // Exclude items that have already been dispensed (have item_payment_id)
+            // Count pharmacy items with status Paid/Billed (pending dispensing).
+            // status='Paid' means paid at payment center, awaiting dispensing.
+            // status='Served' means already dispensed (excluded by the status filter).
             $query = PatientPaymentCacheItem::query()
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
@@ -318,7 +319,6 @@ class NotificationsController extends Controller
                 })
                 ->where('consultation_types.name', 'Pharmacy')
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
@@ -368,7 +368,6 @@ class NotificationsController extends Controller
                 })
                 ->whereNotIn('consultation_types.name', ['Pharmacy', 'Procedure', 'Glass'])
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
@@ -416,7 +415,6 @@ class NotificationsController extends Controller
                 })
                 ->where('consultation_types.name', 'Glass')
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');

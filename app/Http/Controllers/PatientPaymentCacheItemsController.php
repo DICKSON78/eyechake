@@ -259,18 +259,9 @@ class PatientPaymentCacheItemsController extends Controller
                 if ($item) {
                     $amount += ($item->unit_price * $item->quantity);
 
-                    // Check if this is a pharmacy/medicine item
-                    $isPharmacyItem = false;
-                    if ($item->item && $item->item->consultation_type) {
-                        $isPharmacyItem = $item->item->consultation_type->name === 'Pharmacy';
-                    }
-
-                    // For pharmacy items, DON'T set item_payment_id so they appear in dispensing requests
-                    // For other items (Glass, etc.), set item_payment_id normally
-                    if (!$isPharmacyItem) {
-                        $item->item_payment_id = $payment->id;
-                    }
-                    
+                    // Set item_payment_id for all items so they appear in the cash collection report.
+                    // Dispensing requests use status='Paid' (not item_payment_id IS NULL) to find pending items.
+                    $item->item_payment_id = $payment->id;
                     $item->status = 'Paid';
                     $item->save();
 
@@ -553,16 +544,10 @@ class PatientPaymentCacheItemsController extends Controller
                     ->find($request_item);
                 if ($item && $item->status === 'Paid') {
                     // Check if this is a pharmacy/medicine item
-                    $isPharmacyItem = false;
-                    if ($item->item && $item->item->consultation_type) {
-                        $isPharmacyItem = $item->item->consultation_type->name === 'Pharmacy';
-                    }
-
-                    // For pharmacy items, DON'T set item_payment_id so they appear in dispensing requests
-                    if (!$isPharmacyItem) {
-                        $item->item_payment_id = $payment->id;
-                        $item->save();
-                    }
+                    // Set item_payment_id for all items so they appear in the cash collection report.
+                    // Dispensing requests use status='Paid' (not item_payment_id IS NULL) to find pending items.
+                    $item->item_payment_id = $payment->id;
+                    $item->save();
                 }
             }
 
