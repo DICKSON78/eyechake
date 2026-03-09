@@ -19,7 +19,7 @@ import navigationFix from "../utils/navigationFix";
 import AuthLayout from "../layouts/Auth";
 import DefaultLayout from "../layouts/Default";
 import Login from "../pages/auth/Login";
-import Dashboard from "../pages/director/dashboard/Dashboard";
+import RoleBasedDashboard from "./RoleBasedDashboard";
 import SalesExpenses from "../pages/dashboard/sales-expenses/SalesExpenses";
 import PatientRegistration from "../pages/dashboard/patient-registration/PatientRegistration";
 
@@ -238,12 +238,13 @@ const App = () => {
                 <DefaultLayout
                   setThemeMode={setThemeMode}
                   setUser={setUser}
+                  user={user}
                   smsBalance={smsBalance}
                 />
               }
             >
               <React.Fragment>
-                    <Route path="dashboard" element={<Dashboard setSmsBalance={setSmsBalance} />} />
+                    <Route path="dashboard" element={<RoleBasedDashboard user={user} setSmsBalance={setSmsBalance} />} />
                     <Route path="dashboard/sales-expenses" element={<SalesExpenses />} />
                     <Route path="dashboard/patient-registration" element={<PatientRegistration />} />
                 <Route path="reception/*" element={<Suspense fallback={<div>Loading...</div>}><ReceptionRoutes /></Suspense>} />

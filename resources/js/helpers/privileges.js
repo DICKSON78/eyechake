@@ -36,8 +36,28 @@ const PRIVILEGE_ALIASES = {
 };
 
 const ROLE_FALLBACK_PRIVILEGES = {
-  sales: ["sales_center", "sales"],
+  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "marketing", "employee_management", "director", "settings", "calendar"],
+  director: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "director", "settings", "calendar"],
+  receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
+  cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
+  doctor: ["dashboard", "consultation_room", "consultation_reports"],
+  optometrist: ["dashboard", "consultation_room", "consultation_reports"],
   "sales manager": ["sales_center", "sales"],
+  sales: ["sales_center", "sales"],
+  pharmacist: ["dashboard", "medicine_center", "pharmacy_reports", "dispensing_reports"],
+  optician: ["dashboard", "optician_center", "workshop_reports"],
+  workshop: ["dashboard", "optician_center", "workshop_reports"],
+  storekeeper: ["dashboard", "inventory_management", "inventory_reports"],
+  inventory: ["dashboard", "inventory_management", "inventory_reports"],
+  accountant: ["dashboard", "financial_management", "financial_reports"],
+  finance: ["dashboard", "financial_management", "financial_reports", "cash_collection"],
+  "marketing officer": ["dashboard", "marketing", "marketing_reports"],
+  hr: ["dashboard", "employee_management", "user_management", "employee_reports"],
+  "employee management": ["dashboard", "employee_management", "user_management", "employee_reports"],
+  dispensing: ["dashboard", "dispensing"],
+  "procedure room": ["dashboard", "consultation_room", "procedure_requests"],
+  "other dispensing": ["dashboard", "dispensing"],
+  "clinic admin": ["dashboard", "settings"]
 };
 
 const normalizePrivilegePayload = (payload) => {
@@ -120,45 +140,61 @@ export const hasPrivilege = (user, privilegeKey) => {
     return false;
   }
   
-  // Admins always have access
+  // First check if user has explicit privileges (this should work for ALL roles)
+  const privileges = user.privileges || {};
+  const normalizedPrivileges = getNormalizedPrivileges(user);
+  
+  // If user has privileges defined, check them directly (regardless of role)
+  if (Object.keys(normalizedPrivileges).length > 0) {
+    const privilegeValue = normalizedPrivileges[privilegeKey];
+    let granted = isPrivilegeGranted(privilegeValue);
+    
+    // Check aliases if not granted
+    if (!granted) {
+      const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
+      for (const aliasKey of aliasKeys) {
+        if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
+          granted = true;
+          break;
+        }
+      }
+    }
+    
+    // Debug logging
+    if (!granted) {
+      console.log(`[hasPrivilege] Access denied for ${privilegeKey}:`, {
+        user: user.username || user.id,
+        role: user.role || 'No role',
+        privilegeValue,
+        normalizedPrivileges,
+        hasPrivileges: Object.keys(privileges).length > 0
+      });
+    }
+    
+    return granted;
+  }
+  
+  // Admins always have access (fallback for system admin)
   if (isAdmin(user)) {
     return true;
   }
   
-  const privileges = user.privileges || {};
-  const normalizedPrivileges = getNormalizedPrivileges(user);
+  // If no explicit privileges and not admin, check role-based fallback
+  const roleKey = (user?.role || "").toString().trim().toLowerCase();
+  const fallbackPrivileges = ROLE_FALLBACK_PRIVILEGES[roleKey] || [];
+  const hasFallbackPrivilege = fallbackPrivileges.includes(privilegeKey);
   
-  const privilegeValue = normalizedPrivileges[privilegeKey];
-  let granted = isPrivilegeGranted(privilegeValue);
-
-  if (!granted) {
-    const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
-    for (const aliasKey of aliasKeys) {
-      if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
-        granted = true;
-        break;
-      }
-    }
-  }
-  
-  // Debug logging (always log for debugging privilege issues)
-  if (!granted) {
-    console.log(`[hasPrivilege] Access denied for ${privilegeKey}:`, {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[hasPrivilege] No explicit privileges, checking role fallback for ${privilegeKey}:`, {
       user: user.username || user.id,
-      privilegeValue,
-      normalizedPrivileges,
-      privilegesType: typeof privileges,
-      isAdmin: isAdmin(user)
-    });
-  } else {
-    console.log(`[hasPrivilege] Access granted for ${privilegeKey}:`, {
-      user: user.username || user.id,
-      privilegeValue,
-      isAdmin: isAdmin(user)
+      role: user.role || 'No role',
+      roleKey,
+      fallbackPrivileges,
+      hasFallbackPrivilege
     });
   }
   
-  return granted;
+  return hasFallbackPrivilege;
 };
 
 /**

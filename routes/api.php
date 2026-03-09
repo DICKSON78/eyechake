@@ -103,8 +103,9 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
+// Authentication routes with rate limiting
 Route::group(['prefix' => 'auth'], function ($router) {
-    $router->post('/login', [AuthController::class, 'login']);
+    $router->post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
 });
 
 // Public routes - accessible without authentication
@@ -146,6 +147,114 @@ Route::get('/test-auth', function (\Illuminate\Http\Request $request) {
     ]);
 })->middleware('auth:api');
 
+// Reception routes - require reception privilege
+Route::group(['middleware' => ['auth:api', 'privilege:reception']], function ($router) {
+    $router->controller(PatientsController::class)->prefix('patients')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+        $router->delete('/{id}', 'destroy');
+    });
+    
+    $router->controller(PatientsToReturnController::class)->prefix('patients-to-return')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/{id}/return', 'markAsReturned');
+    });
+    
+    $router->controller(MessagesController::class)->prefix('messages')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+    });
+});
+
+// Cashier routes - require payment_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:payment_center']], function ($router) {
+    $router->controller(PatientPaymentCacheController::class)->prefix('patient-payment-cache')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(PatientItemBillsController::class)->prefix('patient-bills')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(ExpensesController::class)->prefix('expenses')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+});
+
+// Consultation room routes - require consultation_room privilege
+Route::group(['middleware' => ['auth:api', 'privilege:consultation_room']], function ($router) {
+    $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(ConsultationDiagnosesController::class)->prefix('consultation-diagnoses')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+});
+
+// Sales routes - require sales_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:sales_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Pharmacy routes - require medicine_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:medicine_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Workshop routes - require optician_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:optician_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Financial management routes - require financial_management privilege
+Route::group(['middleware' => ['auth:api', 'privilege:financial_management']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Marketing routes - require marketing privilege
+Route::group(['middleware' => ['auth:api', 'privilege:marketing']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Employee management routes - require employee_management privilege
+Route::group(['middleware' => ['auth:api', 'privilege:employee_management']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Settings routes - require settings privilege (Admin and Director only)
+Route::group(['middleware' => ['auth:api', 'privilege:settings']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Director routes - require director privilege
+Route::group(['middleware' => ['auth:api', 'privilege:director']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Admin only routes - require admin role
+Route::group(['middleware' => ['auth:api', 'role:Admin']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Main authenticated routes group
 Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->controller(AuthController::class)->prefix('auth')->group(function ($router) {
         $router->post('/change-password', 'changePassword');
