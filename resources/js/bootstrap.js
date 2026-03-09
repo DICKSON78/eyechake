@@ -12,9 +12,13 @@ window.axios = axios;
 // Set the base URL for API calls
 // For local development: use localhost:8000
 // For production: use the live server URL
-// Always use the current origin to avoid DNS resolution issues and ensure
-// consistent behavior behind proxies and during local development
-window.axios.defaults.baseURL = window.location.origin;
+// Set base URL for API calls
+// For local development: use localhost:8000
+// For production: use the live server URL
+// For local development with Vite on port 5173 and Laravel on port 8000
+window.axios.defaults.baseURL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000' 
+  : window.location.origin;
 
 // Add timeout configuration to prevent hanging requests
 window.axios.defaults.timeout = 45000; // 45 seconds timeout for complex operations like clinical notes

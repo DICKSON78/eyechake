@@ -232,15 +232,17 @@ export const NotificationProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is authenticated before fetching notifications
     const token = localStorage.getItem('token');
-    if (token) {
+    const user = window.user; // Get user from window object set by Default layout
+    if (token && user && user.privileges) {
       console.log('NotificationContext: User authenticated, fetching notifications...');
       fetchNotifications({});
     } else {
-      console.log('NotificationContext: User not authenticated, skipping notification fetch');
+      console.log('NotificationContext: User not authenticated or no privileges, skipping fetch');
+      setLoading(false);
     }
     // Expose events globally so layouts can trigger refresh on auth ready
     window.notificationEvents = notificationEvents;
-  }, []); // Only run once on mount
+  }, []); // Empty dependency array - run only once
 
   // WebSocket listener for real-time notifications (replaces polling)
   useEffect(() => {

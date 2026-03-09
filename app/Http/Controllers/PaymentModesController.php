@@ -57,7 +57,7 @@ class PaymentModesController extends Controller
             }
 
             if ($transaction_type) {
-                $data->where('payment_type', $transaction_type);
+                $data->where('transaction_type', $transaction_type);
             }
 
             $data = $data->paginate($per_page);
@@ -103,9 +103,9 @@ class PaymentModesController extends Controller
 
         $input = $request->only('name', 'description', 'status');
         $input['clinic_id'] = $clinic_id;
-        // Map transaction_type (API input) to payment_type (database column)
+        // Map transaction_type (API input) to transaction_type (database column)
         if ($request->has('transaction_type')) {
-            $input['payment_type'] = $request->transaction_type;
+            $input['transaction_type'] = $request->transaction_type;
         }
         $data = PaymentMode::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -140,9 +140,9 @@ class PaymentModesController extends Controller
 
         $data = PaymentMode::findOrFail($id);
         $updateData = $request->only('name', 'description', 'status');
-        // Map transaction_type (API input) to payment_type (database column)
+        // Map transaction_type (API input) to transaction_type (database column)
         if ($request->has('transaction_type')) {
-            $updateData['payment_type'] = $request->transaction_type;
+            $updateData['transaction_type'] = $request->transaction_type;
         }
         $data->update($updateData);
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');
