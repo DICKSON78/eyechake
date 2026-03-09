@@ -263,43 +263,41 @@ class DirectorDashboardController extends Controller
         // Expense payments total (alias for Financial Management compatibility)
         $data['summary']['expense_payments'] = $data['summary']['total_expenses'];
 
-        // Revenue from New Consultation/Patient - sum consultation item amounts, not full payment
+        // Revenue from New Consultation - filter by actual item name (General Consultation - New)
         try {
-            // Cash payments - calculate proportional amount for consultation items
-            $newCashQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('patient_item_payments as pip', 'ppci.item_payment_id', '=', 'pip.id')
-                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+            // Cash payments - proportional allocation for new consultation items
+            $newCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
-                ->whereNotNull('pip.created_at')
-                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('c.patient_direction', 'Direct to Doctor');
-            
-            if ($clinic_id) {
-                $newCashQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $newCash = (float) ($newCashQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0))) as net')->first()->net ?? 0);
+                ->where('it.is_consultation_item', 'Yes')
+                ->where('it.name', 'LIKE', '%New%')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
 
             // Bill payments
-            $newBillQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('patient_item_bill_payments as pip', 'ppci.bill_id', '=', 'pip.bill_id')
-                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+            $newBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
-                ->whereNotNull('pip.created_at')
-                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('c.patient_direction', 'Direct to Doctor');
-            
-            if ($clinic_id) {
-                $newBillQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $newBill = (float) ($newBillQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pip.amount) as net')->first()->net ?? 0);
+                ->where('it.is_consultation_item', 'Yes')
+                ->where('it.name', 'LIKE', '%New%')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
 
             $data['summary']['revenue_new_consultation'] = $newCash + $newBill;
         } catch (\Exception $e) {
@@ -307,43 +305,41 @@ class DirectorDashboardController extends Controller
             $data['summary']['revenue_new_consultation'] = 0;
         }
 
-        // Revenue from Return Consultation - sum return consultation item amounts, not full payment
+        // Revenue from Return Consultation - filter by actual item name (General Consultation - Return)
         try {
             // Cash payments
-            $returnCashQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('patient_item_payments as pip', 'ppci.item_payment_id', '=', 'pip.id')
-                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+            $returnCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
-                ->whereNotNull('pip.created_at')
-                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('c.patient_to_return', 'Yes');
-            
-            if ($clinic_id) {
-                $returnCashQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $returnCash = (float) ($returnCashQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0))) as net')->first()->net ?? 0);
+                ->where('it.is_consultation_item', 'Yes')
+                ->where('it.name', 'LIKE', '%Return%')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
 
             // Bill payments
-            $returnBillQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('patient_item_bill_payments as pip', 'ppci.bill_id', '=', 'pip.bill_id')
-                ->join('consultations as c', 'ppci.id', '=', 'c.payment_cache_item_id')
+            $returnBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
-                ->whereNotNull('pip.created_at')
-                ->where('pip.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('pip.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('c.patient_to_return', 'Yes');
-            
-            if ($clinic_id) {
-                $returnBillQuery->whereIn('pip.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $returnBill = (float) ($returnBillQuery->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pip.amount) as net')->first()->net ?? 0);
+                ->where('it.is_consultation_item', 'Yes')
+                ->where('it.name', 'LIKE', '%Return%')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
 
             $data['summary']['revenue_return_consultation'] = $returnCash + $returnBill;
         } catch (\Exception $e) {
@@ -376,24 +372,41 @@ class DirectorDashboardController extends Controller
             $data['summary']['discount'] = 0;
         }
 
-        // Consultation Revenue (consultation_type_id = 4 = 'Others' in database)
+        // Consultation Revenue (consultation_type_id = 4 = 'Others' in database) - proportional from actual payments
         try {
-            $consultationSalesQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
-                ->where('ppci.consultation_type_id', 4);
+            // Cash payments - proportional allocation
+            $consultationCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
+                ->where('ppci.consultation_type_id', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
+
+            // Bill payments - proportional allocation
+            $consultationBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->where('ppci.consultation_type_id', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
+
+            $data['summary']['consultation'] = $consultationCash + $consultationBill;
             
-            if ($clinic_id) {
-                $consultationSalesQuery->where('u.clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['consultation'] = $consultationSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
-            
-            // Consultation Purchases (COGS)
+            // Consultation Purchases (COGS) - status-based for cost tracking
             $consultationPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
@@ -417,23 +430,41 @@ class DirectorDashboardController extends Controller
             $data['summary']['consultation_profit'] = 0;
         }
 
-        // Pharmacy Sales (consultation_type_id = 1 = 'Pharmacy')
+        // Pharmacy Sales - proportional from actual payments
         try {
-            $pharmacySalesQuery = DB::table('patient_payment_cache_items as ppci')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+            // Cash payments
+            $pharmacyCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
-                ->whereRaw('LOWER(ct.name) = ?', ['pharmacy']);
-            
-            if ($clinic_id) {
-                $pharmacySalesQuery->where('u.clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['pharmacy'] = $pharmacySalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
+                ->whereRaw('LOWER(ct.name) = ?', ['pharmacy'])
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
+
+            // Bill payments
+            $pharmacyBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->whereRaw('LOWER(ct.name) = ?', ['pharmacy'])
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
+
+            $data['summary']['pharmacy'] = $pharmacyCash + $pharmacyBill;
             
             // Pharmacy Purchases (COGS)
             $pharmacyPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
@@ -460,24 +491,45 @@ class DirectorDashboardController extends Controller
             $data['summary']['pharmacy_profit'] = 0;
         }
 
-        // Glass Sales (consultation_type_id = 2 = 'Glass')
+        // Glass Sales - proportional from actual payments (excludes frames)
         try {
-            $glassSalesQuery = DB::table('patient_payment_cache_items as ppci')
+            // Cash payments
+            $glassCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
-                ->where('it.item_type_id', '!=', 4); // Exclude frames
-            
-            if ($clinic_id) {
-                $glassSalesQuery->where('u.clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['glass'] = $glassSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+                ->where('it.item_type_id', '!=', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
+
+            // Bill payments
+            $glassBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->whereRaw('LOWER(ct.name) = ?', ['glass'])
+                ->where('it.item_type_id', '!=', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
+
+            $data['summary']['glass'] = $glassCash + $glassBill;
             
             // Glass Purchases (COGS)
             $glassPurchasesQuery = DB::table('patient_payment_cache_items as ppci')
@@ -489,7 +541,7 @@ class DirectorDashboardController extends Controller
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
                 ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
-                ->where('it.item_type_id', '!=', 4); // Exclude frames
+                ->where('it.item_type_id', '!=', 4);
             
             if ($clinic_id) {
                 $glassPurchasesQuery->where('u.clinic_id', $clinic_id);
@@ -505,22 +557,41 @@ class DirectorDashboardController extends Controller
             $data['summary']['glass_profit'] = 0;
         }
 
-        // Frame Sales (item_type_id = 4 = 'Frame')
+        // Frame Sales - proportional from actual payments (item_type_id = 4)
         try {
-            $frameSalesQuery = DB::table('patient_payment_cache_items as ppci')
+            // Cash payments
+            $frameCash = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_payments as pmt', 'ppci.item_payment_id', '=', 'pmt.id')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('users as u', 'ppc.created_by', '=', 'u.id')
-                ->whereIn('ppci.status', ['Paid', 'Billed', 'Served'])
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '>=', $start_date)
-                ->whereDate(DB::raw('COALESCE(ppci.served_at, ppci.created_at)'), '<=', $end_date)
-                ->where('it.item_type_id', 4);
-            
-            if ($clinic_id) {
-                $frameSalesQuery->where('u.clinic_id', $clinic_id);
-            }
-            
-            $data['summary']['frame'] = $frameSalesQuery->sum(DB::raw('ppci.unit_price * ppci.quantity')) ?? 0;
+                ->join(DB::raw('(SELECT item_payment_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE item_payment_id IS NOT NULL GROUP BY item_payment_id) as totals'), 'ppci.item_payment_id', '=', 'totals.item_payment_id')
+                ->where('it.item_type_id', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
+                ->first()->net ?? 0);
+
+            // Bill payments
+            $frameBill = (float) (DB::table('patient_payment_cache_items as ppci')
+                ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
+                ->where('it.item_type_id', 4)
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
+                ->first()->net ?? 0);
+
+            $data['summary']['frame'] = $frameCash + $frameBill;
             
             // Frame Purchases (COGS)
             $framePurchasesQuery = DB::table('patient_payment_cache_items as ppci')
