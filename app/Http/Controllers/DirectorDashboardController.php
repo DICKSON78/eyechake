@@ -593,6 +593,7 @@ class DirectorDashboardController extends Controller
             ->count();
 
         // Sales by Product Category (Item Types) - Calculate from actual payments with proportional net amounts
+        try {
         if ($clinic_id) {
             $data['statistics']['sales_by_category'] = DB::select("
                 SELECT 
@@ -684,8 +685,13 @@ class DirectorDashboardController extends Controller
                 ORDER BY total_sales DESC
             ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $start_date . ' 00:00:00', $end_date . ' 23:59:59']);
         }
+        } catch (\Exception $e) {
+            \Log::error('Error calculating sales_by_category', ['error' => $e->getMessage()]);
+            $data['statistics']['sales_by_category'] = [];
+        }
 
         // Top Selling Items - Calculate from actual payments with proportional net amounts
+        try {
         if ($clinic_id) {
             $data['statistics']['top_selling_items'] = DB::select("
                 SELECT 
@@ -794,6 +800,10 @@ class DirectorDashboardController extends Controller
                 ORDER BY total_sales DESC
                 LIMIT 10
             ", [$start_date . ' 00:00:00', $end_date . ' 23:59:59', $start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+        }
+        } catch (\Exception $e) {
+            \Log::error('Error calculating top_selling_items', ['error' => $e->getMessage()]);
+            $data['statistics']['top_selling_items'] = [];
         }
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Director Dashboard data retrieved successfully.');
