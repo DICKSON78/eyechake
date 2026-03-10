@@ -88,6 +88,14 @@ class ClientCallingStatusController extends Controller
                 'user_id' => $user->id
             ]);
 
+            \Log::info('Updating calling status', [
+                'patient_id' => $patientId,
+                'status' => $request->status,
+                'notes' => $request->notes,
+                'user_id' => $user->id,
+                'request_data' => $request->all()
+            ]);
+
             $status = PatientCallingStatus::updateOrCreate(
                 ['patient_id' => $patientId],
                 [

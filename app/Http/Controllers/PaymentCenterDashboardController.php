@@ -179,8 +179,8 @@ class PaymentCenterDashboardController extends Controller
 
         $data['summary']['cash_payments'] = $cashItemPayments + $cashBillPayments;
 
-        // Cash available (collected cash) - same as cash payments for now
-        $data['summary']['cash_available'] = $data['summary']['cash_payments'];
+        // Cash available (collected cash minus expenses)
+        $data['summary']['cash_available'] = $data['summary']['cash_payments'] - $data['summary']['total_expenses'];
 
         // Credit payments amount (billed/credited items)
         try {

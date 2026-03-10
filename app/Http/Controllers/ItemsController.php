@@ -78,6 +78,12 @@ class ItemsController extends Controller
             }
 
             if ($lens_type_id) {
+                // Debug: Log lens type filter application
+                \Log::info('Applying lens type filter', [
+                    'lens_type_id' => $lens_type_id,
+                    'user' => $user->id ?? 'guest'
+                ]);
+                
                 $data->where('lens_type_id', $lens_type_id);
             }
 
