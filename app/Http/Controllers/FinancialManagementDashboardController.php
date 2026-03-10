@@ -47,7 +47,7 @@ class FinancialManagementDashboardController extends Controller
         ];
 
         // Get financial statistics
-        // Total revenue: sum of all payments + cleared bills
+        // Total revenue: sum of all payments + cleared bills (same as Daily Cash Collected Report)
         try {
             $revenueQuery = PatientItemPayment::query()
                 ->whereNotNull('created_at')
@@ -61,9 +61,9 @@ class FinancialManagementDashboardController extends Controller
                 });
             }
             
-            $data['summary']['total_revenue'] = $revenueQuery->sum('amount') ?? 0;
-
-            // Add cleared bills to total revenue
+            $itemPaymentsRevenue = $revenueQuery->sum('amount') ?? 0;
+            
+            // Add cleared bills to total revenue (same as Daily Cash Collected Report)
             $clearedBillsQuery = PatientItemBill::query()
                 ->where('status', 'Cleared')
                 ->whereNotNull('created_at')
@@ -76,8 +76,8 @@ class FinancialManagementDashboardController extends Controller
                 });
             }
             
-            $cleared_bills_revenue = $clearedBillsQuery->sum('amount') ?? 0;
-            $data['summary']['total_revenue'] += $cleared_bills_revenue;
+            $clearedBillsRevenue = $clearedBillsQuery->sum('amount') ?? 0;
+            $data['summary']['total_revenue'] = $itemPaymentsRevenue + $clearedBillsRevenue;
         } catch (\Exception $e) {
             \Log::error('Error calculating total revenue', ['error' => $e->getMessage()]);
             $data['summary']['total_revenue'] = 0;
@@ -184,8 +184,7 @@ class FinancialManagementDashboardController extends Controller
                     ->where('u.clinic_id', $clinic_id)
                     ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                     ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
+                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                 $improvementCostQuery = DB::table('expense_payments as expp')
                     ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                     ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
@@ -193,21 +192,20 @@ class FinancialManagementDashboardController extends Controller
                     ->where('u.clinic_id', $clinic_id)
                     ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                     ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
             } else {
                 $runningCostQuery = DB::table('expense_payments as expp')
                     ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                     ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
                     ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                     ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
+                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                 $improvementCostQuery = DB::table('expense_payments as expp')
                     ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                     ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
                     ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                     ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
             }
 
             $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');

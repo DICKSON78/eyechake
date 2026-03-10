@@ -101,8 +101,12 @@ class StocktakesController extends Controller
                         $stocktake_item = StocktakeItem::create($input_item);
 
                         if ($stocktake_item) {
+                            // Get current item balance to ensure correct calculation
+                            $currentItem = Item::find($input_item['item_id']);
+                            $currentBalance = $currentItem ? $currentItem->balance : 0;
+                            
                             $updateData = [
-                                'balance' => $stocktake_item->quantity, // Use balance instead of new_balance
+                                'balance' => $currentBalance, // Keep current balance, stocktake shouldn't change it
                                 'unit_buying_price' => $stocktake_item->unit_buying_price,
                             ];
                             

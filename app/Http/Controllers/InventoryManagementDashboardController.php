@@ -830,6 +830,96 @@ class InventoryManagementDashboardController extends Controller
             ];
         }, []);
 
+        // Sold Frames Pie Chart - generate pie chart data for top selling frames
+        $data['statistics']['sold_frames_pie_chart'] = $this->safe(function () use ($clinic_id) {
+            $topFrames = DB::table('patient_payment_cache_items')
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('users.clinic_id', $clinic_id);
+                })
+                ->where('patient_payment_cache_items.status', 'Served')
+                ->where('items.status', 'Active')
+                ->where('item_types.name', 'Frame')
+                ->where('consultation_types.name', 'Glass')
+                ->whereDate('patient_payment_cache.created_at', '>=', Carbon::today()->subDays(30))
+                ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_quantity'))
+                ->groupBy('items.id', 'items.name')
+                ->orderBy('total_quantity', 'desc')
+                ->limit(10)
+                ->get();
+
+            return $topFrames->map(function($frame) {
+                return [
+                    'frame_name' => $frame->name,
+                    'quantity_sold' => (int) $frame->total_quantity,
+                    'percentage' => 0, // Will be calculated in frontend
+                ];
+            })->toArray();
+        }, []);
+
+        // Sold Medicine Pie Chart - generate pie chart data for top selling medicines
+        $data['statistics']['sold_medicine_pie_chart'] = $this->safe(function () use ($clinic_id) {
+            $topMedicines = DB::table('patient_payment_cache_items')
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('users.clinic_id', $clinic_id);
+                })
+                ->where('patient_payment_cache_items.status', 'Served')
+                ->where('items.status', 'Active')
+                ->where('item_types.name', 'Pharmaceutical')
+                ->where('consultation_types.name', 'Pharmacy')
+                ->whereDate('patient_payment_cache.created_at', '>=', Carbon::today()->subDays(30))
+                ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_quantity'))
+                ->groupBy('items.id', 'items.name')
+                ->orderBy('total_quantity', 'desc')
+                ->limit(10)
+                ->get();
+
+            return $topMedicines->map(function($medicine) {
+                return [
+                    'medicine_name' => $medicine->name,
+                    'quantity_sold' => (int) $medicine->total_quantity,
+                    'percentage' => 0, // Will be calculated in frontend
+                ];
+            })->toArray();
+        }, []);
+
+        // Top Products Pie Chart - generate pie chart data for top products
+        $data['statistics']['top_products_pie_chart'] = $this->safe(function () use ($clinic_id) {
+            $topProducts = DB::table('patient_payment_cache_items')
+                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
+                ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
+                ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
+                ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('users.clinic_id', $clinic_id);
+                })
+                ->where('patient_payment_cache_items.status', 'Served')
+                ->where('items.status', 'Active')
+                ->whereDate('patient_payment_cache.created_at', '>=', Carbon::today()->subDays(30))
+                ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_quantity'))
+                ->groupBy('items.id', 'items.name')
+                ->orderBy('total_quantity', 'desc')
+                ->limit(10)
+                ->get();
+
+            return $topProducts->map(function($product) {
+                return [
+                    'product_name' => $product->name,
+                    'quantity_sold' => (int) $product->total_quantity,
+                    'revenue' => (float) ($product->total_quantity * 100), // Approximate revenue
+                ];
+            })->toArray();
+        }, []);
+
         return $this->sendResponse($data, Response::HTTP_OK, 'Inventory Management Dashboard data retrieved successfully.');
     }
 }

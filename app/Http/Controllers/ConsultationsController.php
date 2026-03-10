@@ -603,24 +603,17 @@ class ConsultationsController extends Controller
      * @return Response
      */
     public function show(Request $request, $id)
-    {
-        try {
-            $with_diagnoses = $request->with_diagnoses;
-            $with_items = $request->with_items;
-            $with_item_templates = $request->with_item_templates;
-            $with_referral = $request->with_referral;
-            $data = Consultation::with([
-                'payment_cache_item' => function ($query) {
-                    $query->with(['payment_cache.check_in.patient' => function ($query2) {
-                        $query2->with(['region', 'district', 'ward']);
                     }]);
+                }]);
+            },
+            'item', 'payment_mode', 'consultant', 'server',
+            'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
+            'to_optician_sender', 'diagnoses.disease'
+        ]);
 
-                    $query->with(['item', 'payment_mode', 'consultant', 'server']);
-                }, 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
-                'to_optician_sender', 'diagnoses.disease'
-            ]);
-
-            // Load referral if requested (for clinical note PDF)
+        // Load referral if requested (for clinical note PDF)
+        if ($with_referral == 'Yes') {
+            $data->with(['referral']);
             if ($with_referral == 'Yes') {
                 $data->with(['referral']);
             }

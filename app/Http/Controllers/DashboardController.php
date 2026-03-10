@@ -166,7 +166,7 @@ class DashboardController extends Controller
                 }, 0);
             });
 
-            // Running Cost & Improvement Cost (by category name match)
+            // Running Cost & Improvement Cost (by expense category name match)
             try {
                 if ($clinic_id) {
                     $runningCostQuery = DB::table('expense_payments as expp')
@@ -176,8 +176,7 @@ class DashboardController extends Controller
                         ->where('u.clinic_id', $clinic_id)
                         ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                         ->where('expp.amount', '>', 0)
-                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
+                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                     $improvementCostQuery = DB::table('expense_payments as expp')
                         ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                         ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
@@ -185,21 +184,20 @@ class DashboardController extends Controller
                         ->where('u.clinic_id', $clinic_id)
                         ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                         ->where('expp.amount', '>', 0)
-                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                 } else {
                     $runningCostQuery = DB::table('expense_payments as expp')
                         ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                         ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
                         ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                         ->where('expp.amount', '>', 0)
-                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
+                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                     $improvementCostQuery = DB::table('expense_payments as expp')
                         ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
                         ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
                         ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
                         ->where('expp.amount', '>', 0)
-                        ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
                 }
 
                 $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
