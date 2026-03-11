@@ -50,7 +50,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     ports:
-      - "3306:3306"
+      - "3307:3307"
     volumes:
       - dbdata:/var/lib/mysql
       - ./sikaf.sql:/docker-entrypoint-initdb.d/init.sql
