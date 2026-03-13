@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Main routes
+Route::get('/', function () {
+    return view('app');
+});
+
+// Login page - serve React app
+Route::get('/login', function () {
+    return view('app');
+})->name('login');
+
 // Sitemap route
 Route::get('/sitemap.xml', function () {
     $baseUrl = config('app.url');

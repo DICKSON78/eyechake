@@ -553,7 +553,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->controller(SalesCenterReportsController::class)->prefix('sales-center')->group(function ($router) {
             $router->get('/sales', 'getSalesReport');
         });
-    });
+});
 });
 
 Route::get('/restore', function (\Illuminate\Http\Request $request) {
