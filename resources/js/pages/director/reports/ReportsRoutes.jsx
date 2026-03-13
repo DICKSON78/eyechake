@@ -245,30 +245,6 @@ const ReportsRoutes = () => {
         element={<DispensingItemBalance />}
       />
 
-      {/* Procedure Room Reports */}
-      <Route
-        path="/procedure-room/served-procedures"
-        element={
-          <PatientItems
-            module="Director"
-            title="Served Procedures Report"
-            consultationType="Procedure"
-            status="Served"
-          />
-        }
-      />
-      <Route
-        path="/procedure-room/pending-procedures"
-        element={
-          <PatientItems
-            module="Director"
-            title="Pending Procedures Report"
-            consultationType="Procedure"
-            status="Pending,Paid,Billed"
-          />
-        }
-      />
-
       {/* Optician Center Reports */}
       <Route
         path="/optician-center/items-dispensed"

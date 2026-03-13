@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -91,28 +92,32 @@ const PatientRoutes = () => {
           >
             <Tab
               label="Patient File"
-              onClick={() => navigate("patient-file")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/patient-file`)}
             />
             <Tab
               label="Payment History"
-              onClick={() => navigate("payment-history")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/payment-history`)}
             />
             <Tab
               label="Attachments"
-              onClick={() => navigate("attachments")}
+              onClick={() => navigate(`/patient-records/patients/${patientId}/attachments`)}
             />
           </Tabs>
           <Routes>
             <Route
-              path="/patient-file"
+              index
+              element={<Navigate to="patient-file" replace />}
+            />
+            <Route
+              path="patient-file"
               element={<PatientFile patient={patient} />}
             />
             <Route
-              path="/payment-history"
+              path="payment-history"
               element={<PatientPaymentHistory patient={patient} />}
             />
             <Route
-              path="/attachments"
+              path="attachments"
               element={<PatientAttachments patient={patient} />}
             />
           </Routes>

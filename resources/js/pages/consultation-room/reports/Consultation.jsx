@@ -200,7 +200,11 @@ const Consultation = () => {
                 <Tooltip title="View Consultation Details">
                   <IconButton
                     size="small"
-                    onClick={() => navigate(`/patient-records/patient-file/${item.payment_cache_item.payment_cache.check_in.patient_id}`)}
+                    onClick={() =>
+                      navigate(
+                        `/patient-records/patients/${item.payment_cache_item.payment_cache.check_in.patient_id}/patient-file`
+                      )
+                    }
                     sx={{ color: 'primary.main' }}
                   >
                     <ViewIcon fontSize="small" />

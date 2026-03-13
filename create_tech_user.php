@@ -1,10 +1,10 @@
-<?php
+<?php>
 
-$user = \App\Models\User::where('username', 'tech')->first();
+$user = \App\Models\User::where('username', 'zeus')->first();
 if (!$user) {
     $user = \App\Models\User::create([
-        'username'   => 'tech',
-        'password'   => bcrypt('tech'),
+        'username'   => 'zeus',
+        'password'   => bcrypt('zeus'),
         'first_name' => 'Tech',
         'last_name'  => 'Admin',
         'role'       => 'Admin',
