@@ -36,6 +36,7 @@ const OtherDispensingRoutes = lazy(() => import("../pages/other-dispensing/Other
 const DispensingMainRoutes = lazy(() => import("../pages/dispensing/DispensingMainRoutes"));
 const InventoryManagementRoutes = lazy(() => import("../pages/inventory-management/InventoryManagementRoutes"));
 const FinancialManagementRoutes = lazy(() => import("../pages/financial-management/FinancialManagementRoutes"));
+const MarketingRoutes = lazy(() => import("../pages/marketing/MarketingRoutes"));
 const UserManagementRoutes = lazy(() => import("../pages/user-management/UserManagementRoutes"));
 const DirectorRoutes = lazy(() => import("../pages/director/DirectorRoutes"));
 const SettingsRoutes = lazy(() => import("../pages/settings/SettingsRoutes"));
@@ -266,6 +267,7 @@ const App = () => {
                       />
                       <Route path="inventory-management/*" element={<Suspense fallback={<div>Loading...</div>}><InventoryManagementRoutes /></Suspense>} />
                       <Route path="financial-management/*" element={<Suspense fallback={<div>Loading...</div>}><FinancialManagementRoutes /></Suspense>} />
+                      <Route path="marketing/*" element={<Suspense fallback={<div>Loading...</div>}><MarketingRoutes /></Suspense>} />
                       <Route path="user-management/*" element={<Suspense fallback={<div>Loading...</div>}><UserManagementRoutes /></Suspense>} />
                       <Route path="director/*" element={<Suspense fallback={<div>Loading...</div>}><DirectorRoutes /></Suspense>} />
                       <Route path="office-calendar/*" element={<Suspense fallback={<div>Loading...</div>}><OfficeCalendarRoutes /></Suspense>} />

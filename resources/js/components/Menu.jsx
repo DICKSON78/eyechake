@@ -315,6 +315,18 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
     });
   };
 
+  const getMenuVisibility = (section) => {
+    const userData = user?.data || user;
+    const role = userData?.job_title?.toLowerCase() || userData?.designation?.toLowerCase() || '';
+    
+    switch (section) {
+      case "MARKETING":
+        return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing');
+      default:
+        return true;
+    }
+  };
+
   // Helper function to check if privilege is granted
   // Uses centralized privilege checking utility
   // Admins always have access to everything
@@ -915,6 +927,113 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               show: isPrivilegeGranted('financial_management'),
             },
           ],
+        },
+        {
+          title: "9. MARKETING",
+          subheader: true,
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Marketing Dashboard",
+          icon: <MarketingStrategiesIcon />,
+          to: "/marketing/dashboard",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Daily Activities",
+          icon: <DailyActivitiesIcon />,
+          to: "/marketing/daily-activities",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Marketing Strategies",
+          icon: <MarketingStrategiesIcon />,
+          to: "/marketing/marketing-strategies",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Campaign Performance",
+          icon: <PerformanceIcon />,
+          to: "/marketing/campaign-performance",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Lead Generation",
+          icon: <PeopleIcon />,
+          to: "/marketing/lead-generation",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Bulk SMS",
+          icon: <EmailIcon />,
+          to: "/marketing/bulk-sms",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Communication Logs",
+          icon: <CommunicationLogsIcon />,
+          to: "/marketing/communication-logs",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Communication Analytics",
+          icon: <PerformanceIcon />,
+          to: "/marketing/communication-analytics",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "High Value Patients",
+          icon: <VipIcon />,
+          to: "/marketing/high-value-patients",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Prestige Clients",
+          icon: <StarIcon />,
+          to: "/marketing/prestige-clients",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Client Calling Status",
+          icon: <PhoneIcon />,
+          to: "/marketing/client-calling-status",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "WhatsApp Export",
+          icon: <MessageIcon />,
+          to: "/marketing/whatsapp-export",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Unreachable Numbers",
+          icon: <WarningIcon />,
+          to: "/marketing/unreachable-numbers",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Events",
+          icon: <LocalActivityRounded as EventsIcon />,
+          to: "/marketing/events",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Research Plans",
+          icon: <LocationSearchingRounded as ResearchIcon />,
+          to: "/marketing/research-plans",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Information Sources",
+          icon: <InfoIcon />,
+          to: "/marketing/information-sources",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Ideas",
+          icon: <LightbulbRounded as IdeaDevelopmentIcon />,
+          to: "/marketing/ideas",
+          show: getMenuVisibility('MARKETING'),
         },
         {
           title: "10. EMPLOYEE MANAGEMENT",
