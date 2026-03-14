@@ -323,35 +323,30 @@ const Dashboard = () => {
                 <CardContent>
                   <ChartWrapper
                     title="Frame Categories Distribution"
-                        style: {
-                          fontSize: 10,
-                          fontWeight: 400,
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
-                        formatter: function (val, opts) {
-                          return numberFormat(opts.w.globals.series[opts.seriesIndex]);
-                        },
+                    options={{
+                      style: {
+                        fontSize: 10,
+                        fontWeight: 400,
                       },
-                      tooltip: {
-                        y: {
-                          formatter: (val) => numberFormat(val),
-                        },
+                      dropShadow: {
+                        enabled: false,
                       },
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          colors: (data.statistics?.frame_categories || []).map(
-                            (e) => theme.palette.text.secondary
-                          ),
-                          useSeriesColors: false,
-                        },
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
-                        },
+                      formatter: function (val, opts) {
+                        return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                      },
+                    }}
+                    tooltip={{
+                      y: {
+                        formatter: (val) => numberFormat(val),
+                      },
+                    }}
+                    legend={{
+                      position: "bottom",
+                      labels: {
+                        colors: (data.statistics?.frame_categories || []).map(
+                          (e) => theme.palette.text.secondary
+                        ),
+                        useSeriesColors: false,
                       },
                     }}
                     series={(data.statistics?.frame_categories || []).map(

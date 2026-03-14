@@ -32,7 +32,7 @@ import {
 
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
-import PerformanceReportCard from "../../../components/PerformanceReportCard";
+// import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 
@@ -287,10 +287,20 @@ const Dashboard = () => {
               </Card>
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <PerformanceReportCard
+              {/* <PerformanceReportCard
                 data={performanceData}
                 loading={performanceLoading}
-              />
+              /> */}
+              <Card sx={{ mt: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Performance Report
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Performance report card component is temporarily unavailable.
+                  </Typography>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </React.Fragment>
