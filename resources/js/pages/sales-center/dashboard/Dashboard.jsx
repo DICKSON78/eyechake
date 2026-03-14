@@ -37,6 +37,7 @@ import ChartWrapper from "../../../components/ChartWrapper";
 import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
+import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 import { useTheme } from "@mui/material/styles";
 
 const Dashboard = () => {
@@ -458,7 +459,7 @@ const Dashboard = () => {
               <PerformanceReportCard
                 department="Sales"
                 user={window.user}
-                editable={window.user?.privileges?.includes('sales_performance_report')}
+                editable={hasPrivilege(window.user, 'sales_performance_report') || isAdmin(window.user)}
                 refreshTrigger={dateParams.start_date}
               />
             </Grid>

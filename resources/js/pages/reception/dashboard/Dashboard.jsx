@@ -34,6 +34,7 @@ import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
 import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import notificationEvents from "../../../utils/notificationEvents";
+import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -465,7 +466,7 @@ const Dashboard = () => {
               <PerformanceReportCard
                 department="CRM"
                 user={window.user}
-                editable={window.user?.privileges?.includes('crm_performance_report')}
+                editable={hasPrivilege(window.user, 'crm_performance_report') || isAdmin(window.user)}
                 refreshTrigger={dateParams?.start_date}
               />
             </Grid>

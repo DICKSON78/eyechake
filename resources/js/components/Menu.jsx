@@ -13,52 +13,54 @@ import {
 import { useNotificationContext } from "../contexts/NotificationContext";
 import { hasPrivilege, isAdmin } from "../helpers/privileges";
 
+// Material-UI Icons - All imports consolidated and deduplicated
 import {
   AddRounded as AddIcon,
+  AssessmentRounded as PerformanceIcon,
+  AssignmentRounded as PrescriptionIcon,
   BadgeRounded as JobTitlesIcon,
+  BusinessCenterRounded as DirectorIcon,
+  CheckCircleRounded as CheckCircleIcon,
   ContactsRounded as ClinicDetailsIcon,
   ContactMailRounded as ContactIcon,
   DoneAllRounded as DoneIcon,
+  EmailRounded as EmailIcon,
+  EventNoteRounded as AppointmentsIcon,
+  EventRounded as EventsIcon,
   ExpandLessRounded as ExpandLessIcon,
   ExpandMoreRounded as ExpandMoreIcon,
-  EventNoteRounded as AppointmentsIcon,
-  EmailRounded as EmailIcon,
   GroupRounded as PeopleIcon,
   HomeRounded as HomeIcon,
   HourglassBottomRounded as WaitingIcon,
   InfoRounded as InfoIcon,
   Inventory2Rounded as ItemsIcon,
-  LightbulbRounded as IdeaDevelopmentIcon,
   LibraryBooksRounded as ReportsIcon,
-  AssignmentRounded as PrescriptionIcon,
+  LightbulbRounded as IdeaDevelopmentIcon,
   LocalActivityRounded as OutreachProgrammesIcon,
   LocalHospitalRounded as ClinicsIcon,
   LocationSearchingRounded as MarketResearchIcon,
   ManageAccountsRounded as UserManagementIcon,
   MedicationRounded as MedicineIcon,
-  BusinessCenterRounded as DirectorIcon,
-  CheckCircleRounded as CheckCircleIcon,
   MessageRounded as MessageIcon,
   MoneyRounded as PaymentModesIcon,
-
   PaymentRounded as PaymentChannelsIcon,
   PestControlRounded as DiseasesIcon,
   PhoneInTalkRounded as CommunicationLogsIcon,
   PhoneRounded as PhoneIcon,
+  PointOfSaleRounded as SalesIcon,
+  ReceiptRounded as ReceiptIcon,
   ScheduleRounded as PatientsToReturnIcon,
   SendRounded as MarketingStrategiesIcon,
   SettingsRounded as SettingsIcon,
-  PointOfSaleRounded as SalesIcon,
+  StarBorderRounded as StarIcon,  // Changed to StarBorderRounded to avoid duplicate
   StarRounded as VipIcon,
-  StarRounded as StarIcon,
   TaskAltRounded as DoctorTaskIcon,
   TaskRounded as DailyActivitiesIcon,
-  ReceiptRounded as ReceiptIcon,
-  AssessmentRounded as PerformanceIcon,
   TrendingDownRounded as ExpensesIcon,
   WarningRounded as WarningIcon,
   WindowRounded as DepartmentsIcon,
 } from "@mui/icons-material";
+
 import GlassPatientsIcon from "./icons/AddLens";
 
 const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
@@ -101,7 +103,6 @@ const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
         },
         "&:hover, &.Mui-selected, &.Mui-selected:hover": {
           color: "primary.main",
-
           "& .MuiListItemIcon-root": {
             color: "inherit",
           },
@@ -175,7 +176,6 @@ const MultiLevelMenuItem = ({ item, location, generateMenuTree }) => {
           },
           "&:hover, &.Mui-selected, &.Mui-selected:hover": {
             color: "primary.main",
-
             "& .MuiListItemIcon-root": {
               color: "inherit",
             },
@@ -274,8 +274,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
   });
 
   // Use NotificationContext for stable sidebar badges
-  // Reference implementation: resources/js/pages/payment-center/pending-cash-patients/PendingCashPatients.jsx
-  // Badge pattern: notifications && typeof notifications.KEY !== 'undefined' && notifications.KEY != null ? (Number(notifications.KEY) || 0) : 0
   const { notifications, loading: notificationsLoading } = useNotificationContext();
 
   // Debug notifications
@@ -317,47 +315,21 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
     });
   };
 
-  const getMenuVisibility = (section) => {
-    const userData = user?.data || user;
-    const role = userData?.job_title?.toLowerCase() || userData?.designation?.toLowerCase() || '';
-    
-    switch (section) {
-      case "MARKETING":
-        return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing');
-      default:
-        return true;
-    }
-  };
-
   // Helper function to check if privilege is granted
-  // Uses centralized privilege checking utility
-  // Admins always have access to everything
   const isPrivilegeGranted = (privilegeKey) => {
-    // If no privilege key provided, show the item (for items that don't need privileges)
     if (!privilegeKey) return true;
-    // Check if user exists and has privileges before checking
     if (!user || !user.privileges) {
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Menu] User or privileges not loaded yet for ${privilegeKey}`, { user: !!user, hasPrivileges: !!(user && user.privileges) });
       }
       return false;
     }
-    const granted = hasPrivilege(user, privilegeKey);
-    // Debug logging for privilege checks (always log for debugging)
-    if (!granted && user && !isAdmin(user)) {
-      console.log(`[Menu] Privilege check failed: ${privilegeKey}`, {
-        user: user.username || user.id,
-        privileges: user.privileges,
-        privilegesType: typeof user.privileges,
-        isAdmin: isAdmin(user)
-      });
-    }
-    return granted;
+    return hasPrivilege(user, privilegeKey);
   };
 
   useEffect(() => {
     if (user && user.privileges) {
-      // Debug user privileges on menu load (always log for debugging)
+      // Debug user privileges on menu load
       console.log('[Menu] User loaded:', {
         username: user.username,
         role: user.role,
@@ -370,42 +342,33 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
       // Role-based menu visibility
       const getMenuVisibility = (section) => {
         const role = (user?.role || "").toString().trim().toLowerCase();
+        const hasSalesCenterAccess = hasPrivilege(user, 'sales_center');
 
         switch (section) {
           case "RECEPTION":
             return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception');
-
           case "CASHIER":
             return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center');
-
           case "CONSULTATION ROOM":
             return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room');
-
           case "SALES TABLE":
             return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess;
-
           case "PHARMACY":
             return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center');
-
           case "WORKSHOP":
             return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center');
-
           case "STOCK MANAGEMENT":
             return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management');
-
           case "FINANCIAL MANAGEMENT":
             return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management');
-
-
           case "EMPLOYEE MANAGEMENT":
             return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management');
-
           case "DIRECTOR":
             return role === "admin" || role === "director" || hasPrivilege(user, 'director');
-
           case "SETTINGS":
             return role === "admin" || role === "director" || hasPrivilege(user, 'settings');
-
+          case "MARKETING":
+            return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing');
           default:
             return false;
         }
@@ -477,7 +440,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Website Appointments",
           icon: <AppointmentsIcon />,
           to: "/external-links/website-appointments",
-          badge: notifications && typeof notifications.website_appointments !== 'undefined' && notifications.website_appointments != null ? (Number(notifications.website_appointments) || 0) : (loading ? '...' : 0),
+          badge: notifications && typeof notifications.website_appointments !== 'undefined' && notifications.website_appointments != null ? (Number(notifications.website_appointments) || 0) : 0,
           show: getMenuVisibility('RECEPTION'),
         },
         {
@@ -495,7 +458,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Patients Sent to Cashier",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-cash-patients",
-          badge: notifications && typeof notifications.patients_sent_to_cashier !== 'undefined' && notifications.patients_sent_to_cashier != null ? (Number(notifications.patients_sent_to_cashier) || 0) : (loading ? '...' : 0),
+          badge: notifications && typeof notifications.patients_sent_to_cashier !== 'undefined' && notifications.patients_sent_to_cashier != null ? (Number(notifications.patients_sent_to_cashier) || 0) : 0,
           show: getMenuVisibility('CASHIER'),
         },
         {
@@ -589,7 +552,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Monthly Optometrist Report",
               icon: <ReportsIcon />,
               to: "/consultation-room/reports/optometrist-monthly-report",
-              show: false, // Hidden per user request
+              show: false,
             },
             {
               title: "Pharmacy & Consultation Report",
@@ -1015,13 +978,13 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         },
         {
           title: "Events",
-          icon: <LocalActivityRounded as EventsIcon />,
+          icon: <EventsIcon />,
           to: "/marketing/events",
           show: getMenuVisibility('MARKETING'),
         },
         {
           title: "Research Plans",
-          icon: <LocationSearchingRounded as ResearchIcon />,
+          icon: <MarketResearchIcon />,
           to: "/marketing/research-plans",
           show: getMenuVisibility('MARKETING'),
         },
@@ -1033,7 +996,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         },
         {
           title: "Ideas",
-          icon: <LightbulbRounded as IdeaDevelopmentIcon />,
+          icon: <IdeaDevelopmentIcon />,
           to: "/marketing/ideas",
           show: getMenuVisibility('MARKETING'),
         },
@@ -1051,7 +1014,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "11. DIRECTOR",
           subheader: true,
-          show: getMenuVisibility('EMPLOYEE MANAGEMENT'),
+          show: getMenuVisibility('DIRECTOR'),
         },
         {
           title: "Director Dashboard",
@@ -1536,16 +1499,16 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
     <Box
       sx={{
         height: "100%",
-        overflowY: "scroll", // Always show scrollbar
+        overflowY: "scroll",
         overflowX: "hidden",
         "&::-webkit-scrollbar": {
-          width: "10px", // Slightly wider
+          width: "10px",
         },
         "&::-webkit-scrollbar-track": {
-          background: "rgba(0,0,0,0.05)" // Visible track
+          background: "rgba(0,0,0,0.05)"
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#888", // Darker visible thumb
+          backgroundColor: "#888",
           borderRadius: "4px",
         },
         "&::-webkit-scrollbar-thumb:hover": {

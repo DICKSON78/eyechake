@@ -1,12 +1,5 @@
 /**
  * Privilege checking utilities
- * Provides consistent privilege checking across the application
- */
-
-/**
- * Check if a privilege value is granted
- * @param {*} value - The privilege value to check
- * @returns {boolean} - True if privilege is granted
  */
 export const isPrivilegeGranted = (value) => {
   if (value === true || value === 1 || value === "1" || value === "true" || value === "Yes" || value === "yes") {
@@ -15,11 +8,6 @@ export const isPrivilegeGranted = (value) => {
   return false;
 };
 
-/**
- * Check if user is an admin
- * @param {Object} user - User object
- * @returns {boolean} - True if user is admin
- */
 export const isAdmin = (user) => {
   if (!user) return false;
   return user.role === "Admin" || 
@@ -124,126 +112,69 @@ const getNormalizedPrivileges = (user) => {
   return normalized;
 };
 
-/**
- * Check if user has a specific privilege
- * Admins always have access to all privileges
- * @param {Object} user - User object
- * @param {string} privilegeKey - The privilege key to check (e.g., 'dashboard', 'reception')
- * @returns {boolean} - True if user has the privilege
- */
 export const hasPrivilege = (user, privilegeKey) => {
   if (!user || !privilegeKey) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[hasPrivilege] Missing user or privilegeKey:`, { user: !!user, privilegeKey });
-    }
     return false;
   }
   
-  // First check if user has explicit privileges (this should work for ALL roles)
-  const privileges = user.privileges || {};
-  const normalizedPrivileges = getNormalizedPrivileges(user);
-  
-  // If user has privileges defined, check them directly (regardless of role)
-  if (Object.keys(normalizedPrivileges).length > 0) {
-    const privilegeValue = normalizedPrivileges[privilegeKey];
-    let granted = isPrivilegeGranted(privilegeValue);
-    
-    // Check aliases if not granted
-    if (!granted) {
-      const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
-      for (const aliasKey of aliasKeys) {
-        if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
-          granted = true;
-          break;
-        }
-      }
-    }
-    
-    // Debug logging
-    if (!granted) {
-      console.log(`[hasPrivilege] Access denied for ${privilegeKey}:`, {
-        user: user.username || user.id,
-        role: user.role || 'No role',
-        privilegeValue,
-        normalizedPrivileges,
-        hasPrivileges: Object.keys(privileges).length > 0
-      });
-    }
-    
-    return granted;
-  }
-  
-  // Admins always have access (fallback for system admin)
   if (isAdmin(user)) {
     return true;
   }
   
-  // If no explicit privileges and not admin, check role-based fallback
-  const roleKey = (user?.role || "").toString().trim().toLowerCase();
-  const fallbackPrivileges = ROLE_FALLBACK_PRIVILEGES[roleKey] || [];
-  const hasFallbackPrivilege = fallbackPrivileges.includes(privilegeKey);
+  const normalizedPrivileges = getNormalizedPrivileges(user);
   
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[hasPrivilege] No explicit privileges, checking role fallback for ${privilegeKey}:`, {
-      user: user.username || user.id,
-      role: user.role || 'No role',
-      roleKey,
-      fallbackPrivileges,
-      hasFallbackPrivilege
-    });
+  const privilegeValue = normalizedPrivileges[privilegeKey];
+  let granted = isPrivilegeGranted(privilegeValue);
+  
+  if (!granted) {
+    const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
+    for (const aliasKey of aliasKeys) {
+      if (isPrivilegeGranted(normalizedPrivileges[aliasKey])) {
+        granted = true;
+        break;
+      }
+    }
   }
   
-  return hasFallbackPrivilege;
+  if (!granted) {
+    const roleKey = (user?.role || "").toString().trim().toLowerCase();
+    const fallbackPrivileges = ROLE_FALLBACK_PRIVILEGES[roleKey] || [];
+    granted = fallbackPrivileges.includes(privilegeKey);
+  }
+  
+  return granted;
 };
 
-/**
- * Check if user has access to a specific report page
- * Access is granted if:
- * 1. User is admin OR
- * 2. User has the parent section privilege (e.g., "reception") OR
- * 3. User has the specific report privilege (e.g., "receptionist_monthly_report")
- * @param {Object} user - User object
- * @param {string} parentPrivilege - Parent section privilege (e.g., "reception")
- * @param {string} reportPrivilege - Specific report privilege (e.g., "receptionist_monthly_report")
- * @returns {boolean} - True if user has access
- */
 export const hasReportAccess = (user, parentPrivilege, reportPrivilege) => {
   if (!user) return false;
   
-  // Admins always have access
   if (isAdmin(user)) {
     return true;
   }
   
   const normalizedPrivileges = getNormalizedPrivileges(user);
   
-  // Check parent privilege OR specific report privilege
-  const hasParent = (() => {
-    if (isPrivilegeGranted(normalizedPrivileges[parentPrivilege])) return true;
+  let hasParent = isPrivilegeGranted(normalizedPrivileges[parentPrivilege]);
+  
+  if (!hasParent) {
     const aliasKeys = PRIVILEGE_ALIASES[parentPrivilege] || [];
-    return aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
-  })();
+    hasParent = aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
+  }
+  
   const hasReport = reportPrivilege ? isPrivilegeGranted(normalizedPrivileges[reportPrivilege]) : false;
   
   return hasParent || hasReport;
 };
 
-/**
- * Get the default route for a user based on their privileges
- * @param {Object} user - User object
- * @returns {string} - Default route path
- */
 export const getDefaultRoute = (user) => {
   if (!user) return "/login";
   
-  // Admins always go to main dashboard
   if (isAdmin(user)) {
     return "/dashboard";
   }
   
   const normalizedPrivileges = getNormalizedPrivileges(user);
   
-  // Priority order for routes
   const routeCandidates = [
     { privilege: 'dashboard', route: '/dashboard' },
     { privilege: 'reception', route: '/reception/dashboard' },
@@ -259,14 +190,11 @@ export const getDefaultRoute = (user) => {
     { privilege: 'settings', route: '/settings/preferences' },
   ];
   
-  // Find first route user has access to
   for (const candidate of routeCandidates) {
     if (hasPrivilege({ ...user, privileges: normalizedPrivileges }, candidate.privilege)) {
       return candidate.route;
     }
   }
   
-  // Fallback: allow access to dashboard even without privileges
-  // This prevents users from being stuck in a login loop
   return "/dashboard";
 };

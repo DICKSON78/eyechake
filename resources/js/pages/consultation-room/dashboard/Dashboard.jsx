@@ -35,6 +35,8 @@ import InfoCard from "../../dashboard/InfoCard";
 import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
+// ✅ IMPORT hasPrivilege
+import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -290,7 +292,8 @@ const Dashboard = () => {
               <PerformanceReportCard
                 department="Optometry"
                 user={window.user}
-                editable={window.user?.privileges?.includes('optometry_performance_report')}
+                // ✅ SAHIHISHA HAPA - tumia hasPrivilege badala ya includes
+                editable={hasPrivilege(window.user, 'optometry_performance_report') || isAdmin(window.user)}
                 refreshTrigger={dateParams.start_date}
               />
             </Grid>

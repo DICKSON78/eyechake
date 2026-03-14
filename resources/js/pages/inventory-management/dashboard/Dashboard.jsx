@@ -316,7 +316,7 @@ const Dashboard = () => {
               },
             }}
           >
-            {/* Pie Chart - Frame Categories */}
+            {/* Pie Chart - Frame Categories - Shows QUANTITIES */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader title="Frame Categories" />
@@ -324,6 +324,9 @@ const Dashboard = () => {
                   <ChartWrapper
                     title="Frame Categories Distribution"
                     options={{
+                      labels: (data.statistics?.frame_categories || []).map(
+                        (e) => `${e.category || 'Unknown'} (${numberFormat(Math.max(0, parseFloat(e.total_quantity) || 0))})`
+                      ),
                       style: {
                         fontSize: 10,
                         fontWeight: 400,
@@ -331,23 +334,42 @@ const Dashboard = () => {
                       dropShadow: {
                         enabled: false,
                       },
-                      formatter: function (val, opts) {
-                        return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                      dataLabels: {
+                        formatter: function (val, opts) {
+                          return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                        },
                       },
-                    }}
-                    tooltip={{
-                      y: {
-                        formatter: (val) => numberFormat(val),
+                      tooltip: {
+                        y: {
+                          formatter: (val) => numberFormat(val),
+                        },
                       },
-                    }}
-                    legend={{
-                      position: "bottom",
-                      labels: {
-                        colors: (data.statistics?.frame_categories || []).map(
-                          (e) => theme.palette.text.secondary
-                        ),
-                        useSeriesColors: false,
+                      legend: {
+                        position: "bottom",
+                        labels: {
+                          colors: (data.statistics?.frame_categories || []).map(
+                            (e) => theme.palette.text.secondary
+                          ),
+                          useSeriesColors: false,
+                        },
                       },
+                      plotOptions: {
+                        pie: {
+                          dataLabels: {
+                            offset: -16,
+                          },
+                        },
+                      },
+                      colors: [
+                        purple[400],
+                        blue[400],
+                        green[400],
+                        orange[400],
+                        pink[400],
+                        cyan[400],
+                        teal[400],
+                        indigo[400],
+                      ],
                     }}
                     series={(data.statistics?.frame_categories || []).map(
                       (e) => Math.max(0, parseFloat(e.total_quantity) || 0)
@@ -360,8 +382,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-
-            {/* Quick Actions removed for Stock Management Dashboard */}
 
             {/* Sold Frames (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
@@ -549,7 +569,7 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
-            {/* Pharmacy Categories Chart */}
+            {/* Pharmacy Categories Chart - Shows QUANTITIES */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader title="Pharmacy Items by Category" />
@@ -558,7 +578,7 @@ const Dashboard = () => {
                   <ChartWrapper
                     options={{
                       labels: (data.statistics?.pharmacy_categories || []).map(
-                        (e) => e.category || 'Unknown'
+                        (e) => `${e.category || 'Unknown'} (${numberFormat(Math.max(0, parseFloat(e.total_quantity) || 0))})`
                       ),
                       chart: {
                         fontFamily: theme.typography.fontFamily,

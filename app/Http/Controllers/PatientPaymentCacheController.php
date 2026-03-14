@@ -294,41 +294,7 @@ class PatientPaymentCacheController extends Controller
             return $this->sendError('Error fetching payment cache data', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-            ]);
-            
-            $data = $data->paginate($per_page);
-            
-            // Log the results for debugging
-            \Log::info('PatientPaymentCacheController results', [
-                'total' => $data->total(),
-                'count' => $data->count(),
-                'current_page' => $data->currentPage(),
-                'per_page' => $data->perPage(),
-            ]);
-            
-            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
-        } catch (\Illuminate\Database\QueryException $e) {
-            \Log::error('PatientPaymentCacheController index query error', [
-                'error' => $e->getMessage(),
-                'sql' => $e->getSql() ?? 'N/A',
-                'bindings' => $e->getBindings() ?? [],
-                'trace' => $e->getTraceAsString(),
-            ]);
-            // Gracefully return an empty paginated response instead of 500 to keep UI responsive
-            $empty = PatientPaymentCache::query()->whereRaw('1 = 0')->paginate($request->per_page ?? 25);
-            return $this->sendResponse($empty, Response::HTTP_OK, 'No results due to query error. Logged for review.');
-        } catch (\Exception $e) {
-            \Log::error('PatientPaymentCacheController index error', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            // Gracefully return an empty paginated response instead of 500
-            $empty = PatientPaymentCache::query()->whereRaw('1 = 0')->paginate($request->per_page ?? 25);
-            return $this->sendResponse($empty, Response::HTTP_OK, 'No results due to error. Logged for review.');
-        }
-    }
+}
 
     /**
      * Store a newly created resource in storage.
