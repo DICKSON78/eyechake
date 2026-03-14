@@ -40,7 +40,6 @@ import {
   CheckCircleRounded as CheckCircleIcon,
   MessageRounded as MessageIcon,
   MoneyRounded as PaymentModesIcon,
-
   PaymentRounded as PaymentChannelsIcon,
   PestControlRounded as DiseasesIcon,
   PhoneInTalkRounded as CommunicationLogsIcon,
@@ -76,7 +75,7 @@ const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
   };
 
   return item.subheader ? (
-    <ListSubheader sx={{
+    <ListSubheader sx={{ 
       px: { xs: 1, sm: 1, md: 1.5 },
       fontWeight: 700,
       fontSize: '0.7875rem'
@@ -257,20 +256,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
 
   const [items, setItems] = useState([]);
 
-  // Debug logging
-  console.log('[Menu] Menu component rendered with:', {
-    drawerOpen,
-    user: user ? {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-      privileges: user.privileges,
-      privilegesType: typeof user.privileges,
-      hasPrivileges: !!(user && user.privileges)
-    } : null,
-    itemCount: items.length
-  });
-
   // Use NotificationContext for stable sidebar badges
   // Reference implementation: resources/js/pages/payment-center/pending-cash-patients/PendingCashPatients.jsx
   // Badge pattern: notifications && typeof notifications.KEY !== 'undefined' && notifications.KEY != null ? (Number(notifications.KEY) || 0) : 0
@@ -315,23 +300,28 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
     });
   };
 
+  const getMenuVisibility = (section) => {
+    const userData = user?.data || user;
+    const role = userData?.job_title?.toLowerCase() || userData?.designation?.toLowerCase() || '';
+    
+    switch (section) {
+      case "MARKETING":
+        return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing');
+      default:
+        return true;
+    }
+  };
+
   // Helper function to check if privilege is granted
   // Uses centralized privilege checking utility
   // Admins always have access to everything
-  const isPrivilegeGranted = (privilegeKey) => {
+  const checkPrivilege = (user, privilege) => {
     // If no privilege key provided, show the item (for items that don't need privileges)
-    if (!privilegeKey) return true;
-    // Check if user exists and has privileges before checking
-    if (!user || !user.privileges) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[Menu] User or privileges not loaded yet for ${privilegeKey}`, { user: !!user, hasPrivileges: !!(user && user.privileges) });
-      }
-      return false;
-    }
-    const granted = hasPrivilege(user, privilegeKey);
+    if (!privilege) return true;
+    const granted = hasPrivilege(user, privilege);
     // Debug logging for privilege checks (always log for debugging)
     if (!granted && user && !isAdmin(user)) {
-      console.log(`[Menu] Privilege check failed: ${privilegeKey}`, {
+      console.log(`[Menu] Privilege check failed: ${privilege}`, {
         user: user.username || user.id,
         privileges: user.privileges,
         privilegesType: typeof user.privileges,
@@ -342,7 +332,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
   };
 
   useEffect(() => {
-    if (user && user.privileges) {
+    if (user) {
       // Debug user privileges on menu load (always log for debugging)
       console.log('[Menu] User loaded:', {
         username: user.username,
@@ -352,56 +342,16 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         privilegesType: typeof user.privileges,
         privilegesKeys: user.privileges ? Object.keys(user.privileges) : []
       });
-
-      // Role-based menu visibility
-      const getMenuVisibility = (section) => {
-        const role = (user?.role || "").toString().trim().toLowerCase();
-
-        switch (section) {
-          case "RECEPTION":
-            return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception');
-
-          case "CASHIER":
-            return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center');
-
-          case "CONSULTATION ROOM":
-            return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room');
-
-          case "SALES TABLE":
-            return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess;
-
-          case "PHARMACY":
-            return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center');
-
-          case "WORKSHOP":
-            return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center');
-
-          case "STOCK MANAGEMENT":
-            return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management');
-
-          case "FINANCIAL MANAGEMENT":
-            return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management');
-
-
-          case "EMPLOYEE MANAGEMENT":
-            return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management');
-
-          case "DIRECTOR":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'director');
-
-          case "SETTINGS":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'settings');
-
-          default:
-            return false;
-        }
-      };
-
+      
+      // Check if user has sales_center access (admins automatically granted via hasPrivilege)
+      const hasSalesCenterAccess = hasPrivilege(user, 'sales_center');
+      console.log('[Menu] Sales center access:', hasSalesCenterAccess);
+      
       setItems(renumberTopSections([
         {
           title: "MENU",
           subheader: true,
-          show: getMenuVisibility('CALENDAR'),
+          show: true,
         },
         {
           title: "Dashboard",
@@ -412,50 +362,50 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "1. RECEPTION",
           subheader: true,
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Reception Dashboard",
           icon: <HomeIcon />,
           to: "/reception/dashboard",
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Register new clients",
           icon: <PeopleIcon />,
           to: "/reception/register-new-client",
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Client Lists",
           icon: <PeopleIcon />,
           to: "/reception/patients",
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Patients to Return",
           icon: <PatientsToReturnIcon />,
           to: "/reception/to-return/patients",
           badge: notifications && typeof notifications.patients_to_return !== 'undefined' && notifications.patients_to_return != null ? (Number(notifications.patients_to_return) || 0) : 0,
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Sent Messages",
           icon: <MessageIcon />,
           to: "/reception/sent-messages",
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/reception/reports",
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
           items: [
             {
               title: "Patient Registration Report",
               icon: <ReportsIcon />,
               to: "/reception/reports/patient-registration",
-              show: getMenuVisibility('RECEPTION'),
+              show: isPrivilegeGranted('reception'),
             },
           ],
         },
@@ -464,112 +414,112 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           icon: <AppointmentsIcon />,
           to: "/external-links/website-appointments",
           badge: notifications && typeof notifications.website_appointments !== 'undefined' && notifications.website_appointments != null ? (Number(notifications.website_appointments) || 0) : (loading ? '...' : 0),
-          show: getMenuVisibility('RECEPTION'),
+          show: isPrivilegeGranted('reception'),
         },
         {
           title: "2. CASHIER",
           subheader: true,
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Cashier Dashboard",
           icon: <HomeIcon />,
           to: "/payment-center/dashboard",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Patients Sent to Cashier",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-cash-patients",
           badge: notifications && typeof notifications.patients_sent_to_cashier !== 'undefined' && notifications.patients_sent_to_cashier != null ? (Number(notifications.patients_sent_to_cashier) || 0) : (loading ? '...' : 0),
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Credit Patients Approval",
           icon: <WaitingIcon />,
           to: "/payment-center/pending-credit-patients",
           badge: notifications && typeof notifications.credit_patients_approval !== 'undefined' && notifications.credit_patients_approval != null ? (Number(notifications.credit_patients_approval) || 0) : 0,
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Pending Patient Bills",
           icon: <WaitingIcon />,
           to: "/payment-center/patient-bills/pending",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Cleared Patient Bills",
           icon: <DoneIcon />,
           to: "/payment-center/patient-bills/cleared",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Invoices",
           icon: <ReceiptIcon />,
           to: "/payment-center/invoices",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Expenses",
           icon: <ExpensesIcon />,
           to: "/payment-center/expenses",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/payment-center/reports",
-          show: getMenuVisibility('CASHIER'),
+          show: isPrivilegeGranted('payment_center'),
           items: [
             {
               title: "Daily Cash Collection Report",
               icon: <ReportsIcon />,
               to: "/payment-center/reports/daily-credit-collection",
-              show: getMenuVisibility('CASHIER'),
+              show: isPrivilegeGranted('payment_center'),
             },
             {
               title: "Expenses Report",
               icon: <ReportsIcon />,
               to: "/payment-center/reports/expenses",
-              show: getMenuVisibility('CASHIER'),
+              show: isPrivilegeGranted('payment_center'),
             },
           ],
         },
         {
           title: "3. CONSULTATION ROOM",
           subheader: true,
-          show: getMenuVisibility('CONSULTATION ROOM'),
+          show: isPrivilegeGranted('consultation_room'),
         },
         {
           title: "Consultation Room Dashboard",
           icon: <HomeIcon />,
           to: "/consultation-room/dashboard",
-          show: getMenuVisibility('CONSULTATION ROOM'),
+          show: isPrivilegeGranted('consultation_room'),
         },
         {
           title: "Patients Sent to Doctor",
           icon: <WaitingIcon />,
           to: "/consultation-room/consultation-patients/pending",
           badge: notifications && typeof notifications.patients_sent_to_doctor !== 'undefined' && notifications.patients_sent_to_doctor != null ? (Number(notifications.patients_sent_to_doctor) || 0) : 0,
-          show: getMenuVisibility('CONSULTATION ROOM'),
+          show: isPrivilegeGranted('consultation_room'),
         },
         {
           title: "Consulted Patients",
           icon: <DoneIcon />,
           to: "/consultation-room/consultation-patients/consulted",
-          show: getMenuVisibility('CONSULTATION ROOM'),
+          show: isPrivilegeGranted('consultation_room'),
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/consultation-room/reports",
-          show: getMenuVisibility('CONSULTATION ROOM'),
+          show: isPrivilegeGranted('consultation_room'),
           items: [
             {
               title: "Consultation Report",
               icon: <ReportsIcon />,
               to: "/consultation-room/reports/consultation",
-              show: getMenuVisibility('CONSULTATION ROOM'),
+              show: isPrivilegeGranted('consultation_room'),
             },
             {
               title: "Monthly Optometrist Report",
@@ -588,86 +538,112 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "4. SALES TABLE",
           subheader: true,
-          show: getMenuVisibility('SALES TABLE'),
+          show: hasSalesCenterAccess,
         },
         {
           title: "Sales Management Dashboard",
           icon: <HomeIcon />,
           to: "/sales-management/dashboard",
-          show: getMenuVisibility('SALES TABLE'),
+          show: hasSalesCenterAccess,
         },
         {
           title: "Client Lists",
           icon: <PeopleIcon />,
           to: "/sales-management/clients",
-          show: getMenuVisibility('SALES TABLE'),
+          show: hasSalesCenterAccess,
         },
         {
           title: "Prescriptions Without Purchases",
           icon: <PrescriptionIcon />,
           to: "/sales-management/prescriptions",
-          show: getMenuVisibility('SALES TABLE'),
+          show: hasSalesCenterAccess,
         },
         {
           title: "Patients Sent to Sales",
           icon: <PrescriptionIcon />,
           to: "/sales-management/clinical-notes",
-          show: getMenuVisibility('SALES TABLE'),
+          show: hasSalesCenterAccess,
           badge: notifications && typeof notifications.patients_sent_to_sales !== 'undefined' && notifications.patients_sent_to_sales != null ? (Number(notifications.patients_sent_to_sales) || 0) : 0,
+        },
+        {
+          title: "Reports",
+          icon: <ReportsIcon />,
+          to: "/sales-management/reports",
+          show: hasSalesCenterAccess,
+          items: [
+            {
+              title: "Sales Manager Monthly Report",
+              icon: <ReportsIcon />,
+              to: "/sales-center/reports/sales-manager-monthly-report",
+              show: false, // Hidden per user request
+            },
+            {
+              title: "Sales Monthly Report",
+              icon: <ReportsIcon />,
+              to: "/sales-center/reports/sales-monthly-report",
+              show: hasSalesCenterAccess,
+            },
+            {
+              title: "Customer Relationship Monthly Report",
+              icon: <ReportsIcon />,
+              to: "/sales-center/reports/customer-relationship-monthly-report",
+              show: false, // Hidden per user request
+            },
+          ],
         },
         {
           title: "5. PHARMACY",
           subheader: true,
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Pharmacy Dashboard",
           icon: <HomeIcon />,
           to: "/pharmacy/dashboard",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Medicine Alerts",
           icon: <WarningIcon />,
           to: "/pharmacy/medicine-alerts",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Medicine Taking",
           icon: <MedicineIcon />,
           to: "/pharmacy/medicine-taking",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Medicine Dispensing Requests",
           icon: <WaitingIcon />,
           to: "/pharmacy/dispensing-requests",
           badge: notifications && typeof notifications.dispensing_requests !== 'undefined' && notifications.dispensing_requests != null ? (Number(notifications.dispensing_requests) || 0) : 0,
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Pharmacy Reports",
           icon: <ReportsIcon />,
           to: "/pharmacy/reports",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
           items: [
             {
               title: "Stock Management",
               icon: <ReportsIcon />,
               to: "/pharmacy/reports/stock-management",
-              show: getMenuVisibility('PHARMACY'),
+              show: isPrivilegeGranted('medicine_center'),
               items: [
                 {
                   title: "Item Balance Report",
                   icon: <ReportsIcon />,
                   to: "/pharmacy/reports/stock-management/item-balance",
-                  show: getMenuVisibility('PHARMACY'),
+                  show: isPrivilegeGranted('medicine_center'),
                 },
                 {
                   title: "Quantity Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/pharmacy/reports/stock-management/item-quantity-dispensed",
-                  show: getMenuVisibility('PHARMACY'),
+                  show: isPrivilegeGranted('medicine_center'),
                 },
               ],
             },
@@ -675,7 +651,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Pharmacy Monthly Report",
               icon: <ReportsIcon />,
               to: "/pharmacy/reports/pharmacy-monthly-report",
-              show: getMenuVisibility('PHARMACY'),
+              show: isPrivilegeGranted('medicine_center'),
             },
           ],
         },
@@ -683,75 +659,75 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Dispensing Reports",
           icon: <ReportsIcon />,
           to: "/dispensing/reports",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
           items: [
             {
               title: "Items Dispensed Report",
               icon: <ReportsIcon />,
               to: "/dispensing/reports/items-dispensed",
-              show: getMenuVisibility('PHARMACY'),
+              show: isPrivilegeGranted('medicine_center'),
             },
             {
               title: "Items Not Dispensed Report",
               icon: <ReportsIcon />,
               to: "/dispensing/reports/items-not-dispensed",
-              show: getMenuVisibility('PHARMACY'),
+              show: isPrivilegeGranted('medicine_center'),
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
               to: "/dispensing/reports/item-balance",
-              show: getMenuVisibility('PHARMACY'),
+              show: isPrivilegeGranted('medicine_center'),
             },
           ],
         },
         {
           title: "6. WORKSHOP",
           subheader: true,
-          show: getMenuVisibility('WORKSHOP'),
+          show: isPrivilegeGranted('optician_center'),
         },
         {
           title: "Workshop Dashboard",
           icon: <HomeIcon />,
           to: "/optician-center/dashboard",
-          show: getMenuVisibility('WORKSHOP'),
+          show: isPrivilegeGranted('optician_center'),
         },
         {
           title: "Patients Sent to Optician",
           icon: <WaitingIcon />,
           to: "/optician-center/glass-patients",
           badge: notifications && typeof notifications.patients_sent_to_optician !== 'undefined' && notifications.patients_sent_to_optician != null ? (Number(notifications.patients_sent_to_optician) || 0) : 0,
-          show: getMenuVisibility('WORKSHOP'),
+          show: isPrivilegeGranted('optician_center'),
         },
         {
           title: "Lens Stock",
           icon: <ItemsIcon />,
           to: "/optician-center/lens-stock",
-          show: getMenuVisibility('WORKSHOP'),
+          show: isPrivilegeGranted('optician_center'),
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/optician-center/reports",
-          show: getMenuVisibility('WORKSHOP'),
+          show: isPrivilegeGranted('optician_center'),
           items: [
             {
               title: "Items Dispensed Report",
               icon: <ReportsIcon />,
               to: "/optician-center/reports/items-dispensed",
-              show: getMenuVisibility('WORKSHOP'),
+              show: isPrivilegeGranted('optician_center'),
             },
             {
               title: "Items Not Dispensed Report",
               icon: <ReportsIcon />,
               to: "/optician-center/reports/items-not-dispensed",
-              show: getMenuVisibility('WORKSHOP'),
+              show: isPrivilegeGranted('optician_center'),
             },
             {
               title: "Item Balance Report",
               icon: <ReportsIcon />,
               to: "/optician-center/reports/item-balance",
-              show: getMenuVisibility('WORKSHOP'),
+              show: isPrivilegeGranted('optician_center'),
             },
           ],
         },
@@ -765,73 +741,73 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "7. STOCK MANAGEMENT",
           subheader: true,
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Stock Dashboard",
           icon: <HomeIcon />,
           to: "/inventory-management/dashboard",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Stocktaking",
           icon: <ItemsIcon />,
           to: "/inventory-management/stocktaking",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Stock Alerts (All Items)",
           icon: <WarningIcon />,
           to: "/inventory-management/stock-alerts",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Lens List",
           icon: <ItemsIcon />,
           to: "/inventory-management/lens-list",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Lens Tracking",
           icon: <ItemsIcon />,
           to: "/inventory-management/lens-tracking",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
         },
         {
           title: "Medicines",
           icon: <ItemsIcon />,
           to: "/pharmacy/medicines",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Add Medicine",
           icon: <AddIcon />,
           to: "/pharmacy/add-medicine",
-          show: getMenuVisibility('PHARMACY'),
+          show: isPrivilegeGranted('medicine_center'),
         },
         {
           title: "Reports",
           icon: <ReportsIcon />,
           to: "/inventory-management/reports",
-          show: getMenuVisibility('STOCK MANAGEMENT'),
+          show: isPrivilegeGranted('inventory_management'),
           items: [
             {
               title: "Stock Management",
               icon: <ReportsIcon />,
               to: "/inventory-management/reports/stock-management",
-              show: getMenuVisibility('STOCK MANAGEMENT'),
+              show: isPrivilegeGranted('inventory_management'),
               items: [
                 {
                   title: "Item Balance Report",
                   icon: <ReportsIcon />,
                   to: "/inventory-management/reports/stock-management/item-balance",
-                  show: getMenuVisibility('STOCK MANAGEMENT'),
+                  show: isPrivilegeGranted('inventory_management'),
                 },
                 {
                   title: "Quantity Dispensed Report",
                   icon: <ReportsIcon />,
                   to: "/inventory-management/reports/stock-management/item-quantity-dispensed",
-                  show: getMenuVisibility('STOCK MANAGEMENT'),
+                  show: isPrivilegeGranted('inventory_management'),
                 },
               ],
             },
@@ -839,224 +815,19 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               title: "Stock Alerts",
               icon: <WarningIcon />,
               to: "/inventory-management/reports/stock-alerts",
-              show: getMenuVisibility('STOCK MANAGEMENT'),
+              show: isPrivilegeGranted('inventory_management'),
             },
           ],
         },
-      ],
-    },
-    {
-      title: "Stock Alerts",
-      icon: <WarningIcon />,
-      to: "/inventory-management/reports/stock-alerts",
-      show: isPrivilegeGranted('inventory_management'),
-    },
-  ],
-},
-{
-  title: "8. FINANCIAL MANAGEMENT",
-  subheader: true,
-  show: role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management'),
-},
-{
-  title: "Financial Management Dashboard",
-  icon: <HomeIcon />,
-  to: "/financial-management/dashboard",
-  show: role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management'),
-},
-{
-  title: "Expenses",
-  icon: <ExpensesIcon />,
-  to: "/financial-management/expenses",
-  show: role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management'),
-},
-{
-  title: "Reports",
-  icon: <ReportsIcon />,
-  to: "/financial-management/reports",
-  show: role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management'),
-  items: [
-    {
-      title: "Cash Collection Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/cash-collection",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Credit Collection Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/credit-collection",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Pending Patient Bills Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/pending-patient-bills",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Cleared Patient Bills Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/cleared-patient-bills",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Bill Payment Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/patient-bill-payments",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Expenses Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/expenses",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Expense Payments Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/expense-payments",
-      show: isPrivilegeGranted('financial_management'),
-    },
-    {
-      title: "Balance Sheet Report",
-      icon: <ReportsIcon />,
-      to: "/financial-management/reports/balance-sheet",
-      show: isPrivilegeGranted('financial_management'),
-    },
-  ],
-},
-{
-  title: "9. MARKETING MANAGEMENT",
-  subheader: true,
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Marketing Dashboard",
-  icon: <HomeIcon />,
-  to: "/marketing/dashboard",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "High Value Patients",
-  icon: <VipIcon />,
-  to: "/marketing/high-value-patients",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "List of Glass Patients",
-  icon: <PeopleIcon />,
-  to: "/marketing/glass-patients",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Marketing Strategies",
-  icon: <MarketingStrategiesIcon />,
-  to: "/marketing/strategies",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Events & Campaigns",
-  icon: <OutreachProgrammesIcon />,
-  to: "/marketing/events",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Bulk SMS",
-  icon: <MessageIcon />,
-  to: "/marketing/bulk-sms",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "WhatsApp Export",
-  icon: <MessageIcon />,
-  to: "/marketing/whatsapp-export",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Unreachable Calls",
-  icon: <WarningIcon />,
-  to: "/marketing/unreachable-numbers",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Prestige Clients",
-  icon: <VipIcon />,
-  to: "/marketing/prestige-clients",
-  badge: notifications && typeof notifications.vip_patients !== 'undefined' && notifications.vip_patients != null ? (Number(notifications.vip_patients) || 0) : 0,
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Client Calling Status",
-  icon: <CommunicationLogsIcon />,
-  to: "/marketing/client-calling-status",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-},
-{
-  title: "Reports",
-  icon: <ReportsIcon />,
-  to: "/marketing/reports",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-  items: [
-    {
-      title: "Marketing Campaign Performance",
-      icon: <ReportsIcon />,
-      to: "/marketing/reports/campaign-performance",
-      show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-    },
-    {
-      title: "Lead Generation Report",
-      icon: <ReportsIcon />,
-      to: "/marketing/reports/lead-generation",
-      show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-    },
-    {
-      title: "Communication Analytics",
-      icon: <ReportsIcon />,
-      to: "/marketing/reports/communication-analytics",
-      show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-    },
-    {
-      title: "Monthly Marketing & Operations Manager Report",
-      icon: <ReportsIcon />,
-      to: "/marketing/reports/marketing-operations-monthly-report",
-      show: false, // Hidden per user request
-    },
-    {
-      title: "Marketing Management Monthly Report",
-      icon: <ReportsIcon />,
-      to: "/marketing/reports/marketing-management-monthly-report",
-      show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-    },
-  ],
-},
-{
-  title: "Settings",
-  icon: <SettingsIcon />,
-  to: "/marketing/settings",
-  show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-  items: [
-    {
-      title: "Sources of Information",
-      icon: <InfoIcon />,
-      to: "/marketing/settings/information-sources",
-      show: role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing'),
-    },
-  ],
-},
-{
-  title: "9. MARKETING",
-  subheader: true,
-  show: getMenuVisibility('MARKETING'),
-},
-{
-  title: "Marketing Dashboard",
-  icon: <MarketingStrategiesIcon />,
-  to: "/marketing/dashboard",
-  show: getMenuVisibility('MARKETING'),
-},
-{
-  title: "Daily Activities",
+        {
+          title: "8. FINANCIAL MANAGEMENT",
+          subheader: true,
+          show: hasPrivilege(user, 'financial_management') || isAdmin(user),
+        },
+        {
+          title: "Financial Management Dashboard",
+          icon: <HomeIcon />,
+          to: "/financial-management/dashboard",
           show: hasPrivilege(user, 'financial_management') || isAdmin(user),
         },
         {
@@ -1122,10 +893,9 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-<<<<<<< Updated upstream
           title: "9. MARKETING MANAGEMENT",
           subheader: true,
-          show: getMenuVisibility('MARKETING MANAGEMENT'),
+          show: true, // Visibility will be determined by generateMenuTree based on visible children
         },
         {
           title: "Marketing Dashboard",
@@ -1348,11 +1118,9 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
-=======
->>>>>>> Stashed changes
           title: "10. EMPLOYEE MANAGEMENT",
           subheader: true,
-          show: getMenuVisibility('EMPLOYEE MANAGEMENT'),
+          show: true, // Visibility will be determined by generateMenuTree based on visible children
         },
         {
           title: "Employees",
@@ -1361,21 +1129,27 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: isPrivilegeGranted('employee_management'),
         },
         {
+         title: "Doctor Tasks",
+         icon: <DoctorTaskIcon />,
+         to: "/user-management/doctor-tasks",
+         show: hasPrivilege(user, 'employee_management') || isAdmin(user),
+       },
+        {
           title: "11. DIRECTOR",
           subheader: true,
-          show: getMenuVisibility('EMPLOYEE MANAGEMENT'),
+          show: true, // Visibility will be determined by generateMenuTree based on visible children
         },
         {
           title: "Director Dashboard",
           icon: <DirectorIcon />,
           to: "/director/dashboard",
-          show: getMenuVisibility('DIRECTOR'),
+          show: false,
         },
         {
           title: "Employee Performance",
           icon: <PerformanceIcon />,
           to: "/director/employee-performance",
-          show: getMenuVisibility('DIRECTOR'),
+          show: isPrivilegeGranted('director'),
         },
         {
           title: "All Reports",
@@ -1520,6 +1294,50 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               ],
             },
             {
+              title: "Marketing Reports",
+              icon: <ReportsIcon />,
+              to: "/director/reports/marketing",
+              show: isPrivilegeGranted('director'),
+              items: [
+                {
+                  title: "Patient Registration Report",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/patient-registration",
+                  show: isPrivilegeGranted('director'),
+                },
+                {
+                  title: "Consultation Report",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/consultation",
+                  show: isPrivilegeGranted('director'),
+                },
+                {
+                  title: "Campaign Performance",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/campaign-performance",
+                  show: isPrivilegeGranted('director'),
+                },
+                {
+                  title: "Lead Generation",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/lead-generation",
+                  show: isPrivilegeGranted('director'),
+                },
+                {
+                  title: "Communication Analytics",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/communication-analytics",
+                  show: isPrivilegeGranted('director'),
+                },
+                {
+                  title: "Marketing Operations Monthly Report",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/marketing/marketing-operations-monthly-report",
+                  show: isPrivilegeGranted('director'),
+                },
+              ],
+            },
+            {
               title: "Medicine Center Reports",
               icon: <ReportsIcon />,
               to: "/director/reports/medicine-center",
@@ -1641,48 +1459,48 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Calendar",
           icon: <AppointmentsIcon />,
           to: "/office-calendar",
-          show: getMenuVisibility('CALENDAR'),
+          show: true,
         },
         {
           title: "12. SETTINGS",
           subheader: true,
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Item Management",
           icon: <ItemsIcon />,
           to: "/settings/item-management",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
           items: [
             {
               title: "Units of Measure",
               icon: <SettingsIcon />,
               to: "/settings/item-management/units-of-measure",
-              show: getMenuVisibility('SETTINGS'),
+              show: hasPrivilege(user, 'settings') || isAdmin(user),
             },
             {
               title: "Lens Types",
               icon: <SettingsIcon />,
               to: "/settings/item-management/lens-types",
-              show: getMenuVisibility('SETTINGS'),
+              show: hasPrivilege(user, 'settings') || isAdmin(user),
             },
             {
               title: "Item Types",
               icon: <SettingsIcon />,
               to: "/settings/item-management/item-types",
-              show: getMenuVisibility('SETTINGS'),
+              show: hasPrivilege(user, 'settings') || isAdmin(user),
             },
             {
               title: "Consultation Types",
               icon: <SettingsIcon />,
               to: "/settings/item-management/consultation-types",
-              show: getMenuVisibility('SETTINGS'),
+              show: hasPrivilege(user, 'settings') || isAdmin(user),
             },
             {
               title: "Items",
               icon: <SettingsIcon />,
               to: "/settings/item-management/items",
-              show: getMenuVisibility('SETTINGS'),
+              show: hasPrivilege(user, 'settings') || isAdmin(user),
             },
           ],
         },
@@ -1690,55 +1508,55 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Payment Modes",
           icon: <PaymentModesIcon />,
           to: "/settings/payment-modes",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Payment Channels",
           icon: <PaymentChannelsIcon />,
           to: "/settings/payment-channels",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Diseases",
           icon: <DiseasesIcon />,
           to: "/settings/diseases",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Expense Categories",
           icon: <ExpensesIcon />,
           to: "/settings/expense-categories",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Departments",
           icon: <DepartmentsIcon />,
           to: "/settings/departments",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Job Titles",
           icon: <JobTitlesIcon />,
           to: "/settings/job-titles",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Occupations",
           icon: <JobTitlesIcon />,
           to: "/settings/occupations",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Clinic Details",
           icon: <ClinicDetailsIcon />,
           to: "/settings/clinic-details",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "System Preferences",
           icon: <SettingsIcon />,
           to: "/settings/preferences",
-          show: getMenuVisibility('SETTINGS'),
+          show: hasPrivilege(user, 'settings') || isAdmin(user),
         },
         {
           title: "Clinics",
@@ -1747,7 +1565,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: (hasPrivilege(user, 'settings') || isAdmin(user)) && isAdmin(user),
         },
       ]));
-
+      
       // Debug: Log visible menu items
       const visibleItems = items.filter(item => item.show !== false);
       const hiddenItems = items.filter(item => item.show === false);
@@ -1769,7 +1587,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
 
     // First, identify which section headers should be shown based on visible children
     const sectionVisibility = new Map();
-
+    
     // Helper function to recursively check if an item or any of its children are visible
     const hasVisibleContent = (item) => {
       // Check if the item itself is visible
@@ -1782,7 +1600,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
       }
       return false;
     };
-
+    
     items.forEach((item, index) => {
       if (item.subheader && item.title !== "MENU") {
         // Find all items that belong to this section (items after this subheader until next subheader)
@@ -1795,10 +1613,10 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           }
           sectionItems.push(nextItem);
         }
-
+        
         // Check if any item in this section is visible (including nested items)
         const hasVisibleItems = sectionItems.some(sectionItem => hasVisibleContent(sectionItem));
-
+        
         sectionVisibility.set(index, hasVisibleItems);
       }
     });
@@ -1822,8 +1640,8 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         (child) => typeof child.show === "boolean" && child.show
       )?.length;
       // Generate unique key: use title + route combination to ensure uniqueness
-      const uniqueKey = e.subheader
-        ? `subheader-${e.title}-${index}`
+      const uniqueKey = e.subheader 
+        ? `subheader-${e.title}-${index}` 
         : `${e.title}-${e.to || index}-${index}`;
       return hasChildren ? (
         <MultiLevelMenuItem
@@ -1854,7 +1672,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           width: "10px", // Slightly wider
         },
         "&::-webkit-scrollbar-track": {
-          background: "rgba(0,0,0,0.05)" // Visible track
+           background: "rgba(0,0,0,0.05)" // Visible track
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "#888", // Darker visible thumb
