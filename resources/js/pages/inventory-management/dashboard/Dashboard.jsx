@@ -526,80 +526,55 @@ const Dashboard = () => {
                   ) : (
                     <ChartWrapper
                       options={{
-                        chart: { 
-                          toolbar: { show: false },
+                        chart: { toolbar: { show: false } },
+                        stroke: { curve: 'smooth', width: [2, 0] },
+                        xaxis: {
+                          categories: frameMonthlySales.map((e) => e.label),
                         },
-                        labels: isFrameFilterActive 
-                          ? [selectedFrameName || 'Selected Frame'] 
-                          : framesPrepared.labels,
-                        colors: isFrameFilterActive 
-                          ? [blue[500]] // Single color when filtered
-                          : chartColors,
+                        yaxis: {
+                          min: 0,
+                          labels: {
+                            formatter: (val) => numberFormat(Math.round(val)),
+                          },
+                        },
                         tooltip: {
-                          y: {
-                            formatter: (value, { seriesIndex }) => {
-                              if (isFrameFilterActive) {
-                                // When filtered, show 100%
-                                return `${selectedFrameName || 'Selected Frame'}: ${numberFormat(framesTotal)} (100%)`;
-                              }
-                              const item = framesPrepared.originalData[seriesIndex];
-                              const percentage = framesTotal > 0 ? ((value / framesTotal) * 100).toFixed(1) : '0';
-                              return `${item?.frame_name || 'Unknown'}: ${numberFormat(value)} (${percentage}%)`;
+                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                            const data = frameMonthlySales[dataPointIndex];
+                            if (!data) return '';
+                            
+                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
+                            html += `<strong>${data.label}</strong><br/>`;
+                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
+                            
+                            if (data.top_product_name && !selectedFrameId) {
+                              html += `<br/><strong style="color: ${purple[500]}">🏆 Top Product:</strong><br/>`;
+                              html += `${data.top_product_name}<br/>`;
+                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
                             }
+                            
+                            html += `</div>`;
+                            return html;
                           }
                         },
-                        dataLabels: {
-                          enabled: true,
-                          style: {
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            colors: ['#fff'],
-                          },
-                          dropShadow: {
-                            enabled: true,
-                            top: 1,
-                            left: 1,
-                            blur: 1,
-                            color: '#000',
-                            opacity: 0.5,
-                          },
-                          formatter: (val, opts) => {
-                            if (isFrameFilterActive) {
-                              // When filtered, always show 100%
-                              return '100%';
-                            }
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            const total = opts.w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                            return `${percentage}%`;
-                          },
-                        },
-                        legend: { 
-                          position: 'bottom',
-                          fontSize: '12px',
-                          show: true,
-                          // Show only selected item when filtered
-                          labels: {
-                            colors: isFrameFilterActive ? ['#fff'] : undefined,
-                          },
-                        },
-                        stroke: {
-                          show: true,
-                          width: 2,
-                          colors: ['#fff'],
-                        },
-                        plotOptions: {
-                          pie: {
-                            expandOnClick: true,
-                            donut: {
-                              size: '0%',
-                            },
-                          },
+                        colors: [purple[500], purple[700]],
+                        markers: {
+                          size: [0, 6],
                         },
                       }}
-                      series={isFrameFilterActive ? [framesTotal] : framesPrepared.series}
-                      type="pie"
-                      height={400}
+                      series={[
+                        {
+                          name: 'Frames Sold',
+                          type: 'line',
+                          data: frameMonthlySales.map((e) => e.quantity_sold || 0),
+                        },
+                        ...(selectedFrameId ? [] : [{
+                          name: 'Top Product',
+                          type: 'scatter',
+                          data: frameMonthlySales.map((e) => e.top_product_quantity || 0),
+                        }])
+                      ]}
+                      type="line"
+                      height={320}
                     />
                   )}
                 </CardContent>
@@ -650,80 +625,55 @@ const Dashboard = () => {
                   ) : (
                     <ChartWrapper
                       options={{
-                        chart: { 
-                          toolbar: { show: false },
+                        chart: { toolbar: { show: false } },
+                        stroke: { curve: 'smooth', width: [2, 0] },
+                        xaxis: {
+                          categories: medicineMonthlySales.map((e) => e.label),
                         },
-                        labels: isMedicineFilterActive 
-                          ? [selectedMedicineName || 'Selected Medicine'] 
-                          : medicinePrepared.labels,
-                        colors: isMedicineFilterActive 
-                          ? [teal[500]] // Single color when filtered
-                          : chartColors,
+                        yaxis: {
+                          min: 0,
+                          labels: {
+                            formatter: (val) => numberFormat(Math.round(val)),
+                          },
+                        },
                         tooltip: {
-                          y: {
-                            formatter: (value, { seriesIndex }) => {
-                              if (isMedicineFilterActive) {
-                                // When filtered, show 100%
-                                return `${selectedMedicineName || 'Selected Medicine'}: ${numberFormat(medicineTotal)} (100%)`;
-                              }
-                              const item = medicinePrepared.originalData[seriesIndex];
-                              const percentage = medicineTotal > 0 ? ((value / medicineTotal) * 100).toFixed(1) : '0';
-                              return `${item?.medicine_name || 'Unknown'}: ${numberFormat(value)} (${percentage}%)`;
+                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                            const data = medicineMonthlySales[dataPointIndex];
+                            if (!data) return '';
+                            
+                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
+                            html += `<strong>${data.label}</strong><br/>`;
+                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
+                            
+                            if (data.top_product_name && !selectedMedicineId) {
+                              html += `<br/><strong style="color: ${teal[500]}">🏆 Top Product:</strong><br/>`;
+                              html += `${data.top_product_name}<br/>`;
+                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
                             }
+                            
+                            html += `</div>`;
+                            return html;
                           }
                         },
-                        dataLabels: {
-                          enabled: true,
-                          style: {
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            colors: ['#fff'],
-                          },
-                          dropShadow: {
-                            enabled: true,
-                            top: 1,
-                            left: 1,
-                            blur: 1,
-                            color: '#000',
-                            opacity: 0.5,
-                          },
-                          formatter: (val, opts) => {
-                            if (isMedicineFilterActive) {
-                              // When filtered, always show 100%
-                              return '100%';
-                            }
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            const total = opts.w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                            return `${percentage}%`;
-                          },
-                        },
-                        legend: { 
-                          position: 'bottom',
-                          fontSize: '12px',
-                          show: true,
-                          // Show only selected item when filtered
-                          labels: {
-                            colors: isMedicineFilterActive ? ['#fff'] : undefined,
-                          },
-                        },
-                        stroke: {
-                          show: true,
-                          width: 2,
-                          colors: ['#fff'],
-                        },
-                        plotOptions: {
-                          pie: {
-                            expandOnClick: true,
-                            donut: {
-                              size: '0%',
-                            },
-                          },
+                        colors: [teal[500], teal[700]],
+                        markers: {
+                          size: [0, 6],
                         },
                       }}
-                      series={isMedicineFilterActive ? [medicineTotal] : medicinePrepared.series}
-                      type="pie"
-                      height={400}
+                      series={[
+                        {
+                          name: 'Medicine Sold',
+                          type: 'line',
+                          data: medicineMonthlySales.map((e) => e.quantity_sold || 0),
+                        },
+                        ...(selectedMedicineId ? [] : [{
+                          name: 'Top Product',
+                          type: 'scatter',
+                          data: medicineMonthlySales.map((e) => e.top_product_quantity || 0),
+                        }])
+                      ]}
+                      type="line"
+                      height={320}
                     />
                   )}
                 </CardContent>

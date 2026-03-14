@@ -168,40 +168,23 @@ class PaymentCenterDashboardController extends Controller
 
         try {
             $cashBillPaymentsQuery = PatientItemBillPayment::query()
-<<<<<<< HEAD
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
                 ->where('created_at', '<=', $end_date . ' 23:59:59')
                 ->where('amount', '>', 0)
-                ->where(function ($q) {
-                    $q->whereHas('channel', function ($query) {
-                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
-                    })
-                    ->orWhereHas('items.payment_mode', function ($query) {
-                        $query->whereRaw('LOWER(transaction_type) = ?', ['cash']);
-                    });
+                ->whereHas('bill.payment_mode', function ($query) {
+                    $query->whereRaw('LOWER(transaction_type) = ?', ['cash']);
                 });
-=======
-                ->join('payment_channels as ch', 'patient_item_bill_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0)
-                ->whereExists(function($q) {
-                    $q->select(DB::raw(1))
-                      ->from('patient_payment_cache_items as ppci')
-                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
-                })
-                ->whereIn(DB::raw('LOWER(ch.name)'), $cashChannelNames);
->>>>>>> origin/master
-
+                
             if ($clinic_id) {
                 $cashBillPaymentsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    $q->select('id')
+                      ->from('users')
+                      ->where('clinic_id', $clinic_id);
                 });
             }
-
-            $cashBillPayments = (float) $cashBillPaymentsQuery->sum('patient_item_bill_payments.amount');
+            
+            $cashBillPayments = (float) $cashBillPaymentsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating cash bill payments', ['error' => $e->getMessage()]);
         }
@@ -217,7 +200,6 @@ class PaymentCenterDashboardController extends Controller
         $creditChannelNames = ['credit'];
 
         try {
-<<<<<<< HEAD
             $creditQuery = PatientItemPayment::query()
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
@@ -225,20 +207,7 @@ class PaymentCenterDashboardController extends Controller
                 ->where('amount', '>', 0)
                 ->whereHas('items.payment_mode', function ($query) {
                     $query->whereRaw('LOWER(transaction_type) = ?', ['credit']);
-=======
-            $creditItemQuery = PatientItemPayment::query()
-                ->join('payment_channels as ch', 'patient_item_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->whereExists(function($q) {
-                    $q->select(DB::raw(1))
-                      ->from('patient_payment_cache_items as ppci')
-                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
->>>>>>> origin/master
-                })
-                ->whereIn(DB::raw('LOWER(ch.name)'), $creditChannelNames);
+                });
 
             if ($clinic_id) {
                 $creditItemQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {

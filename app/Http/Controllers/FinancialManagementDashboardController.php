@@ -47,68 +47,36 @@ class FinancialManagementDashboardController extends Controller
         ];
 
         // Get financial statistics
-<<<<<<< HEAD
         // Total revenue: sum of all payments + cleared bills (same as Daily Cash Collected Report)
-=======
-        // Total revenue: actual payments linked to cache items (no orphans, no bill face values)
->>>>>>> origin/master
         try {
             $revenueQuery = PatientItemPayment::query()
                 ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->whereExists(function($q) {
-                    $q->select(DB::raw(1))
-                      ->from('patient_payment_cache_items as ppci')
-                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                ->when($clinic_id, function($query) use ($clinic_id) {
+                    return $query->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                        $q->select('id')
+                          ->from('users')
+                          ->where('clinic_id', $clinic_id);
+                    });
                 });
             
-            if ($clinic_id) {
-                $revenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-<<<<<<< HEAD
             $itemPaymentsRevenue = $revenueQuery->sum('amount') ?? 0;
             
             // Add cleared bills to total revenue (same as Daily Cash Collected Report)
-            $clearedBillsQuery = PatientItemBill::query()
-                ->where('status', 'Cleared')
+            $clearedBillsQuery = PatientItemBillPayment::query()
                 ->whereNotNull('created_at')
                 ->where('created_at', '>=', $start_date . ' 00:00:00')
                 ->where('created_at', '<=', $end_date . ' 23:59:59');
-=======
-            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-            $itemPaymentsRevenue = (float) ($revenueQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
-
-            // Add actual bill payments
-            $billRevenueQuery = PatientItemBillPayment::query()
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0)
-                ->whereExists(function($q) {
-                    $q->select(DB::raw(1))
-                      ->from('patient_payment_cache_items as ppci')
-                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
-                });
->>>>>>> origin/master
             
             if ($clinic_id) {
-                $billRevenueQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $clearedBillsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')
+                      ->from('users')
+                      ->where('clinic_id', $clinic_id);
                 });
             }
             
-<<<<<<< HEAD
             $clearedBillsRevenue = $clearedBillsQuery->sum('amount') ?? 0;
             $data['summary']['total_revenue'] = $itemPaymentsRevenue + $clearedBillsRevenue;
-=======
-            $billPaymentsRevenue = (float) $billRevenueQuery->sum('patient_item_bill_payments.amount');
-            $data['summary']['total_revenue'] = $itemPaymentsRevenue + $billPaymentsRevenue;
->>>>>>> origin/master
         } catch (\Exception $e) {
             \Log::error('Error calculating total revenue', ['error' => $e->getMessage()]);
             $data['summary']['total_revenue'] = 0;
