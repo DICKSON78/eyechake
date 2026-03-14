@@ -463,8 +463,10 @@ const Dashboard = () => {
             </Grid>
             <Grid size={{ xs: 12 }}>
               <PerformanceReportCard
-                data={crmPerformanceData}
-                loading={crmPerformanceLoading}
+                department="CRM"
+                user={window.user}
+                editable={window.user?.privileges?.includes('crm_performance_report')}
+                refreshTrigger={dateParams?.start_date}
               />
             </Grid>
           </Grid>

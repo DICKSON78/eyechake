@@ -34,6 +34,7 @@ import {
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
 import ChartWrapper from "../../../components/ChartWrapper";
+import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 import { useTheme } from "@mui/material/styles";
@@ -452,6 +453,14 @@ const Dashboard = () => {
                   />
                 </CardContent>
               </Card>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <PerformanceReportCard
+                department="Sales"
+                user={window.user}
+                editable={window.user?.privileges?.includes('sales_performance_report')}
+                refreshTrigger={dateParams.start_date}
+              />
             </Grid>
           </Grid>
         </React.Fragment>

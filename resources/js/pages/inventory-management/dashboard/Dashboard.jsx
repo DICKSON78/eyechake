@@ -438,9 +438,14 @@ const Dashboard = () => {
                           data: frameMonthlySales.map((e) => e.quantity_sold || 0),
                         },
                         ...(selectedFrameId ? [] : [{
-                          name: 'Top Product',
-                          type: 'scatter',
-                          data: frameMonthlySales.map((e) => e.top_product_quantity || 0),
+                          name: 'Top Products',
+                          type: 'pie',
+                          data: frameMonthlySales
+                            .filter(e => e.top_product_name && e.top_product_quantity > 0)
+                            .map(e => ({
+                              x: e.top_product_name,
+                              y: e.top_product_quantity || 0
+                            }))
                         }])
                       ]}
                       type="line"
@@ -526,9 +531,14 @@ const Dashboard = () => {
                           data: medicineMonthlySales.map((e) => e.quantity_sold || 0),
                         },
                         ...(selectedMedicineId ? [] : [{
-                          name: 'Top Product',
-                          type: 'scatter',
-                          data: medicineMonthlySales.map((e) => e.top_product_quantity || 0),
+                          name: 'Top Products',
+                          type: 'pie',
+                          data: medicineMonthlySales
+                            .filter(e => e.top_product_name && e.top_product_quantity > 0)
+                            .map(e => ({
+                              x: e.top_product_name,
+                              y: e.top_product_quantity || 0
+                            }))
                         }])
                       ]}
                       type="line"

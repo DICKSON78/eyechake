@@ -472,7 +472,8 @@ export const getPrivileges = (preferences) => {
       label: "Consultation Room", 
       value: "consultation_room",
       children: [
-        { label: "Optometrist Monthly Report", value: "optometrist_monthly_report" }
+        { label: "Optometrist Monthly Report", value: "optometrist_monthly_report" },
+        { label: "Optometry Performance Report Card", value: "optometry_performance_report" }
       ]
     },
     { label: "Optician Center", value: "optician_center" },
@@ -483,7 +484,8 @@ export const getPrivileges = (preferences) => {
       label: "Sales Center", 
       value: "sales_center",
       children: [
-        { label: "Sales Manager Monthly Report", value: "sales_manager_monthly_report" }
+        { label: "Sales Manager Monthly Report", value: "sales_manager_monthly_report" },
+        { label: "Sales Performance Report Card", value: "sales_performance_report" }
       ]
     },
     { label: "Inventory Management", value: "inventory_management" },
@@ -491,7 +493,8 @@ export const getPrivileges = (preferences) => {
       label: "Marketing",
       value: "marketing",
       children: [
-        { label: "Marketing Operations Monthly Report", value: "marketing_operations_monthly_report" }
+        { label: "Marketing Operations Monthly Report", value: "marketing_operations_monthly_report" },
+        { label: "CRM Performance Report Card", value: "crm_performance_report" }
       ]
     },
     { label: "Financial Management", value: "financial_management" },

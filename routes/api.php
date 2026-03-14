@@ -560,6 +560,28 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/employee-performance', [EmployeePerformanceController::class, 'index']);
     });
 
+    $router->prefix('dashboard')->group(function ($router) {
+        $router->get('/performance/{department}', [PerformanceDashboardController::class, 'getDepartmentPerformance']);
+        $router->patch('/performance/{department}/targets', [PerformanceDashboardController::class, 'updateTargets']);
+    });
+
+    $router->prefix('marketing')->group(function ($router) {
+        $router->controller(\App\Http\Controllers\Marketing\ClientCallingStatusController::class)->group(function ($router) {
+            $router->get('/client-calling-status', 'index');
+            $router->post('/client-calling-status', 'store');
+            $router->patch('/client-calling-status/{id}', 'update');
+            $router->delete('/client-calling-status/{id}', 'destroy');
+            $router->get('/client-calling-stats', 'getCallingStats');
+        });
+    });
+
+    $router->prefix('admin')->group(function ($router) {
+        $router->controller(\App\Http\Controllers\Admin\DeleteTestUsersController::class)->group(function ($router) {
+            $router->get('/test-users', 'index');
+            $router->delete('/test-users', 'destroy');
+        });
+    });
+
     $router->prefix('reports')->group(function ($router) {
         $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
             $router->get('/cash-collection', 'getCashCollectionReport');
