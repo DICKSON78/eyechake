@@ -129,6 +129,9 @@ class PatientPaymentCacheController extends Controller
                 $data->where(function ($query) use ($item_status, $item_transaction_type) {
                     // Regular cash patients (pharmacy items) - must have at least one item matching criteria
                     $query->whereHas('items', function ($subQuery) use ($item_status, $item_transaction_type) {
+                        // Don't exclude items that are already invoiced - allow all routed patients
+                        // $subQuery->whereNull('item_payment_id'); // Removed to allow all routed patients to appear
+                        
                         if ($item_status) {
                             $statuses = explode(',', $item_status);
                             if (count($statuses) > 1) {
@@ -174,8 +177,8 @@ class PatientPaymentCacheController extends Controller
             } else {
                 // Regular filtering logic - ensure we only get payment caches that have at least one item matching ALL criteria
                 $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
-                    // Exclude items that are already invoiced (have item_payment_id)
-                    $query->whereNull('item_payment_id');
+                    // Don't exclude items that are already invoiced - allow cashier to see all routed patients
+                    // $query->whereNull('item_payment_id'); // Removed to allow all routed patients to appear
                     
                     // Status filter
                     if ($item_status) {
@@ -237,8 +240,10 @@ class PatientPaymentCacheController extends Controller
 
             $data->orderBy('created_at', 'desc');
             
-            // Log the query parameters for debugging
-            \Log::info('PatientPaymentCacheController query parameters', [
+            // Debug: Log the SQL query for debugging
+            \Log::info('PatientPaymentCacheController SQL query', [
+                'sql' => $data->toSql(),
+                'bindings' => $data->getBindings(),
                 'item_status' => $item_status,
                 'item_transaction_type' => $item_transaction_type,
                 'start_date' => $start_date,
@@ -267,44 +272,28 @@ class PatientPaymentCacheController extends Controller
                 $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
             })->where('status', 'Pending')->count();
             
-            // Debug: Check payment caches that should appear in the query
-            $testQuery = PatientPaymentCache::query();
-            if ($user->is_admin && $clinic_id) {
-                $testQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
-            } else if ($user->clinic_id) {
-                $testQuery->whereHas('creator', function ($query) use ($user) {
-                    $query->where('clinic_id', $user->clinic_id);
-                });
-            }
-            if ($start_date) {
-                $testQuery->whereDate('created_at', '>=', $start_date);
-            }
-            if ($end_date) {
-                $testQuery->whereDate('created_at', '<=', $end_date);
-            }
-            $testQuery->whereHas('items', function ($q) use ($item_status, $item_transaction_type) {
-                if ($item_status) {
-                    $statuses = explode(',', $item_status);
-                    if (count($statuses) > 1) {
-                        $q->whereIn('status', $statuses);
-                    } else {
-                        $q->where('status', $statuses[0]);
-                    }
-                }
-                if ($item_transaction_type) {
-                    $q->whereHas('payment_mode', function ($q2) use ($item_transaction_type) {
-                        $q2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
-                    });
-                }
-            });
-            $testCount = $testQuery->count();
-            
             \Log::info('PatientPaymentCacheController debug counts', [
                 'total_payment_caches' => $totalPaymentCaches,
                 'total_pending_cash_items' => $totalPendingCashItems,
-                'test_query_count' => $testCount,
+            ]);
+            
+            $result = $data->paginate($per_page);
+            
+            \Log::info('PatientPaymentCacheController result', [
+                'total' => $result->total(),
+                'per_page' => $result->perPage(),
+                'current_page' => $result->currentPage(),
+            ]);
+            
+            return $this->sendResponse($result, Response::HTTP_OK, 'Success.');
+        } catch (\Exception $e) {
+            \Log::error('Error in PatientPaymentCacheController::index', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->sendError('Error fetching payment cache data', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
             ]);
             
             $data = $data->paginate($per_page);

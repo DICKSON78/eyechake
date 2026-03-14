@@ -40,7 +40,7 @@ import {
   CheckCircleRounded as CheckCircleIcon,
   MessageRounded as MessageIcon,
   MoneyRounded as PaymentModesIcon,
-  
+
   PaymentRounded as PaymentChannelsIcon,
   PestControlRounded as DiseasesIcon,
   PhoneInTalkRounded as CommunicationLogsIcon,
@@ -76,7 +76,7 @@ const SingleLevelMenuItem = ({ item, setDrawerOpen, location, navigate }) => {
   };
 
   return item.subheader ? (
-    <ListSubheader sx={{ 
+    <ListSubheader sx={{
       px: { xs: 1, sm: 1, md: 1.5 },
       fontWeight: 700,
       fontSize: '0.7875rem'
@@ -254,9 +254,9 @@ const MultiLevelMenuItem = ({ item, location, generateMenuTree }) => {
 const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [items, setItems] = useState([]);
-  
+
   // Debug logging
   console.log('[Menu] Menu component rendered with:', {
     drawerOpen,
@@ -352,53 +352,51 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         privilegesType: typeof user.privileges,
         privilegesKeys: user.privileges ? Object.keys(user.privileges) : []
       });
-      
+
       // Role-based menu visibility
-  const getMenuVisibility = (section) => {
-    const role = (user?.role || "").toString().trim().toLowerCase();
-    
-    switch (section) {
-      case "RECEPTION":
-        return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception');
-      
-      case "CASHIER":
-        return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center');
-      
-      case "CONSULTATION ROOM":
-        return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room');
-      
-      case "SALES TABLE":
-        return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess;
-      
-      case "PHARMACY":
-        return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center');
-      
-      case "WORKSHOP":
-        return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center');
-      
-      case "STOCK MANAGEMENT":
-        return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management');
-      
-      case "FINANCIAL MANAGEMENT":
-        return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management');
-      
-      case "MARKETING MANAGEMENT":
-        return role === "admin" || role === "marketing officer" || hasPrivilege(user, 'marketing');
-      
-      case "EMPLOYEE MANAGEMENT":
-        return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management');
-      
-      case "DIRECTOR":
-        return role === "admin" || role === "director" || hasPrivilege(user, 'director');
-      
-      case "SETTINGS":
-        return role === "admin" || role === "director" || hasPrivilege(user, 'settings');
-      
-      default:
-        return false;
-    }
-  };
-      
+      const getMenuVisibility = (section) => {
+        const role = (user?.role || "").toString().trim().toLowerCase();
+
+        switch (section) {
+          case "RECEPTION":
+            return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception');
+
+          case "CASHIER":
+            return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center');
+
+          case "CONSULTATION ROOM":
+            return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room');
+
+          case "SALES TABLE":
+            return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess;
+
+          case "PHARMACY":
+            return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center');
+
+          case "WORKSHOP":
+            return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center');
+
+          case "STOCK MANAGEMENT":
+            return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management');
+
+          case "FINANCIAL MANAGEMENT":
+            return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management');
+
+
+          case "EMPLOYEE MANAGEMENT":
+            return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management');
+
+          case "DIRECTOR":
+            return role === "admin" || role === "director" || hasPrivilege(user, 'director');
+
+          case "SETTINGS":
+            return role === "admin" || role === "director" || hasPrivilege(user, 'settings');
+
+          default:
+            return false;
+        }
+      };
+
       setItems(renumberTopSections([
         {
           title: "MENU",
@@ -616,32 +614,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/sales-management/clinical-notes",
           show: getMenuVisibility('SALES TABLE'),
           badge: notifications && typeof notifications.patients_sent_to_sales !== 'undefined' && notifications.patients_sent_to_sales != null ? (Number(notifications.patients_sent_to_sales) || 0) : 0,
-        },
-        {
-          title: "Reports",
-          icon: <ReportsIcon />,
-          to: "/sales-management/reports",
-          show: getMenuVisibility('SALES TABLE'),
-          items: [
-            {
-              title: "Sales Manager Monthly Report",
-              icon: <ReportsIcon />,
-              to: "/sales-center/reports/sales-manager-monthly-report",
-              show: false, // Hidden per user request
-            },
-            {
-              title: "Sales Monthly Report",
-              icon: <ReportsIcon />,
-              to: "/sales-center/reports/sales-monthly-report",
-              show: getMenuVisibility('SALES TABLE'),
-            },
-            {
-              title: "Customer Relationship Monthly Report",
-              icon: <ReportsIcon />,
-              to: "/sales-center/reports/customer-relationship-monthly-report",
-              show: false, // Hidden per user request
-            },
-          ],
         },
         {
           title: "5. PHARMACY",
@@ -1150,6 +1122,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
+<<<<<<< Updated upstream
           title: "9. MARKETING MANAGEMENT",
           subheader: true,
           show: getMenuVisibility('MARKETING MANAGEMENT'),
@@ -1375,6 +1348,8 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
+=======
+>>>>>>> Stashed changes
           title: "10. EMPLOYEE MANAGEMENT",
           subheader: true,
           show: getMenuVisibility('EMPLOYEE MANAGEMENT'),
@@ -1385,12 +1360,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/user-management/users",
           show: isPrivilegeGranted('employee_management'),
         },
-        {
-         title: "Doctor Tasks",
-         icon: <DoctorTaskIcon />,
-         to: "/user-management/doctor-tasks",
-         show: hasPrivilege(user, 'employee_management') || isAdmin(user),
-       },
         {
           title: "11. DIRECTOR",
           subheader: true,
@@ -1546,50 +1515,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
                   title: "Balance Sheet",
                   icon: <ReportsIcon />,
                   to: "/director/reports/financial-management/balance-sheet",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Marketing Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/marketing",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Patient Registration Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/patient-registration",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Consultation Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/consultation",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Campaign Performance",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/campaign-performance",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Lead Generation",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/lead-generation",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Communication Analytics",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/communication-analytics",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Marketing Operations Monthly Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/marketing/marketing-operations-monthly-report",
                   show: isPrivilegeGranted('director'),
                 },
               ],
@@ -1822,7 +1747,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: (hasPrivilege(user, 'settings') || isAdmin(user)) && isAdmin(user),
         },
       ]));
-      
+
       // Debug: Log visible menu items
       const visibleItems = items.filter(item => item.show !== false);
       const hiddenItems = items.filter(item => item.show === false);
@@ -1844,7 +1769,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
 
     // First, identify which section headers should be shown based on visible children
     const sectionVisibility = new Map();
-    
+
     // Helper function to recursively check if an item or any of its children are visible
     const hasVisibleContent = (item) => {
       // Check if the item itself is visible
@@ -1857,7 +1782,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
       }
       return false;
     };
-    
+
     items.forEach((item, index) => {
       if (item.subheader && item.title !== "MENU") {
         // Find all items that belong to this section (items after this subheader until next subheader)
@@ -1870,10 +1795,10 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           }
           sectionItems.push(nextItem);
         }
-        
+
         // Check if any item in this section is visible (including nested items)
         const hasVisibleItems = sectionItems.some(sectionItem => hasVisibleContent(sectionItem));
-        
+
         sectionVisibility.set(index, hasVisibleItems);
       }
     });
@@ -1897,8 +1822,8 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         (child) => typeof child.show === "boolean" && child.show
       )?.length;
       // Generate unique key: use title + route combination to ensure uniqueness
-      const uniqueKey = e.subheader 
-        ? `subheader-${e.title}-${index}` 
+      const uniqueKey = e.subheader
+        ? `subheader-${e.title}-${index}`
         : `${e.title}-${e.to || index}-${index}`;
       return hasChildren ? (
         <MultiLevelMenuItem
@@ -1929,7 +1854,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           width: "10px", // Slightly wider
         },
         "&::-webkit-scrollbar-track": {
-           background: "rgba(0,0,0,0.05)" // Visible track
+          background: "rgba(0,0,0,0.05)" // Visible track
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "#888", // Darker visible thumb

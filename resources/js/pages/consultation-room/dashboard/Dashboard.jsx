@@ -32,6 +32,7 @@ import {
 
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
+import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 
@@ -73,6 +74,14 @@ const Dashboard = () => {
         consultations_trend: [],
       },
     },
+    (response) => response.data.data
+  );
+
+  const { data: performanceData, loading: performanceLoading } = useFetch(
+    "api/performance-reports/optometry",
+    dateParams,
+    true,
+    null,
     (response) => response.data.data
   );
 
@@ -229,7 +238,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            
+
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardContent>
@@ -276,6 +285,12 @@ const Dashboard = () => {
                   </Grid>
                 </CardContent>
               </Card>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <PerformanceReportCard
+                data={performanceData}
+                loading={performanceLoading}
+              />
             </Grid>
           </Grid>
         </React.Fragment>

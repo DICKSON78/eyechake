@@ -37,20 +37,22 @@ class PaymentCenterReportsController extends Controller
         $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
         $item_payments = PatientItemPayment::with(['channel', 'creator'])
-            ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-            ->join('items as it', 'ppci.item_id', '=', 'it.id')
-            ->join('item_types as itype', 'it.item_type_id', '=', 'itype.id')
-            ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-            ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+            ->leftJoin('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
+            ->leftJoin('items as it', 'ppci.item_id', '=', 'it.id')
+            ->leftJoin('medicines as med', 'ppci.medicine_id', '=', 'med.id')
+            ->leftJoin('item_types as itype', 'it.item_type_id', '=', 'itype.id')
+            ->leftJoin('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+            ->leftJoin('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+            ->leftJoin('patients as pt', 'pch.patient_id', '=', 'pt.id');
         $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
             ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-            ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-            ->join('items as it', 'ppci.item_id', '=', 'it.id')
-            ->join('item_types as itype', 'it.item_type_id', '=', 'itype.id')
-            ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-            ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id');
+            ->leftJoin('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
+            ->leftJoin('items as it', 'ppci.item_id', '=', 'it.id')
+            ->leftJoin('medicines as med', 'ppci.medicine_id', '=', 'med.id')
+            ->leftJoin('item_types as itype', 'it.item_type_id', '=', 'itype.id')
+            ->leftJoin('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+            ->leftJoin('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+            ->leftJoin('patients as pt', 'pch.patient_id', '=', 'pt.id');
 
         $item_payments->with(['creator.clinic']);
 
@@ -101,13 +103,42 @@ class PaymentCenterReportsController extends Controller
             $bill_payments->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
         }
 
-        $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', 'itype.name as item_type', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
-        $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', 'itype.name as item_type', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
+        $item_payments->select(
+            DB::raw("'Cash' as transaction_type"), 
+            'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 
+            'patient_item_payments.amount', 'patient_item_payments.discount', 
+            'patient_item_payments.created_at', 'patient_item_payments.created_by', 
+            DB::raw('COALESCE(itype.name, "Medicine") as item_type'), 
+            DB::raw('COALESCE(GROUP_CONCAT(COALESCE(it.name, med.name) SEPARATOR ", "), "Unlinked Items") as items')
+        )->groupBy('patient_item_payments.id');
+
+        $bill_payments->select(
+            DB::raw("'Bill' as transaction_type"), 
+            'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 
+            'patient_item_bill_payments.amount', DB::raw('0 as discount'), 
+            'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', 
+            DB::raw('COALESCE(itype.name, "Medicine") as item_type'), 
+            DB::raw('COALESCE(GROUP_CONCAT(COALESCE(it.name, med.name) SEPARATOR ", "), "Unlinked Items") as items')
+        )->groupBy('patient_item_bill_payments.id');
+
+        // Calculate grand totals before pagination
+        $total_amount = (clone $item_payments)->get()->sum('amount') + (clone $bill_payments)->get()->sum('amount');
+        $total_discount = (clone $item_payments)->get()->sum('discount');
+        $total_net = $total_amount - $total_discount;
 
         $data = $item_payments->unionAll($bill_payments);
         $data->orderBy('created_at', 'desc');
-        $data = $data->paginate($per_page);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        $paginated_data = $data->paginate($per_page);
+
+        // Merge totals into the paginated response
+        $responseData = $paginated_data->toArray();
+        $responseData['totals'] = [
+            'amount' => $total_amount,
+            'discount' => $total_discount,
+            'net' => $total_net,
+        ];
+
+        return $this->sendResponse($responseData, Response::HTTP_OK, 'Success.');
     }
 
     public function getExpenseReport(Request $request)

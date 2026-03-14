@@ -101,12 +101,8 @@ class StocktakesController extends Controller
                         $stocktake_item = StocktakeItem::create($input_item);
 
                         if ($stocktake_item) {
-                            // Get current item balance to ensure correct calculation
-                            $currentItem = Item::find($input_item['item_id']);
-                            $currentBalance = $currentItem ? $currentItem->balance : 0;
-                            
                             $updateData = [
-                                'balance' => $currentBalance, // Keep current balance, stocktake shouldn't change it
+                                'balance' => $stocktake_item->quantity, // Update balance to stocktake quantity
                                 'unit_buying_price' => $stocktake_item->unit_buying_price,
                             ];
                             
@@ -115,10 +111,25 @@ class StocktakesController extends Controller
                                 $updateData['category'] = $input_item['category'];
                             }
                             
-                            $item->update($updateData);
+                             $updateData['new_balance'] = $stocktake_item->quantity; // Sync new_balance
+                             $item->update($updateData);
+
+                             // Clear relevant dashboard caches to ensure real-time update
+                             try {
+                                 $clinic_id = $item->clinic_id ?? $user->clinic_id;
+                                 if ($clinic_id) {
+                                     $today = \Carbon\Carbon::today()->format('Y-m-d');
+                                     \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}");
+                                     \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}_{$today}_{$today}");
+                                 }
+                             } catch (\Exception $e) {
+                                 \Log::warning('Failed to clear dashboard cache after stocktake', ['error' => $e->getMessage()]);
+                             }
                         }
                     }
                 }
+
+                $data->update(['status' => 'Applied']);
             }
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -172,8 +183,18 @@ class StocktakesController extends Controller
                 if ($stocktakeItem->item) {
                     $stocktakeItem->item->update([
                         'balance' => $stocktakeItem->quantity, // Use stocktake quantity directly
-                        // Note: new_balance column doesn't exist in items table
+                        'new_balance' => $stocktakeItem->quantity, // Sync new_balance
                     ]);
+
+                    // Clear relevant dashboard caches
+                    try {
+                        $clinic_id = $stocktakeItem->item->clinic_id;
+                        if ($clinic_id) {
+                            $today = \Carbon\Carbon::today()->format('Y-m-d');
+                            \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}");
+                            \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}_{$today}_{$today}");
+                        }
+                    } catch (\Exception $e) {}
                 }
             }
 

@@ -41,10 +41,16 @@ const LogIn = () => {
 
   useEffect(() => {
     document.title = `Login - ${window.APP_NAME}`;
+    
+    // Clear any stale redirect flags when login page loads
+    window.sessionStorage.removeItem('redirecting_to_login');
   }, []);
 
   useEffect(() => {
     if (data) {
+      // Clear any redirect flags from previous session expiry
+      window.sessionStorage.removeItem('redirecting_to_login');
+      
       window.user = data.data.user;
       window.localStorage.removeItem("token");
       window.localStorage.setItem("token", data.data.token);

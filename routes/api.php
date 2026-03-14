@@ -88,6 +88,7 @@ use App\Http\Controllers\EmployeeReportsController;
 use App\Http\Controllers\ReferralsController;
 use App\Http\Controllers\ExternalLinksEmailAlertsController;
 use App\Http\Controllers\ExternalLinksWebsiteAppointmentsController;
+use App\Http\Controllers\PerformanceDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -301,6 +302,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/mark-all-as-read', [PatientNotificationsController::class, 'markAllAsRead']);
         $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
     });
+    $router->get('/performance-reports/{department}', [PerformanceDashboardController::class, '__invoke']);
     $router->apiResource('/clinics', ClinicsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
@@ -470,7 +472,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         
         // Client Calling Status
         $router->get('/client-calling-status', [ClientCallingStatusController::class, 'index']);
-        $router->put('/client-calling-status/{patientId}', [ClientCallingStatusController::class, 'update']);
+        $router->match(['put', 'patch'], '/client-calling-status/{patientId}', [ClientCallingStatusController::class, 'update']);
         $router->post('/client-calling-status/bulk-update', [ClientCallingStatusController::class, 'bulkUpdate']);
         
         // Campaign Performance

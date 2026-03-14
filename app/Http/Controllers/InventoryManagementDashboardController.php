@@ -831,7 +831,7 @@ class InventoryManagementDashboardController extends Controller
         }, []);
 
         // Sold Frames Pie Chart - generate pie chart data for top selling frames
-        $data['statistics']['sold_frames_pie_chart'] = $this->safe(function () use ($clinic_id) {
+        $data['statistics']['sold_frames_pie_chart'] = $this->safe(function () use ($clinic_id, $frame_id) {
             $topFrames = DB::table('patient_payment_cache_items')
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
@@ -840,6 +840,9 @@ class InventoryManagementDashboardController extends Controller
                 ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->where('users.clinic_id', $clinic_id);
+                })
+                ->when($frame_id, function ($query) use ($frame_id) {
+                    $query->where('items.id', $frame_id);
                 })
                 ->where('patient_payment_cache_items.status', 'Served')
                 ->where('items.status', 'Active')
@@ -862,7 +865,7 @@ class InventoryManagementDashboardController extends Controller
         }, []);
 
         // Sold Medicine Pie Chart - generate pie chart data for top selling medicines
-        $data['statistics']['sold_medicine_pie_chart'] = $this->safe(function () use ($clinic_id) {
+        $data['statistics']['sold_medicine_pie_chart'] = $this->safe(function () use ($clinic_id, $medicine_id) {
             $topMedicines = DB::table('patient_payment_cache_items')
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
@@ -871,6 +874,9 @@ class InventoryManagementDashboardController extends Controller
                 ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->where('users.clinic_id', $clinic_id);
+                })
+                ->when($medicine_id, function ($query) use ($medicine_id) {
+                    $query->where('items.id', $medicine_id);
                 })
                 ->where('patient_payment_cache_items.status', 'Served')
                 ->where('items.status', 'Active')

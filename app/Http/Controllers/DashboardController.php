@@ -190,39 +190,57 @@ class DashboardController extends Controller
                 }, 0);
             });
 
-            // Running Cost & Improvement Cost (by expense category name match)
+            // Running Cost & Improvement Cost (by explicit flag OR category name match)
+            // Running costs = ongoing operational expenses (maintenance, software)
+            // Improvement costs = capital/one-time expenditures (renovation, furniture, importation, events)
+            $runningCostCategories = [
+                'Cleanless, technical / mechanical meintenance', 
+                'Office Software', 
+                'Daily expenses', 
+                'Electricity', 
+                'Ground Floor Rent', 
+                'Rent', 
+                'Salary', 
+                'Staff Allowance & Chakula', 
+                'Transport', 
+                'SODA', 
+                'Marketing', 
+                'Government Tax'
+            ];
+            $improvementCostCategories = [
+                'Renovation', 
+                'Vifaa & Furnitures', 
+                'Importation Cost(Cargo transportation)', 
+                'SABASABA 2025', 
+                'Outreach Programs', 
+                'Parnership Dissolution', 
+                'Loan'
+            ];
             try {
+                $baseRunningQuery = DB::table('expense_payments as expp')
+                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                    ->where('expp.amount', '>', 0);
+
+                $baseImprovementQuery = clone $baseRunningQuery;
+
                 if ($clinic_id) {
-                    $runningCostQuery = DB::table('expense_payments as expp')
-                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                        ->join('users as u', 'expp.created_by', '=', 'u.id')
-                        ->where('u.clinic_id', $clinic_id)
-                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                        ->where('expp.amount', '>', 0)
-                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-                    $improvementCostQuery = DB::table('expense_payments as expp')
-                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                        ->join('users as u', 'expp.created_by', '=', 'u.id')
-                        ->where('u.clinic_id', $clinic_id)
-                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                        ->where('expp.amount', '>', 0)
-                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-                } else {
-                    $runningCostQuery = DB::table('expense_payments as expp')
-                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                        ->where('expp.amount', '>', 0)
-                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-                    $improvementCostQuery = DB::table('expense_payments as expp')
-                        ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                        ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                        ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                        ->where('expp.amount', '>', 0)
-                        ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
+                    $baseRunningQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                        ->where('u.clinic_id', $clinic_id);
+                    $baseImprovementQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                        ->where('u.clinic_id', $clinic_id);
                 }
+
+                $runningCostQuery = (clone $baseRunningQuery)->where(function($q) use ($runningCostCategories) {
+                    $q->where('exp.running_cost', 1)
+                      ->orWhereIn('cat.name', $runningCostCategories);
+                });
+
+                $improvementCostQuery = (clone $baseImprovementQuery)->where(function($q) use ($improvementCostCategories) {
+                    $q->where('exp.improvement_cost', 1)
+                      ->orWhereIn('cat.name', $improvementCostCategories);
+                });
 
                 $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
                 $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');

@@ -44,23 +44,22 @@ class DirectorDashboardController extends Controller
             'statistics' => [],
         ];
 
-        // Today's Patients count
-        $data['summary']['today_patients'] = Patient::query()
+        // Today's Patients count (Active check-ins in date range)
+        $data['summary']['today_patients'] = \App\Models\PatientCheckIn::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('checkIns', function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($query) use ($clinic_id) {
-                        $query->where('clinic_id', $clinic_id);
-                    });
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->count();
+            ->distinct('patient_id')
+            ->count('patient_id');
 
         // Total Patients Registered in date range
         $data['summary']['total_patients_registered'] = Patient::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('checkIns', function ($query) use ($clinic_id) {
+                $query->whereHas('check_ins', function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($query) use ($clinic_id) {
                         $query->where('clinic_id', $clinic_id);
                     });
@@ -73,8 +72,9 @@ class DirectorDashboardController extends Controller
         // Web Appointment Bookings in date range
         $data['summary']['web_appointment_bookings'] = Appointment::query()
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                // Assuming appointments are clinic-specific or we can add clinic filtering later
-                // For now, return all web appointments
+                $query->whereHas('repliedBy', function ($q) use ($clinic_id) {
+                    $q->where('clinic_id', $clinic_id);
+                });
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
@@ -216,41 +216,56 @@ class DirectorDashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date)
             ->sum('amount');
 
-        // Running Cost & Improvement Cost (by expense category name match) - matching Financial Management
+        // Running Cost & Improvement Cost (by explicit flag OR category match)
+        $runningCostCategories = [
+            'Cleanless, technical / mechanical meintenance', 
+            'Office Software', 
+            'Daily expenses', 
+            'Electricity', 
+            'Ground Floor Rent', 
+            'Rent', 
+            'Salary', 
+            'Staff Allowance & Chakula', 
+            'Transport', 
+            'SODA', 
+            'Marketing', 
+            'Government Tax'
+        ];
+        $improvementCostCategories = [
+            'Renovation', 
+            'Vifaa & Furnitures', 
+            'Importation Cost(Cargo transportation)', 
+            'SABASABA 2025', 
+            'Outreach Programs', 
+            'Parnership Dissolution', 
+            'Loan'
+        ];
+
         try {
+            $baseRunningQuery = DB::table('expense_payments as expp')
+                ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                ->where('expp.amount', '>', 0);
+
+            $baseImprovementQuery = clone $baseRunningQuery;
+
             if ($clinic_id) {
-                $runningCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->join('users as u', 'expp.created_by', '=', 'u.id')
-                    ->where('u.clinic_id', $clinic_id)
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
-                $improvementCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->join('users as u', 'expp.created_by', '=', 'u.id')
-                    ->where('u.clinic_id', $clinic_id)
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
-            } else {
-                $runningCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%running%']);
-
-                $improvementCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereRaw('LOWER(cat.name) LIKE ?', ['%improvement%']);
+                $baseRunningQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id);
+                $baseImprovementQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id);
             }
+
+            $runningCostQuery = (clone $baseRunningQuery)->where(function($q) use ($runningCostCategories) {
+                $q->where('exp.running_cost', 1)
+                  ->orWhereIn('cat.name', $runningCostCategories);
+            });
+
+            $improvementCostQuery = (clone $baseImprovementQuery)->where(function($q) use ($improvementCostCategories) {
+                $q->where('exp.improvement_cost', 1)
+                  ->orWhereIn('cat.name', $improvementCostCategories);
+            });
 
             $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
             $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');
@@ -258,6 +273,38 @@ class DirectorDashboardController extends Controller
             \Log::error('Error calculating running/improvement costs', ['error' => $e->getMessage()]);
             $data['summary']['running_cost'] = 0;
             $data['summary']['improvement_cost'] = 0;
+        }
+
+        // New Metrics: Total Patients Seen & Waiting
+        try {
+            // Total patients seen (Consulted) in date range
+            $data['summary']['total_patients_seen'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Consulted')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->distinct()
+                ->count('payment_cache_item_id');
+
+            // Total patients waiting
+            $waitingQuery = \App\Models\PatientWaitingTime::query()
+                ->whereIn('status', ['waiting', 'in_treatment'])
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('patient.check_ins', function ($q) use ($clinic_id) {
+                        $q->whereHas('payment_cache.items.creator', function ($userQuery) use ($clinic_id) {
+                            $userQuery->where('clinic_id', $clinic_id);
+                        });
+                    });
+                });
+            $data['summary']['total_patients_waiting'] = $waitingQuery->count();
+        } catch (\Exception $e) {
+            \Log::error('Error calculating seen/waiting patients', ['error' => $e->getMessage()]);
+            $data['summary']['total_patients_seen'] = 0;
+            $data['summary']['total_patients_waiting'] = 0;
         }
 
         // Expense payments total (alias for Financial Management compatibility)

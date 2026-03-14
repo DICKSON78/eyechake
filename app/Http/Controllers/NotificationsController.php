@@ -171,7 +171,8 @@ class NotificationsController extends Controller
                 })
                 ->whereHas('items', function ($query) {
                     $query->whereIn('status', ['Pending', 'Billed', 'Served'])
-                        ->whereNull('item_payment_id')
+                        // Don't exclude items that are already invoiced - allow all routed patients
+                        // ->whereNull('item_payment_id') // Removed to match frontend behavior
                         ->whereHas('payment_mode', function ($q) {
                             $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
                         });

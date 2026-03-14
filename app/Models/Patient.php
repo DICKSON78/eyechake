@@ -16,8 +16,13 @@ class Patient extends Model
     protected $fillable = [
         'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'region_id', 'district_id', 'ward_id',
         'address', 'national_id', 'phone', 'email', 'occupation', 'payment_mode_id', 'info_source_id', 'is_vip', 
-        'is_student', 'is_businessperson', 'is_outreach', 'is_employee', 'created_by',
+        'is_student', 'is_businessperson', 'is_outreach', 'is_employee', 'created_by', 'is_test_user',
     ];
+
+    public function scopeReal($query)
+    {
+        return $query->where('is_test_user', 0);
+    }
 
     protected $casts = [
         'is_student' => 'boolean',

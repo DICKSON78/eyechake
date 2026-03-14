@@ -253,12 +253,9 @@ const DailyCashCollection = ({ module }) => {
         ]}
         summationFooterColumns={[
           { value: "TOTAL", span: 4, index: 1 },
-          { reducer: (acc, item, index) => acc + (parseFloat(item.amount) || 0), index: 4 },
-          { reducer: (acc, item, index) => acc + (parseFloat(item.discount) || 0), index: 5 },
-          {
-            reducer: (acc, item, index) => acc + Math.max(0, (parseFloat(item.amount) || 0) - (parseFloat(item.discount) || 0)),
-            index: 6,
-          },
+          { totalKey: "amount", index: 4 },
+          { totalKey: "discount", index: 5 },
+          { totalKey: "net", index: 6 },
         ]}
       />
     </Page>

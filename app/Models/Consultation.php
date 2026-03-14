@@ -22,6 +22,7 @@ class Consultation extends Model
     protected $casts = [
         'sent_to_optician_at' => 'datetime:Y-m-d H:i',
         'optician_completed_at' => 'datetime:Y-m-d H:i',
+        'lens_types' => 'json',
     ];
 
     public function payment_cache_item()

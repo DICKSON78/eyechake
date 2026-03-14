@@ -27,6 +27,9 @@ services:
       - COMPOSER_MEMORY_LIMIT=-1
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
@@ -57,6 +60,9 @@ services:
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
@@ -78,6 +84,9 @@ services:
     command: node /app/bin/server.js start --config=/app/config.json
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9601/"]
       interval: 30s

@@ -101,10 +101,10 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
     null,
     hasToken
   );
-  
+
   // Extract user data from response
   const userData = user?.data || user;
-  
+
   // Debug logging for user fetch
   useEffect(() => {
     console.log('[Default Layout] User fetch state:', { loading, error, user: !!userData });
@@ -112,6 +112,20 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
       console.error('[Default Layout] User fetch error:', error);
     }
   }, [loading, error, userData]);
+
+  // Add a small delay to prevent race conditions with token setting
+  const [shouldCheckAuth, setShouldCheckAuth] = useState(false);
+  
+  useEffect(() => {
+    if (hasToken) {
+      const timer = setTimeout(() => {
+        setShouldCheckAuth(true);
+      }, 100); // 100ms delay
+      return () => clearTimeout(timer);
+    } else {
+      setShouldCheckAuth(false);
+    }
+  }, [hasToken]);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [anchorEl, setAnchorEl] = useState();
@@ -144,35 +158,37 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
         if (window.notificationEvents && typeof window.notificationEvents.refresh === 'function') {
           window.notificationEvents.refresh();
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }, [userData, setUser]);
 
   useEffect(() => {
     // If we had a token but got an error, the session expired
-    if (error && !loading && hasToken) {
+    if (error && !loading && hasToken && shouldCheckAuth) {
       // Debug logging
       console.log('[Default Layout] Authentication error detected with token:', {
         error,
         currentPath: location.pathname,
-        hasToken
+        hasToken,
+        shouldCheckAuth
       });
-      
+
       // Clear the invalid token
       localStorage.removeItem('token');
-      
+
       // Define public routes that don't require authentication
       const publicRoutes = ["/", "/about", "/features", "/appointment", "/contact", "/login"];
       const currentPath = location.pathname;
       const isPublicRoute = publicRoutes.some(route => currentPath === route);
-      
-      // Only redirect to login if we're not on a public route
-      if (!isPublicRoute) {
+
+      // Only redirect to login if we're not on a public route AND not already redirecting
+      if (!isPublicRoute && !window.sessionStorage.getItem('redirecting_to_login')) {
         console.log('[Default Layout] Session expired, redirecting to login...');
+        window.sessionStorage.setItem('redirecting_to_login', 'true');
         navigate("/login");
       }
     }
-  }, [error, loading, hasToken, navigate, location.pathname]);
+  }, [error, loading, hasToken, shouldCheckAuth, navigate, location.pathname]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -231,7 +247,6 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
       items: [
         { label: 'Reception Dashboard', to: '/reception/dashboard' },
         { label: 'Patients/Customers', to: '/reception/patients' },
-        { label: 'Prestige Clients', to: '/marketing/prestige-clients' },
         { label: 'Spectacle Patients', to: '/sales-management/glass-patients' },
         { label: 'Patients to Return', to: '/reception/to-return/patients' },
         { label: 'Sent Messages', to: '/reception/sent-messages' },
@@ -434,7 +449,7 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
                 </Tooltip>
 
                 {userData && userData.privileges && userData.privileges.dashboard &&
-                location.pathname.indexOf("/dashboard") === 0 ? (
+                  location.pathname.indexOf("/dashboard") === 0 ? (
                   <Chip
                     variant="outlined"
                     sx={{ mr: { xs: 1, sm: 1, md: 2 } }}

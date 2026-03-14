@@ -32,6 +32,7 @@ import Modal from "../../../components/Modal";
 import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
+import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import notificationEvents from "../../../utils/notificationEvents";
 
 import { useTheme } from "@mui/material/styles";
@@ -54,7 +55,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const addToast = useToast();
   const theme = useTheme();
-  
+
   // Check if user has reception privilege
   usePrivilege('reception', '/dashboard');
 
@@ -102,6 +103,17 @@ const Dashboard = () => {
         daily_registrations: [],
       },
     },
+    (response) => response.data.data
+  );
+
+  const { data: crmPerformanceData, loading: crmPerformanceLoading } = useFetch(
+    "api/performance-reports/crm",
+    {
+      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
+      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+    },
+    true,
+    null,
     (response) => response.data.data
   );
 
@@ -159,7 +171,7 @@ const Dashboard = () => {
   };
 
   if (loading) {
-  return (
+    return (
       <Page title="Reception Dashboard">
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
           <CircularProgress />
@@ -183,8 +195,8 @@ const Dashboard = () => {
           <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip title={loading || isRefreshing ? "Refreshing..." : "Refresh data"}>
               <span>
-                <IconButton 
-                  onClick={handleRefresh} 
+                <IconButton
+                  onClick={handleRefresh}
                   disabled={loading || isRefreshing}
                   sx={{
                     animation: (loading || isRefreshing) ? 'spin 1s linear infinite' : 'none',
@@ -448,6 +460,12 @@ const Dashboard = () => {
                   height="272"
                 />
               </Card>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <PerformanceReportCard
+                data={crmPerformanceData}
+                loading={crmPerformanceLoading}
+              />
             </Grid>
           </Grid>
         </React.Fragment>

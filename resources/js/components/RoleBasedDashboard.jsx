@@ -12,7 +12,6 @@ import PharmacyDashboard from "../pages/medicine-center/dashboard/Dashboard";
 import WorkshopDashboard from "../pages/optician-center/dashboard/Dashboard";
 import StockManagementDashboard from "../pages/inventory-management/dashboard/Dashboard";
 import FinancialManagementDashboard from "../pages/financial-management/dashboard/Dashboard";
-import MarketingDashboard from "../pages/marketing/dashboard/Dashboard";
 import EmployeeManagementDashboard from "../pages/user-management/dashboard/Dashboard";
 import DispensingDashboard from "../pages/dispensing/dashboard/Dashboard";
 import ProcedureRoomDashboard from "../pages/procedure-room/dashboard/Dashboard";
@@ -28,61 +27,61 @@ const RoleBasedDashboard = ({ user, setSmsBalance }) => {
   }
 
   const role = (user.role || "").toString().trim().toLowerCase();
-  
+
   // Role-based dashboard routing
   const getDashboardComponent = () => {
     switch (role) {
       case "admin":
         return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "director":
         return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "receptionist":
         return <ReceptionDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "cashier":
         return <CashierDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "doctor":
       case "optometrist":
         return <ConsultationRoomDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "sales manager":
       case "sales":
         return <SalesTableDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "pharmacist":
         return <PharmacyDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "optician":
       case "workshop":
         return <WorkshopDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "storekeeper":
       case "inventory":
         return <StockManagementDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "accountant":
       case "finance":
         return <FinancialManagementDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "marketing officer":
-        return <MarketingDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+        return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
+
       case "hr":
       case "employee management":
         return <EmployeeManagementDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "dispensing":
         return <DispensingDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "procedure room":
         return <ProcedureRoomDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       case "other dispensing":
         return <OtherDispensingDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
-      
+
       default:
         // Default to director dashboard for unknown roles
         return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;

@@ -49,14 +49,22 @@ class LensStockController extends Controller
 
         // Filter by lens type (SV/Single Vision or Multifocal)
         if ($request->lens_type) {
-            $lensType = $request->lens_type;
-            if (in_array(strtolower($lensType), ['sv', 'single vision'])) {
+            $lensType = strtolower(trim($request->lens_type));
+            if (in_array($lensType, ['sv', 'single vision', 'singlevision'])) {
                 $data->whereHas('lens_type', function ($query) {
-                    $query->where('name', 'Single Vision');
+                    $query->where(DB::raw('LOWER(name)'), 'like', '%single vision%');
                 });
-            } elseif (strtolower($lensType) === 'multifocal') {
+            } elseif (in_array($lensType, ['multifocal', 'multi-focal'])) {
                 $data->whereHas('lens_type', function ($query) {
-                    $query->whereIn('name', ['Bifocal', 'Progressive']);
+                    $query->where(function($q) {
+                        $q->where(DB::raw('LOWER(name)'), 'like', '%bifocal%')
+                          ->orWhere(DB::raw('LOWER(name)'), 'like', '%progressive%');
+                    });
+                });
+            } else {
+                // Fallback for direct matching if it doesn't match the presets
+                $data->whereHas('lens_type', function ($query) use ($lensType) {
+                    $query->where(DB::raw('LOWER(name)'), 'like', '%' . $lensType . '%');
                 });
             }
         }

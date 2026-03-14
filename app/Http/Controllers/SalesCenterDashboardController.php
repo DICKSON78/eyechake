@@ -97,41 +97,78 @@ class SalesCenterDashboardController extends Controller
                 ],
             ];
 
-            // Total sales from patient payments
-            $data['summary']['total_sales'] = PatientItemPayment::query()
-                ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($q) use ($clinic_id) {
-                        $q->where('clinic_id', $clinic_id);
-                    });
+            // Robust Sales Calculation (including item payments and bill payments)
+            $itemPaymentsQuery = PatientItemPayment::query()
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
                 })
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
-                ->sum('amount');
+                ->whereDate('patient_item_payments.created_at', '>=', $start_date)
+                ->whereDate('patient_item_payments.created_at', '<=', $end_date);
+            
+            $billPaymentsQuery = \App\Models\PatientItemBillPayment::query()
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                })
+                ->whereDate('patient_item_bill_payments.created_at', '>=', $start_date)
+                ->whereDate('patient_item_bill_payments.created_at', '<=', $end_date);
+
+            if ($clinic_id) {
+                $itemPaymentsQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+                $billPaymentsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+
+            $itemSalesTotal = (float) ($itemPaymentsQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
+            $billSalesTotal = (float) $billPaymentsQuery->sum('amount');
+            
+            $data['summary']['total_sales'] = $itemSalesTotal + $billSalesTotal;
 
             // Sales today
             $today = Carbon::today()->format('Y-m-d');
-            $data['summary']['sales_today'] = PatientItemPayment::query()
-                ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($q) use ($clinic_id) {
-                        $q->where('clinic_id', $clinic_id);
-                    });
-                })
-                ->whereDate('created_at', $today)
-                ->sum('amount');
+            $data['summary']['sales_today'] = 0;
+            try {
+                $todayItemSales = PatientItemPayment::query()
+                    ->whereDate('created_at', $today)
+                    ->where('amount', '>', 0)
+                    ->whereExists(function($q) {
+                        $q->select(DB::raw(1))->from('patient_payment_cache_items as ppci')->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                    })
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereIn('created_by', function($q) use ($clinic_id) { $q->select('id')->from('users')->where('clinic_id', $clinic_id); });
+                    })
+                    ->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')
+                    ->first()->net ?? 0;
+                
+                $todayBillSales = \App\Models\PatientItemBillPayment::query()
+                    ->whereDate('created_at', $today)
+                    ->where('amount', '>', 0)
+                    ->whereExists(function($q) {
+                        $q->select(DB::raw(1))->from('patient_payment_cache_items as ppci')->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                    })
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereIn('created_by', function($q) use ($clinic_id) { $q->select('id')->from('users')->where('clinic_id', $clinic_id); });
+                    })
+                    ->sum('amount');
+                
+                $data['summary']['sales_today'] = (float) $todayItemSales + (float) $todayBillSales;
+            } catch (\Exception $e) {
+                \Log::error('Error calculating sales today', ['error' => $e->getMessage()]);
+            }
 
-            // Total revenue (same as total sales for now)
+            // Total revenue (same as total sales)
             $data['summary']['total_revenue'] = $data['summary']['total_sales'];
 
             // Total transactions
-            $data['summary']['total_transactions'] = PatientItemPayment::query()
-                ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($q) use ($clinic_id) {
-                        $q->where('clinic_id', $clinic_id);
-                    });
-                })
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
-                ->count();
+            $data['summary']['total_transactions'] = $itemPaymentsQuery->count() + $billPaymentsQuery->count();
 
             // Average transaction
             if ($data['summary']['total_transactions'] > 0) {
@@ -199,15 +236,22 @@ class SalesCenterDashboardController extends Controller
                     ->whereDate('created_at', $dateStr)
                     ->count();
                 
-                // Sales amount on this date
-                $salesAmount = PatientItemPayment::query()
-                    ->when($clinic_id, function ($query) use ($clinic_id) {
-                        $query->whereHas('creator', function ($q) use ($clinic_id) {
-                            $q->where('clinic_id', $clinic_id);
-                        });
-                    })
+                // Sales amount on this date (net)
+                $salesDateItem = PatientItemPayment::query()
                     ->whereDate('created_at', $dateStr)
+                    ->where('amount', '>', 0)
+                    ->whereExists(function($q) { $q->select(DB::raw(1))->from('patient_payment_cache_items as ppci')->whereColumn('ppci.item_payment_id', 'patient_item_payments.id'); })
+                    ->when($clinic_id, function ($query) use ($clinic_id) { $query->whereIn('created_by', function($q) use ($clinic_id) { $q->select('id')->from('users')->where('clinic_id', $clinic_id); }); })
+                    ->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0;
+                
+                $salesDateBill = \App\Models\PatientItemBillPayment::query()
+                    ->whereDate('created_at', $dateStr)
+                    ->where('amount', '>', 0)
+                    ->whereExists(function($q) { $q->select(DB::raw(1))->from('patient_payment_cache_items as ppci')->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id'); })
+                    ->when($clinic_id, function ($query) use ($clinic_id) { $query->whereIn('created_by', function($q) use ($clinic_id) { $q->select('id')->from('users')->where('clinic_id', $clinic_id); }); })
                     ->sum('amount');
+                
+                $salesAmount = (float) $salesDateItem + (float) $salesDateBill;
                 
                 $clientsConsultedVsSales[] = [
                     'date' => $dateStr,

@@ -162,7 +162,7 @@ const Dashboard = () => {
                   transition: 'box-shadow 0.3s ease-in-out',
                 }}
               >
-                <CardHeader 
+                <CardHeader
                   title="Clients Consulted vs Successful Sales"
                   titleTypographyProps={{
                     variant: 'h6',
@@ -277,7 +277,7 @@ const Dashboard = () => {
                   transition: 'box-shadow 0.3s ease-in-out',
                 }}
               >
-                <CardHeader 
+                <CardHeader
                   title="Prescription Demand"
                   titleTypographyProps={{
                     variant: 'h6',

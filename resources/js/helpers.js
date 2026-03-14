@@ -490,9 +490,6 @@ export const getPrivileges = (preferences) => {
     {
       label: "Marketing",
       value: "marketing",
-      show:
-        preferences?.find((e) => e.key === "MARKETING_MODULE")?.value
-          === "Yes",
       children: [
         { label: "Marketing Operations Monthly Report", value: "marketing_operations_monthly_report" }
       ]

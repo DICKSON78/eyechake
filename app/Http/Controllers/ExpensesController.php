@@ -97,6 +97,7 @@ class ExpensesController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'paid_amount' => 'required|numeric|min:0',
             'expense_date' => 'required|date_format:Y-m-d',
+            'channel_id' => 'required|exists:payment_channels,id',
             'running_cost' => 'sometimes|boolean',
             'improvement_cost' => 'sometimes|boolean',
         ]);
@@ -109,6 +110,7 @@ class ExpensesController extends Controller
             ExpensePayment::create([
                 'expense_id' => $data->id,
                 'amount' => $request->paid_amount,
+                'channel_id' => $request->channel_id,
                 'created_by' => $input['created_by'],
             ]);
         }

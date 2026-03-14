@@ -36,7 +36,7 @@ const PRIVILEGE_ALIASES = {
 };
 
 const ROLE_FALLBACK_PRIVILEGES = {
-  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "marketing", "employee_management", "director", "settings", "calendar"],
+  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "employee_management", "director", "settings", "calendar"],
   director: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "director", "settings", "calendar"],
   receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
   cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
@@ -51,7 +51,6 @@ const ROLE_FALLBACK_PRIVILEGES = {
   inventory: ["dashboard", "inventory_management", "inventory_reports"],
   accountant: ["dashboard", "financial_management", "financial_reports"],
   finance: ["dashboard", "financial_management", "financial_reports", "cash_collection"],
-  "marketing officer": ["dashboard", "marketing", "marketing_reports"],
   hr: ["dashboard", "employee_management", "user_management", "employee_reports"],
   "employee management": ["dashboard", "employee_management", "user_management", "employee_reports"],
   dispensing: ["dashboard", "dispensing"],
@@ -255,7 +254,6 @@ export const getDefaultRoute = (user) => {
     { privilege: 'procedure_room', route: '/procedure-room/dashboard' },
     { privilege: 'inventory_management', route: '/inventory-management/dashboard' },
     { privilege: 'sales_center', route: '/sales-management/dashboard' },
-    { privilege: 'marketing', route: '/marketing/dashboard' },
     { privilege: 'financial_management', route: '/financial-management/dashboard' },
     { privilege: 'user_management', route: '/user-management/users' },
     { privilege: 'settings', route: '/settings/preferences' },

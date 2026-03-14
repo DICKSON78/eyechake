@@ -2,7 +2,6 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import UserRegistration from "./users/UserRegistration";
 import Users from "./users/Users";
-import DoctorTasks from "./doctor-tasks/DoctorTasks";
 import AppointmentRequests from "./appointment-requests/AppointmentRequests";
 
 const UserManagementRoutes = () => {
@@ -16,10 +15,6 @@ const UserManagementRoutes = () => {
       <Route
         path="/users/new"
         element={<UserRegistration />}
-      />
-      <Route
-        path="/doctor-tasks"
-        element={<DoctorTasks />}
       />
       <Route
         path="/appointment-requests"

@@ -56,18 +56,33 @@ const Report = ({
     let footerColumns = [];
     if (Array.isArray(summationFooterColumns)) {
       footerColumns = summationFooterColumns.map((col) => {
-        if (typeof col.reducer === "function") {
-          const total = Array.isArray(data.data) ? data.data.reduce(col.reducer, 0) : 0;
-          // Ensure the total is a valid number before formatting
-          const numericTotal = typeof total === 'number' && !isNaN(total) ? total : 0;
-          col.value = numberFormat(numericTotal);
+        let total = 0;
+
+        if (col.totalKey && data && data.totals && typeof data.totals[col.totalKey] !== 'undefined') {
+          // Use grand total from backend if totalKey is provided
+          total = data.totals[col.totalKey];
+        } else if (typeof col.reducer === "function") {
+          // Fallback to client-side page summation
+          total = Array.isArray(data.data) ? data.data.reduce(col.reducer, 0) : 0;
+        } else if (typeof col.value !== 'undefined') {
+          // Static value (like "TOTAL" label)
+          return col;
         }
+
+        // Ensure the total is a valid number before formatting
+        const numericTotal = typeof total === 'string' ? parseFloat(total) : total;
+        const validTotal = typeof numericTotal === 'number' && !isNaN(numericTotal) ? numericTotal : 0;
+
+        const result = {
+          ...col,
+          value: numberFormat(validTotal)
+        };
 
         if (typeof col.span === "number") {
-          col.tableCellProps = { colSpan: col.span };
+          result.tableCellProps = { colSpan: col.span };
         }
 
-        return col;
+        return result;
       });
     }
 
@@ -129,21 +144,21 @@ const Report = ({
           renderExpanded={
             nestedObject
               ? (item, index) => (
-                  <Table
-                    columns={[
-                      {
-                        field: "index",
-                        headerName: "S/N",
-                        valueGetter: (item, index) => index + 1,
-                      },
-                      ...(nestedColumns || []),
-                    ]}
-                    items={
-                      Array.isArray(data.data) && data.data[index] ? data.data[index][nestedObject] : []
-                    }
-                    hidePaginationFooter
-                  />
-                )
+                <Table
+                  columns={[
+                    {
+                      field: "index",
+                      headerName: "S/N",
+                      valueGetter: (item, index) => index + 1,
+                    },
+                    ...(nestedColumns || []),
+                  ]}
+                  items={
+                    Array.isArray(data.data) && data.data[index] ? data.data[index][nestedObject] : []
+                  }
+                  hidePaginationFooter
+                />
+              )
               : null
           }
           repeatHead={!!nestedObject}

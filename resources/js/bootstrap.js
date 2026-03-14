@@ -44,12 +44,16 @@ window.axios.interceptors.response.use(
       const currentPath = window.location.pathname;
       const isPublicRoute = publicRoutes.some(route => currentPath === route);
       
-      // Only redirect to login if we're not already on a public route
+      // Only redirect to login if we're not already on a public route AND not already on login
       if (!isPublicRoute && window.location.href.indexOf("/login") === -1) {
         // Clear the invalid token
         localStorage.removeItem("token");
-        window.location.href = "/login";
-        return Promise.reject(error);
+        
+        // Prevent multiple redirects by setting a flag
+        if (!window.sessionStorage.getItem('redirecting_to_login')) {
+          window.sessionStorage.setItem('redirecting_to_login', 'true');
+          window.location.href = "/login";
+        }
       }
     }
 
