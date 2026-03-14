@@ -67,7 +67,7 @@ const Dashboard = () => {
   const [endDate, setEndDate] = useState(new Date());
 
   const { data, loading, error, handleFetch } = useFetch(
-    "api/financial-management/dashboard",
+    "api/reports/financial-management/dashboard",
     dateParams,
     true,
     {
@@ -249,20 +249,20 @@ const Dashboard = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <InfoCard
-                title="Total Revenue"
-                count={numberFormat(data.summary?.total_revenue || 0)}
-                icon={<RevenueIcon />}
-                color={green[500]}
-                onClick={() => navigate('/financial-management/reports/cash-collection')}
+                title="Total Sales"
+                count={numberFormat(data.summary?.total_debit || 0)}
+                icon={<SalesIcon />}
+                color={purple[400]}
+                onClick={navigateToFinancialManagement}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <InfoCard
                 title="Total Expenses"
-                count={numberFormat(data.summary?.total_expenses || 0)}
-                icon={<ExpenseIcon />}
-                color={red[500]}
-                onClick={() => navigate('/financial-management/expenses')}
+                count={numberFormat(data.summary?.total_credit || 0)}
+                icon={<ExpensesIcon />}
+                color={theme.palette.warning.main}
+                onClick={navigateToFinancialManagement}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>

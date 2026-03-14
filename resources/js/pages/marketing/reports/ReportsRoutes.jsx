@@ -1,45 +1,20 @@
 import React from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+// Keep only essential reports
 import PatientRegistration from "./PatientRegistration";
-import Consultation from "../../consultation-room/reports/Consultation";
-import CampaignPerformance from "./CampaignPerformance";
-import LeadGeneration from "./LeadGeneration";
-import CommunicationAnalytics from "./CommunicationAnalytics";
-import MarketingOperationsMonthlyReport from "./MarketingOperationsMonthlyReport";
-import MarketingManagementMonthlyReport from "./MarketingManagementMonthlyReport";
 
 const ReportsRoutes = () => {
   return (
     <Routes>
-      <Route index element={<Navigate to="/marketing/reports/patient-registration" replace />} />
-      <Route
-        path="/patient-registration"
-        element={<PatientRegistration />}
-      />
-      <Route
-        path="/consultation"
-        element={<Consultation />}
-      />
-      <Route
-        path="/campaign-performance"
-        element={<CampaignPerformance />}
-      />
-      <Route
-        path="/lead-generation"
-        element={<LeadGeneration />}
-      />
-      <Route
-        path="/communication-analytics"
-        element={<CommunicationAnalytics />}
-      />
-      <Route
-        path="/marketing-operations-monthly-report"
-        element={<MarketingOperationsMonthlyReport />}
-      />
-      <Route
-        path="/marketing-management-monthly-report"
-        element={<MarketingManagementMonthlyReport />}
-      />
+      <Route path="patient-registration" element={<PatientRegistration />} />
+      
+      {/* Redirect old routes to patient registration */}
+      <Route path="new-client-vs-return-client" element={<Navigate to="/reports/patient-registration" replace />} />
+      <Route path="unreachable-calls" element={<Navigate to="/reports/patient-registration" replace />} />
+      <Route path="marketing-campaign-performance" element={<Navigate to="/reports/patient-registration" replace />} />
+      <Route path="lead-generation" element={<Navigate to="/reports/patient-registration" replace />} />
+      <Route path="communication-analyst" element={<Navigate to="/reports/patient-registration" replace />} />
     </Routes>
   );
 };

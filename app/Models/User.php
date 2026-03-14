@@ -18,13 +18,8 @@ class User extends Authenticatable
     protected $fillable = [
         'clinic_id', 'first_name', 'middle_name', 'last_name', 'designation', 'department_id', 'job_title_id',
         'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'email', 'username', 'password', 'role',
-        'created_by', 'status', 'is_test_user',
+        'created_by', 'status', 'is_test_user', // Add field to identify test users
     ];
-
-    public function scopeReal($query)
-    {
-        return $query->where('is_test_user', 0);
-    }
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -139,46 +134,6 @@ class User extends Authenticatable
         return $this->role == 'Doctor' || 
                stripos($this->designation, 'doctor') !== false || 
                stripos($this->designation, 'physician') !== false;
-    }
-
-    public function hasPrivilege($privilege)
-    {
-        // Admins have all privileges
-        if ($this->is_admin) {
-            return true;
-        }
-
-        $privileges = $this->privileges;
-        
-        // If it's an object (from accessor), check property
-        if (is_object($privileges)) {
-            if (isset($privileges->{$privilege}) && $privileges->{$privilege}) {
-                return true;
-            }
-        } elseif (is_array($privileges)) {
-            if (in_array($privilege, $privileges) || (isset($privileges[$privilege]) && $privileges[$privilege])) {
-                return true;
-            }
-        }
-
-        // Role-based fallback
-        $roleMap = [
-            'receptionist' => ['reception', 'patient_registration'],
-            'cashier' => ['payment_center', 'patient_bills', 'invoices'],
-            'doctor' => ['consultation_room', 'consultation_reports'],
-            'optometrist' => ['consultation_room', 'consultation_reports'],
-            'pharmacist' => ['medicine_center', 'pharmacy_reports'],
-            'optician' => ['optician_center', 'workshop_reports'],
-            'sales manager' => ['sales_center', 'sales'],
-            'storekeeper' => ['inventory_management', 'inventory_reports'],
-            'accountant' => ['financial_management', 'financial_reports'],
-            'marketing officer' => ['marketing', 'marketing_reports'],
-            'hr' => ['employee_management', 'user_management'],
-            'director' => ['director', 'financial_reports'],
-        ];
-
-        $rolePrivileges = $roleMap[strtolower($this->role)] ?? [];
-        return in_array($privilege, $rolePrivileges);
     }
 
     protected function serializeDate(DateTimeInterface $date)

@@ -9,10 +9,7 @@ import CommunicationLogs from "./communication-logs/CommunicationLogs";
 import BulkSms from "./bulk-sms/BulkSms";
 import WhatsAppExport from "./whatsapp-export/WhatsAppExport";
 import UnreachableNumbers from "./unreachable-numbers/UnreachableNumbers";
-import PrestigeClients from "./prestige-clients/PrestigeClients";
-import ClientCallingStatus from "./client-calling-status/ClientCallingStatus";
-import MarketingGlassPatients from "./glass-patients/MarketingGlassPatients";
-import HighValuePatients from "./high-value-patients/HighValuePatients";
+import PatientRegistration from "./PatientRegistration";
 import SettingsRoutes from "./settings/SettingsRoutes";
 import ReportsRoutes from "./reports/ReportsRoutes";
 

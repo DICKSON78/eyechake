@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import {
   InventoryRounded as InventoryIcon,
+  AssessmentRounded as StocktakingIcon,
   WarningRounded as LowStockIcon,
   TrendingUpRounded as StockInIcon,
   TrendingDownRounded as StockOutIcon,
@@ -25,6 +26,8 @@ import {
   MedicationRounded as PharmacyIcon,
   VisibilityRounded as LensIcon,
   CenterFocusStrongRounded as FrameIcon,
+  ShoppingCartRounded as ProductsIcon,
+  BarChartRounded as ChartIcon,
 } from "@mui/icons-material";
 import {
   blue,
@@ -38,9 +41,6 @@ import {
   yellow,
   indigo,
   lime,
-  deepOrange,
-  lightBlue,
-  lightGreen,
 } from "@mui/material/colors";
 import { useTheme } from "@mui/material/styles";
 
@@ -48,37 +48,36 @@ import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
 import ChartWrapper from "../../../components/ChartWrapper";
 import { useFetch, useToast } from "../../../hooks";
-import { formatError, numberFormat } from "../../../helpers";
+import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const addToast = useToast();
   const theme = useTheme();
 
+  // Set up date parameters for daily filtering (default to today)
   const [dateParams] = useState({
     start_date: new Date().toISOString().split('T')[0],
     end_date: new Date().toISOString().split('T')[0],
   });
 
+  // Selected item filters for individual performance charts
   const [selectedFrameId, setSelectedFrameId] = useState('');
   const [selectedMedicineId, setSelectedMedicineId] = useState('');
   
+  // Store item lists separately so they persist during chart refetch
   const [frameItems, setFrameItems] = useState([]);
   const [medicineItems, setMedicineItems] = useState([]);
   
-  // Separate states for chart data
-  const [frameChartData, setFrameChartData] = useState([]);
-  const [medicineChartData, setMedicineChartData] = useState([]);
+  // Loading states for individual charts
   const [frameChartLoading, setFrameChartLoading] = useState(false);
   const [medicineChartLoading, setMedicineChartLoading] = useState(false);
+  
+  // Store chart data separately
+  const [frameMonthlySales, setFrameMonthlySales] = useState([]);
+  const [medicineMonthlySales, setMedicineMonthlySales] = useState([]);
 
-  // States for single item view
-  const [isFrameFilterActive, setIsFrameFilterActive] = useState(false);
-  const [isMedicineFilterActive, setIsMedicineFilterActive] = useState(false);
-  const [selectedFrameName, setSelectedFrameName] = useState('');
-  const [selectedMedicineName, setSelectedMedicineName] = useState('');
-
-  // MAIN DASHBOARD DATA
+  // Main dashboard data fetch (without filter params - for summary and static data)
   const { data, loading, error, handleFetch } = useFetch(
     "api/inventory-management/dashboard",
     dateParams,
@@ -95,27 +94,31 @@ const Dashboard = () => {
       },
       statistics: {
         frame_categories: [],
+        frame_stock_movement: [],
+        lens_types: [],
         pharmacy_categories: [],
-        sold_frames_pie_chart: [],
-        sold_medicine_pie_chart: [],
+        pharmacy_stock_movement: { stock_in: [], stock_out: [] },
+        frame_monthly_sales: [],
+        medicine_monthly_sales: [],
         frame_items: [],
         medicine_items: [],
       },
     },
     (response) => {
       const result = response.data.data;
+      // Store item lists when main data loads
       if (result?.statistics?.frame_items) {
         setFrameItems(result.statistics.frame_items);
       }
       if (result?.statistics?.medicine_items) {
         setMedicineItems(result.statistics.medicine_items);
       }
-      // Set initial chart data
-      if (result?.statistics?.sold_frames_pie_chart) {
-        setFrameChartData(result.statistics.sold_frames_pie_chart);
+      // Initialize chart data
+      if (result?.statistics?.frame_monthly_sales) {
+        setFrameMonthlySales(result.statistics.frame_monthly_sales);
       }
-      if (result?.statistics?.sold_medicine_pie_chart) {
-        setMedicineChartData(result.statistics.sold_medicine_pie_chart);
+      if (result?.statistics?.medicine_monthly_sales) {
+        setMedicineMonthlySales(result.statistics.medicine_monthly_sales);
       }
       return result;
     }
@@ -124,6 +127,64 @@ const Dashboard = () => {
   useEffect(() => {
     document.title = `Stock Management Dashboard - ${window.APP_NAME}`;
   }, []);
+
+  // Fetch frame chart data when frame filter changes
+  useEffect(() => {
+    if (selectedFrameId === '') {
+      // Reset to original data when "All Frames" is selected
+      if (data?.statistics?.frame_monthly_sales) {
+        setFrameMonthlySales(data.statistics.frame_monthly_sales);
+      }
+      return;
+    }
+    
+    setFrameChartLoading(true);
+    window.axios.get('/api/inventory-management/dashboard', {
+      params: { ...dateParams, frame_id: selectedFrameId }
+    }).then((response) => {
+      const chartData = response.data?.data?.statistics?.frame_monthly_sales || [];
+      setFrameMonthlySales(chartData);
+    }).catch((err) => {
+      console.error('Error fetching frame chart data:', err);
+    }).finally(() => {
+      setFrameChartLoading(false);
+    });
+  }, [selectedFrameId]);
+
+  // Fetch medicine chart data when medicine filter changes
+  useEffect(() => {
+    if (selectedMedicineId === '') {
+      // Reset to original data when "All Medicines" is selected
+      if (data?.statistics?.medicine_monthly_sales) {
+        setMedicineMonthlySales(data.statistics.medicine_monthly_sales);
+      }
+      return;
+    }
+    
+    setMedicineChartLoading(true);
+    window.axios.get('/api/inventory-management/dashboard', {
+      params: { ...dateParams, medicine_id: selectedMedicineId }
+    }).then((response) => {
+      const chartData = response.data?.data?.statistics?.medicine_monthly_sales || [];
+      setMedicineMonthlySales(chartData);
+    }).catch((err) => {
+      console.error('Error fetching medicine chart data:', err);
+    }).finally(() => {
+      setMedicineChartLoading(false);
+    });
+  }, [selectedMedicineId]);
+
+  // Auto-refresh when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        handleFetch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [handleFetch]);
 
   useEffect(() => {
     if (error) {
@@ -136,132 +197,6 @@ const Dashboard = () => {
     addToast({ message: "Dashboard refreshed", severity: "success" });
   };
 
-  // Fetch frame chart data when frame filter changes
-  useEffect(() => {
-    const fetchFrameChartData = async () => {
-      setFrameChartLoading(true);
-      try {
-        const params = { ...dateParams };
-        
-        if (selectedFrameId) {
-          params.frame_id = selectedFrameId;
-          setIsFrameFilterActive(true);
-          // Find and store selected frame name
-          const selectedFrame = frameItems.find(f => f.id === selectedFrameId);
-          setSelectedFrameName(selectedFrame?.name || 'Selected Frame');
-        } else {
-          setIsFrameFilterActive(false);
-          setSelectedFrameName('');
-        }
-        
-        const response = await window.axios.get('/api/inventory-management/dashboard', { params });
-        const chartData = response.data?.data?.statistics?.sold_frames_pie_chart || [];
-        
-        setFrameChartData(chartData);
-        
-      } catch (err) {
-        console.error('Error fetching frame chart data:', err);
-        addToast({ message: "Error loading frame chart data", severity: "error" });
-      } finally {
-        setFrameChartLoading(false);
-      }
-    };
-
-    fetchFrameChartData();
-  }, [selectedFrameId, dateParams]);
-
-  // Fetch medicine chart data when medicine filter changes
-  useEffect(() => {
-    const fetchMedicineChartData = async () => {
-      setMedicineChartLoading(true);
-      try {
-        const params = { ...dateParams };
-        
-        if (selectedMedicineId) {
-          params.medicine_id = selectedMedicineId;
-          setIsMedicineFilterActive(true);
-          // Find and store selected medicine name
-          const selectedMedicine = medicineItems.find(m => m.id === selectedMedicineId);
-          setSelectedMedicineName(selectedMedicine?.name || 'Selected Medicine');
-        } else {
-          setIsMedicineFilterActive(false);
-          setSelectedMedicineName('');
-        }
-        
-        const response = await window.axios.get('/api/inventory-management/dashboard', { params });
-        const chartData = response.data?.data?.statistics?.sold_medicine_pie_chart || [];
-        
-        setMedicineChartData(chartData);
-        
-      } catch (err) {
-        console.error('Error fetching medicine chart data:', err);
-        addToast({ message: "Error loading medicine chart data", severity: "error" });
-      } finally {
-        setMedicineChartLoading(false);
-      }
-    };
-
-    fetchMedicineChartData();
-  }, [selectedMedicineId, dateParams]);
-
-  // Colors
-  const chartColors = [
-    blue[500], green[500], orange[500], purple[500], pink[500], 
-    cyan[500], teal[500], red[500], yellow[500], indigo[500], 
-    lime[500], deepOrange[500], lightBlue[500], lightGreen[500],
-    blue[700], green[700], orange[700], purple[700], pink[700],
-    cyan[700], teal[700], red[700], blue[300], green[300], orange[300],
-  ];
-
-  // Helper functions
-  const hasPieChartData = (chartData) => {
-    return chartData && chartData.length > 0 && chartData.some(item => item.quantity_sold > 0);
-  };
-
-  const getSeriesTotal = (chartData) => {
-    if (!chartData || chartData.length === 0) return 0;
-    return chartData.reduce((sum, item) => sum + (item.quantity_sold || 0), 0);
-  };
-
-  const prepareChartData = (data, type = 'frame', isFilterActive = false) => {
-    if (!data || data.length === 0) return { labels: [], series: [], originalData: [] };
-    
-    // Filter out items with zero quantity
-    let filteredData = data.filter(item => (item.quantity_sold || 0) > 0);
-    
-    // If filter is active, we want to show ONLY the selected item with 100%
-    if (isFilterActive) {
-      // When filter is active, we want the pie to show only one segment with 100%
-      // But we need to keep the original data for reference
-      const total = filteredData.reduce((sum, item) => sum + (item.quantity_sold || 0), 0);
-      
-      // Create a single item representation with 100%
-      const singleItemData = [{
-        ...filteredData[0], // Keep the first item's properties
-        quantity_sold: total, // Set total as the quantity
-        isFiltered: true
-      }];
-      
-      filteredData = singleItemData;
-    }
-    
-    // Sort from largest to smallest
-    const sortedData = [...filteredData].sort((a, b) => (b.quantity_sold || 0) - (a.quantity_sold || 0));
-    
-    return {
-      labels: sortedData.map(e => {
-        if (type === 'frame') {
-          return isFilterActive ? selectedFrameName || e.frame_name || 'Selected Frame' : (e.frame_name || 'Unknown');
-        } else {
-          return isFilterActive ? selectedMedicineName || e.medicine_name || 'Selected Medicine' : (e.medicine_name || 'Unknown');
-        }
-      }),
-      series: sortedData.map(e => e.quantity_sold || 0),
-      originalData: sortedData,
-      total: getSeriesTotal(filteredData)
-    };
-  };
-
   if (loading) {
     return (
       <Page title="Stock Management Dashboard">
@@ -271,44 +206,6 @@ const Dashboard = () => {
       </Page>
     );
   }
-
-  // Prepare chart data with filter status
-  const framesPrepared = prepareChartData(frameChartData, 'frame', isFrameFilterActive);
-  const medicinePrepared = prepareChartData(medicineChartData, 'medicine', isMedicineFilterActive);
-  
-  const hasFramesData = framesPrepared.series.length > 0;
-  const hasMedicineData = medicinePrepared.series.length > 0;
-  
-  const framesTotal = getSeriesTotal(frameChartData);
-  const medicineTotal = getSeriesTotal(medicineChartData);
-
-  // Prepare legend items based on filter status
-  const getFrameLegendItems = () => {
-    if (isFrameFilterActive) {
-      // When filter is active, show only the selected frame in legend
-      return [selectedFrameName || 'Selected Frame'];
-    }
-    // When no filter, show all frames
-    return framesPrepared.labels;
-  };
-
-  const getMedicineLegendItems = () => {
-    if (isMedicineFilterActive) {
-      // When filter is active, show only the selected medicine in legend
-      return [selectedMedicineName || 'Selected Medicine'];
-    }
-    // When no filter, show all medicines
-    return medicinePrepared.labels;
-  };
-
-  // Static data
-  const frameCategories = data?.statistics?.frame_categories || [];
-  const frameCategoriesSeries = frameCategories.map(e => Math.max(0, parseFloat(e.total_quantity) || 0));
-  const hasFrameCategories = frameCategoriesSeries.some(v => v > 0);
-
-  const pharmacyCategories = data?.statistics?.pharmacy_categories || [];
-  const pharmacyCategoriesSeries = pharmacyCategories.map(e => Math.max(0, parseFloat(e.total_quantity) || 0));
-  const hasPharmacyCategories = pharmacyCategoriesSeries.some(v => v > 0);
 
   return (
     <Page
@@ -321,7 +218,10 @@ const Dashboard = () => {
     >
       <CardHeader
         title="Stock Management Dashboard"
-        titleTypographyProps={{ variant: "h4", fontWeight: 700 }}
+        titleTypographyProps={{
+          variant: "h4",
+          fontWeight: 700,
+        }}
         action={
           <Tooltip title="Refresh Dashboard">
             <IconButton onClick={handleRefresh} disabled={loading}>
@@ -329,13 +229,18 @@ const Dashboard = () => {
             </IconButton>
           </Tooltip>
         }
-        sx={{ p: 0, mb: 2 }}
+        sx={{
+          p: 0,
+          mb: 2,
+        }}
       />
-      
       {!loading && data ? (
-        <>
-          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
-            {/* Info Cards */}
+        <React.Fragment>
+          <Grid
+            container
+            spacing={{ xs: 2, sm: 2, md: 3 }}
+            sx={{ mb: 4 }}
+          >
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Total Items"
@@ -401,88 +306,69 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-            {/* Frame Categories Pie Chart */}
+          <Grid
+            container
+            spacing={{ xs: 2, sm: 2, md: 3 }}
+            justifyContent="stretch"
+            sx={{
+              "& .MuiCard-root": {
+                minHeight: "100%",
+              },
+            }}
+          >
+            {/* Pie Chart - Frame Categories */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader title="Frame Categories" />
-                <Divider />
                 <CardContent>
-                  {!hasFrameCategories ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                      <Typography variant="body1" color="textSecondary">
-                        Hakuna data ya Frame Categories
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <ChartWrapper
-                      options={{
-                        labels: frameCategories.map(e => e.category || 'Unknown'),
-                        chart: {
-                          fontFamily: theme.typography.fontFamily,
-                          background: "transparent",
-                          toolbar: { show: false },
+                  <ChartWrapper
+                    title="Frame Categories Distribution"
+                        style: {
+                          fontSize: 10,
+                          fontWeight: 400,
                         },
-                        colors: chartColors,
-                        dataLabels: {
-                          enabled: true,
-                          style: {
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            colors: ['#fff'],
-                          },
-                          dropShadow: {
-                            enabled: true,
-                            top: 1,
-                            left: 1,
-                            blur: 1,
-                            color: '#000',
-                            opacity: 0.5,
-                          },
-                          formatter: (val, opts) => {
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            const total = opts.w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                            return parseFloat(percentage) > 2 ? `${percentage}%` : '';
-                          },
+                        dropShadow: {
+                          enabled: false,
                         },
-                        tooltip: { 
-                          y: { 
-                            formatter: (val, { w }) => {
-                              const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                              const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
-                              return `${numberFormat(val)} (${percentage}%)`;
-                            }
-                          } 
+                        formatter: function (val, opts) {
+                          return numberFormat(opts.w.globals.series[opts.seriesIndex]);
                         },
-                        legend: { 
-                          position: "bottom",
-                          fontSize: '12px',
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: (val) => numberFormat(val),
                         },
-                        stroke: {
-                          show: true,
-                          width: 2,
-                          colors: ['#fff'],
+                      },
+                      legend: {
+                        position: "bottom",
+                        labels: {
+                          colors: (data.statistics?.frame_categories || []).map(
+                            (e) => theme.palette.text.secondary
+                          ),
+                          useSeriesColors: false,
                         },
-                        plotOptions: {
-                          pie: {
-                            expandOnClick: true,
-                            donut: {
-                              size: '0%',
-                            },
-                          },
+                        markers: {
+                          width: 14,
+                          height: 8,
+                          radius: 4,
                         },
-                      }}
-                      series={frameCategoriesSeries}
-                      type="pie"
-                      height={400}
-                    />
-                  )}
+                      },
+                    }}
+                    series={(data.statistics?.frame_categories || []).map(
+                      (e) => Math.max(0, parseFloat(e.total_quantity) || 0)
+                    )}
+                    type="pie"
+                    height={
+                      (data.statistics?.frame_categories || []).length ? 400 : 300
+                    }
+                  />
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Sold Frames - FILTERABLE */}
+            {/* Quick Actions removed for Stock Management Dashboard */}
+
+            {/* Sold Frames (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
@@ -509,19 +395,8 @@ const Dashboard = () => {
                 <Divider />
                 <CardContent>
                   {frameChartLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
-                    </Box>
-                  ) : !hasFramesData ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400, flexDirection: 'column' }}>
-                      <Typography variant="body1" color="textSecondary" gutterBottom>
-                        {selectedFrameId 
-                          ? `Hakuna data ya mauzo ya ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame hii'}`
-                          : "Hakuna data ya mauzo ya frames"}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Total: {numberFormat(framesTotal)}
-                      </Typography>
                     </Box>
                   ) : (
                     <ChartWrapper
@@ -581,7 +456,7 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
-            {/* Sold Medicine - FILTERABLE */}
+            {/* Sold Medicine (Monthly) */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
@@ -608,19 +483,8 @@ const Dashboard = () => {
                 <Divider />
                 <CardContent>
                   {medicineChartLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
-                    </Box>
-                  ) : !hasMedicineData ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400, flexDirection: 'column' }}>
-                      <Typography variant="body1" color="textSecondary" gutterBottom>
-                        {selectedMedicineId 
-                          ? `Hakuna data ya mauzo ya ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine hii'}`
-                          : "Hakuna data ya mauzo ya medicine"}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Total: {numberFormat(medicineTotal)}
-                      </Typography>
                     </Box>
                   ) : (
                     <ChartWrapper
@@ -686,72 +550,87 @@ const Dashboard = () => {
                 <CardHeader title="Pharmacy Items by Category" />
                 <Divider />
                 <CardContent>
-                  {!hasPharmacyCategories ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                      <Typography variant="body1" color="textSecondary">
-                        Hakuna data ya Pharmacy Categories
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <ChartWrapper
-                      options={{
-                        labels: pharmacyCategories.map(e => e.category || 'Unknown'),
-                        chart: {
-                          fontFamily: theme.typography.fontFamily,
-                          background: "transparent",
-                          toolbar: { show: false },
+                  <ChartWrapper
+                    options={{
+                      labels: (data.statistics?.pharmacy_categories || []).map(
+                        (e) => e.category || 'Unknown'
+                      ),
+                      chart: {
+                        fontFamily: theme.typography.fontFamily,
+                        background: "transparent",
+                        toolbar: {
+                          show: false,
                         },
-                        colors: chartColors,
-                        dataLabels: {
-                          enabled: true,
-                          style: {
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            colors: ['#fff'],
-                          },
-                          dropShadow: {
-                            enabled: true,
-                            top: 1,
-                            left: 1,
-                            blur: 1,
-                            color: '#000',
-                            opacity: 0.5,
-                          },
-                          formatter: (val, opts) => {
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            const total = opts.w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                            return parseFloat(percentage) > 2 ? `${percentage}%` : '';
+                      },
+                      plotOptions: {
+                        pie: {
+                          dataLabels: {
+                            offset: -16,
                           },
                         },
-                        tooltip: { 
-                          y: { 
-                            formatter: (val, { w }) => {
-                              const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                              const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
-                              return `${numberFormat(val)} (${percentage}%)`;
-                            }
-                          } 
+                      },
+                      colors: [
+                        teal[400],
+                        green[500],
+                        cyan[500],
+                        blue[400],
+                        purple[400],
+                        orange[400],
+                        pink[400],
+                        yellow[500],
+                      ],
+                      stroke: {
+                        show: false,
+                        width: 3,
+                        colors: (data.statistics?.pharmacy_categories || []).map(
+                          (e) => theme.palette.background.paper
+                        ),
+                      },
+                      dataLabels: {
+                        style: {
+                          fontSize: 10,
+                          fontWeight: 400,
                         },
-                        legend: { position: "bottom" },
-                        stroke: { show: true, width: 2, colors: ['#fff'] },
-                        plotOptions: {
-                          pie: {
-                            expandOnClick: true,
-                            donut: { size: '0%' },
-                          },
+                        dropShadow: {
+                          enabled: false,
                         },
-                      }}
-                      series={pharmacyCategoriesSeries}
-                      type="pie"
-                      height={400}
-                    />
-                  )}
+                        formatter: function (val, opts) {
+                          return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                        },
+                      },
+                      tooltip: {
+                        y: {
+                          formatter: (val) => numberFormat(val),
+                        },
+                      },
+                      legend: {
+                        position: "bottom",
+                        labels: {
+                          colors: (data.statistics?.pharmacy_categories || []).map(
+                            (e) => theme.palette.text.secondary
+                          ),
+                          useSeriesColors: false,
+                        },
+                        markers: {
+                          width: 14,
+                          height: 8,
+                          radius: 4,
+                        },
+                      },
+                    }}
+                    series={(data.statistics?.pharmacy_categories || []).map(
+                      (e) => Math.max(0, parseFloat(e.total_quantity) || 0)
+                    )}
+                    type="pie"
+                    height={
+                      (data.statistics?.pharmacy_categories || []).length ? 400 : 300
+                    }
+                  />
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
-        </>
+        </React.Fragment>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
           <Typography variant="h6">No data available.</Typography>

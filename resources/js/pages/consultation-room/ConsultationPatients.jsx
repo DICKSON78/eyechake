@@ -34,30 +34,20 @@ const ConsultationPatients = () => {
 
   const { status } = useParams();
 
-  const [params, setParams] = useState(() => {
-    const isPending = String(status || '').toLowerCase() === 'pending';
-    const isConsulted = String(status || '').toLowerCase() === 'consulted';
-    
-    // For consulted patients, default to showing last 1 month
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    
-    return {
-      page: 1,
-      per_page: 25,
-      // Don't force direction by default; show all pending regardless of origin
-      patient_direction: undefined,
-      status: undefined,
-      patient_id: undefined,
-      patient_name: undefined,
-      patient_gender: undefined,
-      patient_phone: undefined,
-      item_payment_mode_id: undefined,
-      item_id: undefined,
-      // Set default start date for consulted patients to 1 month ago
-      start_date: isConsulted ? oneMonthAgo : undefined,
-      end_date: undefined,
-    };
+  const [params, setParams] = useState({
+    page: 1,
+    per_page: 25,
+    status: "Sent to Optician",
+    patient_id: undefined,
+    patient_name: undefined,
+    patient_gender: undefined,
+    patient_phone: undefined,
+    item_payment_mode_id: 'consultant', // This is what optician center expects for procedures
+    start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    end_date: new Date(),
+    // Add consultation-specific filters for proper backend filtering
+    require_glass: "Yes",
+    patient_direction: undefined, // Will be set to "Direct to Optician" if needed
   });
 
   const { data, loading, error, handleFetch } = useFetch(

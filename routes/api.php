@@ -344,6 +344,19 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->delete('/{id}', [OfficeCalendarController::class, 'destroy']);
     });
     
+    // Financial management routes - require financial_management privilege
+    Route::group(['middleware' => ['auth:api', 'privilege:financial_management']], function ($router) {
+        $router->controller(FinancialManagementDashboardController::class)->prefix('financial-management')->group(function ($router) {
+            $router->get('/dashboard', '__invoke');
+        });
+        
+        $router->controller(FinancialManagementReportsController::class)->prefix('financial-management')->group(function ($router) {
+            $router->get('/reports', 'index');
+            $router->get('/reports/revenue-collection', 'getRevenueCollectionReport');
+            $router->get('/reports/expenses', 'getExpenseReport');
+        });
+    });
+    
     // Employee Reports
     $router->prefix('employee-reports')->group(function ($router) {
         $router->get('/my-reports', [EmployeeReportsController::class, 'myReports']);
@@ -469,6 +482,13 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         
         // Prestige Clients
         $router->get('/prestige-clients', [PrestigeClientsController::class, 'index']);
+        
+        // Bulk SMS
+        $router->apiResource('/bulk-sms', BulkSmsController::class);
+        $router->post('/bulk-sms/{id}/send', [BulkSmsController::class, 'send']);
+        
+        // WhatsApp Export
+        $router->get('/whatsapp-export', [WhatsAppExportController::class, 'export']);
         
         // Client Calling Status
         $router->get('/client-calling-status', [ClientCallingStatusController::class, 'index']);

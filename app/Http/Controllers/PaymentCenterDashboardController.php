@@ -63,150 +63,149 @@ class PaymentCenterDashboardController extends Controller
             ],
         ];
 
-        // Align dashboard totals with Daily Cash Collection report (only actual payments in range), avoiding duplication from item joins
-        $paymentsSum = 0;
-        $billPaymentsSum = 0;
-
+        // Total revenue from payments (include both item payments and bill payments) plus cleared bills as fallback
+        // Only filter by clinic if clinic_id is provided and user is not admin
+        // Use try-catch to handle any query errors gracefully
         try {
-            $itemPaymentsBase = PatientItemPayment::query()
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0);
-
+            $paymentsQuery = PatientItemPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0);
+            
+            // Apply clinic filter only if clinic_id is provided
             if ($clinic_id) {
-                $itemPaymentsBase->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $paymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
-
-            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-            $paymentsSum = (float) ($itemPaymentsBase->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+            
+            $paymentsSum = $paymentsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
-            \Log::error('Error calculating item payments sum (dashboard)', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            \Log::error('Error calculating payments sum', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $paymentsSum = 0;
         }
-
+            
         try {
-            $billPaymentsBase = PatientItemBillPayment::query()
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0);
-
+            $billPaymentsQuery = PatientItemBillPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0);
+            
+            // Apply clinic filter only if clinic_id is provided
             if ($clinic_id) {
-                $billPaymentsBase->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
-
-            $billPaymentsSum = (float) $billPaymentsBase->sum('patient_item_bill_payments.amount');
+            
+            $billPaymentsSum = $billPaymentsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
-            \Log::error('Error calculating bill payments sum (dashboard)', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            \Log::error('Error calculating bill payments sum', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $billPaymentsSum = 0;
         }
 
-        // Dashboard total revenue now matches Daily Cash Collection (no cleared-bill fallback, no duplication)
-        $data['summary']['total_revenue'] = $paymentsSum + $billPaymentsSum;
+        $billsSum = PatientItemBill::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->where('status', 'Cleared')
+            ->where('created_at', '>=', $start_date . ' 00:00:00')
+            ->where('created_at', '<=', $end_date . ' 23:59:59')
+            ->sum(DB::raw('coalesce(amount,0) - coalesce(discount,0)')) ?? 0;
+            
+        // Prefer actual payments if present; otherwise fall back to cleared bills
+        $data['summary']['total_revenue'] = ($paymentsSum + $billPaymentsSum) > 0
+            ? ($paymentsSum + $billPaymentsSum)
+            : $billsSum;
 
         // Cash payments amount (must match cash in hand)
-        // Cash payments: filter payments once, require linkage, avoid join multiplication
-        $cashItemPayments = 0;
-        $cashBillPayments = 0;
-
-        $cashChannelNames = ["cash", "cash in hand", "cash payment"];
-
         try {
             $cashItemPaymentsQuery = PatientItemPayment::query()
-                ->join('payment_channels as ch', 'patient_item_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->whereIn(DB::raw('LOWER(ch.name)'), $cashChannelNames);
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0)
+                ->where(function ($q) {
+                    $q->whereHas('channel', function ($query) {
+                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                    })
+                    ->orWhereHas('items.payment_mode', function ($query) {
+                        $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    });
+                });
 
             if ($clinic_id) {
-                $cashItemPaymentsQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $cashItemPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
 
-            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-            $cashItemPayments = (float) ($cashItemPaymentsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+            $cashItemPayments = $cashItemPaymentsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating cash item payments', ['error' => $e->getMessage()]);
+            $cashItemPayments = 0;
         }
 
         try {
             $cashBillPaymentsQuery = PatientItemBillPayment::query()
-                ->join('payment_channels as ch', 'patient_item_bill_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0)
-                ->whereIn(DB::raw('LOWER(ch.name)'), $cashChannelNames);
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0)
+                ->where(function ($q) {
+                    $q->whereHas('channel', function ($query) {
+                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                    })
+                    ->orWhereHas('items.payment_mode', function ($query) {
+                        $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    });
+                });
 
             if ($clinic_id) {
-                $cashBillPaymentsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $cashBillPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
 
-            $cashBillPayments = (float) $cashBillPaymentsQuery->sum('patient_item_bill_payments.amount');
+            $cashBillPayments = $cashBillPaymentsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating cash bill payments', ['error' => $e->getMessage()]);
+            $cashBillPayments = 0;
         }
 
         $data['summary']['cash_payments'] = $cashItemPayments + $cashBillPayments;
 
-        // Cash available (collected cash minus expenses)
-        $data['summary']['cash_available'] = $data['summary']['cash_payments'] - $data['summary']['total_expenses'];
+        // Cash available (collected cash) - should be cash in hand from today's collections
+        // This represents actual cash that should be in the cash drawer
+        $data['summary']['cash_available'] = $data['summary']['cash_payments'];
 
-        // Credit payments amount - only by channel name
-        $creditItemPayments = 0;
-        $creditBillPayments = 0;
-        $creditChannelNames = ['credit'];
-
+        // Credit payments amount (billed/credited items)
         try {
-            $creditItemQuery = PatientItemPayment::query()
-                ->join('payment_channels as ch', 'patient_item_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_payments.created_at')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0)
-                ->whereIn(DB::raw('LOWER(ch.name)'), $creditChannelNames);
+            $creditQuery = PatientItemPayment::query()
+                ->whereNotNull('created_at')
+                ->where('created_at', '>=', $start_date . ' 00:00:00')
+                ->where('created_at', '<=', $end_date . ' 23:59:59')
+                ->where('amount', '>', 0)
+                ->whereHas('items.payment_mode', function ($query) {
+                    $query->whereRaw('LOWER(payment_type) = ?', ['credit']);
+                })
+                ->distinct('patient_item_payments.id');
 
             if ($clinic_id) {
-                $creditItemQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $creditQuery->whereHas('creator', function ($q2) use ($clinic_id) {
+                    $q2->where('clinic_id', $clinic_id);
                 });
             }
 
-            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-            $creditItemPayments = (float) ($creditItemQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+            $data['summary']['credit_payments'] = (float) $creditQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
-            \Log::error('Error calculating credit item payments', ['error' => $e->getMessage()]);
+            \Log::error('Error calculating credit payments', ['error' => $e->getMessage()]);
+            $data['summary']['credit_payments'] = 0;
         }
-
-        try {
-            $creditBillQuery = PatientItemBillPayment::query()
-                ->join('payment_channels as ch', 'patient_item_bill_payments.channel_id', '=', 'ch.id')
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0)
-                ->whereIn(DB::raw('LOWER(ch.name)'), $creditChannelNames);
-
-            if ($clinic_id) {
-                $creditBillQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-
-            $creditBillPayments = (float) $creditBillQuery->sum('patient_item_bill_payments.amount');
-        } catch (\Exception $e) {
-            \Log::error('Error calculating credit bill payments', ['error' => $e->getMessage()]);
-        }
-
-        $data['summary']['credit_payments'] = $creditItemPayments + $creditBillPayments;
 
         // Pending bills count (only PatientItemBill records to match the pending bills page) in date range
         try {
@@ -233,7 +232,7 @@ class PaymentCenterDashboardController extends Controller
                 ->whereHas('items', function ($query) {
                     $query->where('status', 'Pending');
                     $query->whereHas('payment_mode', function ($q) {
-                        $q->where('transaction_type', 'Cash');
+                        $q->where('payment_type', 'Cash');
                     });
                 })
                 ->whereDate('created_at', '>=', $start_date)
@@ -308,21 +307,20 @@ class PaymentCenterDashboardController extends Controller
         // Net profit
         $data['summary']['net_profit'] = $data['summary']['total_revenue'] - $data['summary']['total_expenses'];
 
-        // Today's collections (both item and bill payments) - must use whereExists like total_revenue
+        // Today's collections (both item and bill payments)
         try {
             $todayItemsQuery = PatientItemPayment::query()
-                ->whereNotNull('patient_item_payments.created_at')
-                ->whereDate('patient_item_payments.created_at', Carbon::today())
-                ->where('patient_item_payments.amount', '>', 0);
+                ->whereNotNull('created_at')
+                ->whereDate('created_at', Carbon::today())
+                ->where('amount', '>', 0);
             
             if ($clinic_id) {
-                $todayItemsQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $todayItemsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
             
-            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-            $todayItems = (float) ($todayItemsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+            $todayItems = $todayItemsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating today items', ['error' => $e->getMessage()]);
             $todayItems = 0;
@@ -330,17 +328,17 @@ class PaymentCenterDashboardController extends Controller
         
         try {
             $todayBillsQuery = PatientItemBillPayment::query()
-                ->whereNotNull('patient_item_bill_payments.created_at')
-                ->whereDate('patient_item_bill_payments.created_at', Carbon::today())
-                ->where('patient_item_bill_payments.amount', '>', 0);
+                ->whereNotNull('created_at')
+                ->whereDate('created_at', Carbon::today())
+                ->where('amount', '>', 0);
             
             if ($clinic_id) {
-                $todayBillsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $todayBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
                 });
             }
             
-            $todayBills = (float) $todayBillsQuery->sum('patient_item_bill_payments.amount');
+            $todayBills = $todayBillsQuery->sum('amount') ?? 0;
         } catch (\Exception $e) {
             \Log::error('Error calculating today bills', ['error' => $e->getMessage()]);
             $todayBills = 0;
@@ -348,25 +346,24 @@ class PaymentCenterDashboardController extends Controller
         
         $data['summary']['today_collections'] = $todayItems + $todayBills;
 
-        // Payment trends (last 7 days) - use exists filter to avoid duplication
+        // Payment trends (last 7 days) - include both item payments and bill payments
         $data['statistics']['payment_trends'] = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             
             try {
                 $itemRevenueQuery = PatientItemPayment::query()
-                    ->whereNotNull('patient_item_payments.created_at')
-                    ->whereDate('patient_item_payments.created_at', $date)
-                    ->where('patient_item_payments.amount', '>', 0);
+                    ->whereNotNull('created_at')
+                    ->whereDate('created_at', $date)
+                    ->where('amount', '>', 0);
                 
                 if ($clinic_id) {
-                    $itemRevenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    $itemRevenueQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
                     });
                 }
                 
-                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-                $itemRevenue = (float) ($itemRevenueQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+                $itemRevenue = $itemRevenueQuery->sum('amount') ?? 0;
             } catch (\Exception $e) {
                 \Log::error('Error calculating item revenue for date', ['date' => $date, 'error' => $e->getMessage()]);
                 $itemRevenue = 0;
@@ -374,17 +371,17 @@ class PaymentCenterDashboardController extends Controller
                 
             try {
                 $billRevenueQuery = PatientItemBillPayment::query()
-                    ->whereNotNull('patient_item_bill_payments.created_at')
-                    ->whereDate('patient_item_bill_payments.created_at', $date)
-                    ->where('patient_item_bill_payments.amount', '>', 0);
+                    ->whereNotNull('created_at')
+                    ->whereDate('created_at', $date)
+                    ->where('amount', '>', 0);
                 
                 if ($clinic_id) {
-                    $billRevenueQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                        $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                    $billRevenueQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
                     });
                 }
                 
-                $billRevenue = (float) $billRevenueQuery->sum('patient_item_bill_payments.amount');
+                $billRevenue = $billRevenueQuery->sum('amount') ?? 0;
             } catch (\Exception $e) {
                 \Log::error('Error calculating bill revenue for date', ['date' => $date, 'error' => $e->getMessage()]);
                 $billRevenue = 0;
@@ -408,8 +405,8 @@ class PaymentCenterDashboardController extends Controller
                 ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59');
             
             if ($clinic_id) {
-                $itemChannelQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $itemChannelQuery->whereHas('creator', function ($q2) use ($clinic_id) {
+                    $q2->where('clinic_id', $clinic_id);
                 });
             }
             
@@ -434,8 +431,8 @@ class PaymentCenterDashboardController extends Controller
                 ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59');
             
             if ($clinic_id) {
-                $billChannelQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $billChannelQuery->whereHas('creator', function ($q2) use ($clinic_id) {
+                    $q2->where('clinic_id', $clinic_id);
                 });
             }
             
