@@ -24,8 +24,8 @@ const PRIVILEGE_ALIASES = {
 };
 
 const ROLE_FALLBACK_PRIVILEGES = {
-  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "employee_management", "director", "settings", "calendar"],
-  director: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "director", "settings", "calendar"],
+  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "employee_management", "director", "settings", "calendar", "marketing"],
+  director: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "director", "settings", "calendar", "marketing"],
   receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
   cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
   doctor: ["dashboard", "consultation_room", "consultation_reports"],
@@ -188,6 +188,7 @@ export const getDefaultRoute = (user) => {
     { privilege: 'financial_management', route: '/financial-management/dashboard' },
     { privilege: 'user_management', route: '/user-management/users' },
     { privilege: 'settings', route: '/settings/preferences' },
+    { privilege: 'marketing', route: '/marketing/dashboard' },
   ];
   
   for (const candidate of routeCandidates) {

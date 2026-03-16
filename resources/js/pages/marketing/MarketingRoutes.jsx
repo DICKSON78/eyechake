@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./dashboard/Dashboard";
+import DailyActivities from "./daily-activities/DailyActivities";
 import Ideas from "./ideas/Ideas";
 import ResearchPlans from "./research-plans/ResearchPlans";
 import MarketingStrategies from "./marketing-strategies/MarketingStrategies";
@@ -24,11 +25,15 @@ const MarketingRoutes = () => {
         element={<Dashboard />}
       />
       <Route
+        path="/daily-activities"
+        element={<DailyActivities />}
+      />
+      <Route
         path="/high-value-patients"
         element={<HighValuePatients />}
       />
       <Route
-        path="/idea-development"
+        path="/ideas"
         element={<Ideas />}
       />
       <Route
@@ -36,9 +41,10 @@ const MarketingRoutes = () => {
         element={<ResearchPlans />}
       />
       <Route
-        path="/strategies"
+        path="/marketing-strategies"
         element={<MarketingStrategies />}
       />
+ 
       <Route
         path="/events"
         element={<Events eventType="Event" />}
@@ -46,10 +52,6 @@ const MarketingRoutes = () => {
       <Route
         path="/appointments"
         element={<Events eventType="Appointment" />}
-      />
-      <Route
-        path="/outreach-programmes"
-        element={<Events eventType="Outreach Programme" />}
       />
       <Route
         path="/communication-logs"
@@ -66,10 +68,6 @@ const MarketingRoutes = () => {
       <Route
         path="/unreachable-numbers"
         element={<UnreachableNumbers />}
-      />
-      <Route
-        path="/prestige-clients"
-        element={<PrestigeClients />}
       />
       <Route
         path="/client-calling-status"

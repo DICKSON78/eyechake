@@ -77,26 +77,6 @@ class Patient extends Model
         return $this->hasOne(PatientWaitingTime::class, 'patient_id')->whereIn('patient_waiting_times.status', ['waiting', 'in_treatment']);
     }
 
-    public function consultations()
-    {
-        // This is a method to get consultations for a patient through the relationship chain
-        // Used by PatientWaitingTime model to check consultation status
-        try {
-            return Consultation::join('patient_payment_cache_items', 'consultations.payment_cache_item_id', '=', 'patient_payment_cache_items.id')
-                ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
-                ->join('patient_check_ins', 'patient_payment_cache.check_in_id', '=', 'patient_check_ins.id')
-                ->where('patient_check_ins.patient_id', $this->id)
-                ->select('consultations.*')
-                ->orderBy('consultations.created_at', 'desc');
-        } catch (\Exception $e) {
-            \Log::error('Error in Patient consultations method: ' . $e->getMessage(), [
-                'patient_id' => $this->id
-            ]);
-            // Return an empty query builder to prevent further errors
-            return Consultation::whereRaw('1 = 0');
-        }
-    }
-
     public function check_ins()
     {
         return $this->hasMany(PatientCheckIn::class, 'patient_id');

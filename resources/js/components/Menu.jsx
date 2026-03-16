@@ -917,18 +917,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
-          title: "Campaign Performance",
-          icon: <PerformanceIcon />,
-          to: "/marketing/campaign-performance",
-          show: getMenuVisibility('MARKETING'),
-        },
-        {
-          title: "Lead Generation",
-          icon: <PeopleIcon />,
-          to: "/marketing/lead-generation",
-          show: getMenuVisibility('MARKETING'),
-        },
-        {
           title: "Bulk SMS",
           icon: <EmailIcon />,
           to: "/marketing/bulk-sms",
@@ -938,12 +926,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Communication Logs",
           icon: <CommunicationLogsIcon />,
           to: "/marketing/communication-logs",
-          show: getMenuVisibility('MARKETING'),
-        },
-        {
-          title: "Communication Analytics",
-          icon: <PerformanceIcon />,
-          to: "/marketing/communication-analytics",
           show: getMenuVisibility('MARKETING'),
         },
         {
@@ -986,12 +968,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Research Plans",
           icon: <MarketResearchIcon />,
           to: "/marketing/research-plans",
-          show: getMenuVisibility('MARKETING'),
-        },
-        {
-          title: "Information Sources",
-          icon: <InfoIcon />,
-          to: "/marketing/information-sources",
           show: getMenuVisibility('MARKETING'),
         },
         {

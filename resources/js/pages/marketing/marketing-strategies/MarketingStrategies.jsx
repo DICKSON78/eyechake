@@ -21,11 +21,15 @@ import EditMarketingStrategy from "./EditMarketingStrategy";
 import MarketingStrategyDetails from "./MarketingStrategyDetails";
 
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError } from "../../../helpers";
 
 const MarketingStrategies = () => {
   const addToast = useToast();
   const modalRef = useRef();
+
+  // Check marketing privilege
+  usePrivilege('marketing', '/marketing-strategies');
 
   const [params, setParams] = useState({
     page: 1,

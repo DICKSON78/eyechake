@@ -27,25 +27,34 @@ const usePrivilege = (privilege, fallbackRoute = "/dashboard", reportPrivilege =
     // Get user from window (set during login)
     const user = window.user || {};
     
+    console.log('usePrivilege - User:', user);
+    console.log('usePrivilege - Privilege:', privilege);
+    console.log('usePrivilege - Fallback route:', fallbackRoute);
+    
     let hasAccess = false;
     
     // Check if user has access
     if (isAdmin(user)) {
       // Admins always have access
       hasAccess = true;
+      console.log('usePrivilege - Admin access granted');
     } else if (reportPrivilege && privilege) {
       // For report pages, check both parent and report privileges
       hasAccess = hasReportAccess(user, privilege, reportPrivilege);
+      console.log('usePrivilege - Report access:', hasAccess);
     } else if (privilege) {
-      // For regular pages, check the privilege
+      // For regular pages, check privilege
       hasAccess = hasPrivilege(user, privilege);
+      console.log('usePrivilege - Regular access:', hasAccess);
     } else {
       // No privilege specified, allow access
       hasAccess = true;
+      console.log('usePrivilege - No privilege required, access granted');
     }
     
-    // If user doesn't have access, redirect
-    if (!hasAccess) {
+    // Only redirect if explicitly denied access
+    if (!hasAccess && privilege) {
+      console.log('usePrivilege - Access denied, redirecting to:', fallbackRoute);
       if (showError) {
         addToast({
           message: "You do not have permission to access this page.",
@@ -53,6 +62,8 @@ const usePrivilege = (privilege, fallbackRoute = "/dashboard", reportPrivilege =
         });
       }
       navigate(fallbackRoute, { replace: true });
+    } else {
+      console.log('usePrivilege - Access allowed, no redirect');
     }
   }, [privilege, fallbackRoute, reportPrivilege, navigate, addToast, showError]);
 };

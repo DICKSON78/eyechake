@@ -25,23 +25,32 @@ class MarketingDashboardController extends Controller
 
     public function __invoke(Request $request)
     {
-        $request->validate([
-            'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
-        ]);
+        try {
+            $request->validate([
+                'start_date' => 'sometimes|date_format:Y-m-d',
+                'end_date' => 'sometimes|date_format:Y-m-d'
+            ]);
 
-        $user = $request->user();
-        $today = Carbon::today()->format('Y-m-d');
+            $user = $request->user();
+            $today = Carbon::today()->format('Y-m-d');
 
-        if ($user->is_admin) {
-            $clinic_id = $request->clinic_id;
-        } else {
-            $clinic_id = $user->clinic_id;
-        }
+            if ($user->is_admin) {
+                $clinic_id = $request->clinic_id;
+            } else {
+                $clinic_id = $user->clinic_id;
+            }
 
-        // Default to today if no dates provided
-        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+            // Default to today if no dates provided
+            $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+            $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+
+            \Log::info('MarketingDashboardController - Date Range', [
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+                'clinic_id' => $clinic_id,
+                'user_id' => $user->id,
+                'is_admin' => $user->is_admin,
+            ]);
 
         $data = [
             'summary' => [
@@ -315,7 +324,18 @@ class MarketingDashboardController extends Controller
             $date->addMonthNoOverflow();
         }
 
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        } catch (\Exception $e) {
+            \Log::error('MarketingDashboardController error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all(),
+            ]);
+            
+            return $this->sendError(
+                'Failed to load marketing dashboard data: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     private function getMonthlyCount($table, $date_column, $start_date, $end_date, $clinic_id = null, $additional_conditions = [])
@@ -340,6 +360,12 @@ class MarketingDashboardController extends Controller
     private function generateClientStatistics($clinic_id, $start_date, $end_date)
     {
         try {
+            \Log::info('generateClientStatistics started', [
+                'clinic_id' => $clinic_id,
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+            ]);
+            
             // New clients: Patients with no previous consultations before their registration date
             $newClients = Patient::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -349,11 +375,13 @@ class MarketingDashboardController extends Controller
                 })
                 ->whereDate('created_at', '>=', $start_date)
                 ->whereDate('created_at', '<=', $end_date)
-                ->whereDoesntHave('consultations', function ($query) {
+                ->whereDoesntHave('check_ins.payment_cache.consultations', function ($query) {
                     $query->where('status', 'Consulted')
                         ->whereColumn('consultations.created_at', '<', 'patients.created_at');
                 })
                 ->count();
+
+            \Log::info('New clients count calculated', ['count' => $newClients]);
 
             // Returning clients: Patients with at least one previous consultation before their registration date
             $returningClients = Patient::query()
@@ -364,11 +392,13 @@ class MarketingDashboardController extends Controller
                 })
                 ->whereDate('created_at', '>=', $start_date)
                 ->whereDate('created_at', '<=', $end_date)
-                ->whereHas('consultations', function ($query) {
+                ->whereHas('check_ins.payment_cache.consultations', function ($query) {
                     $query->where('status', 'Consulted')
                         ->whereColumn('consultations.created_at', '<', 'patients.created_at');
                 })
                 ->count();
+
+            \Log::info('Returning clients count calculated', ['count' => $returningClients]);
 
             return [
                 ['name' => 'New Client', 'count' => $newClients],

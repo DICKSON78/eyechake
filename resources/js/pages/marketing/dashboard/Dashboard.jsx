@@ -55,6 +55,7 @@ import {
   yellow,
 } from "@mui/material/colors";
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError, numberFormat, getWeekStartDate } from "../../../helpers";
 
 const Dashboard = () => {
@@ -63,12 +64,15 @@ const Dashboard = () => {
   const theme = useTheme();
   const addToast = useToast();
 
+  // Check marketing privilege
+  usePrivilege('marketing', '/dashboard');
+
   const modalRef = useRef();
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: new Date(), // Default to today
-    end_date: new Date(),   // Default to today
+    start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+    end_date: new Date(),   // Today
   });
 
   const [clientTab, setClientTab] = useState(0);

@@ -20,11 +20,17 @@ import CreateDailyActivity from "./CreateDailyActivity";
 import EditDailyActivity from "./EditDailyActivity";
 
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError, getWeekStartDate } from "../../../helpers";
 
 const DailyActivities = () => {
   const addToast = useToast();
   const modalRef = useRef();
+
+  // Check marketing privilege
+  console.log('DailyActivities - Checking privilege...');
+  usePrivilege('marketing', '/daily-activities');
+  console.log('DailyActivities - Privilege check passed');
 
   const [params, setParams] = useState({
     page: 1,
@@ -51,7 +57,15 @@ const DailyActivities = () => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      console.log('DailyActivities API response:', response);
+      console.log('DailyActivities data:', response.data);
+      return response.data.data;
+    },
+    (error) => {
+      console.log('DailyActivities fetch error:', error);
+      addToast({ message: formatError(error), severity: "error" });
+    }
   );
 
   useEffect(() => {
