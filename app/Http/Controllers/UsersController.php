@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class UsersController extends Controller
 {
+    use \App\Http\Traits\ApiResponse;
+
     /**
      * Display a listing of the resource.
      *
@@ -21,6 +23,45 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
+        $per_page = $request->per_page ?? 25;
+        $clinic_id = $user->is_admin ? $request->clinic_id : $user->clinic_id;
+
+        $data = User::with(['job_title', 'department', 'creator'])
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->where('clinic_id', $clinic_id);
+            })
+            ->when($request->designation, function ($query) use ($request) {
+                $query->where('designation', $request->designation);
+            })
+            ->when($request->status, function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->q, function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('first_name', 'like', '%' . $request->q . '%')
+                      ->orWhere('last_name', 'like', '%' . $request->q . '%')
+                      ->orWhere('username', 'like', '%' . $request->q . '%')
+                      ->orWhere('phone', 'like', '%' . $request->q . '%');
+                });
+            })
+            ->orderBy('first_name', 'asc')
+            ->paginate($per_page);
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $user = $request->user();
+        $clinic_id = $user->is_admin ? $request->clinic_id : $user->clinic_id;
+
         $validationRules = [
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -44,7 +85,8 @@ class UsersController extends Controller
 
         $input = $request->except('password', 'privileges');
         $input['clinic_id'] = $clinic_id;
-        $input['password'] = Hash::make($request->password);
+        $input['created_by'] = $user->id;
+        $input['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
 
         $data = DB::transaction(function () use ($input, $request) {
             $user = User::create($input);
@@ -57,11 +99,6 @@ class UsersController extends Controller
                     'privileges' => $normalized,
                 ]);
                 UserPrivilege::updateFromArray($user->id, $normalized);
-                $saved = UserPrivilege::getPrivilegesAsArray($user->id);
-                Log::info('Privileges saved successfully', [
-                    'user_id' => $user->id,
-                    'saved'   => $saved,
-                ]);
             }
 
             return $user;
@@ -174,7 +211,6 @@ class UsersController extends Controller
     {
         //
     }
-}
 
     /**
      * Normalize privileges input for storage.

@@ -174,7 +174,7 @@ class NotificationsController extends Controller
                         // Don't exclude items that are already invoiced - allow all routed patients
                         // ->whereNull('item_payment_id') // Removed to match frontend behavior
                         ->whereHas('payment_mode', function ($q) {
-                            $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
+                            $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
                         });
                 })
                 ->where('created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
@@ -200,7 +200,7 @@ class NotificationsController extends Controller
                 ->whereHas('items', function ($query) {
                     $query->where('status', 'Pending')
                         ->whereHas('payment_mode', function ($q) {
-                            $q->where('transaction_type', 'Credit');
+                            $q->where('payment_type', 'Credit');
                         });
                 })
                 ->whereNotNull('created_at')

@@ -52,13 +52,15 @@ class LensStockController extends Controller
             $lensType = strtolower(trim($request->lens_type));
             if (in_array($lensType, ['sv', 'single vision', 'singlevision'])) {
                 $data->whereHas('lens_type', function ($query) {
-                    $query->where(DB::raw('LOWER(name)'), 'like', '%single vision%');
+                    $query->where(DB::raw('LOWER(name)'), 'like', '%single vision%')
+                          ->orWhere(DB::raw('LOWER(name)'), 'sv');
                 });
             } elseif (in_array($lensType, ['multifocal', 'multi-focal'])) {
                 $data->whereHas('lens_type', function ($query) {
                     $query->where(function($q) {
                         $q->where(DB::raw('LOWER(name)'), 'like', '%bifocal%')
-                          ->orWhere(DB::raw('LOWER(name)'), 'like', '%progressive%');
+                          ->orWhere(DB::raw('LOWER(name)'), 'like', '%progressive%')
+                          ->orWhere(DB::raw('LOWER(name)'), 'like', '%multifocal%');
                     });
                 });
             } else {

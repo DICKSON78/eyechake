@@ -30,7 +30,7 @@ class PaymentModesController extends Controller
         $clinic_id = $request->clinic_id;
         $status = $request->status;
         $q = $request->q;
-        $transaction_type = $request->transaction_type;
+        $payment_type = $request->transaction_type ?? $request->payment_type;
         $data = PaymentMode::query();
 
             if ($user->is_admin) {
@@ -56,8 +56,8 @@ class PaymentModesController extends Controller
                 $data->where('name', 'like', '%' . $q . '%');
             }
 
-            if ($transaction_type) {
-                $data->where('transaction_type', $transaction_type);
+            if ($payment_type) {
+                $data->where('payment_type', $payment_type);
             }
 
             $data = $data->paginate($per_page);
@@ -98,14 +98,16 @@ class PaymentModesController extends Controller
 
         $request->validate([
             'name' => 'required|unique:payment_modes,name',
-            'transaction_type' => 'required|in:Cash,Credit',
+            'payment_type' => 'required|in:Cash,Credit',
         ]);
 
         $input = $request->only('name', 'description', 'status');
         $input['clinic_id'] = $clinic_id;
-        // Map transaction_type (API input) to transaction_type (database column)
-        if ($request->has('transaction_type')) {
-            $input['transaction_type'] = $request->transaction_type;
+        // Map payment_type (API input) to payment_type (database column)
+        if ($request->has('payment_type')) {
+            $input['payment_type'] = $request->payment_type;
+        } elseif ($request->has('transaction_type')) {
+            $input['payment_type'] = $request->transaction_type;
         }
         $data = PaymentMode::create($input);
         return $this->sendResponse($data, Response::HTTP_OK, 'Created successfully.');
@@ -134,15 +136,17 @@ class PaymentModesController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|required|unique:payment_modes,name,' . $id,
-            'transaction_type' => 'sometimes|required|in:Cash,Credit',
+            'payment_type' => 'sometimes|required|in:Cash,Credit',
             'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 
         $data = PaymentMode::findOrFail($id);
         $updateData = $request->only('name', 'description', 'status');
-        // Map transaction_type (API input) to transaction_type (database column)
-        if ($request->has('transaction_type')) {
-            $updateData['transaction_type'] = $request->transaction_type;
+        // Map payment_type (API input) to payment_type (database column)
+        if ($request->has('payment_type')) {
+            $updateData['payment_type'] = $request->payment_type;
+        } elseif ($request->has('transaction_type')) {
+            $updateData['payment_type'] = $request->transaction_type;
         }
         $data->update($updateData);
         return $this->sendResponse($data, Response::HTTP_OK, 'Saved successfully.');

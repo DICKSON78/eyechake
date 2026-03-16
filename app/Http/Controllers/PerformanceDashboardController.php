@@ -9,12 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class PerformanceDashboardController extends Controller
 {
     use ApiResponse;
 
-    public function getDepartmentPerformance(Request $request, $department)
+    public function __invoke(Request $request, $department)
+    {
+        return $this->getDepartmentKPIs($request, $department);
+    }
+
+    public function getDepartmentKPIs(Request $request, $department)
     {
         $user = $request->user();
         $clinic_id = $user->is_admin ? $request->clinic_id : $user->clinic_id;
@@ -28,9 +34,21 @@ class PerformanceDashboardController extends Controller
         $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
         try {
-            $kpis = $this->getDepartmentKPIs($department, $clinic_id, $start_date, $end_date);
+            Log::info('getDepartmentKPIs starting', [
+                'department' => $department,
+                'clinic_id' => $clinic_id,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
+            
+            $kpis = $this->calculateDepartmentKPIs($department, $clinic_id, $start_date, $end_date);
+            Log::info('calculateDepartmentKPIs returned', ['kpis' => $kpis]);
+            
             $summary = $this->generateSummary($kpis, $department);
+            Log::info('generateSummary returned', ['summary' => $summary]);
+            
             $recommendations = $this->generateRecommendations($kpis, $department);
+            Log::info('generateRecommendations returned', ['recommendations' => $recommendations]);
 
             $data = [
                 'department' => $department,
@@ -43,6 +61,8 @@ class PerformanceDashboardController extends Controller
                 'recommendations' => $recommendations,
                 'updated_at' => now()->toISOString()
             ];
+            
+            Log::info('Final data to return', ['data_structure' => array_keys($data), 'kpis_count' => count($kpis)]);
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Success');
         } catch (\Exception $e) {
@@ -67,15 +87,19 @@ class PerformanceDashboardController extends Controller
 
         try {
             foreach ($request->targets as $kpiId => $target) {
-                DB::table('performance_targets')
+                $query = DB::table('performance_targets')
                     ->where('department', $department)
-                    ->where('kpi_id', $kpiId)
-                    ->where('clinic_id', $user->clinic_id)
-                    ->update([
-                        'target' => $target,
-                        'updated_by' => $user->id,
-                        'updated_at' => now()
-                    ]);
+                    ->where('kpi_key', $kpiId);
+
+                // Only add clinic_id filter if the column exists
+                if (Schema::hasColumn('performance_targets', 'clinic_id') && $user->clinic_id) {
+                    $query->where('clinic_id', $user->clinic_id);
+                }
+
+                $query->update([
+                    'target_value' => $target,
+                    'updated_at' => now()
+                ]);
             }
 
             return $this->sendResponse(null, Response::HTTP_OK, 'Targets updated successfully');
@@ -104,7 +128,7 @@ class PerformanceDashboardController extends Controller
         }
     }
 
-    private function getDepartmentKPIs($department, $clinic_id, $start_date, $end_date)
+    private function calculateDepartmentKPIs($department, $clinic_id, $start_date, $end_date)
     {
         switch (strtolower($department)) {
             case 'optometry':
@@ -125,11 +149,11 @@ class PerformanceDashboardController extends Controller
         $medicineSales = DB::table('patient_payment_cache_items as ppci')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('items as i', 'ppci.item_id', '=', 'i.id')
-            ->join('patient_check_ins as pci', 'ppc.check_in_id', '=', 'pci.id')
+            ->join('users as u', 'ppci.created_by', '=', 'u.id')
             ->where('i.category', 'Medicine')
             ->where('ppci.status', 'Paid')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('pci.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
             ->whereDate('ppc.created_at', '>=', $start_date)
             ->whereDate('ppc.created_at', '<=', $end_date)
@@ -138,27 +162,30 @@ class PerformanceDashboardController extends Controller
         $medicineSalesTarget = $this->getTarget('optometry', 'medicine_sales', $clinic_id);
 
         // Return Patient % KPI
-        $totalPatients = DB::table('patient_check_ins')
+        $totalPatients = DB::table('patient_check_ins as pci')
+            ->join('users as u', 'pci.created_by', '=', 'u.id')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
+            ->whereDate('pci.created_at', '>=', $start_date)
+            ->whereDate('pci.created_at', '<=', $end_date)
             ->count();
 
         $returnPatients = DB::table('patient_check_ins as pci')
             ->join('patients as p', 'pci.patient_id', '=', 'p.id')
+            ->join('users as u', 'pci.created_by', '=', 'u.id')
             ->where('pci.created_at', '<', Carbon::parse($start_date))
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('pci.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
             ->whereExists(function ($query) use ($start_date, $clinic_id) {
                 $query->select(DB::raw(1))
                     ->from('patient_check_ins as pci2')
+                    ->join('users as u2', 'pci2.created_by', '=', 'u2.id')
                     ->whereRaw('pci2.patient_id = pci.patient_id')
                     ->whereDate('pci2.created_at', '>=', $start_date)
                     ->when($clinic_id, function ($query) use ($clinic_id) {
-                        $query->where('pci2.clinic_id', $clinic_id);
+                        $query->where('u2.clinic_id', $clinic_id);
                     });
             })
             ->distinct('pci.patient_id')
@@ -195,11 +222,11 @@ class PerformanceDashboardController extends Controller
         $glassSales = DB::table('patient_payment_cache_items as ppci')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('items as i', 'ppci.item_id', '=', 'i.id')
-            ->join('patient_check_ins as pci', 'ppc.check_in_id', '=', 'pci.id')
+            ->join('users as u', 'ppci.created_by', '=', 'u.id')
             ->where('i.category', 'Glass')
             ->where('ppci.status', 'Paid')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('pci.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
             ->whereDate('ppc.created_at', '>=', $start_date)
             ->whereDate('ppc.created_at', '<=', $end_date)
@@ -210,26 +237,27 @@ class PerformanceDashboardController extends Controller
         $averageDailyGlassSalesTarget = $this->getTarget('sales', 'average_glass_daily_sales', $clinic_id);
 
         // Glass Customer Conversion Ratio
-        $totalAttendingPatients = DB::table('patient_check_ins')
+        $totalAttendingPatients = DB::table('patient_check_ins as pci')
+            ->join('users as u', 'pci.created_by', '=', 'u.id')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
+            ->whereDate('pci.created_at', '>=', $start_date)
+            ->whereDate('pci.created_at', '<=', $end_date)
             ->count();
 
         $glassBuyers = DB::table('patient_payment_cache_items as ppci')
             ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
             ->join('items as i', 'ppci.item_id', '=', 'i.id')
-            ->join('patient_check_ins as pci', 'ppc.check_in_id', '=', 'pci.id')
+            ->join('users as u', 'ppci.created_by', '=', 'u.id')
             ->where('i.category', 'Glass')
             ->where('ppci.status', 'Paid')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('pci.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
             ->whereDate('ppc.created_at', '>=', $start_date)
             ->whereDate('ppc.created_at', '<=', $end_date)
-            ->distinct('pci.patient_id')
+            ->distinct('ppc.check_in_id')
             ->count();
 
         $conversionRatio = $totalAttendingPatients > 0 ? ($glassBuyers / $totalAttendingPatients) * 100 : 0;
@@ -259,42 +287,52 @@ class PerformanceDashboardController extends Controller
 
     private function getCRMKPIs($clinic_id, $start_date, $end_date)
     {
+        Log::info('getCRMKPIs called', [
+            'clinic_id' => $clinic_id,
+            'start_date' => $start_date,
+            'end_date' => $end_date
+        ]);
+
         // Patient Contact Status
-        $calledCount = DB::table('patient_calling_status as pcs')
+        $calledCount = DB::table('patient_calling_statuses as pcs')
             ->join('patients as p', 'pcs.patient_id', '=', 'p.id')
+            ->join('users as u', 'p.created_by', '=', 'u.id')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('p.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
-            ->where('pcs.status', 'Called')
+            ->where('pcs.status', 'called')
             ->whereDate('pcs.created_at', '>=', $start_date)
             ->whereDate('pcs.created_at', '<=', $end_date)
             ->count();
 
-        $notCalledCount = DB::table('patient_calling_status as pcs')
+        $notCalledCount = DB::table('patient_calling_statuses as pcs')
             ->join('patients as p', 'pcs.patient_id', '=', 'p.id')
+            ->join('users as u', 'p.created_by', '=', 'u.id')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('p.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
-            ->where('pcs.status', 'Need to Call')
+            ->where('pcs.status', 'need_to_call')
             ->whereDate('pcs.created_at', '>=', $start_date)
             ->whereDate('pcs.created_at', '<=', $end_date)
             ->count();
 
-        $unreachableCount = DB::table('patient_calling_status as pcs')
+        $unreachableCount = DB::table('patient_calling_statuses as pcs')
             ->join('patients as p', 'pcs.patient_id', '=', 'p.id')
+            ->join('users as u', 'p.created_by', '=', 'u.id')
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('p.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
-            ->where('pcs.status', 'Unreachable')
+            ->where('pcs.status', 'unreachable')
             ->whereDate('pcs.created_at', '>=', $start_date)
             ->whereDate('pcs.created_at', '<=', $end_date)
             ->count();
 
         // Marketing Glass Leads
         $glassLeadsCount = DB::table('patients as p')
+            ->join('users as u', 'p.created_by', '=', 'u.id')
             ->where('p.is_glass_prospect', 1)
             ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->where('p.clinic_id', $clinic_id);
+                $query->where('u.clinic_id', $clinic_id);
             })
             ->whereDate('p.created_at', '>=', $start_date)
             ->whereDate('p.created_at', '<=', $end_date)
@@ -320,15 +358,68 @@ class PerformanceDashboardController extends Controller
                 'unit' => 'count'
             ]
         ];
+
+        Log::info('getCRMKPIs returning', [
+            'calledCount' => $calledCount,
+            'notCalledCount' => $notCalledCount,
+            'unreachableCount' => $unreachableCount,
+            'glassLeadsCount' => $glassLeadsCount,
+            'kpis_count' => count([
+                [
+                    'id' => 'patient_contact_status',
+                    'name' => 'Patient Contact Status',
+                    'target' => 0,
+                    'result' => $calledCount,
+                    'formatted_target' => 'N/A',
+                    'formatted_result' => "Called: {$calledCount}, Not Called: {$notCalledCount}, Unreachable: {$unreachableCount}",
+                    'unit' => 'count'
+                ],
+                [
+                    'id' => 'marketing_glass_leads',
+                    'name' => 'Marketing Glass Leads',
+                    'target' => $this->getTarget('crm', 'marketing_glass_leads', $clinic_id),
+                    'result' => $glassLeadsCount,
+                    'formatted_target' => number_format($this->getTarget('crm', 'marketing_glass_leads', $clinic_id)),
+                    'formatted_result' => number_format($glassLeadsCount),
+                    'unit' => 'count'
+                ]
+            ])
+        ]);
+
+        return [
+            [
+                'id' => 'patient_contact_status',
+                'name' => 'Patient Contact Status',
+                'target' => 0,
+                'result' => $calledCount,
+                'formatted_target' => 'N/A',
+                'formatted_result' => "Called: {$calledCount}, Not Called: {$notCalledCount}, Unreachable: {$unreachableCount}",
+                'unit' => 'count'
+            ],
+            [
+                'id' => 'marketing_glass_leads',
+                'name' => 'Marketing Glass Leads',
+                'target' => $this->getTarget('crm', 'marketing_glass_leads', $clinic_id),
+                'result' => $glassLeadsCount,
+                'formatted_target' => number_format($this->getTarget('crm', 'marketing_glass_leads', $clinic_id)),
+                'formatted_result' => number_format($glassLeadsCount),
+                'unit' => 'count'
+            ]
+        ];
     }
 
-    private function getTarget($department, $kpiId, $clinic_id)
+    private function getTarget($department, $kpiId, $clinic_id = null)
     {
-        $target = DB::table('performance_targets')
+        $query = DB::table('performance_targets')
             ->where('department', $department)
-            ->where('kpi_id', $kpiId)
-            ->where('clinic_id', $clinic_id)
-            ->value('target');
+            ->where('kpi_key', $kpiId);
+
+        // Only add clinic_id filter if the column exists
+        if (Schema::hasColumn('performance_targets', 'clinic_id') && $clinic_id) {
+            $query->where('clinic_id', $clinic_id);
+        }
+
+        $target = $query->value('target_value');
 
         return $target ?? 0;
     }
@@ -349,17 +440,7 @@ class PerformanceDashboardController extends Controller
 
         $achievementRate = $totalCount > 0 ? ($achievedCount / $totalCount) * 100 : 0;
 
-        switch (strtolower($department)) {
-            case 'optometry':
-                return "Optometry performance shows {$achievementRate}% target achievement. Medicine sales and patient return rates are key indicators for department success.";
-            case 'sales':
-                return "Sales department achieved {$achievementRate}% of targets. Glass sales performance and customer conversion ratios demonstrate sales effectiveness.";
-            case 'crm':
-            case 'marketing':
-                return "CRM/Marketing performance indicates {$achievementRate}% target completion. Patient engagement and lead generation are critical metrics.";
-            default:
-                return "Department performance shows {$achievementRate}% target achievement rate.";
-        }
+        return "Achieved {$achievedCount} out of {$totalCount} targets ({$achievementRate}% completion rate).";
     }
 
     private function generateRecommendations($kpis, $department)
@@ -369,27 +450,15 @@ class PerformanceDashboardController extends Controller
         foreach ($kpis as $kpi) {
             if ($kpi['target'] > 0 && $kpi['result'] < $kpi['target']) {
                 switch ($kpi['id']) {
-                    case 'medicine_sales':
-                        $recommendations[] = "Consider promotional campaigns for high-margin medicines and review inventory to ensure popular items are always available.";
-                        break;
-                    case 'return_patient_percentage':
-                        $recommendations[] = "Implement patient follow-up system and improve service quality to increase patient retention rates.";
-                        break;
-                    case 'average_glass_daily_sales':
-                        $recommendations[] = "Train staff on upselling techniques and create attractive glass package deals to boost daily sales.";
-                        break;
-                    case 'glass_conversion_ratio':
-                        $recommendations[] = "Enhance product knowledge and create compelling demonstrations to improve conversion rates.";
-                        break;
                     case 'marketing_glass_leads':
-                        $recommendations[] = "Expand marketing outreach and implement targeted campaigns to increase qualified glass prospects.";
+                        $recommendations[] = "Increase marketing efforts to meet glass leads target of {$kpi['target']}.";
                         break;
                 }
             }
         }
 
         if (empty($recommendations)) {
-            $recommendations[] = "Performance is meeting or exceeding targets. Focus on maintaining current standards and continuous improvement.";
+            $recommendations[] = "All targets are being met. Keep up the good work!";
         }
 
         return implode(' ', $recommendations);

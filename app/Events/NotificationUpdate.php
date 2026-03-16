@@ -29,6 +29,13 @@ class NotificationUpdate implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+        // Only broadcast if broadcasting is properly configured
+        if (config('broadcasting.default') === 'null' || 
+            !config('broadcasting.connections.pusher.key') || 
+            !config('broadcasting.connections.pusher.secret')) {
+            return [];
+        }
+        
         return [
             new Channel('notifications'),
         ];
@@ -47,8 +54,15 @@ class NotificationUpdate implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
+        // Only broadcast if broadcasting is properly configured
+        if (config('broadcasting.default') === 'null' || 
+            !config('broadcasting.connections.pusher.key') || 
+            !config('broadcasting.connections.pusher.secret')) {
+            return [];
+        }
+        
         return [
-            'message' => 'Notifications updated',
+            'message' => 'Notification cache cleared',
             'timestamp' => now()->toISOString(),
         ];
     }

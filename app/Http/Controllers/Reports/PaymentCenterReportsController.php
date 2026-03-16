@@ -111,7 +111,7 @@ class PaymentCenterReportsController extends Controller
             ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
             ->select(DB::raw("'Medicine' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'pibp.channel_id', 'pibp.amount', DB::raw('0 as discount'), 'pibp.created_at', 'pibp.created_by', DB::raw('group_concat(it.name separator ", ") as items'))
             ->where('it.category', 'Medicine') // Only include medicine items
-            ->where(function($query) use ($request) {
+            ->where(function($query) use ($effective_clinic_id, $payment_channel_id, $patient_name, $patient_id, $patient_gender, $patient_phone, $start_date, $end_date) {
                 if ($effective_clinic_id) {
                     $query->whereExists(function($subQuery) use ($effective_clinic_id) {
                         $subQuery->select(DB::raw(1))

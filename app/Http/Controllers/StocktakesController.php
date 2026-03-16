@@ -103,6 +103,7 @@ class StocktakesController extends Controller
                         if ($stocktake_item) {
                             $updateData = [
                                 'balance' => $stocktake_item->quantity, // Update balance to stocktake quantity
+                                'new_balance' => $stocktake_item->quantity, // Sync new_balance
                                 'unit_buying_price' => $stocktake_item->unit_buying_price,
                             ];
                             
@@ -111,7 +112,16 @@ class StocktakesController extends Controller
                                 $updateData['category'] = $input_item['category'];
                             }
                             
-                             $updateData['new_balance'] = $stocktake_item->quantity; // Sync new_balance
+                            // Special handling for frame items to ensure proper counting
+                            if ($this->isFrameItem($item)) {
+                                \Log::info('Updating frame item balance during stocktake', [
+                                    'item_id' => $item->id,
+                                    'item_name' => $item->name,
+                                    'old_balance' => $item->balance,
+                                    'new_balance' => $stocktake_item->quantity
+                                ]);
+                            }
+                            
                              $item->update($updateData);
 
                              // Clear relevant dashboard caches to ensure real-time update
@@ -121,6 +131,8 @@ class StocktakesController extends Controller
                                      $today = \Carbon\Carbon::today()->format('Y-m-d');
                                      \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}");
                                      \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}_{$today}_{$today}");
+                                     // Clear frame-specific cache if it exists
+                                     \Illuminate\Support\Facades\Cache::forget("frame_categories_{$clinic_id}");
                                  }
                              } catch (\Exception $e) {
                                  \Log::warning('Failed to clear dashboard cache after stocktake', ['error' => $e->getMessage()]);
@@ -165,6 +177,20 @@ class StocktakesController extends Controller
     }
 
     /**
+     * Check if an item is a frame item
+     *
+     * @param Item $item
+     * @return bool
+     */
+    private function isFrameItem(Item $item)
+    {
+        return $item->item_type && 
+               $item->consultation_type && 
+               $item->item_type->name === 'Frame' && 
+               $item->consultation_type->name === 'Glass';
+    }
+
+    /**
      * Apply a stocktake (move new_balance to balance for all items)
      *
      * @param  int $id
@@ -181,6 +207,16 @@ class StocktakesController extends Controller
 
             foreach ($stocktake->items as $stocktakeItem) {
                 if ($stocktakeItem->item) {
+                    // Special handling for frame items to ensure proper counting
+                    if ($this->isFrameItem($stocktakeItem->item)) {
+                        \Log::info('Applying stocktake for frame item', [
+                            'item_id' => $stocktakeItem->item->id,
+                            'item_name' => $stocktakeItem->item->name,
+                            'old_balance' => $stocktakeItem->item->balance,
+                            'new_balance' => $stocktakeItem->quantity
+                        ]);
+                    }
+                    
                     $stocktakeItem->item->update([
                         'balance' => $stocktakeItem->quantity, // Use stocktake quantity directly
                         'new_balance' => $stocktakeItem->quantity, // Sync new_balance
@@ -193,8 +229,12 @@ class StocktakesController extends Controller
                             $today = \Carbon\Carbon::today()->format('Y-m-d');
                             \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}");
                             \Illuminate\Support\Facades\Cache::forget("dashboard_total_items_{$clinic_id}_{$today}_{$today}");
+                            // Clear frame-specific cache if it exists
+                            \Illuminate\Support\Facades\Cache::forget("frame_categories_{$clinic_id}");
                         }
-                    } catch (\Exception $e) {}
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to clear dashboard cache after applying stocktake', ['error' => $e->getMessage()]);
+                    }
                 }
             }
 

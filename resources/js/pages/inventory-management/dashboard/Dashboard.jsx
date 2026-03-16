@@ -102,6 +102,8 @@ const Dashboard = () => {
         medicine_monthly_sales: [],
         frame_items: [],
         medicine_items: [],
+        frame_sales_by_item: [],     // New: Sales by individual frame items
+        medicine_sales_by_item: [],  // New: Sales by individual medicine items
       },
     },
     (response) => {
@@ -196,6 +198,81 @@ const Dashboard = () => {
     handleFetch();
     addToast({ message: "Dashboard refreshed", severity: "success" });
   };
+
+  // Prepare frame sales data for pie chart - each item is a product + month combination
+  const prepareFrameSalesData = () => {
+    if (selectedFrameId) {
+      // If specific frame selected, show monthly data for that frame
+      return frameMonthlySales.map(item => ({
+        name: frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame',
+        month: item.label,
+        quantity: item.quantity_sold || 0
+      }));
+    } else {
+      // If "All Frames", show all frames with their monthly sales
+      const salesData = [];
+      frameMonthlySales.forEach(monthData => {
+        if (monthData.items && Array.isArray(monthData.items)) {
+          monthData.items.forEach(item => {
+            if (item.quantity > 0) {
+              salesData.push({
+                name: item.name,
+                month: monthData.label,
+                quantity: item.quantity
+              });
+            }
+          });
+        } else if (monthData.quantity_sold > 0 && monthData.item_name) {
+          // Alternative structure: each entry is already an item
+          salesData.push({
+            name: monthData.item_name,
+            month: monthData.label,
+            quantity: monthData.quantity_sold
+          });
+        }
+      });
+      return salesData;
+    }
+  };
+
+  // Prepare medicine sales data for pie chart - each item is a product + month combination
+  const prepareMedicineSalesData = () => {
+    if (selectedMedicineId) {
+      // If specific medicine selected, show monthly data for that medicine
+      return medicineMonthlySales.map(item => ({
+        name: medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine',
+        month: item.label,
+        quantity: item.quantity_sold || 0
+      }));
+    } else {
+      // If "All Medicines", show all medicines with their monthly sales
+      const salesData = [];
+      medicineMonthlySales.forEach(monthData => {
+        if (monthData.items && Array.isArray(monthData.items)) {
+          monthData.items.forEach(item => {
+            if (item.quantity > 0) {
+              salesData.push({
+                name: item.name,
+                month: monthData.label,
+                quantity: item.quantity
+              });
+            }
+          });
+        } else if (monthData.quantity_sold > 0 && monthData.item_name) {
+          // Alternative structure: each entry is already an item
+          salesData.push({
+            name: monthData.item_name,
+            month: monthData.label,
+            quantity: monthData.quantity_sold
+          });
+        }
+      });
+      return salesData;
+    }
+  };
+
+  const frameSalesData = prepareFrameSalesData();
+  const medicineSalesData = prepareMedicineSalesData();
 
   if (loading) {
     return (
@@ -383,13 +460,13 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
-            {/* Sold Frames (Monthly) */}
+            {/* PIE CHART - Frame Sales by Item */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
                   title={selectedFrameId
-                    ? `Sold: ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame'} (Monthly)`
-                    : "Sold Frames (Monthly)"}
+                    ? `Monthly Sales: ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame'}`
+                    : "Top Sold Frames (Quantity)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
                       <InputLabel id="frame-filter-label">Filter by Frame</InputLabel>
@@ -413,76 +490,74 @@ const Dashboard = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
                     </Box>
-                  ) : (
+                  ) : frameSalesData.length > 0 ? (
                     <ChartWrapper
                       options={{
-                        chart: { toolbar: { show: false } },
-                        stroke: { curve: 'smooth', width: [2, 0] },
-                        xaxis: {
-                          categories: frameMonthlySales.map((e) => e.label),
+                        labels: frameSalesData.map(item => 
+                          `${item.name} (${numberFormat(item.quantity)})`
+                        ),
+                        chart: {
+                          toolbar: { show: false },
+                          fontFamily: theme.typography.fontFamily,
                         },
-                        yaxis: {
-                          min: 0,
-                          labels: {
-                            formatter: (val) => numberFormat(Math.round(val)),
+                        dataLabels: {
+                          formatter: function (val, opts) {
+                            return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                          },
+                          style: {
+                            fontSize: '10px',
+                            fontWeight: 400,
                           },
                         },
                         tooltip: {
-                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                            const data = frameMonthlySales[dataPointIndex];
-                            if (!data) return '';
-                            
-                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
-                            html += `<strong>${data.label}</strong><br/>`;
-                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
-                            
-                            if (data.top_product_name && !selectedFrameId) {
-                              html += `<br/><strong style="color: ${purple[500]}">🏆 Top Product:</strong><br/>`;
-                              html += `${data.top_product_name}<br/>`;
-                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
-                            }
-                            
-                            html += `</div>`;
-                            return html;
+                          y: {
+                            formatter: (val) => `${numberFormat(val)} Units`,
                           }
                         },
-                        colors: [purple[500], purple[700]],
-                        markers: {
-                          size: [0, 6],
+                        legend: {
+                          position: "bottom",
+                          labels: {
+                            colors: theme.palette.text.secondary,
+                          },
+                        },
+                        plotOptions: {
+                          pie: {
+                            dataLabels: {
+                              offset: -16,
+                            },
+                          },
+                        },
+                        colors: [
+                          purple[400], blue[400], green[400], orange[400],
+                          pink[400], cyan[400], teal[400], indigo[400],
+                          yellow[600], red[400], lime[600],
+                        ],
+                        stroke: {
+                          show: true,
+                          width: 2,
+                          colors: [theme.palette.background.paper],
                         },
                       }}
-                      series={[
-                        {
-                          name: 'Frames Sold',
-                          type: 'line',
-                          data: frameMonthlySales.map((e) => e.quantity_sold || 0),
-                        },
-                        ...(selectedFrameId ? [] : [{
-                          name: 'Top Products',
-                          type: 'pie',
-                          data: frameMonthlySales
-                            .filter(e => e.top_product_name && e.top_product_quantity > 0)
-                            .map(e => ({
-                              x: e.top_product_name,
-                              y: e.top_product_quantity || 0
-                            }))
-                        }])
-                      ]}
-                      type="line"
-                      height={320}
+                      series={frameSalesData.map(item => item.quantity)}
+                      type="pie"
+                      height={400}
                     />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <Typography variant="body1" color="textSecondary">No sales data available</Typography>
+                    </Box>
                   )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Sold Medicine (Monthly) */}
+            {/* PIE CHART - Medicine Sales by Item */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
                   title={selectedMedicineId
-                    ? `Sold: ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine'} (Monthly)`
-                    : "Sold Medicine (Monthly)"}
+                    ? `Monthly Sales: ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine'}`
+                    : "Top Sold Medicines (Quantity)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
                       <InputLabel id="medicine-filter-label">Filter by Medicine</InputLabel>
@@ -506,64 +581,62 @@ const Dashboard = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
                     </Box>
-                  ) : (
+                  ) : medicineSalesData.length > 0 ? (
                     <ChartWrapper
                       options={{
-                        chart: { toolbar: { show: false } },
-                        stroke: { curve: 'smooth', width: [2, 0] },
-                        xaxis: {
-                          categories: medicineMonthlySales.map((e) => e.label),
+                        labels: medicineSalesData.map(item => 
+                          `${item.name} (${numberFormat(item.quantity)})`
+                        ),
+                        chart: {
+                          toolbar: { show: false },
+                          fontFamily: theme.typography.fontFamily,
                         },
-                        yaxis: {
-                          min: 0,
-                          labels: {
-                            formatter: (val) => numberFormat(Math.round(val)),
+                        dataLabels: {
+                          formatter: function (val, opts) {
+                            return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                          },
+                          style: {
+                            fontSize: '10px',
+                            fontWeight: 400,
                           },
                         },
                         tooltip: {
-                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                            const data = medicineMonthlySales[dataPointIndex];
-                            if (!data) return '';
-                            
-                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
-                            html += `<strong>${data.label}</strong><br/>`;
-                            html += `Total Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
-                            
-                            if (data.top_product_name && !selectedMedicineId) {
-                              html += `<br/><strong style="color: ${teal[500]}">🏆 Top Product:</strong><br/>`;
-                              html += `${data.top_product_name}<br/>`;
-                              html += `Qty: ${numberFormat(data.top_product_quantity || 0)}`;
-                            }
-                            
-                            html += `</div>`;
-                            return html;
+                          y: {
+                            formatter: (val) => `${numberFormat(val)} Units`,
                           }
                         },
-                        colors: [teal[500], teal[700]],
-                        markers: {
-                          size: [0, 6],
+                        legend: {
+                          position: "bottom",
+                          labels: {
+                            colors: theme.palette.text.secondary,
+                          },
+                        },
+                        plotOptions: {
+                          pie: {
+                            dataLabels: {
+                              offset: -16,
+                            },
+                          },
+                        },
+                        colors: [
+                          teal[400], green[500], cyan[500], blue[400],
+                          purple[400], orange[400], pink[400], yellow[500],
+                          red[400], indigo[400], lime[500],
+                        ],
+                        stroke: {
+                          show: true,
+                          width: 2,
+                          colors: [theme.palette.background.paper],
                         },
                       }}
-                      series={[
-                        {
-                          name: 'Medicine Sold',
-                          type: 'line',
-                          data: medicineMonthlySales.map((e) => e.quantity_sold || 0),
-                        },
-                        ...(selectedMedicineId ? [] : [{
-                          name: 'Top Products',
-                          type: 'pie',
-                          data: medicineMonthlySales
-                            .filter(e => e.top_product_name && e.top_product_quantity > 0)
-                            .map(e => ({
-                              x: e.top_product_name,
-                              y: e.top_product_quantity || 0
-                            }))
-                        }])
-                      ]}
-                      type="line"
-                      height={320}
+                      series={medicineSalesData.map(item => item.quantity)}
+                      type="pie"
+                      height={400}
                     />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <Typography variant="body1" color="textSecondary">No sales data available</Typography>
+                    </Box>
                   )}
                 </CardContent>
               </Card>

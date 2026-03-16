@@ -4,169 +4,123 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
-use App\Models\PatientItemPayment;
-use App\Models\PatientItemBillPayment;
+use App\Http\Requests\BalanceSheetReportRequest;
+use App\Models\Clinic;
+use App\Models\PatientItemBill;
 use App\Models\ExpensePayment;
+use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
 class FinancialManagementReportsController extends Controller
 {
     use ApiResponse;
 
+    /**
+     * Get balance sheet report for financial management
+     */
     public function getBalanceSheetReport(Request $request)
     {
         $request->validate([
+            'start_date' => 'required|date_format:Y-m-d',
+            'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
             'report_period' => 'sometimes|in:daily,monthly',
-            'start_date' => 'sometimes|date_format:Y-m-d',
-            'end_date' => 'sometimes|date_format:Y-m-d'
+            'clinic_id' => 'sometimes|exists:clinics,id',
         ]);
 
-        $user = $request->user();
-        $report_period = $request->report_period ?? 'daily';
         $start_date = $request->start_date;
         $end_date = $request->end_date;
+        $report_period = $request->report_period ?? 'daily';
+        $clinic_id = $request->clinic_id ?? (auth()->check() ? auth()->user()->clinic_id : null);
 
-        // Default allow: if user missing or role unspecified, do not restrict by clinic
-        if (!$user || $user->is_admin) {
-            $clinic_id = $request->clinic_id;
-        } else {
-            $clinic_id = $user->clinic_id;
-        }
-
-        // Set default date range if not provided
-        if (!$start_date || !$end_date) {
-            if ($report_period === 'monthly') {
-                $start_date = Carbon::now()->startOfMonth()->format('Y-m-d');
-                $end_date = Carbon::now()->endOfMonth()->format('Y-m-d');
-            } else {
-                $start_date = Carbon::today()->format('Y-m-d');
-                $end_date = Carbon::today()->format('Y-m-d');
-            }
-        }
-
-        // Determine date grouping based on report period
-        $dateFormat = $report_period === 'monthly' ? '%Y-%m' : '%Y-%m-%d';
-        $dateGroupBy = $report_period === 'monthly' 
-            ? DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period")
-            : DB::raw("DATE(created_at) as period");
-
-        // Get DEBIT (Income/Revenue) - Patient Payments
-        $debitQuery = PatientItemPayment::query()
-            ->when($clinic_id, function ($query) use ($clinic_id) {
+        // Get patient payment cache items (debit/revenue)
+        $debitData = \App\Models\PatientPaymentCacheItem::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->select(
-                $dateGroupBy,
-                DB::raw('SUM(amount) as total_debit'),
-                DB::raw('COUNT(*) as transaction_count'),
-                DB::raw("'Patient Payment' as source")
-            )
-            ->groupBy('period');
+            ->selectRaw('DATE(created_at) as period, SUM(unit_price * quantity) as total_debit, COUNT(*) as debit_count')
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'period' => $item->period,
+                    'total_debit' => floatval($item->total_debit),
+                    'debit_count' => $item->debit_count,
+                ];
+            })
+            ->keyBy('period');
 
-        // Get DEBIT (Income/Revenue) - Bill Payments
-        $billPaymentQuery = PatientItemBillPayment::query()
-            ->when($clinic_id, function ($query) use ($clinic_id) {
+        // Get expense payments (credit/expenses)
+        $creditData = \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
             ->whereDate('created_at', '>=', $start_date)
             ->whereDate('created_at', '<=', $end_date)
-            ->select(
-                $dateGroupBy,
-                DB::raw('SUM(amount) as total_debit'),
-                DB::raw('COUNT(*) as transaction_count'),
-                DB::raw("'Bill Payment' as source")
-            )
-            ->groupBy('period');
-
-        // Get CREDIT (Expenses) - Expense Payments
-        $creditQuery = ExpensePayment::query()
-            ->when($clinic_id, function ($query) use ($clinic_id) {
-                $query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
-                });
+            ->selectRaw('DATE(created_at) as period, SUM(amount) as total_credit, COUNT(*) as credit_count')
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'period' => $item->period,
+                    'total_credit' => floatval($item->total_credit),
+                    'credit_count' => $item->credit_count,
+                ];
             })
-            ->whereDate('created_at', '>=', $start_date)
-            ->whereDate('created_at', '<=', $end_date)
-            ->select(
-                $dateGroupBy,
-                DB::raw('SUM(amount) as total_credit'),
-                DB::raw('COUNT(*) as transaction_count'),
-                DB::raw("'Expense Payment' as source")
-            )
-            ->groupBy('period');
+            ->keyBy('period');
 
-        $debits = $debitQuery->get()->toArray();
-        $billPayments = $billPaymentQuery->get()->toArray();
-        $credits = $creditQuery->get()->toArray();
-
-        // Combine all debits
-        $allDebits = array_merge($debits, $billPayments);
-
-        // Group by period and calculate totals
+        // Merge debit and credit data by period
         $periodData = [];
-        
-        // Process debits
-        foreach ($allDebits as $debit) {
-            $period = $debit['period'];
-            if (!isset($periodData[$period])) {
-                $periodData[$period] = [
-                    'period' => $period,
-                    'total_debit' => 0,
-                    'total_credit' => 0,
-                    'balance' => 0,
-                    'debit_details' => [],
-                    'credit_details' => [],
-                ];
-            }
-            $periodData[$period]['total_debit'] += floatval($debit['total_debit']);
-            $periodData[$period]['debit_details'][] = [
-                'source' => $debit['source'],
-                'amount' => floatval($debit['total_debit']),
-                'transaction_count' => intval($debit['transaction_count']),
+        $grandTotalDebit = 0;
+        $grandTotalCredit = 0;
+
+        $current = Carbon::parse($start_date);
+        $end = Carbon::parse($end_date);
+
+        while ($current <= $end) {
+            $period = $current->format('Y-m-d');
+            
+            $debit = $debitData->get($period, ['total_debit' => 0, 'debit_count' => 0]);
+            $credit = $creditData->get($period, ['total_credit' => 0, 'credit_count' => 0]);
+
+            $totalDebit = $debit['total_debit'];
+            $totalCredit = $credit['total_credit'];
+            $balance = $totalDebit - $totalCredit;
+
+            $grandTotalDebit += $totalDebit;
+            $grandTotalCredit += $totalCredit;
+
+            $periodData[] = [
+                'period' => $period,
+                'total_debit' => $totalDebit,
+                'total_credit' => $totalCredit,
+                'balance' => $balance,
+                'debit_details' => [
+                    [
+                        'source' => 'Patient Payment',
+                        'amount' => $totalDebit,
+                        'transaction_count' => $debit['debit_count'],
+                    ]
+                ],
+                'credit_details' => [
+                    [
+                        'source' => 'Expense Payment',
+                        'amount' => $totalCredit,
+                        'transaction_count' => $credit['credit_count'],
+                    ]
+                ],
             ];
+
+            $current->addDay();
         }
 
-        // Process credits
-        foreach ($credits as $credit) {
-            $period = $credit['period'];
-            if (!isset($periodData[$period])) {
-                $periodData[$period] = [
-                    'period' => $period,
-                    'total_debit' => 0,
-                    'total_credit' => 0,
-                    'balance' => 0,
-                    'debit_details' => [],
-                    'credit_details' => [],
-                ];
-            }
-            $periodData[$period]['total_credit'] += floatval($credit['total_credit']);
-            $periodData[$period]['credit_details'][] = [
-                'source' => $credit['source'],
-                'amount' => floatval($credit['total_credit']),
-                'transaction_count' => intval($credit['transaction_count']),
-            ];
-        }
-
-        // Calculate balance for each period
-        foreach ($periodData as &$data) {
-            $data['balance'] = $data['total_debit'] - $data['total_credit'];
-        }
-
-        // Sort by period
-        ksort($periodData);
-
-        // Calculate grand totals
-        $grandTotalDebit = array_sum(array_column($periodData, 'total_debit'));
-        $grandTotalCredit = array_sum(array_column($periodData, 'total_credit'));
         $grandBalance = $grandTotalDebit - $grandTotalCredit;
 
         // Format period for display
@@ -204,5 +158,192 @@ class FinancialManagementReportsController extends Controller
 
         return $this->sendResponse($result, Response::HTTP_OK, 'Balance sheet retrieved successfully.');
     }
-}
+    
+    /**
+     * Handle dashboard requests for financial management reports
+     */
+    public function __invoke(Request $request)
+    {
+        $request->validate([
+            'report_period' => 'sometimes|in:daily,monthly',
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
 
+        // Always run dashboard logic to include additional fields
+        $balanceSheetResponse = $this->getBalanceSheetReport($request);
+        $balanceSheetData = $balanceSheetResponse->getData()->data;
+        
+        // Get additional financial data for dashboard
+        $pendingBills = $this->getPendingBillsCount();
+        $runningCost = $this->getRunningCost();
+        $improvementCost = $this->getImprovementCost();
+        $expensePayments = $this->getExpensePayments();
+        
+        // Create new summary object with additional fields
+        $newSummaryFields = [
+            'pending_bills' => $pendingBills,
+            'running_cost' => $runningCost,
+            'improvement_cost' => $improvementCost,
+            'expense_payments' => $expensePayments,
+            'daily_collections' => $this->getDailyCollections(),
+            'statistics' => [
+                'top_expense_categories' => $this->getTopExpenseCategories(),
+                'payment_trends' => $this->getPaymentTrends(),
+                'expense_trends' => $this->getExpenseTrends(),
+            ],
+        ];
+        
+        // Merge new fields into the existing summary in the result
+        $result = [
+            'data' => array_values($balanceSheetData->data),
+            'total' => $balanceSheetData->total,
+            'summary' => array_merge((array)$balanceSheetData->summary, $newSummaryFields),
+        ];
+        
+        return $this->sendResponse($result, Response::HTTP_OK, 'Financial dashboard data retrieved successfully.');
+    }
+    
+    /**
+     * Get count of pending bills
+     */
+    private function getPendingBillsCount($clinic_id = null)
+    {
+        return \App\Models\PatientItemBill::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->where('status', 'Pending')
+            ->count();
+    }
+    
+    /**
+     * Get running cost (total expenses)
+     */
+    private function getRunningCost($clinic_id = null)
+    {
+        return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
+            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->sum('amount') ?: 0;
+    }
+    
+    /**
+     * Get improvement cost (total of specific improvement expenses)
+     */
+    private function getImprovementCost($clinic_id = null)
+    {
+        return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereHas('expense', function ($query) {
+                $query->whereHas('category', function ($categoryQuery) {
+                    $categoryQuery->where('name', 'Improvement');
+                });
+            })
+            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
+            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->sum('amount') ?: 0;
+    }
+    
+    /**
+     * Get total expense payments
+     */
+    private function getExpensePayments($clinic_id = null)
+    {
+        return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
+            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->count();
+    }
+    
+    /**
+     * Get top expense categories for the current month
+     */
+    private function getTopExpenseCategories($clinic_id = null)
+    {
+        return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('expense_payments.created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
+            ->whereDate('expense_payments.created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereHas('expense', function ($query) {
+                $query->whereHas('category');
+            })
+            ->join('expenses', 'expense_payments.expense_id', '=', 'expenses.id')
+            ->join('expense_categories', 'expenses.category_id', '=', 'expense_categories.id')
+            ->selectRaw('expense_categories.name as category, SUM(expense_payments.amount) as total_amount')
+            ->groupBy('expense_categories.name')
+            ->orderByRaw('total_amount DESC')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'category' => $item->category ?? 'Uncategorized',
+                    'amount' => floatval($item->total_amount),
+                ];
+            })
+            ->toArray();
+    }
+    
+    /**
+     * Get payment trends for the last 7 days
+     */
+    private function getPaymentTrends($clinic_id = null)
+    {
+        $trends = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $total = \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', $date->format('Y-m-d'))
+            ->sum('amount') ?: 0;
+            
+            $trends[] = [
+                'date' => $date->format('M d'),
+                'amount' => floatval($total),
+            ];
+        }
+        
+        return $trends;
+    }
+    
+    /**
+     * Get expense trends for the last 7 days
+     */
+    private function getExpenseTrends($clinic_id = null)
+    {
+        return $this->getPaymentTrends($clinic_id);
+    }
+    
+    /**
+     * Get daily collections (total patient payments for today)
+     */
+    private function getDailyCollections($clinic_id = null)
+    {
+        return \App\Models\PatientPaymentCacheItem::when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', Carbon::today()->format('Y-m-d'))
+            ->selectRaw('SUM(unit_price * quantity) as total')
+            ->value('total') ?: 0;
+    }
+}

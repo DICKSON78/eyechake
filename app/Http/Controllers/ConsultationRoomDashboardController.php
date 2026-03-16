@@ -35,9 +35,16 @@ class ConsultationRoomDashboardController extends Controller
                 $clinic_id = $user->clinic_id ?? null;
             }
 
-        // Default to today if no dates provided
-        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+        // Default to last 7 days if no dates provided to show more meaningful data
+        $start_date = $request->start_date ?? Carbon::now()->subDays(7)->format('Y-m-d'); // 7 days ago
+        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d'); // Today
+        
+        \Log::info('ConsultationRoomDashboard - Date Range', [
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'user_provided_start_date' => $request->start_date,
+            'user_provided_end_date' => $request->end_date,
+        ]);
 
         $data = [
             'summary' => [
@@ -322,7 +329,7 @@ class ConsultationRoomDashboardController extends Controller
 
         // Total patients seen (consultations with status 'Consulted') in date range
         try {
-            $data['summary']['total_patients_seen'] = Consultation::query()
+            $totalPatientsSeenQuery = Consultation::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($q) use ($clinic_id) {
                         $q->where('clinic_id', $clinic_id);
@@ -333,6 +340,15 @@ class ConsultationRoomDashboardController extends Controller
                 ->whereDate('created_at', '<=', $end_date)
                 ->distinct()
                 ->count('payment_cache_item_id');
+            
+            \Log::info('ConsultationRoomDashboard - Total Patients Seen Query', [
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+                'clinic_id' => $clinic_id,
+                'count' => $totalPatientsSeenQuery
+            ]);
+            
+            $data['summary']['total_patients_seen'] = $totalPatientsSeenQuery;
         } catch (\Exception $e) {
             \Log::error('Error counting total patients seen: ' . $e->getMessage());
             $data['summary']['total_patients_seen'] = 0;
@@ -355,7 +371,14 @@ class ConsultationRoomDashboardController extends Controller
                     });
                 });
 
-            $data['summary']['total_patients_waiting'] = $waitingQuery->count();
+            $totalWaitingCount = $waitingQuery->count();
+            
+            \Log::info('ConsultationRoomDashboard - Total Patients Waiting Query', [
+                'clinic_id' => $clinic_id,
+                'count' => $totalWaitingCount
+            ]);
+            
+            $data['summary']['total_patients_waiting'] = $totalWaitingCount;
 
             // Get waiting patient IDs to check for new vs return
             $waitingPatientIds = $waitingQuery->pluck('patient_id')->toArray();
@@ -411,7 +434,7 @@ class ConsultationRoomDashboardController extends Controller
                 ->first();
 
             if ($referralSource) {
-                $data['summary']['referrals_made_today'] = Patient::query()
+                $referralsCount = Patient::query()
                     ->where('info_source_id', $referralSource->id)
                     ->whereDate('created_at', $today)
                     ->when($clinic_id, function ($query) use ($clinic_id) {
@@ -420,7 +443,21 @@ class ConsultationRoomDashboardController extends Controller
                         });
                     })
                     ->count();
+                
+                \Log::info('ConsultationRoomDashboard - Referrals Made Today Query', [
+                    'today' => $today,
+                    'referral_source_id' => $referralSource->id,
+                    'referral_source_name' => $referralSource->name,
+                    'clinic_id' => $clinic_id,
+                    'count' => $referralsCount
+                ]);
+                
+                $data['summary']['referrals_made_today'] = $referralsCount;
             } else {
+                \Log::info('ConsultationRoomDashboard - No Referral Source Found', [
+                    'today' => $today,
+                    'clinic_id' => $clinic_id
+                ]);
                 $data['summary']['referrals_made_today'] = 0;
             }
         } catch (\Exception $e) {

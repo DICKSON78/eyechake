@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useNotificationContext } from "../contexts/NotificationContext";
 
 // Import all dashboard components
+import MainDashboard from "../pages/dashboard/Dashboard";
 import DirectorDashboard from "../pages/director/dashboard/Dashboard";
 import ReceptionDashboard from "../pages/reception/dashboard/Dashboard";
 import CashierDashboard from "../pages/payment-center/dashboard/Dashboard";
@@ -32,7 +33,7 @@ const RoleBasedDashboard = ({ user, setSmsBalance }) => {
   const getDashboardComponent = () => {
     switch (role) {
       case "admin":
-        return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
+        return <MainDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;
 
       case "director":
         return <DirectorDashboard setSmsBalance={setSmsBalance} notifications={notifications} />;

@@ -42,7 +42,7 @@ class PatientPaymentCacheController extends Controller
             $patient_phone = $request->patient_phone;
             $item_status = $request->item_status;
             $item_payment_mode_id = $request->item_payment_mode_id;
-            $item_transaction_type = $request->item_transaction_type;
+            $item_payment_type = $request->item_payment_type;
             $item_consultation_type = $request->item_consultation_type;
             $is_stock_item = $request->is_stock_item;
             $item_consultant_id = $request->item_consultant_id;
@@ -126,9 +126,9 @@ class PatientPaymentCacheController extends Controller
             // Handle the main query logic
             if ($include_optician_glass) {
                 // When including optician glass, we need to show both regular cash patients AND optician glass patients
-                $data->where(function ($query) use ($item_status, $item_transaction_type) {
+                $data->where(function ($query) use ($item_status, $item_payment_type) {
                     // Regular cash patients (pharmacy items) - must have at least one item matching criteria
-                    $query->whereHas('items', function ($subQuery) use ($item_status, $item_transaction_type) {
+                    $query->whereHas('items', function ($subQuery) use ($item_status, $item_payment_type) {
                         // Don't exclude items that are already invoiced - allow all routed patients
                         // $subQuery->whereNull('item_payment_id'); // Removed to allow all routed patients to appear
                         
@@ -141,9 +141,9 @@ class PatientPaymentCacheController extends Controller
                             }
                         }
                         
-                        if ($item_transaction_type) {
-                            $subQuery->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
-                                $query2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
+                        if ($item_payment_type) {
+                            $subQuery->whereHas('payment_mode', function ($query2) use ($item_payment_type) {
+                                $query2->whereRaw('LOWER(payment_type) = ?', [strtolower($item_payment_type)]);
                             });
                         }
                     });
@@ -165,7 +165,7 @@ class PatientPaymentCacheController extends Controller
                             });
                             
                             $itemQuery->whereHas('payment_mode', function ($modeQuery) {
-                                $modeQuery->whereRaw('LOWER(transaction_type) = ?', ['cash']);
+                                $modeQuery->whereRaw('LOWER(payment_type) = ?', ['cash']);
                             });
                         })
                         ->whereHas('consultation', function ($consultationQuery) {
@@ -176,7 +176,7 @@ class PatientPaymentCacheController extends Controller
                 });
             } else {
                 // Regular filtering logic - ensure we only get payment caches that have at least one item matching ALL criteria
-                $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_transaction_type) {
+                $data->whereHas('items', function ($query) use ($item_status, $item_consultation_type, $is_stock_item, $item_consultant_id, $item_payment_mode_id, $item_payment_type) {
                     // Don't exclude items that are already invoiced - allow cashier to see all routed patients
                     // $query->whereNull('item_payment_id'); // Removed to allow all routed patients to appear
                     
@@ -215,9 +215,9 @@ class PatientPaymentCacheController extends Controller
                     }
                     
                     // Transaction type filter - this is critical for cash patients
-                    if ($item_transaction_type) {
-                        $query->whereHas('payment_mode', function ($query2) use ($item_transaction_type) {
-                            $query2->whereRaw('LOWER(transaction_type) = ?', [strtolower($item_transaction_type)]);
+                    if ($item_payment_type) {
+                        $query->whereHas('payment_mode', function ($query2) use ($item_payment_type) {
+                            $query2->whereRaw('LOWER(payment_type) = ?', [strtolower($item_payment_type)]);
                         });
                     }
                 });
@@ -245,7 +245,7 @@ class PatientPaymentCacheController extends Controller
                 'sql' => $data->toSql(),
                 'bindings' => $data->getBindings(),
                 'item_status' => $item_status,
-                'item_transaction_type' => $item_transaction_type,
+                'item_payment_type' => $item_payment_type,
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'include_optician_glass' => $include_optician_glass,
@@ -269,7 +269,7 @@ class PatientPaymentCacheController extends Controller
             
             // Debug: Check if there are any items with pending cash status
             $totalPendingCashItems = \App\Models\PatientPaymentCacheItem::whereHas('payment_mode', function ($q) {
-                $q->whereRaw('LOWER(transaction_type) = ?', ['cash']);
+                $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
             })->where('status', 'Pending')->count();
             
             \Log::info('PatientPaymentCacheController debug counts', [
@@ -294,7 +294,6 @@ class PatientPaymentCacheController extends Controller
             return $this->sendError('Error fetching payment cache data', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-}
 
     /**
      * Store a newly created resource in storage.

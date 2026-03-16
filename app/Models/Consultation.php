@@ -17,6 +17,7 @@ class Consultation extends Model
         'patient_to_return', 'to_return_date', 'return_reason', 'remarks', 'created_by',
         'status', 'require_glass', 'sent_to_optician_at', 'sent_to_optician_by', 'lens_types',
         'doctor_recommendations', 'doctor_comments_remarks', 'optician_completed_at',
+        'payment_mode_id', 'consultant_id', 'server_id',
     ];
 
     protected $casts = [
@@ -73,6 +74,21 @@ class Consultation extends Model
     public function to_optician_sender()
     {
         return $this->belongsTo(User::class, 'sent_to_optician_by');
+    }
+
+    public function payment_mode()
+    {
+        return $this->belongsTo(PaymentMode::class, 'payment_mode_id');
+    }
+
+    public function consultant()
+    {
+        return $this->belongsTo(User::class, 'consultant_id');
+    }
+
+    public function server()
+    {
+        return $this->belongsTo(User::class, 'server_id');
     }
 
     public function doctor_tasks()

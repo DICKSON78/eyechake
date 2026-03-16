@@ -35,7 +35,6 @@ import ChartWrapper from "../../../components/ChartWrapper";
 import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import notificationEvents from "../../../utils/notificationEvents";
 import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
-
 import { useTheme } from "@mui/material/styles";
 import {
   blue,
@@ -57,15 +56,14 @@ const Dashboard = () => {
   const addToast = useToast();
   const theme = useTheme();
 
-  // Check if user has reception privilege
   usePrivilege('reception', '/dashboard');
 
   const modalRef = useRef();
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: new Date(), // Default to today for daily view
-    end_date: new Date(),   // Default to today for daily view
+    start_date: new Date(),
+    end_date: new Date(),
   });
 
   useEffect(() => {
@@ -77,9 +75,7 @@ const Dashboard = () => {
     {
       ...params,
       clinic: undefined,
-      start_date: params.start_date
-        ? formatDateForDb(params.start_date)
-        : undefined,
+      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
     },
     true,
@@ -120,7 +116,6 @@ const Dashboard = () => {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Memoize refresh handler
   const handleRefresh = useCallback(() => {
     if (!loading) {
       setIsRefreshing(true);
@@ -129,18 +124,15 @@ const Dashboard = () => {
     }
   }, [handleFetch, loading]);
 
-  // Auto-refresh every 30 seconds for real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       if (!loading) {
         handleFetch();
       }
-    }, 30000); // 30 seconds
-
+    }, 30000);
     return () => clearInterval(interval);
   }, [handleFetch, loading]);
 
-  // Listen to notification events to refresh data
   useEffect(() => {
     const unsubscribe = notificationEvents.subscribe(() => {
       setTimeout(() => {
@@ -149,7 +141,6 @@ const Dashboard = () => {
         }
       }, 500);
     });
-
     return () => unsubscribe();
   }, [handleFetch, loading]);
 
@@ -167,7 +158,6 @@ const Dashboard = () => {
         setParams={setParams}
       />
     );
-
     modalRef.current.open("Filter", component, "sm");
   };
 
@@ -229,12 +219,7 @@ const Dashboard = () => {
       />
       {!loading && data ? (
         <React.Fragment>
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 2, md: 3 }}
-            sx={{ mb: 4 }}
-          >
-            {/* Main Metrics - Clients Status */}
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Clients Sent to Doctor"
@@ -262,8 +247,6 @@ const Dashboard = () => {
                 onClick={() => navigate('/reception/patients')}
               />
             </Grid>
-
-            {/* Additional Metrics */}
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="New Patients"
@@ -311,12 +294,7 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Charts Section */}
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 2, md: 3 }}
-            sx={{ mt: 2 }}
-          >
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mt: 2 }}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardHeader title="Patients by Gender" />
@@ -328,17 +306,9 @@ const Dashboard = () => {
                       chart: {
                         fontFamily: theme.typography.fontFamily,
                         background: "transparent",
-                        toolbar: {
-                          show: false,
-                        },
+                        toolbar: { show: false },
                       },
-                      plotOptions: {
-                        pie: {
-                          donut: {
-                            size: "50%",
-                          },
-                        },
-                      },
+                      plotOptions: { pie: { donut: { size: "50%" } } },
                       colors: [blue[400], pink[400]],
                       stroke: {
                         show: true,
@@ -348,19 +318,10 @@ const Dashboard = () => {
                         ) || [],
                       },
                       dataLabels: {
-                        style: {
-                          fontWeight: "400",
-                          fontSize: "9px",
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
+                        style: { fontWeight: "400", fontSize: "9px" },
+                        dropShadow: { enabled: false },
                       },
-                      tooltip: {
-                        y: {
-                          formatter: (val) => numberFormat(val),
-                        },
-                      },
+                      tooltip: { y: { formatter: (val) => numberFormat(val) } },
                       legend: {
                         position: "bottom",
                         labels: {
@@ -369,16 +330,10 @@ const Dashboard = () => {
                           ) || [],
                           useSeriesColors: false,
                         },
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
-                        },
+                        markers: { width: 14, height: 8, radius: 4 },
                       },
                     }}
-                    series={(data.statistics.patients_by_gender || []).map(
-                      (e) => e.patients
-                    ) || []}
+                    series={(data.statistics.patients_by_gender || []).map((e) => e.patients) || []}
                     type="donut"
                     height={(data.statistics.patients_by_gender || []).length ? 288 : 256}
                   />
@@ -396,9 +351,7 @@ const Dashboard = () => {
                       fontFamily: theme.typography.fontFamily,
                       foreColor: theme.palette.text.primary,
                       background: "transparent",
-                      toolbar: {
-                        show: false,
-                      },
+                      toolbar: { show: false },
                     },
                     plotOptions: {
                       bar: {
@@ -408,48 +361,20 @@ const Dashboard = () => {
                       },
                     },
                     colors: [purple[400]],
-                    stroke: {
-                      show: true,
-                      width: 3,
-                      curve: "smooth",
-                    },
-                    dataLabels: {
-                      enabled: false,
-                    },
-                    grid: {
-                      show: false,
-                      borderColor: theme.palette.divider,
-                    },
+                    stroke: { show: true, width: 3, curve: "smooth" },
+                    dataLabels: { enabled: false },
+                    grid: { show: false, borderColor: theme.palette.divider },
                     xaxis: {
                       categories: (data.statistics.daily_registrations || []).map((e) => e.date) || [],
-                      axisBorder: {
-                        show: false,
-                        color: theme.palette.divider,
-                      },
-                      axisTicks: {
-                        show: true,
-                        color: theme.palette.divider,
-                        height: 6,
-                      },
+                      axisBorder: { show: false, color: theme.palette.divider },
+                      axisTicks: { show: true, color: theme.palette.divider, height: 6 },
                     },
                     yaxis: {
-                      axisBorder: {
-                        show: false,
-                        color: theme.palette.divider,
-                      },
-                      axisTicks: {
-                        show: true,
-                        color: theme.palette.divider,
-                        width: 6,
-                      },
-                      labels: {
-                        formatter: (val) => numberFormat(val),
-                      },
+                      axisBorder: { show: false, color: theme.palette.divider },
+                      axisTicks: { show: true, color: theme.palette.divider, width: 6 },
+                      labels: { formatter: (val) => numberFormat(val) },
                     },
-                    tooltip: {
-                      theme: "dark",
-                      fillSeriesColor: true,
-                    },
+                    tooltip: { theme: "dark", fillSeriesColor: true },
                   }}
                   series={[
                     {
@@ -462,12 +387,13 @@ const Dashboard = () => {
                 />
               </Card>
             </Grid>
+
             <Grid size={{ xs: 12 }}>
               <PerformanceReportCard
                 department="CRM"
                 user={window.user}
                 editable={hasPrivilege(window.user, 'crm_performance_report') || isAdmin(window.user)}
-                refreshTrigger={dateParams?.start_date}
+                refreshTrigger={params?.start_date}
               />
             </Grid>
           </Grid>

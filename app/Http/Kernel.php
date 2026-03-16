@@ -76,6 +76,7 @@ class Kernel extends HttpKernel
         // Custom security middleware
         'CheckRole' => \App\Http\Middleware\CheckRole::class,
         'CheckPrivilege' => \App\Http\Middleware\CheckPrivilege::class,
+        'privilege' => \App\Http\Middleware\CheckPrivilege::class,
         'SanitizeInput' => \App\Http\Middleware\SanitizeInput::class,
         'SecurityHeaders' => \App\Http\Middleware\SecurityHeaders::class,
     ];

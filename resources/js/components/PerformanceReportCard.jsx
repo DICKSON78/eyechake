@@ -49,11 +49,21 @@ const PerformanceReportCard = ({
   });
 
   useEffect(() => {
+    console.log('Performance Report Card - useEffect triggered');
+    console.log('Performance Report Card - performanceData:', performanceData);
+    
     if (performanceData) {
-      setData(performanceData);
+      // Extract the actual data from the nested structure
+      const actualData = performanceData.data || performanceData;
+      console.log('Performance Report Card - actualData:', actualData);
+      console.log('Performance Report Card - actualData.summary:', actualData.summary);
+      console.log('Performance Report Card - actualData.recommendations:', actualData.recommendations);
+      console.log('Performance Report Card - actualData.updated_at:', actualData.updated_at);
+      
+      setData(actualData);
       // Initialize editable targets
       const targets = {};
-      performanceData.kpis?.forEach(kpi => {
+      actualData.kpis?.forEach(kpi => {
         targets[kpi.id] = kpi.target;
       });
       setEditedTargets(targets);

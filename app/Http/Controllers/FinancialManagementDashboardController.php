@@ -250,6 +250,14 @@ class FinancialManagementDashboardController extends Controller
 
             $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
             $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');
+            
+            \Log::info('FinancialManagementDashboard cost calculations', [
+                'running_cost' => $data['summary']['running_cost'],
+                'improvement_cost' => $data['summary']['improvement_cost'],
+                'clinic_id' => $clinic_id,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
         } catch (\Exception $e) {
             \Log::error('Error calculating running/improvement costs', ['error' => $e->getMessage()]);
             $data['summary']['running_cost'] = 0;

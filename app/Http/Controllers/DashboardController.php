@@ -276,7 +276,24 @@ class DashboardController extends Controller
 
                     $billPaymentsSum = (float) $billPaymentsQuery->sum('patient_item_bill_payments.amount');
 
-                    return $paymentsSum + $billPaymentsSum;
+                    // Include medicine items from bills (same logic as PaymentCenterReportsController)
+                    $medicineItemsQuery = DB::table('patient_item_bill_payments as pibp')
+                        ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
+                        ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                        ->where('it.category', 'Medicine')
+                        ->where('pibp.created_at', '>=', $start_date . ' 00:00:00')
+                        ->where('pibp.created_at', '<=', $end_date . ' 23:59:59')
+                        ->where('pibp.amount', '>', 0);
+                    
+                    if ($clinic_id) {
+                        $medicineItemsQuery->whereIn('pibp.created_by', function($q) use ($clinic_id) {
+                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                        });
+                    }
+                    
+                    $medicineItemsSum = (float) $medicineItemsQuery->sum('pibp.amount');
+
+                    return $paymentsSum + $billPaymentsSum + $medicineItemsSum;
                 }, 0);
             });
 

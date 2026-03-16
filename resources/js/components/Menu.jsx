@@ -346,31 +346,31 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
 
         switch (section) {
           case "RECEPTION":
-            return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception');
+            return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception') || isAdmin(user);
           case "CASHIER":
-            return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center');
+            return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center') || isAdmin(user);
           case "CONSULTATION ROOM":
-            return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room');
+            return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room') || isAdmin(user);
           case "SALES TABLE":
-            return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess;
+            return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || isAdmin(user);
           case "PHARMACY":
-            return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center');
+            return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center') || isAdmin(user);
           case "WORKSHOP":
-            return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center');
+            return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center') || isAdmin(user);
           case "STOCK MANAGEMENT":
-            return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management');
+            return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management') || isAdmin(user);
           case "FINANCIAL MANAGEMENT":
-            return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management');
+            return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management') || isAdmin(user);
           case "EMPLOYEE MANAGEMENT":
-            return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management');
+            return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management') || isAdmin(user);
           case "DIRECTOR":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'director');
+            return role === "admin" || role === "director" || hasPrivilege(user, 'director') || isAdmin(user);
           case "SETTINGS":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'settings');
+            return role === "admin" || role === "director" || hasPrivilege(user, 'settings') || isAdmin(user);
           case "MARKETING":
-            return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing');
+            return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
           default:
-            return false;
+            return isAdmin(user);
         }
       };
 
@@ -384,7 +384,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           title: "Dashboard",
           icon: <HomeIcon />,
           to: "/dashboard",
-          show: isPrivilegeGranted('dashboard'),
+          show: isPrivilegeGranted('dashboard') || isAdmin(user),
         },
         {
           title: "1. RECEPTION",

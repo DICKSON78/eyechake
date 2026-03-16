@@ -286,6 +286,9 @@ class ConsultationsController extends Controller
             } elseif ($status === 'Consulted') {
                 $data->where('status', 'Consulted');
                 $data->whereDate('updated_at', '>=', $start_date);
+            } elseif ($status === 'Pending') {
+                // For Pending status, apply date filtering to match notifications logic
+                $data->whereDate('created_at', '>=', $start_date);
             } else {
                 $data->whereDate('created_at', '>=', $start_date);
             }
@@ -333,6 +336,9 @@ class ConsultationsController extends Controller
                 }
             } elseif ($status === 'Consulted') {
                 $data->whereDate('updated_at', '<=', $end_date);
+            } elseif ($status === 'Pending') {
+                // For Pending status, apply date filtering to match notifications logic
+                $data->whereDate('created_at', '<=', $end_date);
             } else {
                 $data->whereDate('created_at', '<=', $end_date);
             }
@@ -616,7 +622,7 @@ class ConsultationsController extends Controller
             }]);
 
             $data->with([
-                'item', 'payment_mode', 'consultant', 'server',
+                'payment_mode', 'consultant', 'server',
                 'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
                 'to_optician_sender', 'diagnoses.disease'
             ]);

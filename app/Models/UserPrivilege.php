@@ -52,6 +52,9 @@ class UserPrivilege extends Model
         'director',
         'office_calendar',
         'calendar_edit',
+        'optometry_report_card',
+        'sales_report_card',
+        'crm_report_card',
     ];
 
     /**

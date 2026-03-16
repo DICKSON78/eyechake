@@ -8,7 +8,9 @@ import {
   TableRow,
 } from "@mui/material";
 
-const RefractionDetails = ({ consultation: { refraction } }, ref) => {
+const RefractionDetails = ({ consultation }, ref) => {
+  const refraction = consultation?.refraction;
+  
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
