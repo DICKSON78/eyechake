@@ -356,7 +356,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           case "SALES TABLE":
             return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || isAdmin(user);
           case "SALES MANAGEMENT":
-            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasPrivilege(user, 'sales_management') || hasPrivilege(user, 'sales_center') || isAdmin(user);
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasPrivilege(user, 'sales_management') || hasPrivilege(user, 'sales_center') || hasPrivilege(user, 'sales_reports') || isAdmin(user);
           case "PHARMACY":
             return role === "Admin" || role === "Director" || role === "Pharmacist" || hasPrivilege(user, 'medicine_center') || isAdmin(user);
           case "WORKSHOP":
@@ -371,6 +371,10 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
             return role === "Admin" || role === "Director" || hasPrivilege(user, 'director') || isAdmin(user);
           case "SETTINGS":
             return role === "Admin" || role === "Director" || hasPrivilege(user, 'settings') || isAdmin(user);
+          case "OPTOMETRY":
+            return role === "Admin" || role === "Director" || role === "Doctor" || role === "Optometrist" || hasPrivilege(user, 'consultation_room') || hasPrivilege(user, 'optometry_reports') || isAdmin(user);
+          case "SALES TABLE":
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || hasPrivilege(user, 'sales_reports') || isAdmin(user);
           case "MARKETING":
             return role === "Admin" || role === "Director" || role === "Marketing" || role === "Marketing Manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
           case "CRM REPORTS":
@@ -521,7 +525,83 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-          title: "3. CONSULTATION ROOM",
+          title: "3. OPTOMETRY",
+          subheader: true,
+          show: getMenuVisibility('CONSULTATION ROOM'),
+        },
+        {
+          title: "Optometry Dashboard",
+          icon: <EyeIcon />,
+          to: "/optometry-reports",
+          show: getMenuVisibility('optometry_reports') || getMenuVisibility('CONSULTATION ROOM'),
+        },
+        {
+          title: "Optometry Reports",
+          icon: <ReportsIcon />,
+          to: "/optometry-reports",
+          show: getMenuVisibility('optometry_reports') || getMenuVisibility('CONSULTATION ROOM'),
+          items: [
+            {
+              title: "Optometry Performance Report",
+              icon: <ReportsIcon />,
+              to: "/optometry-reports/performance-report-card",
+              show: getMenuVisibility('optometry_reports') || getMenuVisibility('CONSULTATION ROOM'),
+            },
+            {
+              title: "Monthly Optometrist Report",
+              icon: <ReportsIcon />,
+              to: "/consultation-room/reports/optometrist-monthly-report",
+              show: getMenuVisibility('optometry_reports') || getMenuVisibility('CONSULTATION ROOM'),
+            },
+            {
+              title: "Pharmacy & Consultation Report",
+              icon: <ReportsIcon />,
+              to: "/consultation-room/reports/pharmacy-consultation-report",
+              show: getMenuVisibility('optometry_reports') || getMenuVisibility('CONSULTATION ROOM') || isPrivilegeGranted('medicine_center'),
+            },
+          ],
+        },
+        {
+          title: "4. SALES MANAGEMENT",
+          subheader: true,
+          show: getMenuVisibility('SALES MANAGEMENT'),
+        },
+        {
+          title: "Sales Management Dashboard",
+          icon: <HomeIcon />,
+          to: "/sales-management/dashboard",
+          show: getMenuVisibility('SALES MANAGEMENT'),
+        },
+        {
+          title: "Sales Reports",
+          icon: <ReportsIcon />,
+          to: "/sales-reports",
+          show: getMenuVisibility('sales_reports') || getMenuVisibility('SALES MANAGEMENT'),
+          items: [
+            {
+              title: "Sales Performance Report",
+              icon: <ReportsIcon />,
+              to: "/sales-reports/performance-report-card",
+              show: getMenuVisibility('sales_reports') || getMenuVisibility('SALES MANAGEMENT'),
+            },
+            {
+              title: "Sales Center Reports",
+              icon: <ReportsIcon />,
+              to: "/director/reports/sales-center",
+              show: isPrivilegeGranted('director'),
+              items: [
+                {
+                  title: "Sales Manager Monthly Report",
+                  icon: <ReportsIcon />,
+                  to: "/director/reports/sales-center/sales-manager-monthly-report",
+                  show: isPrivilegeGranted('director'),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: "5. CONSULTATION ROOM",
           subheader: true,
           show: getMenuVisibility('CONSULTATION ROOM'),
         },
@@ -571,7 +651,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-          title: "4. SALES TABLE",
+          title: "6. SALES TABLE",
           subheader: true,
           show: getMenuVisibility('SALES MANAGEMENT'),
         },
