@@ -43,6 +43,9 @@ const SettingsRoutes = lazy(() => import("../pages/settings/SettingsRoutes"));
 const OfficeCalendarRoutes = lazy(() => import("../pages/office-calendar/OfficeCalendarRoutes"));
 const PatientRecordsRoutes = lazy(() => import("../pages/patient-records/PatientRecordsRoutes"));
 const ExternalLinksRoutes = lazy(() => import("../pages/external-links/ExternalLinksRoutes"));
+const CRMReportsRoutes = lazy(() => import("../pages/crm-reports/CRMReportsRoutes"));
+const OptometryReportsRoutes = lazy(() => import("../pages/optometry-reports/OptometryReportsRoutes"));
+const SalesReportsRoutes = lazy(() => import("../pages/sales-reports/SalesReportsRoutes"));
 
 import Home from "../Home";
 import About from "../About";
@@ -268,6 +271,9 @@ const App = () => {
                       <Route path="inventory-management/*" element={<Suspense fallback={<div>Loading...</div>}><InventoryManagementRoutes /></Suspense>} />
                       <Route path="financial-management/*" element={<Suspense fallback={<div>Loading...</div>}><FinancialManagementRoutes /></Suspense>} />
                       <Route path="marketing/*" element={<Suspense fallback={<div>Loading...</div>}><MarketingRoutes /></Suspense>} />
+                      <Route path="crm-reports/*" element={<Suspense fallback={<div>Loading...</div>}><CRMReportsRoutes /></Suspense>} />
+                      <Route path="optometry-reports/*" element={<Suspense fallback={<div>Loading...</div>}><OptometryReportsRoutes /></Suspense>} />
+                      <Route path="sales-reports/*" element={<Suspense fallback={<div>Loading...</div>}><SalesReportsRoutes /></Suspense>} />
                       <Route path="user-management/*" element={<Suspense fallback={<div>Loading...</div>}><UserManagementRoutes /></Suspense>} />
                       <Route path="director/*" element={<Suspense fallback={<div>Loading...</div>}><DirectorRoutes /></Suspense>} />
                       <Route path="office-calendar/*" element={<Suspense fallback={<div>Loading...</div>}><OfficeCalendarRoutes /></Suspense>} />

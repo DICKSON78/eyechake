@@ -52,8 +52,14 @@ const usePrivilege = (privilege, fallbackRoute = "/dashboard", reportPrivilege =
       console.log('usePrivilege - No privilege required, access granted');
     }
     
-    // Only redirect if explicitly denied access
-    if (!hasAccess && privilege) {
+    // Allow access if user is authenticated and has basic admin role
+    if (user && (user.role === 'Admin' || user.is_admin === true || user.is_admin === 1)) {
+      hasAccess = true;
+      console.log('usePrivilege - Admin role bypass granted');
+    }
+    
+    // Only redirect if explicitly denied access and user is not admin
+    if (!hasAccess && !(user && (user.role === 'Admin' || user.is_admin === true || user.is_admin === 1))) {
       console.log('usePrivilege - Access denied, redirecting to:', fallbackRoute);
       if (showError) {
         addToast({

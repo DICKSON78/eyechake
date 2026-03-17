@@ -485,16 +485,31 @@ export const getPrivileges = (preferences) => {
       value: "sales_center",
       children: [
         { label: "Sales Manager Monthly Report", value: "sales_manager_monthly_report" },
-        { label: "Sales Performance Report Card", value: "sales_report_card" }
       ]
     },
     { label: "Inventory Management", value: "inventory_management" },
-    {
-      label: "Marketing",
-      value: "marketing",
+    { label: "Sales Management", value: "sales_management" },
+    { 
+      label: "CRM Reports", 
+      value: "crm_reports",
       children: [
-        { label: "Marketing Operations Monthly Report", value: "marketing_operations_monthly_report" },
-        { label: "CRM Performance Report Card", value: "crm_report_card" }
+        { label: "CRM Report Card", value: "crm_report_card" },
+        { label: "Marketing Contact Analytics", value: "marketing_contact_analytics" },
+        { label: "Lead Conversion Report", value: "lead_conversion_report" }
+      ]
+    },
+    { 
+      label: "Optometry Reports", 
+      value: "optometry_reports",
+      children: [
+        { label: "Optometry Report Card", value: "optometry_report_card" }
+      ]
+    },
+    { 
+      label: "Sales Reports", 
+      value: "sales_reports",
+      children: [
+        { label: "Sales Report Card", value: "sales_report_card" }
       ]
     },
     { label: "Financial Management", value: "financial_management" },

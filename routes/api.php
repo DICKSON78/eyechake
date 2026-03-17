@@ -56,10 +56,8 @@ use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\RegionsController;
-use App\Http\Controllers\Reports\InventoryManagementReportsController;
-use App\Http\Controllers\Reports\PaymentCenterReportsController;
-use App\Http\Controllers\Reports\FinancialManagementReportsController;
-use App\Http\Controllers\Reports\SalesCenterReportsController;
+use App\Http\Controllers\CRMReportsController;
+use App\Http\Controllers\DepartmentPerformanceController;
 use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\SurgeryRecordReportsController;
 use App\Http\Controllers\UnitsOfMeasureController;
@@ -232,7 +230,28 @@ Route::group(['middleware' => ['auth:api', 'privilege:financial_management']], f
 
 // Marketing routes - require marketing privilege
 Route::group(['middleware' => ['auth:api', 'privilege:marketing']], function ($router) {
-    // Routes will be added when controllers are created
+    $router->controller(MarketingDashboardController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/dashboard', '__invoke');
+    });
+    
+    $router->controller(DailyActivitiesController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/daily-activities', 'index');
+        $router->post('/daily-activities', 'store');
+        $router->put('/daily-activities/{id}', 'update');
+        $router->delete('/daily-activities/{id}', 'destroy');
+    });
+    
+    $router->controller(MarketingStrategiesController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/marketing-strategies', 'index');
+        $router->post('/marketing-strategies', 'store');
+        $router->put('/marketing-strategies/{id}', 'update');
+        $router->delete('/marketing-strategies/{id}', 'destroy');
+    });
+    
+    $router->controller(PrestigeClientsController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/prestige-clients', 'index');
+        $router->get('/prestige-clients/{id}', 'show');
+    });
 });
 
 // Employee management routes - require employee_management privilege
@@ -594,11 +613,13 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->get('/dashboard', '__invoke');
             $router->get('/balance-sheet', 'getBalanceSheetReport');
         });
-        $router->controller(SalesCenterReportsController::class)->prefix('sales-center')->group(function ($router) {
-            $router->get('/sales', 'getSalesReport');
-        });
+        // Sales report route removed - no longer needed
+    });
 });
-});
+
+// CRM Reports - Public endpoints for testing
+Route::get('/crm-reports/marketing-contact-analytics', [CRMReportsController::class, 'marketingContactAnalytics']);
+Route::get('/crm-reports/lead-conversion-report', [CRMReportsController::class, 'leadConversionReport']);
 
 // Department Performance Report Cards
 Route::group(['middleware' => 'auth:api'], function ($router) {

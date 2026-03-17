@@ -360,15 +360,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12 }}>
-              <PerformanceReportCard
-                department="Optometry"
-                user={window.user}
-                // ✅ SAHIHISHA HAPA - tumia hasPrivilege badala ya includes
-                editable={hasPrivilege(window.user, 'optometry_performance_report') || isAdmin(window.user)}
-                refreshTrigger={dateParams.start_date}
-              />
-            </Grid>
           </Grid>
         </React.Fragment>
       ) : (

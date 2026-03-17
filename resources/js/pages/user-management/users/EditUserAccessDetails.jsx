@@ -165,19 +165,13 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
       .map((e) => {
         const hasChildren = e.children && e.children.length;
         const isChecked = formData.privileges.indexOf(e.value) !== -1;
-        const childrenChecked = hasChildren 
-          ? e.children.filter(c => formData.privileges.includes(c.value)).length 
-          : 0;
-        const allChildrenChecked = hasChildren && childrenChecked === e.children.length;
-        const someChildrenChecked = hasChildren && childrenChecked > 0 && !allChildrenChecked;
         
-        return hasChildren ? (
-          <Grid item xs={12} sm={6} key={e.value}>
+        return (
+          <Grid item xs={12} key={e.value}>
             <Paper
               variant="outlined"
               sx={{
                 p: 2,
-                height: "100%",
                 backgroundColor: isChecked 
                   ? (theme) => alpha(theme.palette.primary.main, 0.04)
                   : "background.paper",
@@ -191,34 +185,37 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                 },
               }}
             >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isChecked}
-                    indeterminate={someChildrenChecked && !isChecked}
-                    onChange={(event) => toggleCategory(e, event.target.checked)}
-                    sx={{
-                      "&.Mui-checked": {
-                        color: "primary.main",
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    {e.label}
-                  </Typography>
-                }
-              />
-              {e.children && (
-                <Box sx={{ pl: 4, mt: 1 }}>
-                  {e.children.map(child => (
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                {/* Main category checkbox */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isChecked}
+                      onChange={(event) => toggleCategory(e, event.target.checked)}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: "primary.main",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography variant="subtitle2" fontWeight={600}>
+                      {e.label}
+                    </Typography>
+                  }
+                />
+                
+                {/* Sub-items in the same row */}
+                {hasChildren && e.children.map(child => {
+                  const childChecked = formData.privileges.indexOf(child.value) !== -1;
+                  return (
                     <FormControlLabel
                       key={child.value}
                       control={
                         <Checkbox
                           size="small"
-                          checked={formData.privileges.indexOf(child.value) !== -1}
+                          checked={childChecked}
                           onChange={(event) =>
                             setFormData({
                               ...formData,
@@ -234,62 +231,11 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                           {child.label}
                         </Typography>
                       }
-                      sx={{ display: "block", ml: 0 }}
+                      sx={{ ml: 0 }}
                     />
-                  ))}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        ) : (
-          <Grid item xs={12} sm={6} md={4} key={e.value}>
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 1.5,
-                height: "100%",
-                backgroundColor: isChecked 
-                  ? (theme) => alpha(theme.palette.primary.main, 0.04)
-                  : "background.paper",
-                borderColor: isChecked 
-                  ? "primary.main"
-                  : (theme) => theme.palette.divider,
-                transition: "all 0.2s ease",
-                cursor: "pointer",
-                "&:hover": {
-                  borderColor: "primary.main",
-                },
-              }}
-              onClick={() =>
-                setFormData({
-                  ...formData,
-                  privileges: isChecked
-                    ? formData.privileges.filter((f) => f !== e.value)
-                    : [...formData.privileges, e.value],
-                })
-              }
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isChecked}
-                    onChange={(event) =>
-                      setFormData({
-                        ...formData,
-                        privileges: event.target.checked
-                          ? [...new Set([...formData.privileges, e.value])]
-                          : formData.privileges.filter((f) => f !== e.value),
-                      })
-                    }
-                  />
-                }
-                label={
-                  <Typography variant="body2">
-                    {e.label}
-                  </Typography>
-                }
-                sx={{ m: 0, width: "100%" }}
-              />
+                  );
+                })}
+              </Box>
             </Paper>
           </Grid>
         );

@@ -28,9 +28,7 @@ const DailyActivities = () => {
   const modalRef = useRef();
 
   // Check marketing privilege
-  console.log('DailyActivities - Checking privilege...');
-  usePrivilege('marketing', '/daily-activities');
-  console.log('DailyActivities - Privilege check passed');
+  usePrivilege('marketing', '/marketing/daily-activities');
 
   const [params, setParams] = useState({
     page: 1,

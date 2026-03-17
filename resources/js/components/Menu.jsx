@@ -59,6 +59,8 @@ import {
   TrendingDownRounded as ExpensesIcon,
   WarningRounded as WarningIcon,
   WindowRounded as DepartmentsIcon,
+  Visibility as EyeIcon,
+  ShoppingCart as ShoppingCartIcon,
 } from "@mui/icons-material";
 
 import GlassPatientsIcon from "./icons/AddLens";
@@ -341,34 +343,40 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
 
       // Role-based menu visibility
       const getMenuVisibility = (section) => {
-        const role = (user?.role || "").toString().trim().toLowerCase();
+        const role = (user?.role || "").toString().trim();
         const hasSalesCenterAccess = hasPrivilege(user, 'sales_center');
 
         switch (section) {
           case "RECEPTION":
-            return role === "admin" || role === "receptionist" || hasPrivilege(user, 'reception') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Receptionist" || hasPrivilege(user, 'reception') || isAdmin(user);
           case "CASHIER":
-            return role === "admin" || role === "cashier" || hasPrivilege(user, 'payment_center') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Cashier" || role === "Finance Manager" || hasPrivilege(user, 'payment_center') || isAdmin(user);
           case "CONSULTATION ROOM":
-            return role === "admin" || role === "doctor" || role === "optometrist" || hasPrivilege(user, 'consultation_room') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Doctor" || role === "Optometrist" || hasPrivilege(user, 'consultation_room') || isAdmin(user);
           case "SALES TABLE":
-            return role === "admin" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || isAdmin(user);
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || isAdmin(user);
+          case "SALES MANAGEMENT":
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasPrivilege(user, 'sales_management') || hasPrivilege(user, 'sales_center') || isAdmin(user);
           case "PHARMACY":
-            return role === "admin" || role === "pharmacist" || hasPrivilege(user, 'medicine_center') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Pharmacist" || hasPrivilege(user, 'medicine_center') || isAdmin(user);
           case "WORKSHOP":
-            return role === "admin" || role === "optician" || role === "workshop" || hasPrivilege(user, 'optician_center') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Optician" || hasPrivilege(user, 'optician_center') || isAdmin(user);
           case "STOCK MANAGEMENT":
-            return role === "admin" || role === "storekeeper" || role === "inventory" || hasPrivilege(user, 'inventory_management') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Storekeeper" || role === "Inventory Manager" || hasPrivilege(user, 'inventory_management') || isAdmin(user);
           case "FINANCIAL MANAGEMENT":
-            return role === "admin" || role === "accountant" || role === "finance" || hasPrivilege(user, 'financial_management') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Accountant" || role === "Finance Manager" || hasPrivilege(user, 'financial_management') || isAdmin(user);
           case "EMPLOYEE MANAGEMENT":
-            return role === "admin" || role === "hr" || role === "employee management" || hasPrivilege(user, 'employee_management') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "HR" || role === "Employee Manager" || hasPrivilege(user, 'employee_management') || isAdmin(user);
           case "DIRECTOR":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'director') || isAdmin(user);
+            return role === "Admin" || role === "Director" || hasPrivilege(user, 'director') || isAdmin(user);
           case "SETTINGS":
-            return role === "admin" || role === "director" || hasPrivilege(user, 'settings') || isAdmin(user);
+            return role === "Admin" || role === "Director" || hasPrivilege(user, 'settings') || isAdmin(user);
           case "MARKETING":
-            return role === "admin" || role === "marketing" || role === "marketing manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
+            return role === "Admin" || role === "Director" || role === "Marketing" || role === "Marketing Manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
+          case "CRM REPORTS":
+            return role === "admin" || role === "director" || role === "marketing manager" || role === "marketing" || hasPrivilege(user, 'crm_reports') || hasPrivilege(user, 'marketing') || isAdmin(user);
+          case "CALENDAR":
+            return hasPrivilege(user, 'office_calendar') || isAdmin(user);
           default:
             return isAdmin(user);
         }
@@ -565,31 +573,31 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "4. SALES TABLE",
           subheader: true,
-          show: getMenuVisibility('SALES TABLE'),
+          show: getMenuVisibility('SALES MANAGEMENT'),
         },
         {
           title: "Sales Management Dashboard",
           icon: <HomeIcon />,
           to: "/sales-management/dashboard",
-          show: getMenuVisibility('SALES TABLE'),
+          show: getMenuVisibility('SALES MANAGEMENT'),
         },
         {
           title: "Client Lists",
           icon: <PeopleIcon />,
           to: "/sales-management/clients",
-          show: getMenuVisibility('SALES TABLE'),
+          show: getMenuVisibility('SALES MANAGEMENT'),
         },
         {
           title: "Prescriptions Without Purchases",
           icon: <PrescriptionIcon />,
           to: "/sales-management/prescriptions",
-          show: getMenuVisibility('SALES TABLE'),
+          show: getMenuVisibility('SALES MANAGEMENT'),
         },
         {
           title: "Patients Sent to Sales",
           icon: <PrescriptionIcon />,
           to: "/sales-management/clinical-notes",
-          show: getMenuVisibility('SALES TABLE'),
+          show: getMenuVisibility('SALES MANAGEMENT'),
           badge: notifications && typeof notifications.patients_sent_to_sales !== 'undefined' && notifications.patients_sent_to_sales != null ? (Number(notifications.patients_sent_to_sales) || 0) : 0,
         },
         {
@@ -977,7 +985,42 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
-          title: "10. EMPLOYEE MANAGEMENT",
+          title: "10. CRM REPORTS",
+          subheader: true,
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "CRM Report",
+          icon: <ReportsIcon />,
+          to: "/crm-reports/performance-report-card",
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "Marketing Contact Analytics",
+          icon: <PhoneIcon />,
+          to: "/crm-reports/marketing-contact-analytics",
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "Lead Conversion Report",
+          icon: <PeopleIcon />,
+          to: "/crm-reports/lead-conversion-report",
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "Optometry Report",
+          icon: <EyeIcon />,
+          to: "/optometry-reports",
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "Sales Report",
+          icon: <ShoppingCartIcon />,
+          to: "/sales-reports",
+          show: getMenuVisibility('CRM REPORTS'),
+        },
+        {
+          title: "11. EMPLOYEE MANAGEMENT",
           subheader: true,
           show: getMenuVisibility('EMPLOYEE MANAGEMENT'),
         },
@@ -1076,12 +1119,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/director/reports/sales-center",
               show: isPrivilegeGranted('director'),
               items: [
-                {
-                  title: "Sales Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/sales-center/sales",
-                  show: isPrivilegeGranted('director'),
-                },
                 {
                   title: "Sales Manager Monthly Report",
                   icon: <ReportsIcon />,

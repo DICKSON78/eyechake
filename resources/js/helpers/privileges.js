@@ -24,27 +24,84 @@ const PRIVILEGE_ALIASES = {
 };
 
 const ROLE_FALLBACK_PRIVILEGES = {
-  admin: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "employee_management", "director", "settings", "calendar", "marketing"],
-  director: ["dashboard", "reception", "payment_center", "consultation_room", "sales_center", "medicine_center", "optician_center", "inventory_management", "financial_management", "director", "settings", "calendar", "marketing"],
-  receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
-  cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
-  doctor: ["dashboard", "consultation_room", "consultation_reports"],
-  optometrist: ["dashboard", "consultation_room", "consultation_reports"],
-  "sales manager": ["sales_center", "sales"],
-  sales: ["sales_center", "sales"],
-  pharmacist: ["dashboard", "medicine_center", "pharmacy_reports", "dispensing_reports"],
-  optician: ["dashboard", "optician_center", "workshop_reports"],
-  workshop: ["dashboard", "optician_center", "workshop_reports"],
-  storekeeper: ["dashboard", "inventory_management", "inventory_reports"],
-  inventory: ["dashboard", "inventory_management", "inventory_reports"],
-  accountant: ["dashboard", "financial_management", "financial_reports"],
-  finance: ["dashboard", "financial_management", "financial_reports", "cash_collection"],
-  hr: ["dashboard", "employee_management", "user_management", "employee_reports"],
-  "employee management": ["dashboard", "employee_management", "user_management", "employee_reports"],
-  dispensing: ["dashboard", "dispensing"],
-  "procedure room": ["dashboard", "consultation_room", "procedure_requests"],
-  "other dispensing": ["dashboard", "dispensing"],
-  "clinic admin": ["dashboard", "settings"]
+  Admin: [
+    "dashboard",
+    "reception",
+    "payment_center",
+    "consultation_room",
+    "optician_center",
+    "medicine_center",
+    "procedure_room",
+    "inventory_management",
+    "financial_management",
+    "employee_management",
+    "settings",
+    "clear_pending_bill",
+    "customer_relationship_management",
+    "receptionist_monthly_report",
+    "cashier_monthly_report",
+    "optometrist_monthly_report",
+    "dispensing",
+    "other_dispensing",
+    "sales_center",
+    "sales_manager_monthly_report",
+    "user_management",
+    "marketing",
+    "marketing_operations_monthly_report",
+    "director",
+    "office_calendar",
+    "calendar_edit",
+    "optometry_report_card",
+    "sales_report_card",
+    "crm_report_card",
+  ],
+  Director: [
+    "dashboard",
+    "reception",
+    "payment_center",
+    "consultation_room",
+    "optician_center",
+    "medicine_center",
+    "procedure_room",
+    "inventory_management",
+    "financial_management",
+    "employee_management",
+    "clear_pending_bill",
+    "customer_relationship_management",
+    "receptionist_monthly_report",
+    "cashier_monthly_report",
+    "optometrist_monthly_report",
+    "dispensing",
+    "other_dispensing",
+    "sales_center",
+    "sales_manager_monthly_report",
+    "user_management",
+    "marketing",
+    "marketing_operations_monthly_report",
+    "director",
+    "office_calendar",
+    "calendar_edit",
+    "optometry_report_card",
+    "sales_report_card",
+    "crm_report_card",
+  ],
+  Receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
+  Cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
+  Doctor: ["dashboard", "consultation_room", "consultation_reports", "optometry_report_card"],
+  Optometrist: ["dashboard", "consultation_room", "consultation_reports", "optometry_report_card"],
+  Optician: ["dashboard", "optician_center", "workshop_reports"],
+  Pharmacist: ["dashboard", "medicine_center", "pharmacy_reports", "dispensing_reports"],
+  SalesManager: ["sales_center", "sales", "sales_manager_monthly_report", "sales_report_card"],
+  Sales: ["sales_center", "sales", "sales_report_card"],
+  Storekeeper: ["dashboard", "inventory_management", "inventory_reports"],
+  InventoryManager: ["dashboard", "inventory_management", "inventory_reports"],
+  Accountant: ["dashboard", "financial_management", "financial_reports"],
+  FinanceManager: ["dashboard", "financial_management", "financial_reports"],
+  HR: ["dashboard", "employee_management", "employee_reports"],
+  EmployeeManager: ["dashboard", "employee_management", "employee_reports"],
+  Marketing: ["marketing", "marketing_operations_monthly_report", "office_calendar"],
+  MarketingManager: ["marketing", "marketing_operations_monthly_report", "office_calendar"],
+  Client: [],
 };
 
 const normalizePrivilegePayload = (payload) => {
@@ -171,6 +228,42 @@ export const getDefaultRoute = (user) => {
   
   if (isAdmin(user)) {
     return "/dashboard";
+  }
+  
+  // Role-based routing for specific roles
+  const role = (user?.role || "").toString().trim();
+  
+  switch (role) {
+    case "Receptionist":
+      return "/reception/dashboard";
+    case "Cashier":
+      return "/payment-center/dashboard";
+    case "Doctor":
+    case "Optometrist":
+      return "/consultation-room/dashboard";
+    case "Optician":
+      return "/optician-center/dashboard";
+    case "Pharmacist":
+      return "/medicine-center/dashboard";
+    case "Sales Manager":
+    case "Sales":
+      return "/sales-management/dashboard";
+    case "Storekeeper":
+    case "Inventory Manager":
+      return "/inventory-management/dashboard";
+    case "Accountant":
+    case "Finance Manager":
+      return "/financial-management/dashboard";
+    case "HR":
+    case "Employee Manager":
+      return "/user-management/users";
+    case "Marketing":
+    case "Marketing Manager":
+      return "/marketing/dashboard";
+    case "Director":
+      return "/dashboard";
+    default:
+      break;
   }
   
   const normalizedPrivileges = getNormalizedPrivileges(user);

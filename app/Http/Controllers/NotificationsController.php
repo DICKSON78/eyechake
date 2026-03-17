@@ -39,23 +39,27 @@ class NotificationsController extends Controller
     {
         $user = $request->user();
         
+        // Simplified authentication check
         if (!$user) {
+            Log::info('NotificationsController: No authenticated user, returning defaults');
             return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
         }
 
+        Log::info('NotificationsController: User authenticated', ['user_id' => $user->id, 'role' => $user->role]);
+
         $clinic_id = $user->is_admin ? ($request->clinic_id ?? null) : ($user->clinic_id ?? null);
 
-        // Add simple caching for 10 seconds to reduce database load while maintaining real-time feel
+        // Simple cache check
         $cacheKey = "notifications_user_{$user->id}_clinic_" . ($clinic_id ?? 'null');
         $cachedData = cache()->get($cacheKey);
 
-        // In local environment, always fetch fresh data for testing
-        // In production, use cache but with shorter TTL for real-time updates
         if ($cachedData && !app()->environment('local')) {
             return $this->sendResponse($cachedData, Response::HTTP_OK, 'Success (cached).');
         }
 
         try {
+            Log::info('NotificationsController: Calculating notifications', ['clinic_id' => $clinic_id]);
+            
             $data = [
                 'patients_sent_to_cashier' => $this->getPatientsSentToCashierCount($clinic_id),
                 'credit_patients_approval' => $this->getCreditPatientsApprovalCount($clinic_id),
@@ -74,15 +78,16 @@ class NotificationsController extends Controller
                 'website_appointments' => $this->getWebsiteAppointmentsCount(),
             ];
 
-            // Cache for 2 seconds (reduced for more real-time updates)
-            cache()->put($cacheKey, $data, 2);
+            Log::info('NotificationsController: Data calculated', $data);
+
+            // Cache for 5 seconds
+            cache()->put($cacheKey, $data, 5);
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
         } catch (\Throwable $e) {
             Log::error('NotificationsController: Failed to calculate notifications: ' . $e->getMessage());
             Log::error('NotificationsController: Stack trace: ' . $e->getTraceAsString());
 
-            // Return default data on error, but don't cache errors
             return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
         }
     }

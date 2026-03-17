@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -12,15 +12,15 @@ import {
   Button,
   Chip,
   Alert,
-} from '@mui/material';
+} from "@mui/material";
 import {
   PointOfSaleRounded as SalesIcon,
   ShoppingCartRounded as CartIcon,
-  TrendingUpRounded as TrendingIcon,
+  TrendingUpRounded as TrendingUpIcon,
   DiscountRounded as DiscountIcon,
   AssessmentRounded as ReportsIcon,
   PictureAsPdfRounded as PdfIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   blue,
   cyan,
@@ -30,15 +30,15 @@ import {
   teal,
   pink,
   red,
-} from '@mui/material/colors';
+} from "@mui/material/colors";
 
-import Page from '../../../components/Page';
-import InfoCard from '../../dashboard/InfoCard';
-import ChartWrapper from '../../../components/ChartWrapper';
-import { useFetch, useToast } from '../../../hooks';
-import { formatError, numberFormat, getWeekStartDate, getWeekEndDate, formatDateForDb } from '../../../helpers';
-import { downloadHTMLAsPDF } from '../../../helpers/pdfDownload';
-import { useTheme } from '@mui/material/styles';
+import Page from "../../../components/Page";
+import InfoCard from "../../dashboard/InfoCard";
+import ChartWrapper from "../../../components/ChartWrapper";
+import { useFetch, useToast } from "../../../hooks";
+import { formatError, numberFormat, getWeekStartDate, getWeekEndDate, formatDateForDb } from "../../../helpers";
+import { downloadHTMLAsPDF } from "../../../helpers/pdfDownload";
+import { useTheme } from "@mui/material/styles";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const Dashboard = () => {
   });
 
   const { data, loading, error } = useFetch(
-    'api/sales-management/dashboard',
+    "api/sales-management/dashboard",
     dateParams,
     true,
     {
@@ -87,7 +87,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (error) {
-      addToast({ message: formatError(error), severity: 'error' });
+      addToast({ message: formatError(error), severity: "error" });
     }
   }, [error, addToast]);
 
@@ -95,7 +95,7 @@ const Dashboard = () => {
   const handleDownloadPDF = async () => {
     try {
       if (!printRef.current) {
-        addToast({ message: 'Dashboard content not found', severity: 'error' });
+        addToast({ message: "Dashboard content not found", severity: "error" });
         return;
       }
 
@@ -106,59 +106,59 @@ const Dashboard = () => {
       await downloadHTMLAsPDF(printRef.current, filename);
       
       addToast({
-        message: 'Dashboard report downloaded successfully!',
-        severity: 'success',
+        message: "Dashboard report downloaded successfully!",
+        severity: "success",
       });
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+      console.error("Error downloading PDF:", error);
       addToast({
-        message: formatError(error) || 'Failed to download dashboard report',
-        severity: 'error',
+        message: formatError(error) || "Failed to download dashboard report",
+        severity: "error",
       });
     }
   };
 
   if (loading) {
     return (
-      <Page title='Sales Management Dashboard'>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <Page title="Sales Management Dashboard">
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
           <CircularProgress />
         </Box>
       </Page>
     );
   }
 
-  // Calculate performance metrics - now using backend calculated performance
-  const salesPerformance = data.summary?.sales_performance || 0;
+  // Calculate performance metrics
+  const salesPerformance = data.summary?.total_sales ? ((data.summary.total_sales / 1500000) * 100).toFixed(1) : 0;
 
   return (
     <Page
-      title='Sales Management Dashboard'
+      title="Sales Management Dashboard"
       breadcrumbs={[
-        { title: 'Home' },
-        { title: 'Sales Management' },
-        { title: 'Sales Management Dashboard' },
+        { title: "Home" },
+        { title: "Sales Management" },
+        { title: "Sales Management Dashboard" },
       ]}
     >
       <CardHeader
-        title='Sales Management Dashboard'
+        title="Sales Management Dashboard"
         titleTypographyProps={{
-          variant: 'h4',
+          variant: "h4",
           fontWeight: 700,
         }}
         subheader={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant="body2" color="text.secondary">
               Real-time sales performance and analytics
             </Typography>
             <Chip 
-              label={`Performance: ${salesPerformance}%`} 
+              label={`Target: ${salesPerformance}%`} 
               color={salesPerformance >= 100 ? 'success' : salesPerformance >= 75 ? 'warning' : 'error'}
-              size='small'
+              size="small"
             />
             <Button
-              variant='outlined'
-              size='small'
+              variant="outlined"
+              size="small"
               startIcon={<PdfIcon />}
               onClick={handleDownloadPDF}
               sx={{ ml: 'auto' }}
@@ -176,16 +176,16 @@ const Dashboard = () => {
       {/* Date Filter */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant='h6' gutterBottom>
+          <Typography variant="h6" gutterBottom>
             Date Filter
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <Box>
-              <Typography variant='body2' color='text.secondary' gutterBottom>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
                 Start Date
               </Typography>
               <input
-                type='date'
+                type="date"
                 value={dateParams.start_date}
                 onChange={(e) => setDateParams({ ...dateParams, start_date: e.target.value })}
                 style={{
@@ -197,11 +197,11 @@ const Dashboard = () => {
               />
             </Box>
             <Box>
-              <Typography variant='body2' color='text.secondary' gutterBottom>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
                 End Date
               </Typography>
               <input
-                type='date'
+                type="date"
                 value={dateParams.end_date}
                 onChange={(e) => setDateParams({ ...dateParams, end_date: e.target.value })}
                 style={{
@@ -213,7 +213,7 @@ const Dashboard = () => {
               />
             </Box>
             <Button
-              variant='contained'
+              variant="contained"
               onClick={() => window.location.reload()}
               sx={{ mt: 2 }}
             >
@@ -256,27 +256,27 @@ const Dashboard = () => {
                 <InfoCard
                   title="Average Transaction"
                   count={numberFormat(data.summary?.average_transaction || 0)}
-                  subtitle='Per sale'
-                  icon={<TrendingIcon />}
+                  subtitle="Per sale"
+                  icon={<TrendingUpIcon />}
                   color={purple[500]}
                   onClick={() => navigate('/sales-management/reports/sales-manager-monthly-report')}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                 <InfoCard
-                  title='Items Sold'
+                  title="Items Sold"
                   count={numberFormat(data.summary?.items_sold || 0)}
-                  subtitle='Products sold'
-                  icon={<ReportsIcon />}
+                  subtitle="Products sold"
+                  icon={<AssessmentIcon />}
                   color={orange[500]}
                   onClick={() => navigate('/sales-management/prescriptions')}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                 <InfoCard
-                  title='Total Discounts'
+                  title="Total Discounts"
                   count={numberFormat(data.summary?.total_discounts || 0)}
-                  subtitle='Discounts given'
+                  subtitle="Discounts given"
                   icon={<DiscountIcon />}
                   color={pink[500]}
                   onClick={() => navigate('/sales-management/reports/sales-manager-monthly-report')}
@@ -284,10 +284,10 @@ const Dashboard = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                 <InfoCard
-                  title='Sales Performance'
+                  title="Sales Performance"
                   count={`${salesPerformance}%`}
-                  subtitle={`vs ${numberFormat(data.summary?.sales_target || 1500000)} target`}
-                  icon={<TrendingIcon />}
+                  subtitle="vs 1.5M target"
+                  icon={<TrendingUpIcon />}
                   color={salesPerformance >= 100 ? green[500] : salesPerformance >= 75 ? orange[500] : red[500]}
                   onClick={() => navigate('/sales-management/reports/sales-manager-monthly-report')}
                 />
@@ -315,7 +315,7 @@ const Dashboard = () => {
                   }}
                 >
                   <CardHeader
-                    title='Clients Consulted vs Successful Sales'
+                    title="Clients Consulted vs Successful Sales"
                     titleTypographyProps={{
                       variant: 'h6',
                       fontWeight: 600,
@@ -341,7 +341,7 @@ const Dashboard = () => {
                           chart: {
                             fontFamily: theme.typography.fontFamily,
                             foreColor: theme.palette.text.primary,
-                            background: 'transparent',
+                            background: "transparent",
                             toolbar: {
                               show: false,
                             },
@@ -349,7 +349,7 @@ const Dashboard = () => {
                           },
                           stroke: {
                             width: [3, 3],
-                            curve: 'smooth',
+                            curve: "smooth",
                           },
                           colors: [blue[400], green[400]],
                           dataLabels: {
@@ -375,21 +375,21 @@ const Dashboard = () => {
                           },
                           yaxis: {
                             title: {
-                              text: 'Count',
+                              text: "Count",
                             },
                             labels: {
                               formatter: (val) => Math.round(val),
                             },
                           },
                           tooltip: {
-                            theme: 'dark',
+                            theme: "dark",
                             shared: true,
                             y: {
                               formatter: (val) => `${Math.round(val)}`,
                             },
                           },
                           legend: {
-                            position: 'top',
+                            position: "top",
                             markers: {
                               width: 14,
                               height: 8,
@@ -399,15 +399,15 @@ const Dashboard = () => {
                         }}
                         series={[
                           {
-                            name: 'Clients Consulted',
+                            name: "Clients Consulted",
                             data: (data.statistics?.clients_consulted_vs_sales || []).map((e) => e.clients_consulted || 0),
                           },
                           {
-                            name: 'Successful Sales (Count)',
+                            name: "Successful Sales (Count)",
                             data: (data.statistics?.clients_consulted_vs_sales || []).map((e) => e.successful_sales || 0),
                           },
                         ]}
-                        type='line'
+                        type="line"
                         height={350}
                       />
                     </Box>
@@ -430,7 +430,7 @@ const Dashboard = () => {
                   }}
                 >
                   <CardHeader
-                    title='Prescription Demand'
+                    title="Prescription Demand"
                     titleTypographyProps={{
                       variant: 'h6',
                       fontWeight: 600,
@@ -456,7 +456,7 @@ const Dashboard = () => {
                           chart: {
                             fontFamily: theme.typography.fontFamily,
                             foreColor: theme.palette.text.primary,
-                            background: 'transparent',
+                            background: "transparent",
                             toolbar: {
                               show: false,
                             },
@@ -466,7 +466,7 @@ const Dashboard = () => {
                             bar: {
                               borderRadius: 4,
                               dataLabels: {
-                                position: 'top',
+                                position: "top",
                               },
                             },
                           },
@@ -476,7 +476,7 @@ const Dashboard = () => {
                             formatter: (val) => Math.round(val),
                             offsetY: -20,
                             style: {
-                              fontSize: '10px',
+                              fontSize: "10px",
                               colors: [theme.palette.text.primary],
                             },
                           },
@@ -500,20 +500,20 @@ const Dashboard = () => {
                           },
                           yaxis: {
                             title: {
-                              text: 'Quantity',
+                              text: "Quantity",
                             },
                             labels: {
                               formatter: (val) => Math.round(val),
                             },
                           },
                           tooltip: {
-                            theme: 'dark',
+                            theme: "dark",
                             y: {
                               formatter: (val) => `${Math.round(val)} items`,
                             },
                           },
                           legend: {
-                            position: 'top',
+                            position: "top",
                             markers: {
                               width: 14,
                               height: 8,
@@ -523,11 +523,11 @@ const Dashboard = () => {
                         }}
                         series={[
                           {
-                            name: 'Prescription Quantity',
+                            name: "Prescription Quantity",
                             data: (data.statistics?.prescription_demand || []).map((e) => e.quantity || 0),
                           },
                         ]}
-                        type='bar'
+                        type="bar"
                         height={350}
                       />
                     </Box>
@@ -535,27 +535,28 @@ const Dashboard = () => {
                 </Card>
               </Grid>
             </Grid>
+          </>
 
           {/* Performance Alert */}
           {salesPerformance < 75 && (
-            <Alert severity='warning' sx={{ mb: 3 }}>
-              <Typography variant='body2'>
+            <Alert severity="warning" sx={{ mb: 3 }}>
+              <Typography variant="body2">
                 Sales performance is at {salesPerformance}% of the daily target. Consider reviewing sales strategies and customer engagement.
               </Typography>
             </Alert>
           )}
 
           {salesPerformance >= 100 && (
-            <Alert severity='success' sx={{ mb: 3 }}>
-              <Typography variant='body2'>
+            <Alert severity="success" sx={{ mb: 3 }}>
+              <Typography variant="body2">
                 Great job! Sales performance has exceeded the daily target at {salesPerformance}%. Keep up the excellent work!
               </Typography>
             </Alert>
           )}
         </>
       ) : (
-        <Alert severity='info' sx={{ mb: 3 }}>
-          <Typography variant='body2'>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
             No sales data available for the selected period. Sales data will appear here once transactions are recorded.
           </Typography>
         </Alert>
