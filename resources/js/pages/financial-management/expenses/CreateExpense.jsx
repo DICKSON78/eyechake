@@ -36,9 +36,21 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
   const paidAmountRef = useRef();
   const descriptionRef = useRef();
   const dateRef = useRef();
+  const channelRef = useRef();
 
   const { data: categories } = useFetch(
     "api/expense-categories",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+
+  const { data: channels } = useFetch(
+    "api/payment-channels",
     {
       status: "Active",
       per_page: 500,
@@ -54,6 +66,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
     paid_amount: undefined,
     description: undefined,
     expense_date: new Date(),
+    channel_id: undefined,
     running_cost: false,
     improvement_cost: false,
   });
@@ -94,8 +107,8 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
         <Form ref={formRef}>
           {/* Basic Information Section */}
           <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
-            <CardHeader 
-              title="Expense Information" 
+            <CardHeader
+              title="Expense Information"
               titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
             />
             <Divider />
@@ -130,14 +143,28 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                     }
                   />
                 </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Select
+                    ref={channelRef}
+                    label="Payment Channel *"
+                    fullWidth
+                    required
+                    options={channels}
+                    optionsLabel="name"
+                    optionsValue="id"
+                    onChange={(value) =>
+                      setFormData({ ...formData, channel_id: value })
+                    }
+                  />
+                </Grid>
               </Grid>
             </CardContent>
           </Card>
 
           {/* Amount Information Section */}
           <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
-            <CardHeader 
-              title="Amount Details" 
+            <CardHeader
+              title="Amount Details"
               titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
             />
             <Divider />
@@ -196,7 +223,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
                         color={
                           parseFloat(formData.total_amount || 0) -
                             parseFloat(formData.paid_amount || 0) >
-                          0
+                            0
                             ? "warning.main"
                             : "success.main"
                         }
@@ -220,8 +247,8 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
 
           {/* Description Section */}
           <Card variant="outlined" sx={{ mb: 3, boxShadow: 1 }}>
-            <CardHeader 
-              title="Additional Details" 
+            <CardHeader
+              title="Additional Details"
               titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
             />
             <Divider />
@@ -290,7 +317,7 @@ const CreateExpense = ({ modal, fetchExpenses }) => {
           {loading ? "Saving..." : "Save Expense"}
         </Button>
       </CardActions>
-    </React.Fragment>
+    </React.Fragment >
   );
 };
 

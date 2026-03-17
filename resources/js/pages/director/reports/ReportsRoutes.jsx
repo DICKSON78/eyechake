@@ -27,12 +27,6 @@ import BillPayments from "../../payment-center/reports/BillPayments";
 import BalanceSheet from "../../financial-management/reports/BalanceSheet";
 
 // Marketing Reports
-import MarketingPatientRegistration from "../../marketing/reports/PatientRegistration";
-import CampaignPerformance from "../../marketing/reports/CampaignPerformance";
-import LeadGeneration from "../../marketing/reports/LeadGeneration";
-import CommunicationAnalytics from "../../marketing/reports/CommunicationAnalytics";
-import MarketingOperationsMonthlyReport from "../../marketing/reports/MarketingOperationsMonthlyReport";
-import MarketingManagementMonthlyReport from "../../marketing/reports/MarketingManagementMonthlyReport";
 
 // Medicine Center Reports
 import PatientItems from "../../reports/PatientItems";
@@ -141,35 +135,6 @@ const ReportsRoutes = () => {
         element={<BalanceSheet />}
       />
 
-      {/* Marketing Reports */}
-      <Route
-        path="/marketing/patient-registration"
-        element={<MarketingPatientRegistration />}
-      />
-      <Route
-        path="/marketing/consultation"
-        element={<Consultation />}
-      />
-      <Route
-        path="/marketing/campaign-performance"
-        element={<CampaignPerformance />}
-      />
-      <Route
-        path="/marketing/lead-generation"
-        element={<LeadGeneration />}
-      />
-      <Route
-        path="/marketing/communication-analytics"
-        element={<CommunicationAnalytics />}
-      />
-      <Route
-        path="/marketing/marketing-operations-monthly-report"
-        element={<MarketingOperationsMonthlyReport />}
-      />
-      <Route
-        path="/marketing/marketing-management-monthly-report"
-        element={<MarketingManagementMonthlyReport />}
-      />
 
       {/* Medicine Center Reports */}
       <Route
@@ -243,30 +208,6 @@ const ReportsRoutes = () => {
       <Route
         path="/dispensing/item-balance"
         element={<DispensingItemBalance />}
-      />
-
-      {/* Procedure Room Reports */}
-      <Route
-        path="/procedure-room/served-procedures"
-        element={
-          <PatientItems
-            module="Director"
-            title="Served Procedures Report"
-            consultationType="Procedure"
-            status="Served"
-          />
-        }
-      />
-      <Route
-        path="/procedure-room/pending-procedures"
-        element={
-          <PatientItems
-            module="Director"
-            title="Pending Procedures Report"
-            consultationType="Procedure"
-            status="Pending,Paid,Billed"
-          />
-        }
       />
 
       {/* Optician Center Reports */}

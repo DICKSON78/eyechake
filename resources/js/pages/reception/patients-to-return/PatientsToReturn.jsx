@@ -38,6 +38,7 @@ import {
   TodayRounded as TodayIcon,
 } from "@mui/icons-material";
 import { orange, red, green, blue, purple, cyan, pink } from "@mui/material/colors";
+import { useTheme } from "@mui/material/styles";
 
 import Page from "../../../components/Page";
 import Modal from "../../../components/Modal";
@@ -47,6 +48,7 @@ import { formatError, formatDate } from "../../../helpers";
 const PatientsToReturn = () => {
   const navigate = useNavigate();
   const addToast = useToast();
+  const theme = useTheme();
   const modalRef = useRef();
 
   const [params, setParams] = useState({
@@ -250,109 +252,81 @@ const PatientsToReturn = () => {
       ]}
     >
       <Grid container spacing={3}>
-        {/* Summary Cards - Increased Size */}
+        {/* Summary Cards - Design tu imeboreshwa, data inabaki vile vile */}
         <Grid size={{ xs: 12 }}>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card 
-                sx={{ 
-                  bgcolor: blue[50], 
-                  border: `2px solid ${blue[200]}`,
-                  height: '100%',
-                  minHeight: 100,
-                }}
-              >
-                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: blue[500], width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 } }}>
-                      <CalendarIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                    </Avatar>
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Box>
-                      <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: "bold", color: blue[700] }}>
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: blue[700], lineHeight: 1.2 }}>
                         {data.summary?.total || 0}
                       </Typography>
-                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: "text.secondary", fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
                         Total This Week
                       </Typography>
                     </Box>
+                    <Avatar sx={{ bgcolor: blue[500], width: 56, height: 56 }}>
+                      <CalendarIcon sx={{ fontSize: 28 }} />
+                    </Avatar>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card 
-                sx={{ 
-                  bgcolor: orange[50], 
-                  border: `2px solid ${orange[200]}`,
-                  height: '100%',
-                  minHeight: 100,
-                }}
-              >
-                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: orange[500], width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 } }}>
-                      <TodayIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                    </Avatar>
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Box>
-                      <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: "bold", color: orange[700] }}>
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: orange[700], lineHeight: 1.2 }}>
                         {data.summary?.today || 0}
                       </Typography>
-                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: "text.secondary", fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
                         Returning Today
                       </Typography>
                     </Box>
+                    <Avatar sx={{ bgcolor: orange[500], width: 56, height: 56 }}>
+                      <TodayIcon sx={{ fontSize: 28 }} />
+                    </Avatar>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card 
-                sx={{ 
-                  bgcolor: red[50], 
-                  border: `2px solid ${red[200]}`,
-                  height: '100%',
-                  minHeight: 100,
-                }}
-              >
-                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: red[500], width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 } }}>
-                      <OverdueIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                    </Avatar>
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Box>
-                      <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: "bold", color: red[700] }}>
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: red[700], lineHeight: 1.2 }}>
                         {data.summary?.overdue || 0}
                       </Typography>
-                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: "text.secondary", fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
                         Overdue
                       </Typography>
                     </Box>
+                    <Avatar sx={{ bgcolor: red[500], width: 56, height: 56 }}>
+                      <OverdueIcon sx={{ fontSize: 28 }} />
+                    </Avatar>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <Card 
-                sx={{ 
-                  bgcolor: green[50], 
-                  border: `2px solid ${green[200]}`,
-                  height: '100%',
-                  minHeight: 100,
-                }}
-              >
-                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: green[500], width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 } }}>
-                      <CalendarIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
-                    </Avatar>
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Box>
-                      <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, fontWeight: "bold", color: green[700] }}>
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: green[700], lineHeight: 1.2 }}>
                         {data.summary?.this_week || 0}
                       </Typography>
-                      <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: "text.secondary", fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
                         Days This Week
                       </Typography>
                     </Box>
+                    <Avatar sx={{ bgcolor: green[500], width: 56, height: 56 }}>
+                      <CalendarIcon sx={{ fontSize: 28 }} />
+                    </Avatar>
                   </Stack>
                 </CardContent>
               </Card>
@@ -360,7 +334,7 @@ const PatientsToReturn = () => {
           </Grid>
         </Grid>
 
-        {/* Patients Table */}
+        {/* Patients Table - Design imeboreshwa, data inabaki vile vile */}
         <Grid size={{ xs: 12 }}>
           <Card>
             <CardHeader
@@ -376,9 +350,15 @@ const PatientsToReturn = () => {
                   </IconButton>
                 </Tooltip>
               }
+              sx={{ 
+                '& .MuiCardHeader-action': { 
+                  alignSelf: 'center',
+                  mr: 1 
+                } 
+              }}
             />
             <Divider />
-            <CardContent>
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
               {loading ? (
                 <Box sx={{ p: 4, textAlign: "center" }}>
                   <CircularProgress />
@@ -388,11 +368,11 @@ const PatientsToReturn = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Patient Name</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Return Date</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }} align="center">Actions</TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Patient Name</TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Phone</TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Return Date</TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: 'grey.50' }} align="center">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -403,45 +383,36 @@ const PatientsToReturn = () => {
                             key={index}
                             hover
                             sx={{
-                              bgcolor: statusColors.bg,
+                              '&:last-child td, &:last-child th': { border: 0 },
                               '&:hover': {
-                                bgcolor: statusColors.bg,
-                                opacity: 0.9,
+                                bgcolor: 'action.hover',
                               },
                             }}
                           >
                             <TableCell>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <Avatar sx={{ bgcolor: blue[500], width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 } }}>
-                                  <PersonIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
+                              <Stack direction="row" alignItems="center" spacing={1.5}>
+                                <Avatar sx={{ bgcolor: blue[100], color: blue[700], width: 36, height: 36 }}>
+                                  <PersonIcon sx={{ fontSize: 20 }} />
                                 </Avatar>
                                 <Box>
-                                  <Typography variant="body1" fontWeight="medium">
+                                  <Typography variant="body1" fontWeight="500">
                                     {patient.patient_name}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
                                     #{patient.patient_number}
                                   </Typography>
                                 </Box>
-                                <Stack direction="row" spacing={0.5}>
-                                  {patient.is_vip === true && (
-                                    <Chip icon={<VipIcon />} label="VIP" color="warning" size="small" sx={{ height: 20 }} />
-                                  )}
-                                  {patient.is_businessperson === true && (
-                                    <Chip icon={<BusinessIcon />} label="Business" color="info" size="small" sx={{ height: 20 }} />
-                                  )}
-                                  {patient.is_outreach === true && (
-                                    <Chip icon={<OutreachIcon />} label="Outreach" color="success" size="small" sx={{ height: 20 }} />
-                                  )}
-                                </Stack>
                               </Stack>
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2">{patient.phone || "N/A"}</Typography>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2">
-                                {patient.returnDay} - {patient.returnDate}
+                              <Typography variant="body2" fontWeight="500">
+                                {patient.returnDay}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {patient.returnDate}
                               </Typography>
                             </TableCell>
                             <TableCell>
@@ -456,26 +427,39 @@ const PatientsToReturn = () => {
                                 }
                                 color={statusColors.color}
                                 size="small"
+                                sx={{ 
+                                  fontWeight: 500,
+                                  '& .MuiChip-icon': { 
+                                    fontSize: 16,
+                                    ml: 0.5 
+                                  } 
+                                }}
                               />
                             </TableCell>
                             <TableCell align="center">
-                              <Stack direction="row" spacing={1} justifyContent="center">
+                              <Stack direction="row" spacing={0.5} justifyContent="center">
                                 <Tooltip title="View Details">
                                   <IconButton
                                     size="small"
                                     onClick={() => handleViewDetails(patient)}
-                                    sx={{ color: blue[500] }}
+                                    sx={{ 
+                                      color: blue[600],
+                                      '&:hover': { bgcolor: blue[50] }
+                                    }}
                                   >
-                                    <ViewIcon />
+                                    <ViewIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Check In">
                                   <IconButton
                                     size="small"
                                     onClick={() => handleCheckIn(patient.patient_id)}
-                                    sx={{ color: green[500] }}
+                                    sx={{ 
+                                      color: green[600],
+                                      '&:hover': { bgcolor: green[50] }
+                                    }}
                                   >
-                                    <CheckInIcon />
+                                    <CheckInIcon fontSize="small" />
                                   </IconButton>
                                 </Tooltip>
                               </Stack>

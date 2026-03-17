@@ -20,11 +20,15 @@ import CreateDailyActivity from "./CreateDailyActivity";
 import EditDailyActivity from "./EditDailyActivity";
 
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError, getWeekStartDate } from "../../../helpers";
 
 const DailyActivities = () => {
   const addToast = useToast();
   const modalRef = useRef();
+
+  // Check marketing privilege
+  usePrivilege('marketing', '/marketing/daily-activities');
 
   const [params, setParams] = useState({
     page: 1,
@@ -51,7 +55,15 @@ const DailyActivities = () => {
       total: 0,
       page: 1,
     },
-    (response) => response.data.data
+    (response) => {
+      console.log('DailyActivities API response:', response);
+      console.log('DailyActivities data:', response.data);
+      return response.data.data;
+    },
+    (error) => {
+      console.log('DailyActivities fetch error:', error);
+      addToast({ message: formatError(error), severity: "error" });
+    }
   );
 
   useEffect(() => {
@@ -134,73 +146,80 @@ const DailyActivities = () => {
             setParams={setParams}
             sx={{ mb: 2 }}
           />
-          <Table
-            loading={loading}
-            columns={[
-              {
-                field: "index",
-                headerName: "S/N",
-                valueGetter: (item, index) =>
-                  params.per_page * (params.page - 1) + index + 1,
-              },
-              {
-                field: "activity_date",
-                headerName: "Activity Date",
-              },
-              {
-                field: "description",
-                headerName: "Description",
-              },
-              {
-                field: "created_by",
-                headerName: "Created By",
-                valueGetter: (item, index) => item.creator?.full_name,
-              },
-              {
-                field: "created_at",
-                headerName: "Date Created",
-              },
-              {
-                field: "status",
-                headerName: "Status",
-                renderCell: (item) => (
-                  <Chip
-                    size="small"
-                    color={getStatusColor(item.status)}
-                    label={item.status}
-                  />
-                ),
-              },
-              {
-                field: "actions",
-                headerName: "Actions",
-                renderCell: (item) => (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={1}
-                  >
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={() => openEditDailyActivityModal(item)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                ),
-              },
-            ]}
-            items={data.data}
-            itemCount={data.total}
-            page={params.page}
-            pageSize={params.per_page}
-            onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) =>
-              setParams({ ...params, per_page: value, page: 1 })
-            }
-          />
+          {data.data.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+              <p>No daily activities found.</p>
+              <p>Create your first daily activity to get started.</p>
+            </div>
+          ) : (
+            <Table
+              loading={loading}
+              columns={[
+                {
+                  field: "index",
+                  headerName: "S/N",
+                  valueGetter: (item, index) =>
+                    params.per_page * (params.page - 1) + index + 1,
+                },
+                {
+                  field: "activity_date",
+                  headerName: "Activity Date",
+                },
+                {
+                  field: "description",
+                  headerName: "Description",
+                },
+                {
+                  field: "created_by",
+                  headerName: "Created By",
+                  valueGetter: (item, index) => item.creator?.full_name,
+                },
+                {
+                  field: "created_at",
+                  headerName: "Date Created",
+                },
+                {
+                  field: "status",
+                  headerName: "Status",
+                  renderCell: (item) => (
+                    <Chip
+                      size="small"
+                      color={getStatusColor(item.status)}
+                      label={item.status}
+                    />
+                  ),
+                },
+                {
+                  field: "actions",
+                  headerName: "Actions",
+                  renderCell: (item) => (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                    >
+                      <Tooltip title="Edit">
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditDailyActivityModal(item)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  ),
+                },
+              ]}
+              items={data.data}
+              itemCount={data.total}
+              page={params.page}
+              pageSize={params.per_page}
+              onPageChange={(page) => setParams({ ...params, page })}
+              onPageSizeChange={(value) =>
+                setParams({ ...params, per_page: value, page: 1 })
+              }
+            />
+          )}
         </CardContent>
       </Card>
       <Modal ref={modalRef} />

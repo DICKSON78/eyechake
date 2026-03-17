@@ -18,7 +18,7 @@ class User extends Authenticatable
     protected $fillable = [
         'clinic_id', 'first_name', 'middle_name', 'last_name', 'designation', 'department_id', 'job_title_id',
         'employee_number', 'date_of_birth', 'gender', 'national_id', 'phone', 'email', 'username', 'password', 'role',
-        'created_by', 'status',
+        'created_by', 'status', 'is_test_user', // Add field to identify test users
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -52,11 +52,9 @@ class User extends Authenticatable
         // Check if privileges were manually set in attributes (e.g., during login)
         if (array_key_exists('privileges', $this->attributes)) {
             $value = $this->attributes['privileges'];
-            // If it's already an object/array, return it as-is
             if (is_object($value) || is_array($value)) {
                 return $value;
             }
-            // If it's a string (JSON), try to decode it
             if (is_string($value)) {
                 $decoded = json_decode($value, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -64,8 +62,21 @@ class User extends Authenticatable
                 }
             }
         }
-        // Otherwise, fetch from database and convert to object format
+
+        // Fetch from database and convert to object format
         $privilegesArray = UserPrivilege::getPrivilegesAsArray($this->id);
+        
+        // Force include the new report card privileges if the user has them in the columns
+        $newPrivileges = ['optometry_report_card', 'sales_report_card', 'crm_report_card'];
+        $dbRecord = \Illuminate\Support\Facades\DB::table('user_privileges')->where('user_id', $this->id)->first();
+        if ($dbRecord) {
+            foreach ($newPrivileges as $newPriv) {
+                if (isset($dbRecord->$newPriv) && $dbRecord->$newPriv == 1 && !in_array($newPriv, $privilegesArray)) {
+                    $privilegesArray[] = $newPriv;
+                }
+            }
+        }
+
         $privilegesObj = new \stdClass();
         foreach ($privilegesArray as $privilege) {
             $privilegesObj->$privilege = true;

@@ -50,7 +50,25 @@ const PatientReturnSidebar = () => {
       },
       data: [],
     },
-    (response) => response.data.data
+    (response) => {
+      // Handle both direct data and nested data structures
+      if (response?.data?.data) {
+        return response.data.data;
+      } else if (response?.data) {
+        return response.data;
+      } else if (response) {
+        return response;
+      }
+      return {
+        summary: {
+          total: 0,
+          today: 0,
+          this_week: 0,
+          overdue: 0,
+        },
+        data: [],
+      };
+    }
   );
 
   useEffect(() => {
@@ -158,9 +176,29 @@ const PatientReturnSidebar = () => {
     modalRef.current.open("Patient Details", patientDetails, "sm");
   };
 
-  // Flatten the data structure to get all patients
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "today":
+        return orange[500];
+      case "overdue":
+        return red[500];
+      default:
+        return blue[500];
+    }
+  };
+
+  // Flatten data structure to get all patients
   const allPatients = data?.data
     ? data.data.flatMap((dayGroup) =>
+        (dayGroup.patients || []).map((patient) => ({
+          ...patient,
+          returnDate: dayGroup.date_display,
+          status: dayGroup.status,
+          to_return_date: patient.to_return_date || dayGroup.date,
+        }))
+      )
+    : Array.isArray(data)
+    ? data.flatMap((dayGroup) =>
         (dayGroup.patients || []).map((patient) => ({
           ...patient,
           returnDate: dayGroup.date_display,
@@ -184,21 +222,14 @@ const PatientReturnSidebar = () => {
   // Limit to top 10 patients
   const topPatients = sortedPatients.slice(0, 10);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "today":
-        return orange[500];
-      case "overdue":
-        return red[500];
-      default:
-        return blue[500];
-    }
-  };
-
   return (
     <Card sx={{ height: "100%" }}>
       <CardHeader
         title="Patients Scheduled to Return"
+        titleTypographyProps={{
+          variant: "h6",
+          fontWeight: 600,
+        }}
         action={
           <Tooltip title="Refresh">
             <IconButton size="small" onClick={handleFetch} disabled={loading}>
@@ -206,10 +237,6 @@ const PatientReturnSidebar = () => {
             </IconButton>
           </Tooltip>
         }
-        titleTypographyProps={{
-          variant: "h6",
-          fontWeight: 600,
-        }}
       />
       <Divider />
       <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
@@ -219,7 +246,7 @@ const PatientReturnSidebar = () => {
           </Box>
         ) : error ? (
           <Alert severity="error" sx={{ m: 2 }}>
-            {formatError(error) || "Failed to load patient data"}
+            {formatError(error) || "Network connectivity error. Please check your connection and try again."}
           </Alert>
         ) : topPatients.length === 0 ? (
           <Box sx={{ p: 3, textAlign: "center" }}>

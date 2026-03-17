@@ -102,6 +102,8 @@ const Dashboard = () => {
         medicine_monthly_sales: [],
         frame_items: [],
         medicine_items: [],
+        frame_sales_by_item: [],     // New: Sales by individual frame items
+        medicine_sales_by_item: [],  // New: Sales by individual medicine items
       },
     },
     (response) => {
@@ -196,6 +198,81 @@ const Dashboard = () => {
     handleFetch();
     addToast({ message: "Dashboard refreshed", severity: "success" });
   };
+
+  // Prepare frame sales data for pie chart - each item is a product + month combination
+  const prepareFrameSalesData = () => {
+    if (selectedFrameId) {
+      // If specific frame selected, show monthly data for that frame
+      return frameMonthlySales.map(item => ({
+        name: frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame',
+        month: item.label,
+        quantity: item.quantity_sold || 0
+      }));
+    } else {
+      // If "All Frames", show all frames with their monthly sales
+      const salesData = [];
+      frameMonthlySales.forEach(monthData => {
+        if (monthData.items && Array.isArray(monthData.items)) {
+          monthData.items.forEach(item => {
+            if (item.quantity > 0) {
+              salesData.push({
+                name: item.name,
+                month: monthData.label,
+                quantity: item.quantity
+              });
+            }
+          });
+        } else if (monthData.quantity_sold > 0 && monthData.item_name) {
+          // Alternative structure: each entry is already an item
+          salesData.push({
+            name: monthData.item_name,
+            month: monthData.label,
+            quantity: monthData.quantity_sold
+          });
+        }
+      });
+      return salesData;
+    }
+  };
+
+  // Prepare medicine sales data for pie chart - each item is a product + month combination
+  const prepareMedicineSalesData = () => {
+    if (selectedMedicineId) {
+      // If specific medicine selected, show monthly data for that medicine
+      return medicineMonthlySales.map(item => ({
+        name: medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine',
+        month: item.label,
+        quantity: item.quantity_sold || 0
+      }));
+    } else {
+      // If "All Medicines", show all medicines with their monthly sales
+      const salesData = [];
+      medicineMonthlySales.forEach(monthData => {
+        if (monthData.items && Array.isArray(monthData.items)) {
+          monthData.items.forEach(item => {
+            if (item.quantity > 0) {
+              salesData.push({
+                name: item.name,
+                month: monthData.label,
+                quantity: item.quantity
+              });
+            }
+          });
+        } else if (monthData.quantity_sold > 0 && monthData.item_name) {
+          // Alternative structure: each entry is already an item
+          salesData.push({
+            name: monthData.item_name,
+            month: monthData.label,
+            quantity: monthData.quantity_sold
+          });
+        }
+      });
+      return salesData;
+    }
+  };
+
+  const frameSalesData = prepareFrameSalesData();
+  const medicineSalesData = prepareMedicineSalesData();
 
   if (loading) {
     return (
@@ -316,59 +393,25 @@ const Dashboard = () => {
               },
             }}
           >
-            {/* Pie Chart - Frame Categories */}
+            {/* Pie Chart - Frame Categories - Shows QUANTITIES */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader title="Frame Categories" />
-                <Divider />
                 <CardContent>
                   <ChartWrapper
+                    title="Frame Categories Distribution"
                     options={{
                       labels: (data.statistics?.frame_categories || []).map(
-                        (e) => e.category || 'Unknown'
+                        (e) => `${e.category || 'Unknown'} (${numberFormat(Math.max(0, parseFloat(e.total_quantity) || 0))})`
                       ),
-                      chart: {
-                        fontFamily: theme.typography.fontFamily,
-                        background: "transparent",
-                        toolbar: {
-                          show: false,
-                        },
+                      style: {
+                        fontSize: 10,
+                        fontWeight: 400,
                       },
-                      plotOptions: {
-                        pie: {
-                          dataLabels: {
-                            offset: -16,
-                          },
-                        },
-                      },
-                      colors: [
-                        blue[400],
-                        red[400],
-                        cyan[500],
-                        green[500],
-                        indigo[400],
-                        teal[400],
-                        purple[400],
-                        lime[600],
-                        pink[400],
-                        yellow[500],
-                        orange[400],
-                      ],
-                      stroke: {
-                        show: false,
-                        width: 3,
-                        colors: (data.statistics?.frame_categories || []).map(
-                          (e) => theme.palette.background.paper
-                        ),
+                      dropShadow: {
+                        enabled: false,
                       },
                       dataLabels: {
-                        style: {
-                          fontSize: 10,
-                          fontWeight: 400,
-                        },
-                        dropShadow: {
-                          enabled: false,
-                        },
                         formatter: function (val, opts) {
                           return numberFormat(opts.w.globals.series[opts.seriesIndex]);
                         },
@@ -386,12 +429,24 @@ const Dashboard = () => {
                           ),
                           useSeriesColors: false,
                         },
-                        markers: {
-                          width: 14,
-                          height: 8,
-                          radius: 4,
+                      },
+                      plotOptions: {
+                        pie: {
+                          dataLabels: {
+                            offset: -16,
+                          },
                         },
                       },
+                      colors: [
+                        purple[400],
+                        blue[400],
+                        green[400],
+                        orange[400],
+                        pink[400],
+                        cyan[400],
+                        teal[400],
+                        indigo[400],
+                      ],
                     }}
                     series={(data.statistics?.frame_categories || []).map(
                       (e) => Math.max(0, parseFloat(e.total_quantity) || 0)
@@ -405,15 +460,13 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
-            {/* Quick Actions removed for Stock Management Dashboard */}
-
-            {/* Sold Frames (Monthly) */}
+            {/* PIE CHART - Frame Sales by Item */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
                   title={selectedFrameId
-                    ? `Sold: ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame'} (Monthly)`
-                    : "Sold Frames (Monthly)"}
+                    ? `Monthly Sales: ${frameItems.find(f => f.id === selectedFrameId)?.name || 'Frame'}`
+                    : "Top Sold Frames (Quantity)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
                       <InputLabel id="frame-filter-label">Filter by Frame</InputLabel>
@@ -437,75 +490,74 @@ const Dashboard = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
                     </Box>
-                  ) : (
+                  ) : frameSalesData.length > 0 ? (
                     <ChartWrapper
                       options={{
-                        chart: { toolbar: { show: false } },
-                        labels: (data.statistics?.sold_frames_pie_chart || []).map(
-                          (e) => e.frame_name || 'Unknown'
+                        labels: frameSalesData.map(item => 
+                          `${item.name} (${numberFormat(item.quantity)})`
                         ),
-                        colors: [blue[500], green[500], orange[500], purple[500], pink[500], cyan[500], teal[500], red[500], yellow[500], indigo[500]],
-                        tooltip: {
-                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                            const data = data.statistics?.sold_frames_pie_chart?.[dataPointIndex];
-                            if (!data) return '';
-                            
-                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
-                            html += `<strong>${data.frame_name}</strong><br/>`;
-                            html += `Quantity Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
-                            html += `Percentage: ${((series[seriesIndex] / series.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`;
-                            html += `</div>`;
-                            
-                            return html;
-                          }
-                        },
-                        plotOptions: {
-                          pie: {
-                            donut: {
-                              size: '65%',
-                              labels: {
-                                show: true,
-                                total: {
-                                  show: true,
-                                  label: 'Total Frames Sold',
-                                  formatter: function (w) {
-                                    const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                    return numberFormat(total);
-                                  }
-                                }
-                              }
-                            }
-                          }
+                        chart: {
+                          toolbar: { show: false },
+                          fontFamily: theme.typography.fontFamily,
                         },
                         dataLabels: {
                           formatter: function (val, opts) {
-                            const total = opts.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = ((val / total) * 100).toFixed(1);
-                            return `${percentage}%`;
+                            return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                          },
+                          style: {
+                            fontSize: '10px',
+                            fontWeight: 400,
+                          },
+                        },
+                        tooltip: {
+                          y: {
+                            formatter: (val) => `${numberFormat(val)} Units`,
                           }
                         },
                         legend: {
-                          position: 'bottom'
-                        }
+                          position: "bottom",
+                          labels: {
+                            colors: theme.palette.text.secondary,
+                          },
+                        },
+                        plotOptions: {
+                          pie: {
+                            dataLabels: {
+                              offset: -16,
+                            },
+                          },
+                        },
+                        colors: [
+                          purple[400], blue[400], green[400], orange[400],
+                          pink[400], cyan[400], teal[400], indigo[400],
+                          yellow[600], red[400], lime[600],
+                        ],
+                        stroke: {
+                          show: true,
+                          width: 2,
+                          colors: [theme.palette.background.paper],
+                        },
                       }}
-                      series={(data.statistics?.sold_frames_pie_chart || []).map(
-                        (e) => e.quantity_sold || 0
-                      )}
+                      series={frameSalesData.map(item => item.quantity)}
                       type="pie"
-                      height={320}
+                      height={400}
                     />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <Typography variant="body1" color="textSecondary">No sales data available</Typography>
+                    </Box>
                   )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Sold Medicine (Monthly) */}
+            {/* PIE CHART - Medicine Sales by Item */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader
                   title={selectedMedicineId
-                    ? `Sold: ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine'} (Monthly)`
-                    : "Sold Medicine (Monthly)"}
+                    ? `Monthly Sales: ${medicineItems.find(m => m.id === selectedMedicineId)?.name || 'Medicine'}`
+                    : "Top Sold Medicines (Quantity)"}
                   action={
                     <FormControl size="small" sx={{ minWidth: 180 }}>
                       <InputLabel id="medicine-filter-label">Filter by Medicine</InputLabel>
@@ -529,69 +581,68 @@ const Dashboard = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
                       <CircularProgress size={40} />
                     </Box>
-                  ) : (
+                  ) : medicineSalesData.length > 0 ? (
                     <ChartWrapper
                       options={{
-                        chart: { toolbar: { show: false } },
-                        labels: (data.statistics?.sold_medicine_pie_chart || []).map(
-                          (e) => e.medicine_name || 'Unknown'
+                        labels: medicineSalesData.map(item => 
+                          `${item.name} (${numberFormat(item.quantity)})`
                         ),
-                        colors: [teal[500], green[500], blue[500], orange[500], purple[500], pink[500], cyan[500], red[500], yellow[500], indigo[500]],
-                        tooltip: {
-                          custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                            const data = data.statistics?.sold_medicine_pie_chart?.[dataPointIndex];
-                            if (!data) return '';
-                            
-                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px;">`;
-                            html += `<strong>${data.medicine_name}</strong><br/>`;
-                            html += `Quantity Sold: ${numberFormat(data.quantity_sold || 0)}<br/>`;
-                            html += `Percentage: ${((series[seriesIndex] / series.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`;
-                            html += `</div>`;
-                            
-                            return html;
-                          }
-                        },
-                        plotOptions: {
-                          pie: {
-                            donut: {
-                              size: '65%',
-                              labels: {
-                                show: true,
-                                total: {
-                                  show: true,
-                                  label: 'Total Medicine Sold',
-                                  formatter: function (w) {
-                                    const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                    return numberFormat(total);
-                                  }
-                                }
-                              }
-                            }
-                          }
+                        chart: {
+                          toolbar: { show: false },
+                          fontFamily: theme.typography.fontFamily,
                         },
                         dataLabels: {
                           formatter: function (val, opts) {
-                            const total = opts.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                            const percentage = ((val / total) * 100).toFixed(1);
-                            return `${percentage}%`;
+                            return numberFormat(opts.w.globals.series[opts.seriesIndex]);
+                          },
+                          style: {
+                            fontSize: '10px',
+                            fontWeight: 400,
+                          },
+                        },
+                        tooltip: {
+                          y: {
+                            formatter: (val) => `${numberFormat(val)} Units`,
                           }
                         },
                         legend: {
-                          position: 'bottom'
-                        }
+                          position: "bottom",
+                          labels: {
+                            colors: theme.palette.text.secondary,
+                          },
+                        },
+                        plotOptions: {
+                          pie: {
+                            dataLabels: {
+                              offset: -16,
+                            },
+                          },
+                        },
+                        colors: [
+                          teal[400], green[500], cyan[500], blue[400],
+                          purple[400], orange[400], pink[400], yellow[500],
+                          red[400], indigo[400], lime[500],
+                        ],
+                        stroke: {
+                          show: true,
+                          width: 2,
+                          colors: [theme.palette.background.paper],
+                        },
                       }}
-                      series={(data.statistics?.sold_medicine_pie_chart || []).map(
-                        (e) => e.quantity_sold || 0
-                      )}
+                      series={medicineSalesData.map(item => item.quantity)}
                       type="pie"
-                      height={320}
+                      height={400}
                     />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+                      <Typography variant="body1" color="textSecondary">No sales data available</Typography>
+                    </Box>
                   )}
                 </CardContent>
               </Card>
             </Grid>
 
-            {/* Pharmacy Categories Chart */}
+            {/* Pharmacy Categories Chart - Shows QUANTITIES */}
             <Grid size={{ md: 6, sm: 12, xs: 12 }}>
               <Card>
                 <CardHeader title="Pharmacy Items by Category" />
@@ -600,7 +651,7 @@ const Dashboard = () => {
                   <ChartWrapper
                     options={{
                       labels: (data.statistics?.pharmacy_categories || []).map(
-                        (e) => e.category || 'Unknown'
+                        (e) => `${e.category || 'Unknown'} (${numberFormat(Math.max(0, parseFloat(e.total_quantity) || 0))})`
                       ),
                       chart: {
                         fontFamily: theme.typography.fontFamily,

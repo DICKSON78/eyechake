@@ -95,6 +95,7 @@ class ExpensePaymentsController extends Controller
         $request->validate([
             'expense_id' => 'required|exists:expenses,id',
             'amount' => 'required|numeric|min:0',
+            'channel_id' => 'required|exists:payment_channels,id',
         ]);
 
         $input = $request->all();

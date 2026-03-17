@@ -24,6 +24,7 @@ import CreateVipPatient from "../../reception/vip-patients/CreateVipPatient";
 import EditPatient from "../../reception/patients/EditPatient";
 
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
 import { formatError, getAge, numberFormat } from "../../../helpers";
 
@@ -32,6 +33,9 @@ const PrestigeClients = () => {
   const navigate = useNavigate();
   const modalRef = useRef();
   const { setNotificationField, refreshNotifications, lockNotificationKey, unlockNotificationKey } = useNotificationContext();
+
+  // Check marketing privilege
+  usePrivilege('marketing', '/marketing/prestige-clients');
 
   const [item, setItem] = useState();
   const [anchorEl, setAnchorEl] = useState();

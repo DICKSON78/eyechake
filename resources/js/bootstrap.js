@@ -12,9 +12,13 @@ window.axios = axios;
 // Set the base URL for API calls
 // For local development: use localhost:8000
 // For production: use the live server URL
-// Always use the current origin to avoid DNS resolution issues and ensure
-// consistent behavior behind proxies and during local development
-window.axios.defaults.baseURL = window.location.origin;
+// Set base URL for API calls
+// For local development: use localhost:8000
+// For production: use the live server URL
+// For local development with Vite on port 5173 and Laravel on port 8000
+window.axios.defaults.baseURL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000' 
+  : window.location.origin;
 
 // Add timeout configuration to prevent hanging requests
 window.axios.defaults.timeout = 45000; // 45 seconds timeout for complex operations like clinical notes
@@ -40,12 +44,16 @@ window.axios.interceptors.response.use(
       const currentPath = window.location.pathname;
       const isPublicRoute = publicRoutes.some(route => currentPath === route);
       
-      // Only redirect to login if we're not already on a public route
+      // Only redirect to login if we're not already on a public route AND not already on login
       if (!isPublicRoute && window.location.href.indexOf("/login") === -1) {
         // Clear the invalid token
         localStorage.removeItem("token");
-        window.location.href = "/login";
-        return Promise.reject(error);
+        
+        // Prevent multiple redirects by setting a flag
+        if (!window.sessionStorage.getItem('redirecting_to_login')) {
+          window.sessionStorage.setItem('redirecting_to_login', 'true');
+          window.location.href = "/login";
+        }
       }
     }
 

@@ -39,23 +39,27 @@ class NotificationsController extends Controller
     {
         $user = $request->user();
         
+        // Simplified authentication check
         if (!$user) {
+            Log::info('NotificationsController: No authenticated user, returning defaults');
             return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
         }
 
+        Log::info('NotificationsController: User authenticated', ['user_id' => $user->id, 'role' => $user->role]);
+
         $clinic_id = $user->is_admin ? ($request->clinic_id ?? null) : ($user->clinic_id ?? null);
 
-        // Add simple caching for 10 seconds to reduce database load while maintaining real-time feel
+        // Simple cache check
         $cacheKey = "notifications_user_{$user->id}_clinic_" . ($clinic_id ?? 'null');
         $cachedData = cache()->get($cacheKey);
 
-        // In local environment, always fetch fresh data for testing
-        // In production, use cache but with shorter TTL for real-time updates
         if ($cachedData && !app()->environment('local')) {
             return $this->sendResponse($cachedData, Response::HTTP_OK, 'Success (cached).');
         }
 
         try {
+            Log::info('NotificationsController: Calculating notifications', ['clinic_id' => $clinic_id]);
+            
             $data = [
                 'patients_sent_to_cashier' => $this->getPatientsSentToCashierCount($clinic_id),
                 'credit_patients_approval' => $this->getCreditPatientsApprovalCount($clinic_id),
@@ -74,15 +78,16 @@ class NotificationsController extends Controller
                 'website_appointments' => $this->getWebsiteAppointmentsCount(),
             ];
 
-            // Cache for 2 seconds (reduced for more real-time updates)
-            cache()->put($cacheKey, $data, 2);
+            Log::info('NotificationsController: Data calculated', $data);
+
+            // Cache for 5 seconds
+            cache()->put($cacheKey, $data, 5);
 
             return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
         } catch (\Throwable $e) {
             Log::error('NotificationsController: Failed to calculate notifications: ' . $e->getMessage());
             Log::error('NotificationsController: Stack trace: ' . $e->getTraceAsString());
 
-            // Return default data on error, but don't cache errors
             return $this->sendResponse($this->getDefaultData(), Response::HTTP_OK, 'Success.');
         }
     }
@@ -171,7 +176,8 @@ class NotificationsController extends Controller
                 })
                 ->whereHas('items', function ($query) {
                     $query->whereIn('status', ['Pending', 'Billed', 'Served'])
-                        ->whereNull('item_payment_id')
+                        // Don't exclude items that are already invoiced - allow all routed patients
+                        // ->whereNull('item_payment_id') // Removed to match frontend behavior
                         ->whereHas('payment_mode', function ($q) {
                             $q->whereRaw('LOWER(payment_type) = ?', ['cash']);
                         });
@@ -307,8 +313,9 @@ class NotificationsController extends Controller
     private function getDispensingRequestsCount($clinic_id)
     {
         try {
-            // Count pharmacy items with status Paid/Billed (pending dispensing)
-            // Exclude items that have already been dispensed (have item_payment_id)
+            // Count pharmacy items with status Paid/Billed (pending dispensing).
+            // status='Paid' means paid at payment center, awaiting dispensing.
+            // status='Served' means already dispensed (excluded by the status filter).
             $query = PatientPaymentCacheItem::query()
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('consultation_types', 'patient_payment_cache_items.consultation_type_id', '=', 'consultation_types.id')
@@ -318,7 +325,6 @@ class NotificationsController extends Controller
                 })
                 ->where('consultation_types.name', 'Pharmacy')
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
@@ -368,7 +374,6 @@ class NotificationsController extends Controller
                 })
                 ->whereNotIn('consultation_types.name', ['Pharmacy', 'Procedure', 'Glass'])
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');
@@ -416,7 +421,6 @@ class NotificationsController extends Controller
                 })
                 ->where('consultation_types.name', 'Glass')
                 ->whereIn('patient_payment_cache_items.status', ['Paid', 'Billed'])
-                ->whereNull('patient_payment_cache_items.item_payment_id')
                 ->whereNotNull('patient_payment_cache.created_at')
                 ->where('patient_payment_cache.created_at', '>=', Carbon::today()->format('Y-m-d') . ' 00:00:00')
                 ->where('patient_payment_cache.created_at', '<=', Carbon::today()->format('Y-m-d') . ' 23:59:59');

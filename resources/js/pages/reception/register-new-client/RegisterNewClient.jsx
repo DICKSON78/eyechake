@@ -84,17 +84,7 @@ const RegisterNewClient = () => {
     (response) => response.data.data.data
   );
 
-  const { data: informationSources, handleFetch: fetchInformationSources } =
-    useFetch(
-      "api/marketing/information-sources",
-      {
-        status: "Active",
-        per_page: 500,
-      },
-      false,
-      [],
-      (response) => response.data.data.data
-    );
+  const informationSources = [];
 
   const { data: occupations } = useFetch(
     "api/occupations",
@@ -140,11 +130,11 @@ const RegisterNewClient = () => {
 
   // Use static data for regions dropdown (from JSON structure)
   const staticRegions = getRegions();
-  
+
   // State for districts and wards (using static data)
   const [availableDistricts, setAvailableDistricts] = useState([]);
   const [availableWards, setAvailableWards] = useState([]);
-  
+
   // State to track selected names (for mapping to IDs)
   const [selectedRegionName, setSelectedRegionName] = useState(null);
   const [selectedDistrictName, setSelectedDistrictName] = useState(null);
@@ -181,7 +171,6 @@ const RegisterNewClient = () => {
 
   useEffect(() => {
     document.title = `Register New Client - ${window.APP_NAME}`;
-    fetchInformationSources();
   }, []);
 
   // Debug: Log regions data when it changes
@@ -218,11 +207,11 @@ const RegisterNewClient = () => {
   useEffect(() => {
     if (error) {
       let errorMessage = formatError(error);
-      
+
       // Extract validation errors - check multiple possible locations
       const responseData = error?.response?.data;
       let validationErrors = null;
-      
+
       // Check different possible locations for validation errors
       if (responseData?.errors) {
         validationErrors = responseData.errors;
@@ -232,7 +221,7 @@ const RegisterNewClient = () => {
         // Sometimes errors are in the data object directly
         validationErrors = responseData.data;
       }
-      
+
       if (validationErrors && typeof validationErrors === 'object') {
         const errorMessages = Object.entries(validationErrors)
           .map(([field, messages]) => {
@@ -241,7 +230,7 @@ const RegisterNewClient = () => {
             return `${fieldName}: ${messageText}`;
           })
           .join('; ');
-        
+
         if (errorMessages) {
           errorMessage = errorMessages;
         }
@@ -250,7 +239,7 @@ const RegisterNewClient = () => {
       } else if (responseData?.error) {
         errorMessage = responseData.error;
       }
-      
+
       setSubmitError(errorMessage);
       addToast({ message: errorMessage, severity: "error" });
       console.error('Registration error:', error);
@@ -277,18 +266,18 @@ const RegisterNewClient = () => {
     if (selectedRegionName) {
       const districts = getDistrictsByRegionName(selectedRegionName);
       setAvailableDistricts(districts);
-      
+
       // Try to find matching region ID from API
       if (apiRegions && Array.isArray(apiRegions)) {
-        const matchingRegion = apiRegions.find(r => 
+        const matchingRegion = apiRegions.find(r =>
           r.name?.toLowerCase() === selectedRegionName.toLowerCase()
         );
         if (matchingRegion) {
-          setFormData(prev => ({ 
-            ...prev, 
+          setFormData(prev => ({
+            ...prev,
             region_id: matchingRegion.id,
-            district_id: null, 
-            ward_id: null 
+            district_id: null,
+            ward_id: null
           }));
         }
       }
@@ -306,7 +295,7 @@ const RegisterNewClient = () => {
     if (selectedRegionName && selectedDistrictName) {
       const wards = getWardsByDistrictName(selectedRegionName, selectedDistrictName);
       setAvailableWards(wards);
-      
+
       // Try to find matching district ID from API
       if (formData.region_id) {
         window.axios
@@ -320,21 +309,21 @@ const RegisterNewClient = () => {
           .then((response) => {
             const backendData = response?.data?.data;
             let districtsData = [];
-            
+
             if (backendData && typeof backendData === 'object' && !Array.isArray(backendData) && Array.isArray(backendData.data)) {
               districtsData = backendData.data;
             } else if (Array.isArray(backendData)) {
               districtsData = backendData;
             }
-            
-            const matchingDistrict = districtsData.find(d => 
+
+            const matchingDistrict = districtsData.find(d =>
               d.name?.toLowerCase() === selectedDistrictName.toLowerCase()
             );
             if (matchingDistrict) {
-              setFormData(prev => ({ 
-                ...prev, 
+              setFormData(prev => ({
+                ...prev,
                 district_id: matchingDistrict.id,
-                ward_id: null 
+                ward_id: null
               }));
             }
           })
@@ -348,7 +337,7 @@ const RegisterNewClient = () => {
       setSelectedWardName(null);
     }
   }, [selectedRegionName, selectedDistrictName, formData.region_id]);
-  
+
   // Update ward ID when ward name is selected
   useEffect(() => {
     if (selectedRegionName && selectedDistrictName && selectedWardName && formData.district_id) {
@@ -363,14 +352,14 @@ const RegisterNewClient = () => {
         .then((response) => {
           const backendData = response?.data?.data;
           let wardsData = [];
-          
+
           if (backendData && typeof backendData === 'object' && !Array.isArray(backendData) && Array.isArray(backendData.data)) {
             wardsData = backendData.data;
           } else if (Array.isArray(backendData)) {
             wardsData = backendData;
           }
-          
-          const matchingWard = wardsData.find(w => 
+
+          const matchingWard = wardsData.find(w =>
             w.name?.toLowerCase() === selectedWardName.toLowerCase()
           );
           if (matchingWard) {
@@ -385,45 +374,45 @@ const RegisterNewClient = () => {
 
   const handleSubmit = () => {
     setSubmitError(null);
-    
+
     // Validate form using formRef
     if (!formRef.current.validate()) {
       return;
     }
-    
+
     // Additional validation: Check if payment_mode_id is selected
     if (!formData.payment_mode_id || formData.payment_mode_id === null || formData.payment_mode_id === 0) {
-      addToast({ 
-        message: "Please select a payment mode. This field is required.", 
-        severity: "error" 
+      addToast({
+        message: "Please select a payment mode. This field is required.",
+        severity: "error"
       });
       return;
     }
-    
+
     // Validate required fields
     if (!formData.first_name?.trim()) {
       addToast({ message: "First name is required", severity: "error" });
       return;
     }
-    
+
     if (!formData.last_name?.trim()) {
       addToast({ message: "Last name is required", severity: "error" });
       return;
     }
-    
+
     if (!formData.gender) {
       addToast({ message: "Gender is required", severity: "error" });
       return;
     }
-    
+
     if (!formData.phone?.trim()) {
       addToast({ message: "Phone number is required", severity: "error" });
       return;
     }
-    
+
     // Debug: Log formData before building payload
     console.log('FormData before building payload:', formData);
-    
+
     // Build payload - get actual values (they should be non-empty due to validation above)
     const payload = {
       first_name: formData.first_name?.trim() || '',
@@ -447,7 +436,7 @@ const RegisterNewClient = () => {
       is_outreach: Boolean(formData.is_outreach),
       is_employee: Boolean(formData.is_employee),
     };
-    
+
     // Handle optional string fields - convert empty strings to null
     const optionalStringFields = ['middle_name', 'email', 'address', 'national_id', 'occupation'];
     optionalStringFields.forEach(field => {
@@ -455,7 +444,7 @@ const RegisterNewClient = () => {
         payload[field] = null;
       }
     });
-    
+
     // Handle optional integer fields - convert to integer or null
     // region_id, district_id, ward_id, info_source_id are optional
     // IMPORTANT: Only send IDs that exist in the database
@@ -478,7 +467,7 @@ const RegisterNewClient = () => {
         }
       }
     });
-    
+
     // Additional validation: If using static data IDs, ensure they're reasonable
     // Static region IDs are 1-31, static district IDs are 100+, static ward IDs are 20000+
     // Database IDs are typically auto-increment starting from 1
@@ -492,7 +481,7 @@ const RegisterNewClient = () => {
     if (payload.ward_id && payload.ward_id > 100000) {
       console.warn('Ward ID seems unusually high, may be a static data ID mismatch:', payload.ward_id);
     }
-    
+
     // Handle required integer field - payment_mode_id
     // This field is REQUIRED, so we must ensure it's a valid integer
     if (payload.payment_mode_id === '' || payload.payment_mode_id === undefined || payload.payment_mode_id === null || payload.payment_mode_id === 0) {
@@ -508,18 +497,18 @@ const RegisterNewClient = () => {
         payload.payment_mode_id = intValue;
       }
     }
-    
+
     // Remove undefined values
     Object.keys(payload).forEach(key => {
       if (payload[key] === undefined) {
         delete payload[key];
       }
     });
-    
+
     // Debug: Log the final payload before sending
     console.log('Final payload being sent to API:', payload);
     console.log('Payment Mode ID:', payload.payment_mode_id, 'Type:', typeof payload.payment_mode_id);
-    
+
     handlePost("api/patients", payload);
   };
 
@@ -558,7 +547,7 @@ const RegisterNewClient = () => {
         <Form ref={formRef}>
           <Card>
             <CardContent sx={{ p: 2 }}>
-          <Grid container spacing={2}>
+              <Grid container spacing={2}>
                 {/* Section 1: Personal Information */}
                 <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" sx={{ mt: 0, mb: 1.5 }}>
@@ -623,13 +612,13 @@ const RegisterNewClient = () => {
                     onChange={(value) => {
                       const newDate = !isNaN(value) && value !== null && value !== undefined ? value : null;
                       lastUpdatedFieldRef.current = 'date_of_birth';
-                      
+
                       let calculatedAge = null;
                       if (newDate) {
                         const years = moment().diff(moment(newDate), "years");
                         calculatedAge = years >= 0 ? Math.floor(years) : null;
                       }
-                      
+
                       setFormData({
                         ...formData,
                         date_of_birth: newDate,
@@ -649,7 +638,7 @@ const RegisterNewClient = () => {
                     onChange={(value) => {
                       lastUpdatedFieldRef.current = 'age';
                       const age = validateInteger(value);
-                      
+
                       if (age !== null && age !== undefined && age >= 0) {
                         const calculatedDateOfBirth = moment().subtract(age, "years").startOf('day').toDate();
                         setFormData({
@@ -666,8 +655,8 @@ const RegisterNewClient = () => {
                       }
                     }}
                     helperText={
-                      formData.date_of_birth 
-                        ? "Auto-calculated from date of birth" 
+                      formData.date_of_birth
+                        ? "Auto-calculated from date of birth"
                         : "Enter age to auto-calculate date of birth"
                     }
                   />
@@ -704,7 +693,7 @@ const RegisterNewClient = () => {
                   <Typography variant="h6" sx={{ mt: 1.5, mb: 1.5 }}>
                     Contact Information
                   </Typography>
-            </Grid>
+                </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <TextField
@@ -745,8 +734,8 @@ const RegisterNewClient = () => {
                 {/* Section 3: Location Details */}
                 <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" sx={{ mt: 1.5, mb: 1.5 }}>
-                      Location Details (Tanzania)
-                    </Typography>
+                    Location Details (Tanzania)
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -780,11 +769,11 @@ const RegisterNewClient = () => {
                     optionsLabel="name"
                     optionsValue="name"
                     placeholder={
-                      !selectedRegionName 
-                        ? "Select a region first" 
-                        : availableDistricts.length === 0 
-                        ? "No districts available for this region"
-                        : "Select a district (optional)"
+                      !selectedRegionName
+                        ? "Select a region first"
+                        : availableDistricts.length === 0
+                          ? "No districts available for this region"
+                          : "Select a district (optional)"
                     }
                     onChange={(value) => {
                       setSelectedDistrictName(value || null);
@@ -805,11 +794,11 @@ const RegisterNewClient = () => {
                     optionsLabel="name"
                     optionsValue="name"
                     placeholder={
-                      !selectedDistrictName 
-                        ? "Select a district first" 
-                        : availableWards.length === 0 
-                        ? "No wards available for this district"
-                        : "Select a ward (optional)"
+                      !selectedDistrictName
+                        ? "Select a district first"
+                        : availableWards.length === 0
+                          ? "No wards available for this district"
+                          : "Select a ward (optional)"
                     }
                     onChange={(value) => {
                       setSelectedWardName(value || null);
@@ -821,7 +810,7 @@ const RegisterNewClient = () => {
                 <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" sx={{ mt: 1.5, mb: 1.5 }}>
                     Payment & Information
-                    </Typography>
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -842,20 +831,6 @@ const RegisterNewClient = () => {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Select
-                    ref={informationSourceRef}
-                    label="Source of Information"
-                    fullWidth
-                    clearable
-                    options={informationSources}
-                    optionsLabel="name"
-                    optionsValue="id"
-                    onChange={(value) =>
-                      setFormData({ ...formData, info_source_id: value })
-                    }
-                  />
-            </Grid>
 
                 {/* Section 5: Client Type */}
                 <Grid size={{ xs: 12 }}>
@@ -863,111 +838,111 @@ const RegisterNewClient = () => {
                     Client Type
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                  Select all categories that apply to this client
-                </Typography>
+                    Select all categories that apply to this client
+                  </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12 }}>
                   <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} flexWrap="wrap">
-                  {[
-                    { key: 'is_student', label: 'Student', icon: '🎓' },
-                    { key: 'is_businessperson', label: 'Businessperson', icon: '💼' },
-                    { key: 'is_vip', label: 'Prestige', icon: '⭐' },
-                    { key: 'is_outreach', label: 'Outreach Client', icon: '🤝' },
-                    { key: 'is_employee', label: 'VIP', icon: '👔' },
-                  ].map(({ key, label, icon }) => (
-                    <Paper
-                      key={key}
-                      elevation={0}
-                      sx={{
+                    {[
+                      { key: 'is_student', label: 'Student', icon: '🎓' },
+                      { key: 'is_businessperson', label: 'Businessperson', icon: '💼' },
+                      { key: 'is_vip', label: 'Prestige', icon: '⭐' },
+                      { key: 'is_outreach', label: 'Outreach Client', icon: '🤝' },
+                      { key: 'is_employee', label: 'VIP', icon: '👔' },
+                    ].map(({ key, label, icon }) => (
+                      <Paper
+                        key={key}
+                        elevation={0}
+                        sx={{
                           p: 1.5,
-                        borderRadius: 2,
+                          borderRadius: 2,
                           border: `2px solid ${formData[key] ? theme.palette.secondary.main : theme.palette.divider}`,
-                        backgroundColor: formData[key] 
+                          backgroundColor: formData[key]
                             ? alpha(theme.palette.secondary.main, 0.1)
-                          : theme.palette.background.paper,
-                        transition: 'all 0.2s ease',
-                        cursor: 'pointer',
+                            : theme.palette.background.paper,
+                          transition: 'all 0.2s ease',
+                          cursor: 'pointer',
                           flex: { xs: '1 1 100%', sm: '1 1 auto' },
                           minWidth: { sm: 140 },
-                        '&:hover': {
+                          '&:hover': {
                             borderColor: theme.palette.secondary.main,
                             backgroundColor: alpha(theme.palette.secondary.main, 0.1),
-                          transform: 'translateY(-2px)',
+                            transform: 'translateY(-2px)',
                             boxShadow: `0 4px 12px ${alpha(theme.palette.secondary.main, 0.2)}`,
-                        },
-                      }}
-                      onClick={() =>
-                        setFormData({ ...formData, [key]: !formData[key] })
-                      }
-                    >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={formData[key]}
-                            onChange={(e) =>
-                              setFormData({ ...formData, [key]: e.target.checked })
-                            }
-                            sx={{
-                                color: theme.palette.secondary.main,
-                              '&.Mui-checked': {
-                                  color: theme.palette.secondary.main,
-                              },
-                            }}
-                          />
+                          },
+                        }}
+                        onClick={() =>
+                          setFormData({ ...formData, [key]: !formData[key] })
                         }
-                        label={
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData[key]}
+                              onChange={(e) =>
+                                setFormData({ ...formData, [key]: e.target.checked })
+                              }
+                              sx={{
+                                color: theme.palette.secondary.main,
+                                '&.Mui-checked': {
+                                  color: theme.palette.secondary.main,
+                                },
+                              }}
+                            />
+                          }
+                          label={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Typography component="span" sx={{ fontSize: 18 }}>
-                              {icon}
-                            </Typography>
+                                {icon}
+                              </Typography>
                               <Typography variant="body2" fontWeight={600}>
-                              {label}
-                            </Typography>
-                          </Box>
-                        }
+                                {label}
+                              </Typography>
+                            </Box>
+                          }
                           sx={{ m: 0 }}
-                      />
-                    </Paper>
-                  ))}
-                </Stack>
-            </Grid>
-          </Grid>
+                        />
+                      </Paper>
+                    ))}
+                  </Stack>
+                </Grid>
+              </Grid>
             </CardContent>
 
-          {/* Submit Button */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
+            {/* Submit Button */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
                 p: 2,
                 pt: 1.5,
-              borderTop: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={loading}
-              startIcon={loading ? null : <CheckCircleIcon />}
-              size="large"
-              sx={{
-                minWidth: 220,
-                textTransform: 'none',
-                fontWeight: 600,
-                py: 1.5,
-                px: 5,
-                fontSize: '1rem',
-                borderRadius: 2,
-                boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
-                '&:hover': {
-                  boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
-                },
+                borderTop: `1px solid ${theme.palette.divider}`,
               }}
             >
-              {loading ? "Registering Patient..." : "Register Patient"}
-            </Button>
-          </Box>
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={loading}
+                startIcon={loading ? null : <CheckCircleIcon />}
+                size="large"
+                sx={{
+                  minWidth: 220,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  py: 1.5,
+                  px: 5,
+                  fontSize: '1rem',
+                  borderRadius: 2,
+                  boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  '&:hover': {
+                    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+                  },
+                }}
+              >
+                {loading ? "Registering Patient..." : "Register Patient"}
+              </Button>
+            </Box>
           </Card>
         </Form>
       </Container>

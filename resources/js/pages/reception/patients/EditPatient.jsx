@@ -59,9 +59,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     is_employee: item.is_employee || false,
   });
 
-  const marketingEnabled =
-    window.user?.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
-      ?.value === "Yes";
+  const marketingEnabled = false;
 
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
@@ -74,17 +72,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     (response) => response.data.data.data
   );
 
-  const { data: informationSources, handleFetch: fetchInformationSources } =
-    useFetch(
-      "api/marketing/information-sources",
-      {
-        status: "Active",
-        per_page: 500,
-      },
-      false,
-      [],
-      (response) => response.data.data.data
-    );
+  const informationSources = [];
 
   const { data, loading, error, handlePatch } = usePatch(
     `api/patients/${item.id}`,
@@ -102,11 +90,6 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
     }
   };
 
-  useEffect(() => {
-    if (marketingEnabled) {
-      fetchInformationSources();
-    }
-  }, []);
 
   useEffect(() => {
     if (data) {
@@ -319,44 +302,20 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                 }
               />
             </Grid>
-            {marketingEnabled ? (
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={informationSourceRef}
-                  label="Source of Information"
-                  fullWidth
-                  clearable
-                  options={informationSources}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  value={informationSources.find(
-                    (e) => e.id === formData.info_source_id
-                  )}
-                  onChange={(value) =>
-                    setFormData({ ...formData, info_source_id: value })
-                  }
-                />
-              </Grid>
-            ) : null}
             <Grid
               item
               xs={12}
             >
               <Stack direction="row" spacing={3} flexWrap="wrap">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.is_vip}
-                    onChange={(event) =>
-                      setFormData({ ...formData, is_vip: event.target.checked })
-                    }
-                  />
-                }
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_vip}
+                      onChange={(event) =>
+                        setFormData({ ...formData, is_vip: event.target.checked })
+                      }
+                    />
+                  }
                   label="VIP"
                 />
                 <FormControlLabel
@@ -369,7 +328,7 @@ const EditPatient = ({ item, modal, fetchPatients }) => {
                     />
                   }
                   label="VIP"
-              />
+                />
               </Stack>
             </Grid>
           </Grid>

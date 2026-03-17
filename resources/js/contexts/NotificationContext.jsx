@@ -55,77 +55,24 @@ export const NotificationProvider = ({ children }) => {
       setLoading(true);
       setCurrentParams(params);
       
-      // Check if user is authenticated before making the request
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.log('NotificationContext: No token found, skipping fetch');
-        setLoading(false);
-        return null;
-      }
-      
-      // Use the globally configured axios instance (with auth/interceptors)
-      // Ensure axios is available and properly initialized before making the request
-      if (!window.axios) {
-        console.error('NotificationContext: axios is not available');
-        setLoading(false);
-        return null;
-      }
-      
-      // Check if axios methods are available
-      if (typeof window.axios.get !== 'function') {
-        console.error('NotificationContext: axios.get is not a function. Axios may not be properly initialized.');
+      // Simple authentication check - if no user, don't fetch
+      if (!window.user || !window.user.id) {
+        console.log('NotificationContext: User not authenticated or no privileges, skipping fetch');
         setLoading(false);
         return null;
       }
       
       console.log('NotificationContext: Making API call to /api/notifications');
       
-      // Create a safe axios call with proper error handling
-      // Use the exact same pattern as other hooks - normalize the URI and use params
-      const normalizedUri = 'api/notifications'.replace(/^\/+/, '');
-      let response;
-      try {
-        response = await window.axios.get('/' + normalizedUri, {
-          params: {},
-        });
-      } catch (axiosError) {
-        // Handle axios errors - check if it's a response error or a network/configuration error
-        if (axiosError.response) {
-          // Response was received but status code is out of 2xx range
-          response = axiosError.response;
-        } else if (axiosError.request) {
-          // Request was made but no response received
-          console.error('NotificationContext: No response received:', axiosError);
-          setLoading(false);
-          return null;
-        } else {
-          // Something else happened (likely axios configuration issue)
-          console.error('NotificationContext: Axios configuration error:', axiosError.message);
-          setLoading(false);
-          return null;
-        }
-      }
+      // Simple API call without complex error handling
+      const response = await window.axios.get('/api/notifications');
       console.log('NotificationContext: API response received:', response);
-      
-      // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE')) {
-        console.error('NotificationContext: Received HTML instead of JSON - likely authentication error');
-        setLoading(false);
-        return null;
-      }
-      
-      // Check for error status codes
-      if (response.status >= 400) {
-        console.error('NotificationContext: API returned error status:', response.status);
-        setLoading(false);
-        return null;
-      }
       
       if (response.data && response.data.data) {
         const serverData = response.data.data;
         console.log('Fetched notifications:', serverData);
         
-        // Ensure all required keys exist with default values
+        // Simple merge with defaults
         const defaultNotifications = {
           patients_sent_to_cashier: 0,
           credit_patients_approval: 0,
@@ -144,44 +91,14 @@ export const NotificationProvider = ({ children }) => {
           website_appointments: 0,
         };
         
-        // Merge server data with defaults to ensure all keys exist
-        const mergedServerData = { ...defaultNotifications, ...serverData };
-        
-        // Set notifications with stabilization to prevent flickering
-        setNotifications(prev => {
-          // Only update if the data has actually changed
-          const hasChanged = !prev || Object.keys(mergedServerData).some(key => 
-            prev[key] !== mergedServerData[key]
-          );
-          
-          if (hasChanged) {
-            console.log('Notifications updated:', { prev, serverData: mergedServerData });
-            setPreviousNotifications(prev);
-            // If certain keys are locked, preserve current values for those keys
-            const finalData = { ...mergedServerData };
-            Object.keys(lockedKeys || {}).forEach((key) => {
-              if (lockedKeys[key] && prev && typeof prev[key] !== 'undefined') {
-                finalData[key] = prev[key];
-              }
-            });
-            return finalData;
-          }
-          return prev;
-        });
-        
-        return mergedServerData;
+        const mergedData = { ...defaultNotifications, ...serverData };
+        setNotifications(mergedData);
+        return mergedData;
       }
     } catch (error) {
       console.error('NotificationContext: Failed to fetch notifications:', error);
       
-      // Check if error response is HTML (error page)
-      if (error.response && typeof error.response.data === 'string' && error.response.data.trim().startsWith('<!DOCTYPE')) {
-        console.error('NotificationContext: Received HTML error page - likely authentication or routing issue');
-      } else {
-        console.error('NotificationContext: Error details:', error.response?.data || error.message);
-      }
-      
-      // Set default values on error to prevent undefined state
+      // Set default values on error
       setNotifications({
         patients_sent_to_cashier: 0,
         credit_patients_approval: 0,
@@ -199,11 +116,10 @@ export const NotificationProvider = ({ children }) => {
         patients_sent_to_sales: 0,
         website_appointments: 0,
       });
-      return null;
     } finally {
       setLoading(false);
     }
-  }, [lockedKeys]);
+  }, []);
 
   const refreshNotifications = useCallback(() => {
     // Defer by one tick to allow pages to lock keys first
@@ -232,89 +148,78 @@ export const NotificationProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is authenticated before fetching notifications
     const token = localStorage.getItem('token');
-    if (token) {
+    const user = window.user; // Get user from window object set by Default layout
+    if (token && user && user.privileges) {
       console.log('NotificationContext: User authenticated, fetching notifications...');
       fetchNotifications({});
     } else {
-      console.log('NotificationContext: User not authenticated, skipping notification fetch');
+      console.log('NotificationContext: User not authenticated or no privileges, skipping fetch');
+      setLoading(false);
     }
     // Expose events globally so layouts can trigger refresh on auth ready
     window.notificationEvents = notificationEvents;
-  }, []); // Only run once on mount
+  }, []); // Empty dependency array - run only once
 
   // WebSocket listener for real-time notifications (replaces polling)
   useEffect(() => {
-    // Check if Echo is available
+    // Skip WebSocket if not available
     if (!window.Echo) {
-      console.warn('Echo not initialized, WebSocket notifications disabled');
+      console.log('NotificationContext: Echo not available, using polling only');
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.log('NotificationContext: No token, skipping WebSocket subscription');
+    const user = window.user;
+    if (!user || !user.id) {
+      console.log('NotificationContext: No authenticated user, skipping WebSocket');
       return;
     }
 
-    console.log('NotificationContext: Subscribing to notification channel via WebSocket...');
+    console.log('NotificationContext: Setting up WebSocket for user:', user.id);
     
-    const channel = window.Echo.channel('notifications')
-      .listen('.notification.update', (data) => {
-        console.log('✅ Notification update received via WebSocket:', data);
-        // Fetch fresh notifications when broadcast is received
+    // Simple private channel for this user
+    const channel = window.Echo.private(`user.${user.id}.notifications`)
+      .listen('NotificationUpdated', (data) => {
+        console.log('✅ WebSocket notification received:', data);
         fetchNotifications({});
+      })
+      .error((error) => {
+        console.warn('❌ WebSocket error:', error);
       });
 
     return () => {
-      console.log('NotificationContext: Unsubscribing from notification channel');
-      try {
-        window.Echo.leave('notifications');
-      } catch (e) {
-        console.warn('Error leaving notification channel:', e);
+      console.log('NotificationContext: Cleaning up WebSocket');
+      if (channel && typeof channel.leave === 'function') {
+        channel.leave();
+      } else if (channel && typeof channel.stop === 'function') {
+        channel.stop();
       }
     };
   }, [fetchNotifications]);
 
-  // Fallback polling (only if WebSocket unavailable) - much less frequent
+  // Simple polling as fallback
   useEffect(() => {
-    // Only use polling as fallback if Echo is not available
+    // Skip if WebSocket is available
     if (window.Echo) {
-      console.log('NotificationContext: WebSocket active, polling disabled');
+      console.log('NotificationContext: WebSocket available, skipping polling');
       return;
     }
 
-    console.log('NotificationContext: WebSocket unavailable, using fallback polling');
+    // Skip if no authenticated user
+    if (!window.user || !window.user.id) {
+      console.log('NotificationContext: No user, skipping polling');
+      return;
+    }
+
+    console.log('NotificationContext: Using polling fallback');
     
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }
-
-    let pollCount = 0;
-    const pollInterval = 30000; // Poll every 30 seconds as fallback (instead of 2 seconds)
-
-    const pollNotifications = () => {
+    // Poll every 30 seconds
+    const interval = setInterval(() => {
       if (!loading) {
-        console.log(`NotificationContext: Fallback polling (attempt ${pollCount + 1})`);
-        fetchNotifications({})
-          .then(() => {
-            pollCount++;
-          })
-          .catch((error) => {
-            console.warn('NotificationContext: Fallback polling failed:', error);
-          });
+        fetchNotifications({});
       }
-    };
+    }, 30000);
 
-    // Initial poll
-    pollNotifications();
-
-    // Set up polling interval
-    const intervalId = setInterval(pollNotifications, pollInterval);
-
-    return () => {
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(interval);
   }, [fetchNotifications, loading]);
 
   // Listen to notification refresh events with improved debouncing and immediate response

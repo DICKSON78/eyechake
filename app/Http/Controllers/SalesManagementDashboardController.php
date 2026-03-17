@@ -25,6 +25,11 @@ class SalesManagementDashboardController extends Controller
 
             $user = $request->user();
             
+            // Check access permissions
+            if (!$user || (!$user->is_admin && !in_array($user->role, ['Sales Manager', 'Sales']) && !isset($user->privileges['sales_management']) && !isset($user->privileges['sales_center']))) {
+                return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Access denied');
+            }
+            
             // Default to today if no dates provided
             $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
             $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
@@ -123,6 +128,24 @@ class SalesManagementDashboardController extends Controller
             if ($data['summary']['total_transactions'] > 0) {
                 $data['summary']['average_transaction'] = $data['summary']['total_sales'] / $data['summary']['total_transactions'];
             }
+
+            // Get sales target from performance_targets table
+            try {
+                $salesTarget = DB::table('performance_targets')
+                    ->where('department', 'sales')
+                    ->where('kpi_key', 'daily_sales_target')
+                    ->value('target_value') ?? 1500000; // Default fallback
+            } catch (\Exception $e) {
+                $salesTarget = 1500000; // Default fallback
+            }
+
+            // Calculate sales performance percentage
+            $salesPerformance = $data['summary']['total_sales'] > 0 
+                ? (($data['summary']['total_sales'] / $salesTarget) * 100) 
+                : 0;
+
+            $data['summary']['sales_target'] = $salesTarget;
+            $data['summary']['sales_performance'] = round($salesPerformance, 1);
 
             // Items sold
             try {

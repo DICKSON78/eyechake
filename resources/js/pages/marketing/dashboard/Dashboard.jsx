@@ -55,6 +55,7 @@ import {
   yellow,
 } from "@mui/material/colors";
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError, numberFormat, getWeekStartDate } from "../../../helpers";
 
 const Dashboard = () => {
@@ -63,12 +64,15 @@ const Dashboard = () => {
   const theme = useTheme();
   const addToast = useToast();
 
+  // Check marketing privilege
+  usePrivilege('marketing', '/dashboard');
+
   const modalRef = useRef();
 
   const [params, setParams] = useState({
     clinic_id: undefined,
-    start_date: new Date(), // Default to today
-    end_date: new Date(),   // Default to today
+    start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+    end_date: new Date(),   // Today
   });
 
   const [clientTab, setClientTab] = useState(0);
@@ -444,195 +448,7 @@ const Dashboard = () => {
               </Grid>
             </Grid>
 
-            {/* New Client vs Return Client Tab Section */}
-            <Grid
-              container
-              spacing={{ xs: 1, sm: 2, md: 3 }}
-              sx={{ mt: 2, width: '100%', maxWidth: '100%' }}
-            >
-              <Grid size={{ xs: 12 }}>
-                <Card sx={{ width: '100%' }}>
-                  <CardHeader title="New Client vs Return Client" />
-                  <Divider />
-                  <CardContent>
-                    <Tabs
-                      value={clientTab}
-                      onChange={(e, newValue) => setClientTab(newValue)}
-                      sx={{ mb: 3 }}
-                    >
-                      <Tab label="New Client" />
-                      <Tab label="Return Client" />
-                    </Tabs>
-                    {clientTab === 0 && (
-                      <Box>
-                        <ChartWrapper
-                          options={{
-                            chart: {
-                              fontFamily: theme.typography.fontFamily,
-                              foreColor: theme.palette.text.primary,
-                              background: "transparent",
-                              toolbar: {
-                                show: false,
-                              },
-                            },
-                            labels: (data.statistics.client_statistics || []).map(
-                              (e) => e.name
-                            ),
-                            plotOptions: {
-                              pie: {
-                                dataLabels: {
-                                  offset: -16,
-                                },
-                              },
-                            },
-                            colors: [blue[400], green[400]],
-                            stroke: {
-                              show: false,
-                              width: 3,
-                              colors: (data.statistics.client_statistics || []).map(
-                                (e) => theme.palette.background.paper
-                              ),
-                            },
-                            dataLabels: {
-                              style: {
-                                fontSize: 12,
-                                fontWeight: 600,
-                              },
-                              dropShadow: {
-                                enabled: false,
-                              },
-                              formatter: (val, opts) => {
-                                const seriesIndex = opts.seriesIndex;
-                                const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
-                                return `${numberFormat(count)} (${val.toFixed(1)}%)`;
-                              },
-                            },
-                            tooltip: {
-                              y: {
-                                formatter: (val, { seriesIndex }) => {
-                                  const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
-                                  return `${numberFormat(count)} clients`;
-                                },
-                              },
-                            },
-                            legend: {
-                              position: 'bottom',
-                              labels: {
-                                colors: (data.statistics.client_statistics || []).map(
-                                  (e) => theme.palette.text.secondary
-                                ),
-                                useSeriesColors: false,
-                              },
-                              markers: {
-                                width: 14,
-                                height: 8,
-                                radius: 4,
-                              },
-                            },
-                          }}
-                          series={(data.statistics.client_statistics || []).map(
-                            (e) => e.count
-                          )}
-                          type="pie"
-                          height={350}
-                        />
-                        <Box sx={{ mt: 3, textAlign: 'center' }}>
-                          <Typography variant="h6" gutterBottom>
-                            New Clients: {numberFormat(data.statistics.client_statistics?.find(c => c.name === 'New Client')?.count || 0)}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            Patients registered with no previous consultations
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )}
-                    {clientTab === 1 && (
-                      <Box>
-                        <ChartWrapper
-                          options={{
-                            chart: {
-                              fontFamily: theme.typography.fontFamily,
-                              foreColor: theme.palette.text.primary,
-                              background: "transparent",
-                              toolbar: {
-                                show: false,
-                              },
-                            },
-                            labels: (data.statistics.client_statistics || []).map(
-                              (e) => e.name
-                            ),
-                            plotOptions: {
-                              pie: {
-                                dataLabels: {
-                                  offset: -16,
-                                },
-                              },
-                            },
-                            colors: [blue[400], green[400]],
-                            stroke: {
-                              show: false,
-                              width: 3,
-                              colors: (data.statistics.client_statistics || []).map(
-                                (e) => theme.palette.background.paper
-                              ),
-                            },
-                            dataLabels: {
-                              style: {
-                                fontSize: 12,
-                                fontWeight: 600,
-                              },
-                              dropShadow: {
-                                enabled: false,
-                              },
-                              formatter: (val, opts) => {
-                                const seriesIndex = opts.seriesIndex;
-                                const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
-                                return `${numberFormat(count)} (${val.toFixed(1)}%)`;
-                              },
-                            },
-                            tooltip: {
-                              y: {
-                                formatter: (val, { seriesIndex }) => {
-                                  const count = data.statistics.client_statistics?.[seriesIndex]?.count || 0;
-                                  return `${numberFormat(count)} clients`;
-                                },
-                              },
-                            },
-                            legend: {
-                              position: 'bottom',
-                              labels: {
-                                colors: (data.statistics.client_statistics || []).map(
-                                  (e) => theme.palette.text.secondary
-                                ),
-                                useSeriesColors: false,
-                              },
-                              markers: {
-                                width: 14,
-                                height: 8,
-                                radius: 4,
-                              },
-                            },
-                          }}
-                          series={(data.statistics.client_statistics || []).map(
-                            (e) => e.count
-                          )}
-                          type="pie"
-                          height={350}
-                        />
-                        <Box sx={{ mt: 3, textAlign: 'center' }}>
-                          <Typography variant="h6" gutterBottom>
-                            Return Clients: {numberFormat(data.statistics.client_statistics?.find(c => c.name === 'Return Client')?.count || 0)}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            Patients registered with previous consultations
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+            {/* Other dashboard sections... */}
           </Box>
         </React.Fragment>
       ) : null}

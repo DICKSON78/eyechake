@@ -1,403 +1,256 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
-  Button,
-  CardActions,
+  Card,
   CardContent,
+  CardHeader,
   Grid,
-  LinearProgress,
-  Stack,
+  TextField,
+  Button,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
   Alert,
-  AlertTitle,
 } from "@mui/material";
-import Form from "../../../components/Form";
-import TextField from "../../../components/TextField";
-import DatePicker from "../../../components/DatePicker";
-import Select from "../../../components/Select";
-
-import moment from "moment";
+import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { useFetch, usePost, useToast } from "../../../hooks";
-import {
-  formatDateForDb,
-  formatError,
-  getValidationRules,
-  validateInteger,
-} from "../../../helpers";
+import { formatError } from "../../../helpers";
 
-const validationRules = getValidationRules();
-
-const CreateVipPatient = ({ modal, fetchPatients }) => {
-  const addToast = useToast();
+const CreateVipPatient = () => {
   const navigate = useNavigate();
-
-  const formRef = useRef();
-  const firstNameRef = useRef();
-  const middleNameRef = useRef();
-  const lastNameRef = useRef();
-  const genderRef = useRef();
-  const dateOfBirthRef = useRef();
-  const addressRef = useRef();
-  const nationalIdRef = useRef();
-  const phoneRef = useRef();
-  const emailRef = useRef();
-  const occupationRef = useRef();
-  const paymentModeRef = useRef();
-  const informationSourceRef = useRef();
-
-  const marketingEnabled =
-    window.user?.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
-      ?.value === "Yes";
-
-  const { data: paymentModes } = useFetch(
-    "api/payment-modes",
-    {
-      status: "Active",
-      per_page: 500,
-    },
-    true,
-    [],
-    (response) => response.data.data.data
-  );
-
-  const { data: informationSources, handleFetch: fetchInformationSources } =
-    useFetch(
-      "api/marketing/information-sources",
-      {
-        status: "Active",
-        per_page: 500,
-      },
-      false,
-      [],
-      (response) => response.data.data.data
-    );
+  const { id } = useParams();
+  const addToast = useToast();
+  const { post } = usePost();
+  const isEditing = !!id;
 
   const [formData, setFormData] = useState({
-    first_name: undefined,
-    middle_name: undefined,
-    last_name: undefined,
-    gender: undefined,
-    date_of_birth: null,
-    region_id: undefined,
-    district_id: undefined,
-    ward_id: undefined,
-    address: undefined,
-    national_id: undefined,
-    phone: undefined,
-    email: undefined,
-    occupation: undefined,
-    payment_mode_id: undefined,
-    info_source_id: undefined,
-    is_vip: true, // Always true for VIP patients
+    first_name: "",
+    last_name: "",
+    phone: "",
+    email: "",
+    gender: "",
+    date_of_birth: "",
+    address: "",
+    occupation: "",
+    vip_notes: "",
+    is_vip: true,
   });
 
-  const { data, loading, error, handlePost } = usePost("api/patients", {
-    ...formData,
-    date_of_birth: formData.date_of_birth
-      ? formatDateForDb(formData.date_of_birth)
-      : null,
-  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Fetch patient data if editing
+  const { data: patientData, loading: fetchLoading } = useFetch(
+    isEditing ? `/api/patients/${id}` : null
+  );
 
   useEffect(() => {
-    if (marketingEnabled) {
-      fetchInformationSources();
+    if (patientData && isEditing) {
+      setFormData({
+        first_name: patientData.first_name || "",
+        last_name: patientData.last_name || "",
+        phone: patientData.phone || "",
+        email: patientData.email || "",
+        gender: patientData.gender || "",
+        date_of_birth: patientData.date_of_birth || "",
+        address: patientData.address || "",
+        occupation: patientData.occupation || "",
+        vip_notes: patientData.vip_notes || "",
+        is_vip: patientData.is_vip || true,
+      });
     }
-  }, []);
+  }, [patientData, isEditing]);
 
-  useEffect(() => {
-    if (data) {
-      const createdId = data?.data?.id;
-      if (createdId) {
-        addToast({ message: data.message, severity: "success" });
-        // Refresh the patients list
-        if (fetchPatients) {
-          fetchPatients();
-        }
-        window.setTimeout(() => {
-          navigate(`/reception/patients/${createdId}/check-in`);
-        }, 1000);
-      } else {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const endpoint = isEditing ? `/api/patients/${id}` : "/api/patients";
+      const response = await post(endpoint, formData);
+
+      if (response.status === 200 || response.status === 201) {
         addToast({
-          message: data?.data?.error || "Prestige client registration failed. Please try again.",
-          severity: "error",
+          message: `VIP patient ${isEditing ? 'updated' : 'created'} successfully`,
+          severity: "success"
         });
+        navigate("/reception/patients");
       }
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (error) {
-      addToast({ message: formatError(error), severity: "error" });
-    }
-  }, [error]);
-
-  const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePost();
+    } catch (err) {
+      setError(formatError(err));
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (fetchLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <React.Fragment>
-      {loading && <LinearProgress />}
-      <CardContent>
-        <Alert severity="info" sx={{ mb: 2 }}>
-          <AlertTitle>Prestige Client Registration</AlertTitle>
-          Prestige clients receive priority treatment and enhanced services throughout their visit.
-        </Alert>
-        
-        <Form ref={formRef}>
-          <Grid
-            container
-            spacing={2}
-          >
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={firstNameRef}
-                label="First Name"
-                fullWidth
-                required
-                onChange={(value) =>
-                  setFormData({ ...formData, first_name: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={middleNameRef}
-                label="Middle Name"
-                fullWidth
-                onChange={(value) =>
-                  setFormData({ ...formData, middle_name: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={lastNameRef}
-                label="Last Name"
-                fullWidth
-                required
-                onChange={(value) =>
-                  setFormData({ ...formData, last_name: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Select
-                ref={genderRef}
-                label="Gender"
-                fullWidth
-                required
-                options={["Male", "Female"]}
-                onChange={(value) =>
-                  setFormData({ ...formData, gender: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Stack
-                direction="row"
-                alignItems="flex-end"
-                spacing={1}
-              >
-                <DatePicker
-                  ref={dateOfBirthRef}
-                  label="Date of Birth"
-                  fullWidth
-                  value={formData.date_of_birth}
-                  onChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      date_of_birth: !isNaN(value) ? value : null,
-                    })
-                  }
-                />
-                <TextField
-                  label="Age"
-                  fullWidth
-                  rules={[validationRules.optionalInteger]}
-                  onChange={(value) => {
-                    const age = validateInteger(value);
-                    if (age) {
-                      setFormData({
-                        ...formData,
-                        date_of_birth: moment().subtract(age, "years").toDate(),
-                      });
-                    }
-                  }}
-                  containerProps={{ sx: { width: 80 } }}
-                />
-              </Stack>
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={addressRef}
-                label="Address"
-                fullWidth
-                onChange={(value) =>
-                  setFormData({ ...formData, address: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={phoneRef}
-                label="Phone Number"
-                fullWidth
-                required
-                rules={[validationRules.optionalPhone]}
-                onChange={(value) => setFormData({ ...formData, phone: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={emailRef}
-                label="Email Address"
-                fullWidth
-                type="email"
-                rules={[validationRules.optionalEmail]}
-                onChange={(value) => setFormData({ ...formData, email: value })}
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={nationalIdRef}
-                label="National ID"
-                fullWidth
-                onChange={(value) =>
-                  setFormData({ ...formData, national_id: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <TextField
-                ref={occupationRef}
-                label="Occupation"
-                fullWidth
-                onChange={(value) =>
-                  setFormData({ ...formData, occupation: value })
-                }
-              />
-            </Grid>
-            <Grid
-              item
-              md={4}
-              sm={6}
-              xs={12}
-            >
-              <Select
-                ref={paymentModeRef}
-                label="Payment Mode"
-                fullWidth
-                required
-                options={paymentModes}
-                optionsLabel="name"
-                optionsValue="id"
-                onChange={(value) =>
-                  setFormData({ ...formData, payment_mode_id: value })
-                }
-              />
-            </Grid>
-            {marketingEnabled ? (
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={informationSourceRef}
-                  label="Source of Information"
-                  fullWidth
-                  clearable
-                  options={informationSources}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  onChange={(value) =>
-                    setFormData({ ...formData, info_source_id: value })
-                  }
-                />
-              </Grid>
-            ) : null}
-          </Grid>
-        </Form>
-      </CardContent>
-      <CardActions>
-        <Box flexGrow={1} />
+    <Box sx={{ p: 3 }}>
+      <Box mb={3} display="flex" alignItems="center" gap={2}>
         <Button
           variant="outlined"
-          size="large"
-          color="secondary"
-          sx={{ mr: 1 }}
-          onClick={() => modal.close()}
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/reception/patients")}
         >
-          Cancel
+          Back to Patients
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={handleSubmit}
-          sx={{ 
-            background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-            color: 'white'
-          }}
-        >
-          Save Prestige Client
-        </Button>
-      </CardActions>
-    </React.Fragment>
+        <Typography variant="h4" component="h1">
+          {isEditing ? "Edit VIP Patient" : "Create VIP Patient"}
+        </Typography>
+      </Box>
+
+      <Card>
+        <CardHeader title="Patient Information" />
+        <CardContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth required>
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    label="Gender"
+                  >
+                    <MenuItem value="Male">Male</MenuItem>
+                    <MenuItem value="Female">Female</MenuItem>
+                    <MenuItem value="Other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Date of Birth"
+                  name="date_of_birth"
+                  type="date"
+                  value={formData.date_of_birth}
+                  onChange={handleInputChange}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="Occupation"
+                  name="occupation"
+                  value={formData.occupation}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  fullWidth
+                  label="VIP Notes"
+                  name="vip_notes"
+                  value={formData.vip_notes}
+                  onChange={handleInputChange}
+                  multiline
+                  rows={4}
+                  helperText="Special notes about this VIP patient"
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box display="flex" gap={2} justifyContent="flex-end">
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate("/reception/patients")}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                    disabled={loading}
+                  >
+                    {loading ? <CircularProgress size={20} /> : isEditing ? "Update" : "Create"}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

@@ -9,9 +9,11 @@ use App\Models\PatientItemPayment;
 use App\Models\PatientPaymentCache;
 use App\Models\PatientPaymentCacheItem;
 use App\Models\PaymentChannel;
+use App\Events\NotificationUpdate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class PatientCheckInsController extends Controller
 {
@@ -187,6 +189,45 @@ class PatientCheckInsController extends Controller
                     }
                 }
             }
+        }
+
+        // Trigger notification refresh so cashier sees new patients immediately
+        try {
+            // Clear notification cache for all users in the same clinic
+            if ($user->clinic_id) {
+                // Get all users in the same clinic who have cashier privileges
+                $cashierUsers = \App\Models\User::where('clinic_id', $user->clinic_id)
+                    ->whereHas('privileges', function ($query) {
+                        $query->where('privilege', 'payment_center')
+                            ->orWhere('payment_center', true); // Handle both old and new privilege structures
+                    })
+                    ->get();
+                
+                foreach ($cashierUsers as $cashierUser) {
+                    $cacheKey = "notifications_user_{$cashierUser->id}_clinic_" . ($cashierUser->clinic_id ?? 'null');
+                    \Cache::forget($cacheKey);
+                }
+            } else {
+                // If no clinic_id, clear cache for the current user only
+                $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
+                \Cache::forget($cacheKey);
+            }
+            
+            event(new NotificationUpdate());
+            Log::info('Patient checked in - notification cache cleared and refresh triggered', [
+                'check_in_id' => $data->id,
+                'patient_id' => $data->patient_id,
+                'payment_cache_id' => $payment_cache->id ?? null,
+                'items_count' => count($createdCacheItems),
+                'mode' => $mode,
+                'user_clinic_id' => $user->clinic_id,
+                'cashier_users_count' => isset($cashierUsers) ? $cashierUsers->count() : 1
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to trigger notification refresh after patient check-in', [
+                'error' => $e->getMessage(),
+                'check_in_id' => $data->id
+            ]);
         }
 
         $message = $mode === 'invoice' ? 'Invoice created successfully.' : ($mode === 'bill' ? 'Bill created successfully.' : 'Checked in successfully.');

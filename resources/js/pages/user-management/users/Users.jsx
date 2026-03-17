@@ -48,6 +48,7 @@ const Users = () => {
     clinic_id: undefined,
     employee_number: undefined,
     name: undefined,
+    is_test_user: false, // Add filter for test users
     gender: undefined,
     department_id: undefined,
     job_title_id: undefined,

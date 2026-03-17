@@ -47,37 +47,48 @@ class FinancialManagementDashboardController extends Controller
         ];
 
         // Get financial statistics
-        // Total revenue: sum of all payments + cleared bills (same as Daily Cash Collected Report)
+        // Total revenue: actual payments linked to cache items (no orphans, no bill face values)
         try {
             $revenueQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+                ->whereNotNull('patient_item_payments.created_at')
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
             if ($clinic_id) {
-                $revenueQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $revenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $itemPaymentsRevenue = $revenueQuery->sum('amount') ?? 0;
-            
-            // Add cleared bills to total revenue (same as Daily Cash Collected Report)
-            $clearedBillsQuery = PatientItemBill::query()
-                ->where('status', 'Cleared')
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59');
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $itemPaymentsRevenue = (float) ($revenueQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
+
+            // Add actual bill payments
+            $billRevenueQuery = PatientItemBillPayment::query()
+                ->whereNotNull('patient_item_bill_payments.created_at')
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
             
             if ($clinic_id) {
-                $clearedBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $billRevenueQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $clearedBillsRevenue = $clearedBillsQuery->sum('amount') ?? 0;
-            $data['summary']['total_revenue'] = $itemPaymentsRevenue + $clearedBillsRevenue;
+            $billPaymentsRevenue = (float) $billRevenueQuery->sum('patient_item_bill_payments.amount');
+            $data['summary']['total_revenue'] = $itemPaymentsRevenue + $billPaymentsRevenue;
         } catch (\Exception $e) {
             \Log::error('Error calculating total revenue', ['error' => $e->getMessage()]);
             $data['summary']['total_revenue'] = 0;
@@ -105,36 +116,47 @@ class FinancialManagementDashboardController extends Controller
 
         $data['summary']['net_profit'] = $data['summary']['total_revenue'] - $data['summary']['total_expenses'];
 
-        // Daily collections: sum of all payments (item payments + bill payments) within the date range
+        // Daily collections: actual payments linked to cache items
         try {
-            $dailyCollectionsQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+            $dailyItemQuery = PatientItemPayment::query()
+                ->whereNotNull('patient_item_payments.created_at')
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
             if ($clinic_id) {
-                $dailyCollectionsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $dailyItemQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $dailyCollections = $dailyCollectionsQuery->sum('amount') ?? 0;
+            // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+            $dailyCollections = (float) ($dailyItemQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
 
-            // Add bill payments to daily collections
-            $billPaymentsQuery = PatientItemBillPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
+            // Add bill payments
+            $dailyBillQuery = PatientItemBillPayment::query()
+                ->whereNotNull('patient_item_bill_payments.created_at')
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
+                });
             
             if ($clinic_id) {
-                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->where('clinic_id', $clinic_id);
+                $dailyBillQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
-            $billPaymentsCollections = $billPaymentsQuery->sum('amount') ?? 0;
+            $billPaymentsCollections = (float) $dailyBillQuery->sum('patient_item_bill_payments.amount');
             $data['summary']['daily_collections'] = $dailyCollections + $billPaymentsCollections;
         } catch (\Exception $e) {
             \Log::error('Error calculating daily collections', ['error' => $e->getMessage()]);
@@ -174,42 +196,68 @@ class FinancialManagementDashboardController extends Controller
         
         $data['summary']['expense_payments'] = $data['summary']['total_expenses'];
 
-        // Running Cost & Improvement Cost (by expense category name match)
+        // Running Cost & Improvement Cost (by explicit flag OR category match)
+        // Running costs = ongoing operational expenses (maintenance, software)
+        // Improvement costs = capital/one-time expenditures (renovation, furniture, importation, events)
+        $runningCostCategories = [
+            'Cleanless, technical / mechanical meintenance', 
+            'Office Software', 
+            'Daily expenses', 
+            'Electricity', 
+            'Ground Floor Rent', 
+            'Rent', 
+            'Salary', 
+            'Staff Allowance & Chakula', 
+            'Transport', 
+            'SODA', 
+            'Marketing', 
+            'Government Tax'
+        ];
+        $improvementCostCategories = [
+            'Renovation', 
+            'Vifaa & Furnitures', 
+            'Importation Cost(Cargo transportation)', 
+            'SABASABA 2025', 
+            'Outreach Programs', 
+            'Parnership Dissolution', 
+            'Loan'
+        ];
         try {
+            $baseRunningQuery = DB::table('expense_payments as expp')
+                ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
+                ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
+                ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
+                ->where('expp.amount', '>', 0);
+
+            $baseImprovementQuery = clone $baseRunningQuery;
+
             if ($clinic_id) {
-                $runningCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->join('users as u', 'expp.created_by', '=', 'u.id')
-                    ->where('u.clinic_id', $clinic_id)
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-                $improvementCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->join('users as u', 'expp.created_by', '=', 'u.id')
-                    ->where('u.clinic_id', $clinic_id)
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-            } else {
-                $runningCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
-                $improvementCostQuery = DB::table('expense_payments as expp')
-                    ->join('expenses as exp', 'expp.expense_id', '=', 'exp.id')
-                    ->join('expense_categories as cat', 'exp.category_id', '=', 'cat.id')
-                    ->whereBetween(DB::raw('DATE(expp.created_at)'), [$start_date, $end_date])
-                    ->where('expp.amount', '>', 0)
-                    ->whereIn('cat.name', ['Cleanless, technical / mechanical meintenance', 'Renovation', 'Vifaa & Furnitures', 'Office Software', 'Importation Cost(Cargo transportation)', 'SABASABA 2025']);
+                $baseRunningQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id);
+                $baseImprovementQuery->join('users as u', 'expp.created_by', '=', 'u.id')
+                    ->where('u.clinic_id', $clinic_id);
             }
+
+            $runningCostQuery = (clone $baseRunningQuery)->where(function($q) use ($runningCostCategories) {
+                $q->where('exp.running_cost', 1)
+                  ->orWhereIn('cat.name', $runningCostCategories);
+            });
+
+            $improvementCostQuery = (clone $baseImprovementQuery)->where(function($q) use ($improvementCostCategories) {
+                $q->where('exp.improvement_cost', 1)
+                  ->orWhereIn('cat.name', $improvementCostCategories);
+            });
 
             $data['summary']['running_cost'] = (float) $runningCostQuery->sum('expp.amount');
             $data['summary']['improvement_cost'] = (float) $improvementCostQuery->sum('expp.amount');
+            
+            \Log::info('FinancialManagementDashboard cost calculations', [
+                'running_cost' => $data['summary']['running_cost'],
+                'improvement_cost' => $data['summary']['improvement_cost'],
+                'clinic_id' => $clinic_id,
+                'start_date' => $start_date,
+                'end_date' => $end_date
+            ]);
         } catch (\Exception $e) {
             \Log::error('Error calculating running/improvement costs', ['error' => $e->getMessage()]);
             $data['summary']['running_cost'] = 0;
@@ -424,7 +472,7 @@ class FinancialManagementDashboardController extends Controller
             // Total patients registered
             $totalPatientsQuery = Patient::query();
             if ($clinic_id) {
-                $totalPatientsQuery->whereHas('checkIns.creator', function ($query) use ($clinic_id) {
+                $totalPatientsQuery->whereHas('check_ins.creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             }
@@ -513,12 +561,12 @@ class FinancialManagementDashboardController extends Controller
         // Calculate consultation, pharmacy, glass, others from payment cache items
         try {
             if ($clinic_id) {
+                // Consultation fees are stored under consultation_type 'Others' (ID 4)
                 $consultationQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Consultation');
+                        $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -533,7 +581,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Pharmacy');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -548,7 +595,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Glass');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -558,12 +604,12 @@ class FinancialManagementDashboardController extends Controller
                 
                 $data['summary']['glass'] = $glassQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
                 
+                // Procedures are the 'others' category (consultation_type 'Procedure', ID 3)
                 $othersQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Others');
+                        $query->where('name', 'Procedure');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -573,12 +619,12 @@ class FinancialManagementDashboardController extends Controller
                 
                 $data['summary']['others'] = $othersQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
             } else {
+                // Consultation fees are stored under consultation_type 'Others' (ID 4)
                 $consultationQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Consultation');
+                        $query->where('name', 'Others');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
@@ -590,7 +636,6 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Pharmacy');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
@@ -602,19 +647,18 @@ class FinancialManagementDashboardController extends Controller
                         $query->where('name', 'Glass');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');
                 
                 $data['summary']['glass'] = $glassQuery->sum(DB::raw('unit_price * quantity')) ?? 0;
                 
+                // Procedures are the 'others' category (consultation_type 'Procedure', ID 3)
                 $othersQuery = PatientPaymentCacheItem::query()
                     ->whereHas('consultation_type', function ($query) {
-                        $query->where('name', 'Others');
+                        $query->where('name', 'Procedure');
                     })
                     ->whereIn('status', ['Paid', 'Billed', 'Served'])
-                    ->whereNull('bill_id')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59');

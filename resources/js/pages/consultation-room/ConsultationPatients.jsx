@@ -34,39 +34,48 @@ const ConsultationPatients = () => {
 
   const { status } = useParams();
 
-  const [params, setParams] = useState(() => {
-    const isPending = String(status || '').toLowerCase() === 'pending';
-    const isConsulted = String(status || '').toLowerCase() === 'consulted';
-    
-    // For consulted patients, default to showing last 1 month
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    
-    return {
-      page: 1,
-      per_page: 25,
-      // Don't force direction by default; show all pending regardless of origin
-      patient_direction: undefined,
-      status: undefined,
-      patient_id: undefined,
-      patient_name: undefined,
-      patient_gender: undefined,
-      patient_phone: undefined,
-      item_payment_mode_id: undefined,
-      item_id: undefined,
-      // Set default start date for consulted patients to 1 month ago
-      start_date: isConsulted ? oneMonthAgo : undefined,
-      end_date: undefined,
-    };
+  // Debug user privileges
+  console.log('ConsultationPatients User Info:', {
+    user: window.user,
+    privileges: window.user?.privileges,
+    role: window.user?.role,
+    isAdmin: window.user?.role === 'Admin' || window.user?.is_admin,
+  });
+
+  const [params, setParams] = useState({
+    page: 1,
+    per_page: 25,
+    status: "Sent to Optician",
+    patient_id: undefined,
+    patient_name: undefined,
+    patient_gender: undefined,
+    patient_phone: undefined,
+    item_payment_mode_id: 'consultant', // This is what optician center expects for procedures
+    start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    end_date: new Date(),
+    // Add consultation-specific filters for proper backend filtering
+    require_glass: "Yes",
+    patient_direction: undefined, // Will be set to "Direct to Optician" if needed
   });
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/consultations",
     {
       ...params,
-      status: capitalize(status),
+      status: status ? capitalize(status) : params.status, // Use URL status if provided, otherwise use default
       start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+      // For pending status, remove require_glass filter to match notifications logic
+      require_glass: status === 'pending' ? undefined : params.require_glass,
+      // For pending status, use today's date to match notifications logic
+      ...(status === 'pending' && {
+        start_date: formatDateForDb(new Date()),
+        end_date: formatDateForDb(new Date()),
+      }),
+      // For pending status, remove item_payment_mode_id filter to match notifications logic
+      ...(status === 'pending' && {
+        item_payment_mode_id: undefined,
+      }),
     },
     true,
     {
@@ -75,6 +84,15 @@ const ConsultationPatients = () => {
       page: 1,
     },
     (response) => {
+      // Debug logging
+      console.log('ConsultationPatients API params:', {
+        status: status ? capitalize(status) : params.status,
+        start_date: status === 'pending' ? formatDateForDb(new Date()) : (params.start_date ? formatDateForDb(params.start_date) : undefined),
+        end_date: status === 'pending' ? formatDateForDb(new Date()) : (params.end_date ? formatDateForDb(params.end_date) : undefined),
+        require_glass: status === 'pending' ? undefined : params.require_glass,
+        item_payment_mode_id: status === 'pending' ? undefined : params.item_payment_mode_id,
+      });
+      
       // Handle paginated response from Laravel
       const paginatedData = response.data?.data || response.data || {};
       return {
@@ -105,9 +123,19 @@ const ConsultationPatients = () => {
 
   useEffect(() => {
     if (error) {
-      addToast({ message: formatError(error), severity: "error" });
+      // Check if it's a 403 unauthorized error
+      if (error?.response?.status === 403) {
+        addToast({ 
+          message: "You don't have permission to access consultation room. Please contact administrator.", 
+          severity: "error" 
+        });
+        // Redirect to dashboard if unauthorized
+        navigate('/dashboard');
+      } else {
+        addToast({ message: formatError(error), severity: "error" });
+      }
     }
-  }, [error]);
+  }, [error, addToast, navigate]);
 
   const getTitle = () => {
     if (status === "pending") {

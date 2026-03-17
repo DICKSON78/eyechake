@@ -60,10 +60,10 @@ const ReadOnlyField = ({ label, value, multiline = false }) => (
     <Typography variant="caption" color="text.secondary" fontWeight="500">
       {label}
     </Typography>
-    <Typography 
-      variant="body2" 
-      sx={{ 
-        mt: 0.5, 
+    <Typography
+      variant="body2"
+      sx={{
+        mt: 0.5,
         whiteSpace: multiline ? 'pre-wrap' : 'normal',
         minHeight: multiline ? 60 : 'auto',
         p: 1,
@@ -248,6 +248,25 @@ const ClinicalNotes = ({ patient, consultation }) => {
             <Subheader title="Refraction Details" />
             <Refraction consultation={consultation} />
 
+            {/* Recommendations & Remarks */}
+            <Subheader title="Doctor's Notes" />
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <ReadOnlyField
+                  label="Doctor Recommendations"
+                  value={consultation.doctor_recommendations}
+                  multiline
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <ReadOnlyField
+                  label="Remarks"
+                  value={consultation.doctor_comments_remarks}
+                  multiline
+                />
+              </Grid>
+            </Grid>
+
             <Subheader title="Management" />
             <Table
               loading={loadingItems}
@@ -315,10 +334,10 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 <Subheader title="Lens Selection" />
                 <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
-                    {(typeof consultation.lens_types === 'string' 
-                      ? JSON.parse(consultation.lens_types) 
-                      : Array.isArray(consultation.lens_types) 
-                        ? consultation.lens_types 
+                    {(typeof consultation.lens_types === 'string'
+                      ? JSON.parse(consultation.lens_types)
+                      : Array.isArray(consultation.lens_types)
+                        ? consultation.lens_types
                         : []
                     ).map((lensType, index) => (
                       <Chip

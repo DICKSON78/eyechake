@@ -57,9 +57,10 @@ const LensList = () => {
     // Normalizing values to ensure robust comparison (trim and handle potential minor differences)
     const normalizedFilter = lensTypeFilter ? String(lensTypeFilter).trim() : null;
     const normalizedLensType = lens.lens_type ? String(lens.lens_type).trim() : null;
-    
-    const matchesLensType = !normalizedFilter || normalizedLensType === normalizedFilter;
-    const matchesSearch = !searchQuery || 
+
+    const matchesLensType = !normalizedFilter ||
+      (normalizedLensType && normalizedLensType.toLowerCase() === normalizedFilter.toLowerCase());
+    const matchesSearch = !searchQuery ||
       lens.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lens.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lens.category?.toLowerCase().includes(searchQuery.toLowerCase());

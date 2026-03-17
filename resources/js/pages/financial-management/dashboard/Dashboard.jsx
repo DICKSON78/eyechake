@@ -31,6 +31,7 @@ import {
   AssessmentRounded as AnalyticsIcon,
   CheckCircleRounded as ClearedIcon,
   HourglassEmptyRounded as PendingIcon,
+  PointOfSaleRounded as SalesIcon,
 } from "@mui/icons-material";
 import {
   blue,
@@ -61,6 +62,7 @@ const Dashboard = () => {
   const [dateParams, setDateParams] = useState({
     start_date: formatDateForDb(new Date()),
     end_date: formatDateForDb(new Date()),
+    clinic_id: window.user?.clinic_id || 1, // Use actual user's clinic_id with fallback for testing
   });
 
   const [startDate, setStartDate] = useState(new Date());
@@ -78,6 +80,10 @@ const Dashboard = () => {
         pending_bills: 0,
         expense_payments: 0,
         daily_collections: 0,
+        total_debit: 0,
+        total_credit: 0,
+        running_cost: 0,
+        improvement_cost: 0,
       },
       statistics: {
         top_expense_categories: [],
@@ -85,12 +91,27 @@ const Dashboard = () => {
         expense_trends: [],
       },
     },
-    (response) => response.data.data
+    (response) => {
+      console.log('Financial Dashboard API Response:', response);
+      console.log('API Data:', response.data);
+      console.log('API Data Data:', response.data?.data);
+      console.log('API Summary:', response.data?.data?.summary);
+      console.log('Daily Collections:', response.data?.data?.summary?.daily_collections);
+      console.log('Total Sales:', response.data?.data?.summary?.total_debit);
+      return response.data.data; // Return the actual data, not the wrapper
+    }
   );
 
   useEffect(() => {
     document.title = `Financial Management Dashboard - ${window.APP_NAME}`;
-  }, []);
+    console.log('Financial Dashboard - User:', window.user);
+    console.log('Financial Dashboard - DateParams:', dateParams);
+    console.log('Financial Dashboard - Data received:', data);
+    console.log('Financial Dashboard - Summary:', data?.summary);
+    console.log('Financial Dashboard - Daily Collections from data:', data?.summary?.daily_collections);
+    console.log('Financial Dashboard - Chart Data:', data?.statistics);
+    console.log('Financial Dashboard - Top Expense Categories:', data?.statistics?.top_expense_categories);
+  }, [data]);
 
   useEffect(() => {
     if (error) {
@@ -117,7 +138,9 @@ const Dashboard = () => {
       setDateParams({
         start_date: formatDateForDb(startDate),
         end_date: formatDateForDb(endDate),
+        clinic_id: window.user?.clinic_id || 1, // Use actual user's clinic_id with fallback
       });
+      handleFetch();
     } else {
       addToast({ message: "Please select valid date range", severity: "warning" });
     }
@@ -130,7 +153,9 @@ const Dashboard = () => {
     setDateParams({
       start_date: formatDateForDb(today),
       end_date: formatDateForDb(today),
+      clinic_id: window.user?.clinic_id || 1, // Use actual user's clinic_id with fallback
     });
+    handleFetch();
   };
 
   const profitMargin = data.summary?.total_revenue > 0 
@@ -156,7 +181,6 @@ const Dashboard = () => {
         { title: "Dashboard" },
       ]}
     >
-      {/* Header with Actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography
@@ -232,12 +256,7 @@ const Dashboard = () => {
 
       {!loading && data ? (
         <React.Fragment>
-          {/* Summary Cards */}
-          <Grid
-            container
-            spacing={{ xs: 2, sm: 2, md: 3 }}
-            sx={{ mb: 4 }}
-          >
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <InfoCard
                 title="Collections"
@@ -249,11 +268,11 @@ const Dashboard = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
               <InfoCard
-                title="Total Revenue"
+                title="Total Sales"
                 count={numberFormat(data.summary?.total_revenue || 0)}
-                icon={<RevenueIcon />}
-                color={green[500]}
-                onClick={() => navigate('/financial-management/reports/cash-collection')}
+                icon={<SalesIcon />}
+                color={purple[400]}
+                onClick={() => navigate('/financial-management/sales')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
@@ -261,7 +280,7 @@ const Dashboard = () => {
                 title="Total Expenses"
                 count={numberFormat(data.summary?.total_expenses || 0)}
                 icon={<ExpenseIcon />}
-                color={red[500]}
+                color={theme.palette.warning.main}
                 onClick={() => navigate('/financial-management/expenses')}
               />
             </Grid>
@@ -303,7 +322,6 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Additional Stats Row */}
           <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <Card
@@ -338,11 +356,7 @@ const Dashboard = () => {
                   <Chip
                     label={data.summary?.net_profit >= 0 ? "Positive" : "Negative"}
                     size="small"
-                    sx={{
-                      bgcolor: data.summary?.net_profit >= 0 ? teal[100] : orange[100],
-                      color: data.summary?.net_profit >= 0 ? teal[700] : orange[700],
-                      fontWeight: 600,
-                    }}
+                    color={data.summary?.net_profit >= 0 ? "success" : "warning"}
                   />
                 </CardContent>
               </Card>
@@ -430,9 +444,7 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Charts Section */}
           <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-            {/* Revenue vs Expenses Trend */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Card
                 sx={{
@@ -492,11 +504,11 @@ const Dashboard = () => {
                     series={[
                       {
                         name: "Revenue",
-                        data: (data.statistics?.payment_trends || []).map((e) => parseFloat(e.revenue || 0))
+                        data: (data.statistics?.payment_trends || []).map((e) => parseFloat(e.amount || 0))
                       },
                       {
                         name: "Expenses",
-                        data: (data.statistics?.expense_trends || []).map((e) => parseFloat(e.expenses || 0))
+                        data: (data.statistics?.expense_trends || []).map((e) => parseFloat(e.amount || 0))
                       },
                     ]}
                     type="line"
@@ -506,7 +518,6 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
-            {/* Expense Categories */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Card
                 sx={{
@@ -563,7 +574,6 @@ const Dashboard = () => {
             </Grid>
           </Grid>
 
-          {/* Quick Actions Section */}
           <Card
             sx={{
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)',

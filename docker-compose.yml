@@ -27,6 +27,9 @@ services:
       - COMPOSER_MEMORY_LIMIT=-1
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
@@ -50,13 +53,16 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     ports:
-      - "3306:3306"
+      - "3307:3307"
     volumes:
       - dbdata:/var/lib/mysql
       - ./sikaf.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
@@ -66,7 +72,8 @@ services:
 
   # Soketi WebSocket Server
   soketi:
-    image: quay.io/soketi/soketi:latest-16-alpine
+    image: quay.io/soketi/soketi:latest-16-debian
+    pull_policy: missing
     container_name: eyechake_soketi
     restart: unless-stopped
     ports:
@@ -77,6 +84,9 @@ services:
     command: node /app/bin/server.js start --config=/app/config.json
     networks:
       - eyechake-network
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9601/"]
       interval: 30s

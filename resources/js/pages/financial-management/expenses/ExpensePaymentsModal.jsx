@@ -15,6 +15,7 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteRounded";
 import Form from "../../../components/Form";
 import TextField from "../../../components/TextField";
+import Select from "../../../components/Select";
 import Table from "../../../components/Table";
 
 import { useDelete, useFetch, usePost, useToast } from "../../../hooks";
@@ -32,6 +33,7 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
   const formRef = useRef();
   const amountRef = useRef();
   const descriptionRef = useRef();
+  const channelRef = useRef();
 
   const [data, setData] = useState();
   const [error, setError] = useState();
@@ -52,10 +54,22 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
     (response) => response.data.data.data
   );
 
+  const { data: channels } = useFetch(
+    "api/payment-channels",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
+
   const [formData, setFormData] = useState({
     expense_id: expense.id,
     amount: undefined,
     description: undefined,
+    channel_id: undefined,
   });
 
   const {
@@ -178,6 +192,19 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
                       onChange={(value) =>
                         setFormData({ ...formData, description: value })
                       }
+                      containerProps={{ mb: 2 }}
+                    />
+                    <Select
+                      ref={channelRef}
+                      label="Payment Channel"
+                      fullWidth
+                      required
+                      options={channels}
+                      optionsLabel="name"
+                      optionsValue="id"
+                      onChange={(value) =>
+                        setFormData({ ...formData, channel_id: value })
+                      }
                     />
                   </Form>
                 </CardContent>
@@ -228,6 +255,11 @@ const ExpensePaymentsModal = ({ expense, fetchExpenses, modal }) => {
                     {
                       field: "description",
                       headerName: "Description",
+                    },
+                    {
+                      field: "channel",
+                      headerName: "Channel",
+                      valueGetter: (item) => item.channel?.name,
                     },
                     {
                       field: "created_by",

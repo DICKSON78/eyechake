@@ -8,7 +8,9 @@ import {
   TableRow,
 } from "@mui/material";
 
-const RefractionDetails = ({ consultation: { refraction } }, ref) => {
+const RefractionDetails = ({ consultation }, ref) => {
+  const refraction = consultation?.refraction;
+  
   useImperativeHandle(ref, () => ({
     validate: () => {
       return true;
@@ -17,7 +19,39 @@ const RefractionDetails = ({ consultation: { refraction } }, ref) => {
 
   return (
     <React.Fragment>
-      {/* Objective Refraction removed for workshop clinical notes */}
+      <Table sx={{ mb: 2, width: '100%' }}>
+        <TableHead>
+          <TableRow>
+            <TableCell colSpan={8}>Objective Refraction</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell colSpan={4}>RE</TableCell>
+            <TableCell colSpan={4}>LE</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell component="th">SPH</TableCell>
+            <TableCell component="th">CYL</TableCell>
+            <TableCell component="th">AXIS</TableCell>
+            <TableCell component="th">VA</TableCell>
+            <TableCell component="th">SPH</TableCell>
+            <TableCell component="th">CYL</TableCell>
+            <TableCell component="th">AXIS</TableCell>
+            <TableCell component="th">VA</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>{refraction ? (refraction.ob_re_sph || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_re_cyl || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_re_axis || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_re_va || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_le_sph || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_le_cyl || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_le_axis || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.ob_le_va || '-') : '-'}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
       <Table sx={{ width: '100%' }}>
         <TableHead>
           <TableRow>
@@ -40,14 +74,14 @@ const RefractionDetails = ({ consultation: { refraction } }, ref) => {
             <TableCell component="th">VA</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>{refraction ? refraction.sub_re_sph : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_re_cyl : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_re_axis : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_re_va : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_le_sph : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_le_cyl : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_le_axis : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_le_va : null}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_sph || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_cyl || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_axis || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_va || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_sph || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_cyl || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_axis || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_va || '-') : '-'}</TableCell>
           </TableRow>
 
           <TableRow>
@@ -61,12 +95,12 @@ const RefractionDetails = ({ consultation: { refraction } }, ref) => {
             <TableCell component="th" />
           </TableRow>
           <TableRow>
-            <TableCell>{refraction ? refraction.sub_re_add : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_re_add_va : null}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_add || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_re_add_va || '-') : '-'}</TableCell>
             <TableCell />
             <TableCell />
-            <TableCell>{refraction ? refraction.sub_le_add : null}</TableCell>
-            <TableCell>{refraction ? refraction.sub_le_add_va : null}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_add || '-') : '-'}</TableCell>
+            <TableCell>{refraction ? (refraction.sub_le_add_va || '-') : '-'}</TableCell>
             <TableCell />
             <TableCell />
           </TableRow>

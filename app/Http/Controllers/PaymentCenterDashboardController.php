@@ -123,6 +123,7 @@ class PaymentCenterDashboardController extends Controller
             : $billsSum;
 
         // Cash payments amount (must match cash in hand)
+        // Enhanced cash detection with multiple patterns and fallbacks
         try {
             $cashItemPaymentsQuery = PatientItemPayment::query()
                 ->whereNotNull('created_at')
@@ -131,10 +132,24 @@ class PaymentCenterDashboardController extends Controller
                 ->where('amount', '>', 0)
                 ->where(function ($q) {
                     $q->whereHas('channel', function ($query) {
-                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                        // Comprehensive cash channel detection
+                        $query->where(function($subQuery) {
+                            $subQuery->whereRaw("LOWER(name) LIKE '%cash%'")
+                                   ->orWhereRaw("LOWER(name) = 'cash'")
+                                   ->orWhereRaw("LOWER(name) = 'cash in hand'")
+                                   ->orWhereRaw("LOWER(name) = 'cash payment'")
+                                   ->orWhereRaw("LOWER(name) = 'cash payment'")
+                                   ->orWhereRaw("LOWER(name) = 'cash on hand'");
+                        });
                     })
                     ->orWhereHas('items.payment_mode', function ($query) {
                         $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    })
+                    // Fallback: check if channel_id corresponds to cash channels
+                    ->orWhereIn('channel_id', function($query) {
+                        $query->select('id')
+                              ->from('payment_channels')
+                              ->whereRaw("LOWER(name) LIKE '%cash%'");
                     });
                 });
 
@@ -158,10 +173,24 @@ class PaymentCenterDashboardController extends Controller
                 ->where('amount', '>', 0)
                 ->where(function ($q) {
                     $q->whereHas('channel', function ($query) {
-                        $query->whereRaw("LOWER(name) IN ('cash', 'cash in hand', 'cash payment')");
+                        // Comprehensive cash channel detection
+                        $query->where(function($subQuery) {
+                            $subQuery->whereRaw("LOWER(name) LIKE '%cash%'")
+                                   ->orWhereRaw("LOWER(name) = 'cash'")
+                                   ->orWhereRaw("LOWER(name) = 'cash in hand'")
+                                   ->orWhereRaw("LOWER(name) = 'cash payment'")
+                                   ->orWhereRaw("LOWER(name) = 'cash payment'")
+                                   ->orWhereRaw("LOWER(name) = 'cash on hand'");
+                        });
                     })
                     ->orWhereHas('items.payment_mode', function ($query) {
                         $query->whereRaw('LOWER(payment_type) = ?', ['cash']);
+                    })
+                    // Fallback: check if channel_id corresponds to cash channels
+                    ->orWhereIn('channel_id', function($query) {
+                        $query->select('id')
+                              ->from('payment_channels')
+                              ->whereRaw("LOWER(name) LIKE '%cash%'");
                     });
                 });
 
@@ -179,8 +208,9 @@ class PaymentCenterDashboardController extends Controller
 
         $data['summary']['cash_payments'] = $cashItemPayments + $cashBillPayments;
 
-        // Cash available (collected cash minus expenses)
-        $data['summary']['cash_available'] = $data['summary']['cash_payments'] - $data['summary']['total_expenses'];
+        // Cash available (collected cash) - should be cash in hand from today's collections
+        // This represents actual cash that should be in the cash drawer
+        $data['summary']['cash_available'] = $data['summary']['cash_payments'];
 
         // Credit payments amount (billed/credited items)
         try {

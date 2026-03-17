@@ -1,12 +1,5 @@
 /**
  * Privilege checking utilities
- * Provides consistent privilege checking across the application
- */
-
-/**
- * Check if a privilege value is granted
- * @param {*} value - The privilege value to check
- * @returns {boolean} - True if privilege is granted
  */
 export const isPrivilegeGranted = (value) => {
   if (value === true || value === 1 || value === "1" || value === "true" || value === "Yes" || value === "yes") {
@@ -15,11 +8,6 @@ export const isPrivilegeGranted = (value) => {
   return false;
 };
 
-/**
- * Check if user is an admin
- * @param {Object} user - User object
- * @returns {boolean} - True if user is admin
- */
 export const isAdmin = (user) => {
   if (!user) return false;
   return user.role === "Admin" || 
@@ -36,8 +24,84 @@ const PRIVILEGE_ALIASES = {
 };
 
 const ROLE_FALLBACK_PRIVILEGES = {
-  sales: ["sales_center", "sales"],
-  "sales manager": ["sales_center", "sales"],
+  Admin: [
+    "dashboard",
+    "reception",
+    "payment_center",
+    "consultation_room",
+    "optician_center",
+    "medicine_center",
+    "procedure_room",
+    "inventory_management",
+    "financial_management",
+    "employee_management",
+    "settings",
+    "clear_pending_bill",
+    "customer_relationship_management",
+    "receptionist_monthly_report",
+    "cashier_monthly_report",
+    "optometrist_monthly_report",
+    "dispensing",
+    "other_dispensing",
+    "sales_center",
+    "sales_manager_monthly_report",
+    "user_management",
+    "marketing",
+    "marketing_operations_monthly_report",
+    "director",
+    "office_calendar",
+    "calendar_edit",
+    "optometry_report_card",
+    "sales_report_card",
+    "crm_report_card",
+  ],
+  Director: [
+    "dashboard",
+    "reception",
+    "payment_center",
+    "consultation_room",
+    "optician_center",
+    "medicine_center",
+    "procedure_room",
+    "inventory_management",
+    "financial_management",
+    "employee_management",
+    "clear_pending_bill",
+    "customer_relationship_management",
+    "receptionist_monthly_report",
+    "cashier_monthly_report",
+    "optometrist_monthly_report",
+    "dispensing",
+    "other_dispensing",
+    "sales_center",
+    "sales_manager_monthly_report",
+    "user_management",
+    "marketing",
+    "marketing_operations_monthly_report",
+    "director",
+    "office_calendar",
+    "calendar_edit",
+    "optometry_report_card",
+    "sales_report_card",
+    "crm_report_card",
+  ],
+  Receptionist: ["dashboard", "reception", "patient_registration", "reception_reports", "website_appointments"],
+  Cashier: ["dashboard", "payment_center", "credit_patients_approval", "patient_bills", "invoices", "expenses", "payment_center_reports"],
+  Doctor: ["dashboard", "consultation_room", "consultation_reports", "optometry_report_card"],
+  Optometrist: ["dashboard", "consultation_room", "consultation_reports", "optometry_report_card"],
+  Optician: ["dashboard", "optician_center", "workshop_reports"],
+  Pharmacist: ["dashboard", "medicine_center", "pharmacy_reports", "dispensing_reports"],
+  SalesManager: ["sales_center", "sales", "sales_manager_monthly_report", "sales_report_card"],
+  Sales: ["sales_center", "sales", "sales_report_card"],
+  Storekeeper: ["dashboard", "inventory_management", "inventory_reports"],
+  InventoryManager: ["dashboard", "inventory_management", "inventory_reports"],
+  Accountant: ["dashboard", "financial_management", "financial_reports"],
+  FinanceManager: ["dashboard", "financial_management", "financial_reports"],
+  HR: ["dashboard", "employee_management", "employee_reports"],
+  EmployeeManager: ["dashboard", "employee_management", "employee_reports"],
+  Marketing: ["marketing", "marketing_operations_monthly_report", "office_calendar"],
+  MarketingManager: ["marketing", "marketing_operations_monthly_report", "office_calendar"],
+  Client: [],
 };
 
 const normalizePrivilegePayload = (payload) => {
@@ -105,32 +169,20 @@ const getNormalizedPrivileges = (user) => {
   return normalized;
 };
 
-/**
- * Check if user has a specific privilege
- * Admins always have access to all privileges
- * @param {Object} user - User object
- * @param {string} privilegeKey - The privilege key to check (e.g., 'dashboard', 'reception')
- * @returns {boolean} - True if user has the privilege
- */
 export const hasPrivilege = (user, privilegeKey) => {
   if (!user || !privilegeKey) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[hasPrivilege] Missing user or privilegeKey:`, { user: !!user, privilegeKey });
-    }
     return false;
   }
   
-  // Admins always have access
   if (isAdmin(user)) {
     return true;
   }
   
-  const privileges = user.privileges || {};
   const normalizedPrivileges = getNormalizedPrivileges(user);
   
   const privilegeValue = normalizedPrivileges[privilegeKey];
   let granted = isPrivilegeGranted(privilegeValue);
-
+  
   if (!granted) {
     const aliasKeys = PRIVILEGE_ALIASES[privilegeKey] || [];
     for (const aliasKey of aliasKeys) {
@@ -141,74 +193,81 @@ export const hasPrivilege = (user, privilegeKey) => {
     }
   }
   
-  // Debug logging (always log for debugging privilege issues)
   if (!granted) {
-    console.log(`[hasPrivilege] Access denied for ${privilegeKey}:`, {
-      user: user.username || user.id,
-      privilegeValue,
-      normalizedPrivileges,
-      privilegesType: typeof privileges,
-      isAdmin: isAdmin(user)
-    });
-  } else {
-    console.log(`[hasPrivilege] Access granted for ${privilegeKey}:`, {
-      user: user.username || user.id,
-      privilegeValue,
-      isAdmin: isAdmin(user)
-    });
+    const roleKey = (user?.role || "").toString().trim().toLowerCase();
+    const fallbackPrivileges = ROLE_FALLBACK_PRIVILEGES[roleKey] || [];
+    granted = fallbackPrivileges.includes(privilegeKey);
   }
   
   return granted;
 };
 
-/**
- * Check if user has access to a specific report page
- * Access is granted if:
- * 1. User is admin OR
- * 2. User has the parent section privilege (e.g., "reception") OR
- * 3. User has the specific report privilege (e.g., "receptionist_monthly_report")
- * @param {Object} user - User object
- * @param {string} parentPrivilege - Parent section privilege (e.g., "reception")
- * @param {string} reportPrivilege - Specific report privilege (e.g., "receptionist_monthly_report")
- * @returns {boolean} - True if user has access
- */
 export const hasReportAccess = (user, parentPrivilege, reportPrivilege) => {
   if (!user) return false;
   
-  // Admins always have access
   if (isAdmin(user)) {
     return true;
   }
   
   const normalizedPrivileges = getNormalizedPrivileges(user);
   
-  // Check parent privilege OR specific report privilege
-  const hasParent = (() => {
-    if (isPrivilegeGranted(normalizedPrivileges[parentPrivilege])) return true;
+  let hasParent = isPrivilegeGranted(normalizedPrivileges[parentPrivilege]);
+  
+  if (!hasParent) {
     const aliasKeys = PRIVILEGE_ALIASES[parentPrivilege] || [];
-    return aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
-  })();
+    hasParent = aliasKeys.some((k) => isPrivilegeGranted(normalizedPrivileges[k]));
+  }
+  
   const hasReport = reportPrivilege ? isPrivilegeGranted(normalizedPrivileges[reportPrivilege]) : false;
   
   return hasParent || hasReport;
 };
 
-/**
- * Get the default route for a user based on their privileges
- * @param {Object} user - User object
- * @returns {string} - Default route path
- */
 export const getDefaultRoute = (user) => {
   if (!user) return "/login";
   
-  // Admins always go to main dashboard
   if (isAdmin(user)) {
     return "/dashboard";
   }
   
+  // Role-based routing for specific roles
+  const role = (user?.role || "").toString().trim();
+  
+  switch (role) {
+    case "Receptionist":
+      return "/reception/dashboard";
+    case "Cashier":
+      return "/payment-center/dashboard";
+    case "Doctor":
+    case "Optometrist":
+      return "/consultation-room/dashboard";
+    case "Optician":
+      return "/optician-center/dashboard";
+    case "Pharmacist":
+      return "/medicine-center/dashboard";
+    case "Sales Manager":
+    case "Sales":
+      return "/sales-management/dashboard";
+    case "Storekeeper":
+    case "Inventory Manager":
+      return "/inventory-management/dashboard";
+    case "Accountant":
+    case "Finance Manager":
+      return "/financial-management/dashboard";
+    case "HR":
+    case "Employee Manager":
+      return "/user-management/users";
+    case "Marketing":
+    case "Marketing Manager":
+      return "/marketing/dashboard";
+    case "Director":
+      return "/dashboard";
+    default:
+      break;
+  }
+  
   const normalizedPrivileges = getNormalizedPrivileges(user);
   
-  // Priority order for routes
   const routeCandidates = [
     { privilege: 'dashboard', route: '/dashboard' },
     { privilege: 'reception', route: '/reception/dashboard' },
@@ -219,20 +278,17 @@ export const getDefaultRoute = (user) => {
     { privilege: 'procedure_room', route: '/procedure-room/dashboard' },
     { privilege: 'inventory_management', route: '/inventory-management/dashboard' },
     { privilege: 'sales_center', route: '/sales-management/dashboard' },
-    { privilege: 'marketing', route: '/marketing/dashboard' },
     { privilege: 'financial_management', route: '/financial-management/dashboard' },
     { privilege: 'user_management', route: '/user-management/users' },
     { privilege: 'settings', route: '/settings/preferences' },
+    { privilege: 'marketing', route: '/marketing/dashboard' },
   ];
   
-  // Find first route user has access to
   for (const candidate of routeCandidates) {
     if (hasPrivilege({ ...user, privileges: normalizedPrivileges }, candidate.privilege)) {
       return candidate.route;
     }
   }
   
-  // Fallback: allow access to dashboard even without privileges
-  // This prevents users from being stuck in a login loop
   return "/dashboard";
 };

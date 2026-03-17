@@ -48,9 +48,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
   const paymentModeRef = useRef();
   const informationSourceRef = useRef();
 
-  const marketingEnabled =
-    window.user?.clinic?.preferences?.find((e) => e.key === "MARKETING_MODULE")
-      ?.value === "Yes";
+  const marketingEnabled = false;
 
   const { data: paymentModes } = useFetch(
     "api/payment-modes",
@@ -63,17 +61,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
     (response) => response.data.data.data
   );
 
-  const { data: informationSources, handleFetch: fetchInformationSources } =
-    useFetch(
-      "api/marketing/information-sources",
-      {
-        status: "Active",
-        per_page: 500,
-      },
-      false,
-      [],
-      (response) => response.data.data.data
-    );
+  const informationSources = [];
 
   const { data: occupations } = useFetch(
     "api/occupations",
@@ -82,9 +70,9 @@ const CreatePatient = ({ modal, fetchPatients }) => {
       per_page: 500,
     },
     true,
-      [],
-      (response) => response.data.data.data
-    );
+    [],
+    (response) => response.data.data.data
+  );
 
   const [formData, setFormData] = useState({
     first_name: undefined,
@@ -116,11 +104,6 @@ const CreatePatient = ({ modal, fetchPatients }) => {
       : null,
   });
 
-  useEffect(() => {
-    if (marketingEnabled) {
-      fetchInformationSources();
-    }
-  }, []);
 
   useEffect(() => {
     if (data) {
@@ -366,28 +349,7 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                 }
               />
             </Grid>
-            {marketingEnabled ? (
-              <Grid
-                item
-                md={4}
-                sm={6}
-                xs={12}
-              >
-                <Select
-                  ref={informationSourceRef}
-                  label="Source of Information"
-                  fullWidth
-                  clearable
-                  options={informationSources}
-                  optionsLabel="name"
-                  optionsValue="id"
-                  onChange={(value) =>
-                    setFormData({ ...formData, info_source_id: value })
-                  }
-                />
-              </Grid>
-            ) : null}
-            
+
             {/* Client Type Checkboxes */}
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
@@ -420,15 +382,15 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                   }
                   label="Businessperson"
                 />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.is_vip}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_vip}
                       onChange={(e) =>
                         setFormData({ ...formData, is_vip: e.target.checked })
-                    }
-                  />
-                }
+                      }
+                    />
+                  }
                   label="VIP"
                 />
                 <FormControlLabel
@@ -441,18 +403,18 @@ const CreatePatient = ({ modal, fetchPatients }) => {
                     />
                   }
                   label="Outreach Client"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.is_employee}
-                    onChange={(e) =>
-                      setFormData({ ...formData, is_employee: e.target.checked })
-                    }
-                  />
-                }
-                label="Employee"
-              />
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formData.is_employee}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_employee: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Employee"
+                />
               </Stack>
             </Grid>
           </Grid>

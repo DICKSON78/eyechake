@@ -112,15 +112,17 @@ class ReceptionDashboardController extends Controller
                 ->value('visit_count') ?? 0);
         }, 0);
 
-        // Waiting patients (approximation based on recent check-ins)
-        $data['summary']['waiting_patients'] = $this->safe(function () use ($clinic_id, $today) {
-            return PatientCheckIn::query()
+        // Waiting patients (using PatientWaitingTime for real-time accuracy)
+        $data['summary']['waiting_patients'] = $this->safe(function () use ($clinic_id) {
+            return \App\Models\PatientWaitingTime::query()
+                ->whereIn('status', ['waiting', 'in_treatment'])
                 ->when($clinic_id, function ($query) use ($clinic_id) {
-                    $query->whereHas('creator', function ($query) use ($clinic_id) {
-                        $query->where('clinic_id', $clinic_id);
+                    $query->whereHas('patient.check_ins', function ($q) use ($clinic_id) {
+                        $q->whereHas('payment_cache.items.creator', function ($userQuery) use ($clinic_id) {
+                            $userQuery->where('clinic_id', $clinic_id);
+                        });
                     });
                 })
-                ->whereDate('created_at', $today)
                 ->count();
         }, 0);
 

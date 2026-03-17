@@ -34,8 +34,10 @@ import {
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
 import ChartWrapper from "../../../components/ChartWrapper";
+import PerformanceReportCard from "../../../components/PerformanceReportCard";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
+import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 import { useTheme } from "@mui/material/styles";
 
 const Dashboard = () => {
@@ -452,6 +454,14 @@ const Dashboard = () => {
                   />
                 </CardContent>
               </Card>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <PerformanceReportCard
+                department="Sales"
+                user={window.user}
+                editable={hasPrivilege(window.user, 'sales_performance_report') || isAdmin(window.user)}
+                refreshTrigger={dateParams.start_date}
+              />
             </Grid>
           </Grid>
         </React.Fragment>

@@ -21,11 +21,15 @@ import EditMarketingStrategy from "./EditMarketingStrategy";
 import MarketingStrategyDetails from "./MarketingStrategyDetails";
 
 import { useFetch, useToast } from "../../../hooks";
+import usePrivilege from "../../../hooks/usePrivilege";
 import { formatDateForDb, formatError } from "../../../helpers";
 
 const MarketingStrategies = () => {
   const addToast = useToast();
   const modalRef = useRef();
+
+  // Check marketing privilege
+  usePrivilege('marketing', '/marketing-strategies');
 
   const [params, setParams] = useState({
     page: 1,
@@ -146,69 +150,76 @@ const MarketingStrategies = () => {
             setParams={setParams}
             sx={{ mb: 2 }}
           />
-          <Table
-            loading={loading}
-            columns={[
-              {
-                field: "index",
-                headerName: "S/N",
-                valueGetter: (item, index) =>
-                  params.per_page * (params.page - 1) + index + 1,
-              },
-              {
-                field: "title",
-                headerName: "Title",
-              },
-              {
-                field: "created_by",
-                headerName: "Created By",
-                valueGetter: (item, index) => item.creator?.full_name,
-              },
-              {
-                field: "created_at",
-                headerName: "Date Created",
-              },
-              {
-                field: "status",
-                headerName: "Status",
-                renderCell: (item) => (
-                  <Chip
-                    size="small"
-                    color={getStatusColor(item.status)}
-                    label={item.status}
-                  />
-                ),
-              },
-              {
-                field: "actions",
-                headerName: "Actions",
-                renderCell: (item) => (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={1}
-                  >
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={() => openEditMarketingStrategyModal(item)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                ),
-              },
-            ]}
-            items={data.data}
-            itemCount={data.total}
-            page={params.page}
-            pageSize={params.per_page}
-            onPageChange={(page) => setParams({ ...params, page })}
-            onPageSizeChange={(value) =>
-              setParams({ ...params, per_page: value, page: 1 })
-            }
-          />
+          {data.data.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+              <p>No marketing strategies found.</p>
+              <p>Create your first marketing strategy to get started.</p>
+            </div>
+          ) : (
+            <Table
+              loading={loading}
+              columns={[
+                {
+                  field: "index",
+                  headerName: "S/N",
+                  valueGetter: (item, index) =>
+                    params.per_page * (params.page - 1) + index + 1,
+                },
+                {
+                  field: "title",
+                  headerName: "Title",
+                },
+                {
+                  field: "created_by",
+                  headerName: "Created By",
+                  valueGetter: (item, index) => item.creator?.full_name,
+                },
+                {
+                  field: "created_at",
+                  headerName: "Date Created",
+                },
+                {
+                  field: "status",
+                  headerName: "Status",
+                  renderCell: (item) => (
+                    <Chip
+                      size="small"
+                      color={getStatusColor(item.status)}
+                      label={item.status}
+                    />
+                  ),
+                },
+                {
+                  field: "actions",
+                  headerName: "Actions",
+                  renderCell: (item) => (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                    >
+                      <Tooltip title="Edit">
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditMarketingStrategyModal(item)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  ),
+                },
+              ]}
+              items={data.data}
+              itemCount={data.total}
+              page={params.page}
+              pageSize={params.per_page}
+              onPageChange={(page) => setParams({ ...params, page })}
+              onPageSizeChange={(value) =>
+                setParams({ ...params, per_page: value, page: 1 })
+              }
+            />
+          )}
         </CardContent>
       </Card>
       <Modal ref={modalRef} />

@@ -41,7 +41,7 @@ class PatientPaymentCacheItemsController extends Controller
             $q = $request->q;
             $payment_cache_id = $request->payment_cache_id;
             $payment_mode_id = $request->payment_mode_id;
-            $transaction_type = $request->transaction_type;
+            $payment_type = $request->transaction_type ?? $request->payment_type;
             $consultation_type = $request->consultation_type;
             $is_stock_item = $request->is_stock_item;
             $consultant_id = $request->consultant_id;
@@ -110,9 +110,9 @@ class PatientPaymentCacheItemsController extends Controller
             $data->where('payment_mode_id', $payment_mode_id);
         }
 
-        if ($transaction_type) {
-            $data->whereHas('payment_mode', function ($query) use ($transaction_type) {
-                $query->where('payment_type', $transaction_type);
+        if ($payment_type) {
+            $data->whereHas('payment_mode', function ($query) use ($payment_type) {
+                $query->where('payment_type', $payment_type);
             });
         }
 
@@ -259,18 +259,9 @@ class PatientPaymentCacheItemsController extends Controller
                 if ($item) {
                     $amount += ($item->unit_price * $item->quantity);
 
-                    // Check if this is a pharmacy/medicine item
-                    $isPharmacyItem = false;
-                    if ($item->item && $item->item->consultation_type) {
-                        $isPharmacyItem = $item->item->consultation_type->name === 'Pharmacy';
-                    }
-
-                    // For pharmacy items, DON'T set item_payment_id so they appear in dispensing requests
-                    // For other items (Glass, etc.), set item_payment_id normally
-                    if (!$isPharmacyItem) {
-                        $item->item_payment_id = $payment->id;
-                    }
-                    
+                    // Set item_payment_id for all items so they appear in the cash collection report.
+                    // Dispensing requests use status='Paid' (not item_payment_id IS NULL) to find pending items.
+                    $item->item_payment_id = $payment->id;
                     $item->status = 'Paid';
                     $item->save();
 
@@ -396,7 +387,25 @@ class PatientPaymentCacheItemsController extends Controller
                 $user = $request->user();
                 $cacheKey = "notifications_user_{$user->id}_clinic_" . ($user->clinic_id ?? 'null');
                 \Cache::forget($cacheKey);
-                event(new \App\Events\NotificationUpdate());
+                
+                // Try to dispatch event, but don't fail if broadcasting fails
+                try {
+                    // Only dispatch if broadcasting is properly configured
+                    if (config('broadcasting.default') !== 'null' && 
+                        config('broadcasting.connections.pusher.key') && 
+                        config('broadcasting.connections.pusher.secret')) {
+                        event(new \App\Events\NotificationUpdate());
+                    } else {
+                        \Log::info('Broadcasting not configured, skipping NotificationUpdate event');
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to broadcast NotificationUpdate event', [
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue without broadcasting
+                }
+                
                 \Log::info('Payment completed - notification cache cleared and refresh triggered', [
                     'payment_id' => $payment->id,
                     'amount' => $payment->amount,
@@ -553,16 +562,10 @@ class PatientPaymentCacheItemsController extends Controller
                     ->find($request_item);
                 if ($item && $item->status === 'Paid') {
                     // Check if this is a pharmacy/medicine item
-                    $isPharmacyItem = false;
-                    if ($item->item && $item->item->consultation_type) {
-                        $isPharmacyItem = $item->item->consultation_type->name === 'Pharmacy';
-                    }
-
-                    // For pharmacy items, DON'T set item_payment_id so they appear in dispensing requests
-                    if (!$isPharmacyItem) {
-                        $item->item_payment_id = $payment->id;
-                        $item->save();
-                    }
+                    // Set item_payment_id for all items so they appear in the cash collection report.
+                    // Dispensing requests use status='Paid' (not item_payment_id IS NULL) to find pending items.
+                    $item->item_payment_id = $payment->id;
+                    $item->save();
                 }
             }
 

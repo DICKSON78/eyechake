@@ -91,6 +91,12 @@ class ConsultationsController extends Controller
             $data->with(['diagnoses.disease']);
         }
 
+        if ($request->with_items == 'Yes') {
+            $data->with(['items' => function($query) {
+                $query->with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server']);
+            }]);
+        }
+
         if ($user->is_admin) {
             $data->with(['creator.clinic']);
 
@@ -280,6 +286,9 @@ class ConsultationsController extends Controller
             } elseif ($status === 'Consulted') {
                 $data->where('status', 'Consulted');
                 $data->whereDate('updated_at', '>=', $start_date);
+            } elseif ($status === 'Pending') {
+                // For Pending status, apply date filtering to match notifications logic
+                $data->whereDate('created_at', '>=', $start_date);
             } else {
                 $data->whereDate('created_at', '>=', $start_date);
             }
@@ -327,6 +336,9 @@ class ConsultationsController extends Controller
                 }
             } elseif ($status === 'Consulted') {
                 $data->whereDate('updated_at', '<=', $end_date);
+            } elseif ($status === 'Pending') {
+                // For Pending status, apply date filtering to match notifications logic
+                $data->whereDate('created_at', '<=', $end_date);
             } else {
                 $data->whereDate('created_at', '<=', $end_date);
             }
@@ -595,30 +607,31 @@ class ConsultationsController extends Controller
         return $this->sendResponse($data, Response::HTTP_OK, 'Added successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param Request $request
-     * @param  int $id
-     * @return Response
-     */
     public function show(Request $request, $id)
-                    }]);
-                }]);
-            },
-            'item', 'payment_mode', 'consultant', 'server',
-            'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
-            'to_optician_sender', 'diagnoses.disease'
-        ]);
+    {
+        $with_diagnoses = $request->with_diagnoses;
+        $with_items = $request->with_items;
+        $with_item_templates = $request->with_item_templates;
+        $with_referral = $request->with_referral;
 
-        // Load referral if requested (for clinical note PDF)
-        if ($with_referral == 'Yes') {
-            $data->with(['referral']);
-            if ($with_referral == 'Yes') {
-                $data->with(['referral']);
-            }
+        try {
+            $data = Consultation::with(['payment_cache_item' => function ($query) {
+                $query->with(['payment_cache.check_in.patient' => function ($query2) {
+                    $query2->with(['region', 'district', 'ward']);
+                }]);
+            }]);
+
+            $data->with([
+                'payment_mode', 'consultant', 'server',
+                'creator', 'external_examination', 'functional_tests', 'visual_acuity', 'refraction', 'fundoscopy',
+                'to_optician_sender', 'diagnoses.disease'
+            ]);
 
             $data = $data->findOrFail($id);
+
+            if ($with_referral == 'Yes') {
+                $data->load(['referral']);
+            }
 
             if ($with_items == 'Yes') {
                 $data->items = PatientPaymentCacheItem::with(['item.unit_of_measure', 'consultation_type', 'payment_mode', 'creator', 'server'])

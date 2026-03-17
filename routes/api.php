@@ -56,10 +56,8 @@ use App\Http\Controllers\PaymentChannelsController;
 use App\Http\Controllers\PaymentModesController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\RegionsController;
-use App\Http\Controllers\Reports\InventoryManagementReportsController;
-use App\Http\Controllers\Reports\PaymentCenterReportsController;
-use App\Http\Controllers\Reports\FinancialManagementReportsController;
-use App\Http\Controllers\Reports\SalesCenterReportsController;
+use App\Http\Controllers\CRMReportsController;
+use App\Http\Controllers\DepartmentPerformanceController;
 use App\Http\Controllers\StocktakesController;
 use App\Http\Controllers\SurgeryRecordReportsController;
 use App\Http\Controllers\UnitsOfMeasureController;
@@ -88,6 +86,7 @@ use App\Http\Controllers\EmployeeReportsController;
 use App\Http\Controllers\ReferralsController;
 use App\Http\Controllers\ExternalLinksEmailAlertsController;
 use App\Http\Controllers\ExternalLinksWebsiteAppointmentsController;
+use App\Http\Controllers\PerformanceDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -103,8 +102,9 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
+// Authentication routes with rate limiting
 Route::group(['prefix' => 'auth'], function ($router) {
-    $router->post('/login', [AuthController::class, 'login']);
+    $router->post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
 });
 
 // Public routes - accessible without authentication
@@ -146,6 +146,135 @@ Route::get('/test-auth', function (\Illuminate\Http\Request $request) {
     ]);
 })->middleware('auth:api');
 
+// Reception routes - require reception privilege
+Route::group(['middleware' => ['auth:api', 'privilege:reception']], function ($router) {
+    $router->controller(PatientsController::class)->prefix('patients')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+        $router->delete('/{id}', 'destroy');
+    });
+    
+    $router->controller(PatientsToReturnController::class)->prefix('patients-to-return')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/{id}/return', 'markAsReturned');
+    });
+    
+    $router->controller(MessagesController::class)->prefix('messages')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+    });
+});
+
+// Cashier routes - require payment_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:payment_center']], function ($router) {
+    $router->controller(PatientPaymentCacheController::class)->prefix('patient-payment-cache')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(PatientItemBillsController::class)->prefix('patient-bills')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(ExpensesController::class)->prefix('expenses')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+});
+
+// Consultation room routes - require consultation_room privilege
+Route::group(['middleware' => ['auth:api', 'privilege:consultation_room']], function ($router) {
+    $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+    
+    $router->controller(ConsultationDiagnosesController::class)->prefix('consultation-diagnoses')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->post('/', 'store');
+        $router->get('/{id}', 'show');
+        $router->put('/{id}', 'update');
+    });
+});
+
+// Sales routes - require sales_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:sales_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Pharmacy routes - require medicine_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:medicine_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Workshop routes - require optician_center privilege
+Route::group(['middleware' => ['auth:api', 'privilege:optician_center']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Financial management routes - require financial_management privilege
+Route::group(['middleware' => ['auth:api', 'privilege:financial_management']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Marketing routes - require marketing privilege
+Route::group(['middleware' => ['auth:api', 'privilege:marketing']], function ($router) {
+    $router->controller(MarketingDashboardController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/dashboard', '__invoke');
+    });
+    
+    $router->controller(DailyActivitiesController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/daily-activities', 'index');
+        $router->post('/daily-activities', 'store');
+        $router->put('/daily-activities/{id}', 'update');
+        $router->delete('/daily-activities/{id}', 'destroy');
+    });
+    
+    $router->controller(MarketingStrategiesController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/marketing-strategies', 'index');
+        $router->post('/marketing-strategies', 'store');
+        $router->put('/marketing-strategies/{id}', 'update');
+        $router->delete('/marketing-strategies/{id}', 'destroy');
+    });
+    
+    $router->controller(PrestigeClientsController::class)->prefix('marketing')->group(function ($router) {
+        $router->get('/prestige-clients', 'index');
+        $router->get('/prestige-clients/{id}', 'show');
+    });
+});
+
+// Employee management routes - require employee_management privilege
+Route::group(['middleware' => ['auth:api', 'privilege:employee_management']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Settings routes - require settings privilege (Admin and Director only)
+Route::group(['middleware' => ['auth:api', 'privilege:settings']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Director routes - require director privilege
+Route::group(['middleware' => ['auth:api', 'privilege:director']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Admin only routes - require admin role
+Route::group(['middleware' => ['auth:api', 'role:Admin']], function ($router) {
+    // Routes will be added when controllers are created
+});
+
+// Main authenticated routes group
 Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->controller(AuthController::class)->prefix('auth')->group(function ($router) {
         $router->post('/change-password', 'changePassword');
@@ -169,7 +298,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/{id}/move-to-department', [PatientWaitingTimesController::class, 'moveToDepartment']);
     });
     
-    // Doctor Tasks
+    // Doctor Tasks feature removed as per request
+    /*
     $router->prefix('doctor-tasks')->group(function ($router) {
         $router->get('/', [DoctorTasksController::class, 'index']);
         $router->get('/statistics', [DoctorTasksController::class, 'statistics']);
@@ -178,6 +308,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/{id}/start', [DoctorTasksController::class, 'startTask']);
         $router->post('/{id}/complete', [DoctorTasksController::class, 'completeTask']);
     });
+    */
     
     $router->get('/dashboard', [DashboardController::class, '__invoke']);
     // Temporarily moved outside auth to test
@@ -192,6 +323,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/mark-all-as-read', [PatientNotificationsController::class, 'markAllAsRead']);
         $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
     });
+    $router->get('/performance-reports/{department}', [PerformanceDashboardController::class, '__invoke']);
     $router->apiResource('/clinics', ClinicsController::class);
     $router->apiResource('/departments', DepartmentsController::class);
     $router->apiResource('/job-titles', JobTitlesController::class);
@@ -231,6 +363,16 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/{id}', [OfficeCalendarController::class, 'show']);
         $router->put('/{id}', [OfficeCalendarController::class, 'update']);
         $router->delete('/{id}', [OfficeCalendarController::class, 'destroy']);
+    });
+    
+    // Financial management routes - require financial_management privilege
+    Route::group(['middleware' => ['auth:api', 'privilege:financial_management']], function ($router) {
+        $router->controller(FinancialManagementReportsController::class)->prefix('financial-management')->group(function ($router) {
+            $router->get('/dashboard', '__invoke');
+            $router->get('/reports', 'index');
+            $router->get('/reports/revenue-collection', 'getRevenueCollectionReport');
+            $router->get('/reports/expenses', 'getExpenseReport');
+        });
     });
     
     // Employee Reports
@@ -359,9 +501,16 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         // Prestige Clients
         $router->get('/prestige-clients', [PrestigeClientsController::class, 'index']);
         
+        // Bulk SMS
+        $router->apiResource('/bulk-sms', BulkSmsController::class);
+        $router->post('/bulk-sms/{id}/send', [BulkSmsController::class, 'send']);
+        
+        // WhatsApp Export
+        $router->get('/whatsapp-export', [WhatsAppExportController::class, 'export']);
+        
         // Client Calling Status
         $router->get('/client-calling-status', [ClientCallingStatusController::class, 'index']);
-        $router->put('/client-calling-status/{patientId}', [ClientCallingStatusController::class, 'update']);
+        $router->match(['put', 'patch'], '/client-calling-status/{patientId}', [ClientCallingStatusController::class, 'update']);
         $router->post('/client-calling-status/bulk-update', [ClientCallingStatusController::class, 'bulkUpdate']);
         
         // Campaign Performance
@@ -429,6 +578,28 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/employee-performance', [EmployeePerformanceController::class, 'index']);
     });
 
+    $router->prefix('dashboard')->group(function ($router) {
+        $router->get('/performance/{department}', [PerformanceDashboardController::class, 'getDepartmentKPIs']);
+        $router->patch('/performance/{department}/targets', [PerformanceDashboardController::class, 'updateTargets']);
+    });
+
+    $router->prefix('marketing')->group(function ($router) {
+        $router->controller(\App\Http\Controllers\Marketing\ClientCallingStatusController::class)->group(function ($router) {
+            $router->get('/client-calling-status', 'index');
+            $router->post('/client-calling-status', 'store');
+            $router->match(['put', 'patch'], '/client-calling-status/{patientId}', 'update');
+            $router->delete('/client-calling-status/{id}', 'destroy');
+            $router->get('/client-calling-stats', 'getCallingStats');
+        });
+    });
+
+    $router->prefix('admin')->group(function ($router) {
+        $router->controller(\App\Http\Controllers\Admin\DeleteTestUsersController::class)->group(function ($router) {
+            $router->get('/test-users', 'index');
+            $router->delete('/test-users', 'destroy');
+        });
+    });
+
     $router->prefix('reports')->group(function ($router) {
         $router->controller(PaymentCenterReportsController::class)->prefix('payment-center')->group(function ($router) {
             $router->get('/cash-collection', 'getCashCollectionReport');
@@ -439,11 +610,27 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
             $router->get('/item-balance', 'getItemBalanceReport');
         });
         $router->controller(FinancialManagementReportsController::class)->prefix('financial-management')->group(function ($router) {
+            $router->get('/dashboard', '__invoke');
             $router->get('/balance-sheet', 'getBalanceSheetReport');
         });
-        $router->controller(SalesCenterReportsController::class)->prefix('sales-center')->group(function ($router) {
-            $router->get('/sales', 'getSalesReport');
-        });
+        // Sales report route removed - no longer needed
+    });
+});
+
+// CRM Reports - Public endpoints for testing
+Route::get('/crm-reports/marketing-contact-analytics', [CRMReportsController::class, 'marketingContactAnalytics']);
+Route::get('/crm-reports/lead-conversion-report', [CRMReportsController::class, 'leadConversionReport']);
+
+// Department Performance Report Cards
+Route::group(['middleware' => 'auth:api'], function ($router) {
+    $router->prefix('department-performance')->group(function ($router) {
+        $router->get('/departments', [\App\Http\Controllers\DepartmentPerformanceController::class, 'getDepartments']);
+        $router->get('/{department}', [\App\Http\Controllers\DepartmentPerformanceController::class, 'show']);
+        $router->post('/{department}/generate', [\App\Http\Controllers\DepartmentPerformanceController::class, 'generate']);
+        $router->patch('/{department}', [\App\Http\Controllers\DepartmentPerformanceController::class, 'update']);
+        $router->get('/{department}/targets', [\App\Http\Controllers\DepartmentPerformanceController::class, 'getTargets']);
+        $router->get('/{department}/audit-logs', [\App\Http\Controllers\DepartmentPerformanceController::class, 'getAuditLogs']);
+        $router->post('/initialize', [\App\Http\Controllers\DepartmentPerformanceController::class, 'initialize']);
     });
 });
 

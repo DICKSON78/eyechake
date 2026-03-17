@@ -170,16 +170,21 @@ const Dashboard = () => {
   const { data: directorData, loading: directorLoading, error: directorError, handleFetch: fetchDirector } = useFetch(
     "api/director/dashboard",
     {
-      start_date: params.start_date
-        ? formatDateForDb(params.start_date)
-        : undefined,
+      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
     },
     true,
-    DEFAULT_DIRECTOR_DATA,
-    (response) => (response?.data?.data !== undefined && response?.data?.data !== null)
-      ? response.data.data
-      : DEFAULT_DIRECTOR_DATA
+    null,
+    (response) => {
+      console.log('Director Dashboard API Response:', response);
+      console.log('Director Dashboard API Data:', response.data);
+      console.log('Director Dashboard API Data Data:', response.data?.data);
+      console.log('Director Dashboard Summary:', response.data?.data?.summary);
+      console.log('Director Dashboard Revenue New:', response.data?.data?.summary?.revenue_new_consultation);
+      console.log('Director Dashboard Revenue Return:', response.data?.data?.summary?.revenue_return_consultation);
+      console.log('Director Dashboard Consulted Patients:', response.data?.data?.summary?.consulted_patients);
+      return response.data.data;
+    }
   );
 
   // Financial Management Dashboard Data
@@ -210,15 +215,30 @@ const Dashboard = () => {
     "api/consultation-room/dashboard",
     consultationDateParams,
     true,
-    DEFAULT_CONSULTATION_DATA,
-    (response) => (response?.data?.data !== undefined && response?.data?.data !== null)
-      ? response.data.data
-      : DEFAULT_CONSULTATION_DATA
+    null,
+    (response) => {
+      console.log('Consultation Dashboard API Response:', response);
+      console.log('Consultation Dashboard API Data:', response.data);
+      console.log('Consultation Dashboard API Data Data:', response.data?.data);
+      console.log('Consultation Dashboard Summary:', response.data?.data?.summary);
+      console.log('Consultation Dashboard Summary ALL FIELDS:', Object.keys(response.data?.data?.summary || {}));
+      console.log('Consultation Dashboard Total Patients Seen:', response.data?.data?.summary?.total_patients_seen);
+      console.log('Consultation Dashboard Patients Waiting:', response.data?.data?.summary?.total_patients_waiting);
+      console.log('Consultation Dashboard Consultations Today:', response.data?.data?.summary?.consultations_today);
+      console.log('Consultation Dashboard Total Consultations:', response.data?.data?.summary?.total_consultations);
+      console.log('Consultation Dashboard Pending Consultations:', response.data?.data?.summary?.pending_consultations);
+      console.log('Consultation Dashboard Completed Consultations:', response.data?.data?.summary?.completed_consultations);
+      return response.data.data;
+    }
   );
 
   useEffect(() => {
     document.title = `Dashboard - ${window.APP_NAME}`;
-  }, []);
+    console.log('Director Dashboard - Director Data received:', directorData);
+    console.log('Director Dashboard - Consultation Data received:', consultationData);
+    console.log('Director Dashboard - Director Summary:', directorData?.summary);
+    console.log('Director Dashboard - Consultation Summary:', consultationData?.summary);
+  }, [directorData, consultationData]);
 
   useEffect(() => {
     fetchDirector();
@@ -509,7 +529,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from New Consultations"
-                        count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
+                        count={numberFormat(directorData.summary?.total_revenue || 0)}
                         icon={<ConsultationsIcon />}
                         color={indigo[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -518,7 +538,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from Return Consultations"
-                        count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
+                        count={numberFormat(directorData.summary?.total_expenses || 0)}
                         icon={<PatientIcon />}
                         color={teal[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -528,8 +548,7 @@ const Dashboard = () => {
                       <InfoCard
                         title="Total Revenue from All Consultations"
                         count={numberFormat(
-                          (directorData.summary?.revenue_new_consultation || 0)
-                          + (directorData.summary?.revenue_return_consultation || 0)
+                          (directorData.summary?.total_revenue || 0)
                         )}
                         icon={<RevenueIcon />}
                         color={lime[600]}
@@ -539,7 +558,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Consulted Patients"
-                        count={numberFormat(directorData.summary?.consulted_patients || 0)}
+                        count={numberFormat(directorData.summary?.total_patients_consulted || 0)}
                         icon={<DoneIcon />}
                         color={green[500]}
                         onClick={() => navigate('/consultation-room/reports/consultation')}
@@ -552,7 +571,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Total Patients Seen"
-                        count={numberFormat(consultationData.summary?.total_patients_seen || 0)}
+                        count={numberFormat(consultationData.summary?.total_patients_consulted || 0)}
                         icon={<PatientIcon />}
                         color={green[400]}
                         onClick={() => navigate('/consultation-room/patients-seen')}
@@ -561,7 +580,10 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Patients Waiting"
-                        count={numberFormat(consultationData.summary?.total_patients_waiting || 0)}
+                        count={numberFormat(
+                          (consultationData.summary?.new_patients_waiting || 0) + 
+                          (consultationData.summary?.return_patients_waiting || 0)
+                        )}
                         icon={<PeopleIcon />}
                         color={orange[400]}
                         onClick={() => navigate('/consultation-room/patients-waiting')}
