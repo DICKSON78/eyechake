@@ -143,10 +143,24 @@ class PaymentCenterReportsController extends Controller
                 }
             });
         
-        $data = $item_payments->unionAll($bill_payments)->unionAll($medicine_items);
-        $data->orderBy('created_at', 'desc');
-        $data = $data->paginate($per_page);
-        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
+        $union = $item_payments->unionAll($bill_payments)->unionAll($medicine_items);
+        $union->orderBy('created_at', 'desc');
+        $data = $union->paginate($per_page);
+
+        // Calculate grand totals from all pages
+        $allItems = $item_payments->unionAll($bill_payments)->unionAll($medicine_items)->get();
+        $totalAmount = $allItems->sum('amount');
+        $totalDiscount = $allItems->sum('discount');
+
+        // Attach totals to paginated response
+        $result = $data->toArray();
+        $result['totals'] = [
+            'amount' => $totalAmount,
+            'discount' => $totalDiscount,
+            'net' => max(0, $totalAmount - $totalDiscount),
+        ];
+
+        return $this->sendResponse($result, Response::HTTP_OK, 'Success.');
     }
 
     public function getExpenseReport(Request $request)

@@ -1,21 +1,12 @@
 <?php
-
 namespace App\Http\Middleware;
-
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UserPrivilege;
 
 class CheckPrivilege
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @param  string  $privilege
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
-     */
     public function handle(Request $request, Closure $next, string $privilege)
     {
         if (!Auth::check()) {
@@ -23,73 +14,49 @@ class CheckPrivilege
         }
 
         $user = Auth::user();
-        
-        // Check if user is admin (has all privileges)
-        if ($user->role === 'Admin' || $user->is_admin) {
+
+        // Admin and Director have full access
+        if ($user->role === 'Admin' || $user->role === 'Director' || $user->is_admin) {
             return $next($request);
         }
 
-        // Check user privileges
-        $userPrivileges = $this->getUserPrivileges($user);
-        
-        if (!$this->hasPrivilege($userPrivileges, $privilege)) {
-            return response()->json(['message' => 'Unauthorized - Required privilege: ' . $privilege], 403);
-        }
-
-        return $next($request);
-    }
-
-    /**
-     * Get user privileges from database
-     */
-    private function getUserPrivileges($user)
-    {
-        $privileges = [];
-        
-        // Get privileges from user_privileges table
-        $userPrivileges = \App\Models\UserPrivilege::where('user_id', $user->id)->first();
-        
-        if ($userPrivileges) {
-            // Convert JSON to array
-            $privileges = json_decode($userPrivileges->privileges, true) ?: [];
-        }
-        
-        // Add role-based fallback privileges
+        // Check role-based privileges first
         $rolePrivileges = $this->getRoleFallbackPrivileges($user->role);
-        $privileges = array_merge($privileges, $rolePrivileges);
-        
-        return $privileges;
+        if (in_array($privilege, $rolePrivileges)) {
+            return $next($request);
+        }
+
+        // Check database privileges (column-based)
+        $userPrivileges = UserPrivilege::where('user_id', $user->id)->first();
+        if ($userPrivileges && isset($userPrivileges->$privilege) && $userPrivileges->$privilege == 1) {
+            return $next($request);
+        }
+
+        return response()->json(['message' => 'Unauthorized - Required privilege: ' . $privilege], 403);
     }
 
-    /**
-     * Get role-based fallback privileges
-     */
     private function getRoleFallbackPrivileges($role)
     {
         $roleMap = [
-            'receptionist' => ['reception', 'patient_registration'],
-            'cashier' => ['payment_center', 'patient_bills', 'invoices'],
-            'doctor' => ['consultation_room', 'consultation_reports'],
-            'optometrist' => ['consultation_room', 'consultation_reports'],
-            'pharmacist' => ['medicine_center', 'pharmacy_reports'],
-            'optician' => ['optician_center', 'workshop_reports'],
-            'sales manager' => ['sales_center', 'sales'],
-            'storekeeper' => ['inventory_management', 'inventory_reports'],
-            'accountant' => ['financial_management', 'financial_reports'],
-            'marketing officer' => ['marketing', 'marketing_reports'],
-            'hr' => ['employee_management', 'user_management'],
-            'director' => ['director', 'financial_reports'],
+            'Admin'            => ['*'],
+            'Director'         => ['*'],
+            'Receptionist'     => ['dashboard', 'reception', 'receptionist_monthly_report'],
+            'Cashier'          => ['dashboard', 'payment_center', 'cashier_monthly_report', 'clear_pending_bill'],
+            'Doctor'           => ['dashboard', 'consultation_room', 'optometrist_monthly_report', 'optometry_report_card'],
+            'Optometrist'      => ['dashboard', 'consultation_room', 'optometrist_monthly_report', 'optometry_report_card'],
+            'Optician'         => ['dashboard', 'optician_center', 'dispensing'],
+            'Pharmacist'       => ['dashboard', 'medicine_center', 'dispensing'],
+            'Sales Manager'    => ['dashboard', 'sales_center', 'sales_management', 'sales', 'sales_manager_monthly_report', 'sales_report_card'],
+            'Sales'            => ['dashboard', 'sales_center', 'sales_management', 'sales', 'sales_report_card'],
+            'Storekeeper'      => ['dashboard', 'inventory_management'],
+            'Inventory Manager'=> ['dashboard', 'inventory_management'],
+            'Accountant'       => ['dashboard', 'financial_management'],
+            'Finance Manager'  => ['dashboard', 'financial_management'],
+            'HR'               => ['dashboard', 'employee_management', 'user_management'],
+            'Marketing'        => ['dashboard', 'marketing', 'marketing_operations_monthly_report', 'office_calendar', 'crm_reports'],
+            'Marketing Manager'=> ['dashboard', 'marketing', 'marketing_operations_monthly_report', 'office_calendar', 'crm_reports'],
         ];
-        
-        return $roleMap[strtolower($role)] ?? [];
-    }
 
-    /**
-     * Check if user has specific privilege
-     */
-    private function hasPrivilege($privileges, $requiredPrivilege)
-    {
-        return in_array($requiredPrivilege, $privileges) || 
-               isset($privileges[$requiredPrivilege]) && $privileges[$requiredPrivilege];
+        return $roleMap[$role] ?? ['dashboard'];
     }
 }

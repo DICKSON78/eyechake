@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 import {
   Box,
   Card,
@@ -60,6 +61,10 @@ import { formatDateForDb, formatError, numberFormat, getWeekStartDate } from "..
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const safeNavigate = (path, requiredPrivilege) => {
+    if (isAdmin(window.user)) { navigate(path); return; }
+    if (!requiredPrivilege || hasPrivilege(window.user, requiredPrivilege)) { navigate(path); }
+  };
 
   const theme = useTheme();
   const addToast = useToast();
@@ -173,7 +178,7 @@ const Dashboard = () => {
                   count={data.summary.total_patients_registered}
                   icon={<PersonIcon />}
                   color={blue[400]}
-                  onClick={() => navigate("/reception/patients")}
+                  onClick={() => safeNavigate("/reception/patients", "reception")}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
