@@ -61,7 +61,8 @@ ufw allow 3306/tcp
 ## 📊 Access URLs
 
 - **Local**: http://localhost:8000
-- **Production**: http://62.171.159.62:8074
+- **Production**: https://sikafeyecare.com
+- **Server IP**: http://62.171.159.62:8074 (for testing)
 - **GitHub Actions**: https://github.com/DICKSON78/eyechake/actions
 
 ## 👤 Login Credentials
