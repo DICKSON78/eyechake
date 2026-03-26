@@ -59,96 +59,171 @@ class DashboardController extends Controller
             'sms_balance' => 0,
         ];
         
-        // Use the same logic as PaymentCenterReportsController
+        // Use the exact same logic as PaymentCenterReportsController::getCashCollectionReport
         try {
-            $paymentsQuery = PatientItemPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
-            
-            if ($clinic_id) {
-                $paymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $paymentsSum = $paymentsQuery->sum('amount') ?? 0;
-            
-            $billPaymentsQuery = PatientItemBillPayment::query()
-                ->whereNotNull('created_at')
-                ->where('created_at', '>=', $start_date . ' 00:00:00')
-                ->where('created_at', '<=', $end_date . ' 23:59:59')
-                ->where('amount', '>', 0);
-            
-            if ($clinic_id) {
-                $billPaymentsQuery->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $billPaymentsSum = $billPaymentsQuery->sum('amount') ?? 0;
-            
-            // Include medicine items from bills
-            $medicineItemsQuery = DB::table('patient_item_bill_payments as pibp')
-                ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
+            // Item payments query - same as PaymentCenterReportsController
+            $item_payments = PatientItemPayment::with(['channel', 'creator'])
+                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
                 ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
                 ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-                ->select(DB::raw("'Medicine' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'pibp.channel_id', 'pibp.amount', DB::raw('0 as discount'), 'pibp.created_at', 'pibp.created_by', DB::raw('group_concat(it.name separator ", ") as items'))
-                ->where('it.category', 'Medicine') // Only include medicine items
-                ->where(function($query) use ($request) {
-                    if ($effective_clinic_id) {
-                        $query->whereExists(function($subQuery) use ($effective_clinic_id) {
-                            $subQuery->select(DB::raw(1))
-                                ->from('users')
-                                ->where('id', DB::raw('pibp.created_by'))
-                                ->where('clinic_id', $effective_clinic_id);
-                        });
-                    }
-                    if ($payment_channel_id) {
-                        $query->where('pibp.channel_id', $payment_channel_id);
-                    }
-                    if ($patient_name) {
-                        $query->whereRaw('concat(pt.first_name, coalesce(pt.middle_name, ""), pt.last_name) like ?', [str_replace(' ', '', '%' . $patient_name . '%')]);
-                    }
-                    if ($patient_id) {
-                        $query->where('pch.patient_id', $patient_id);
-                    }
-                    if ($patient_gender) {
-                        $query->where('pt.gender', $patient_gender);
-                    }
-                    if ($patient_phone) {
-                        $query->where('pt.phone', 'like', '%' . $patient_phone . '%');
-                    }
-                    if ($start_date) {
-                        $query->whereDate('pibp.created_at', '>=', $start_date);
-                    }
-                    if ($end_date) {
-                        $query->whereDate('pibp.created_at', '<=', $end_date);
-                    }
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0);
+            
+            if ($clinic_id) {
+                $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
+            }
             
-            $medicineItems = $medicineItemsQuery->sum('amount') ?? 0;
+            // Bill payments query - same as PaymentCenterReportsController
+            $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
+                ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
+                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0);
             
-            $data['total_collections'] = ($paymentsSum + $billPaymentsSum + $medicineItems);
-            $data['total_discounts'] = 0; // Could calculate if needed
+            if ($clinic_id) {
+                $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
             
-            // Add other fields as needed
-            $data['total_patients'] = 0;
-            $data['total_patient_visits'] = 0;
-            $data['total_consulted_patients'] = 0;
-            $data['total_glass'] = 0;
-            $data['total_medicine'] = $medicineItems;
-            $data['total_procedures'] = 0;
-            $data['total_others'] = 0;
-            $data['total_consultations'] = 0;
-            $data['total_pending_bills'] = 0;
-            $data['sms_balance'] = 0;
+            // Calculate total collections - sum of both item and bill payments
+            $item_payments_sum = $item_payments->sum('patient_item_payments.amount') ?? 0;
+            $bill_payments_sum = $bill_payments->sum('patient_item_bill_payments.amount') ?? 0;
+            $data['total_collections'] = ($item_payments_sum + $bill_payments_sum);
+            
+            // Calculate total patients (unique patients who made payments)
+            $item_patients = $item_payments->distinct('pt.id')->pluck('pt.id');
+            $bill_patients = $bill_payments->distinct('pt.id')->pluck('pt.id');
+            $all_patients = $item_patients->merge($bill_patients)->unique();
+            $data['total_patients'] = $all_patients->count();
+            
+            // Calculate total patient visits (check-ins with payments)
+            $item_visits = $item_payments->distinct('pch.id')->pluck('pch.id');
+            $bill_visits = $bill_payments->distinct('pch.id')->pluck('pch.id');
+            $all_visits = $item_visits->merge($bill_visits)->unique();
+            $data['total_patient_visits'] = $all_visits->count();
+            
+            // Calculate totals by item category and specific consultation types
+            $item_categories = $item_payments
+                ->selectRaw('it.category, it.name, SUM(patient_item_payments.amount) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
+                ->groupBy('it.category', 'it.name')
+                ->get();
+            
+            $bill_categories = $bill_payments
+                ->selectRaw('it.category, it.name, SUM(patient_item_bill_payments.amount) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
+                ->groupBy('it.category', 'it.name')
+                ->get();
+            
+            // Merge category and item totals
+            $all_categories = [];
+            $consultation_new_total = 0;
+            $consultation_return_total = 0;
+            $consultation_verify_total = 0;
+            
+            foreach ($item_categories as $item) {
+                $category = $item->category;
+                $name = $item->name;
+                $amount = $item->total_amount;
+                
+                // Track consultation revenue separately by type
+                if ($name === 'General Consultation - New') {
+                    $consultation_new_total += $amount;
+                } elseif ($name === 'General Consultation - Return') {
+                    $consultation_return_total += $amount;
+                } elseif ($name === 'General Consultation - Verify') {
+                    $consultation_verify_total += $amount;
+                }
+                
+                // Track by category
+                if ($category) {
+                    $all_categories[$category] = ($all_categories[$category] ?? 0) + $amount;
+                }
+            }
+            
+            foreach ($bill_categories as $item) {
+                $category = $item->category;
+                $name = $item->name;
+                $amount = $item->total_amount;
+                
+                // Track consultation revenue separately by type
+                if ($name === 'General Consultation - New') {
+                    $consultation_new_total += $amount;
+                } elseif ($name === 'General Consultation - Return') {
+                    $consultation_return_total += $amount;
+                } elseif ($name === 'General Consultation - Verify') {
+                    $consultation_verify_total += $amount;
+                }
+                
+                // Track by category
+                if ($category) {
+                    $all_categories[$category] = ($all_categories[$category] ?? 0) + $amount;
+                }
+            }
+            
+            // Assign to specific categories
+            $data['total_glass'] = $all_categories['Glass'] ?? 0;
+            $data['total_medicine'] = $all_categories['Medicine'] ?? 0;
+            $data['total_procedures'] = $all_categories['Procedure'] ?? 0;
+            $data['total_others'] = $all_categories['Others'] ?? 0;
+            
+            // New consultation revenue fields separated by type
+            $data['consultation_new_revenue'] = $consultation_new_total;
+            $data['consultation_return_revenue'] = $consultation_return_total + $consultation_verify_total; // Return + Verify combined
+            $data['consultation_verify_revenue'] = $consultation_verify_total;
+            $data['consultation_other_revenue'] = $consultation_return_total + $consultation_verify_total;
+            $data['total_consultations'] = $consultation_new_total + $consultation_return_total + $consultation_verify_total;
+            
+            // Calculate consulted patients for the date range
+            $consulted_patients_query = \App\Models\Consultation::query()
+                ->where('consultations.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('consultations.created_at', '<=', $end_date . ' 23:59:59');
+            
+            if ($clinic_id) {
+                $consulted_patients_query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $data['total_consulted_patients'] = $consulted_patients_query->distinct('patient_id')->count('patient_id');
+            
+            // Calculate pending bills for the date range (only bills created on this date)
+            $pending_bills_query = \App\Models\PatientItemBill::query()
+                ->where('patient_item_bills.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bills.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bills.balance', '>', 0);
+            
+            if ($clinic_id) {
+                $pending_bills_query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $data['total_pending_bills'] = $pending_bills_query->sum('balance');
+            
+            // Get SMS balance from clinic
+            if ($clinic_id) {
+                $clinic = \App\Models\Clinic::find($clinic_id);
+                $data['sms_balance'] = $clinic->sms_balance ?? 0;
+            } else {
+                // If no clinic restriction, get total SMS balance across all clinics
+                $data['sms_balance'] = \App\Models\Clinic::sum('sms_balance') ?? 0;
+            }
             
         } catch (\Exception $e) {
-            \Log::error('Error calculating daily collection data', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            \Log::error('Dashboard getDailyCashCollectionData error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
         
         return $data;
@@ -196,6 +271,10 @@ class DashboardController extends Controller
                     'procedure' => $dailyCollectionData['total_procedures'] ?? 0,
                     'others' => $dailyCollectionData['total_others'] ?? 0,
                     'consultation' => $dailyCollectionData['total_consultations'] ?? 0,
+                    'consultation_new_revenue' => $dailyCollectionData['consultation_new_revenue'] ?? 0,
+                    'consultation_return_revenue' => $dailyCollectionData['consultation_return_revenue'] ?? 0,
+                    'consultation_verify_revenue' => $dailyCollectionData['consultation_verify_revenue'] ?? 0,
+                    'consultation_other_revenue' => $dailyCollectionData['consultation_other_revenue'] ?? 0,
                     'pending_bills' => $dailyCollectionData['total_pending_bills'] ?? 0,
                     'sms_balance' => $dailyCollectionData['sms_balance'] ?? 0,
                 ],
@@ -276,24 +355,7 @@ class DashboardController extends Controller
 
                     $billPaymentsSum = (float) $billPaymentsQuery->sum('patient_item_bill_payments.amount');
 
-                    // Include medicine items from bills (same logic as PaymentCenterReportsController)
-                    $medicineItemsQuery = DB::table('patient_item_bill_payments as pibp')
-                        ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
-                        ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                        ->where('it.category', 'Medicine')
-                        ->where('pibp.created_at', '>=', $start_date . ' 00:00:00')
-                        ->where('pibp.created_at', '<=', $end_date . ' 23:59:59')
-                        ->where('pibp.amount', '>', 0);
-                    
-                    if ($clinic_id) {
-                        $medicineItemsQuery->whereIn('pibp.created_by', function($q) use ($clinic_id) {
-                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                        });
-                    }
-                    
-                    $medicineItemsSum = (float) $medicineItemsQuery->sum('pibp.amount');
-
-                    return $paymentsSum + $billPaymentsSum + $medicineItemsSum;
+                    return $paymentsSum + $billPaymentsSum;
                 }, 0);
             });
 

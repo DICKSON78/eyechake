@@ -19,6 +19,7 @@ const Modal = (props, ref) => {
 
   useImperativeHandle(ref, () => ({
     open: (title, component, size = "sm", subtitle = "") => {
+      console.log('Modal.open called:', { title, size, subtitle, component });
       setState({
         ...state,
         open: true,

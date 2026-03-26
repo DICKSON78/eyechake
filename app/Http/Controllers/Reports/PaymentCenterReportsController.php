@@ -102,53 +102,14 @@ class PaymentCenterReportsController extends Controller
         $item_payments->select(DB::raw("'Cash' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_payments.amount', 'patient_item_payments.discount', 'patient_item_payments.created_at', 'patient_item_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_payments.id');
         $bill_payments->select(DB::raw("'Bill' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'channel_id', 'patient_item_bill_payments.amount', DB::raw('0 as discount'), 'patient_item_bill_payments.created_at', 'patient_item_bill_payments.created_by', DB::raw('group_concat(it.name separator ", ") as items'))->groupBy('patient_item_bill_payments.id');
         
-        // Include medicine items from bills
-        $medicine_items = DB::table('patient_item_bill_payments as pibp')
-            ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
-            ->join('items as it', 'ppci.item_id', '=', 'it.id')
-            ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-            ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-            ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-            ->select(DB::raw("'Medicine' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'pibp.channel_id', 'pibp.amount', DB::raw('0 as discount'), 'pibp.created_at', 'pibp.created_by', DB::raw('group_concat(it.name separator ", ") as items'))
-            ->where('it.category', 'Medicine') // Only include medicine items
-            ->where(function($query) use ($effective_clinic_id, $payment_channel_id, $patient_name, $patient_id, $patient_gender, $patient_phone, $start_date, $end_date) {
-                if ($effective_clinic_id) {
-                    $query->whereExists(function($subQuery) use ($effective_clinic_id) {
-                        $subQuery->select(DB::raw(1))
-                            ->from('users')
-                            ->where('id', DB::raw('pibp.created_by'))
-                            ->where('clinic_id', $effective_clinic_id);
-                    });
-                }
-                if ($payment_channel_id) {
-                    $query->where('pibp.channel_id', $payment_channel_id);
-                }
-                if ($patient_name) {
-                    $query->whereRaw('concat(pt.first_name, coalesce(pt.middle_name, ""), pt.last_name) like ?', [str_replace(' ', '', '%' . $patient_name . '%')]);
-                }
-                if ($patient_id) {
-                    $query->where('pch.patient_id', $patient_id);
-                }
-                if ($patient_gender) {
-                    $query->where('pt.gender', $patient_gender);
-                }
-                if ($patient_phone) {
-                    $query->where('pt.phone', 'like', '%' . $patient_phone . '%');
-                }
-                if ($start_date) {
-                    $query->whereDate('pibp.created_at', '>=', $start_date);
-                }
-                if ($end_date) {
-                    $query->whereDate('pibp.created_at', '<=', $end_date);
-                }
-            });
+
         
-        $union = $item_payments->unionAll($bill_payments)->unionAll($medicine_items);
+        $union = $item_payments->unionAll($bill_payments);
         $union->orderBy('created_at', 'desc');
         $data = $union->paginate($per_page);
 
         // Calculate grand totals from all pages
-        $allItems = $item_payments->unionAll($bill_payments)->unionAll($medicine_items)->get();
+        $allItems = $item_payments->unionAll($bill_payments)->get();
         $totalAmount = $allItems->sum('amount');
         $totalDiscount = $allItems->sum('discount');
 
