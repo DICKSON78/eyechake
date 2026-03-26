@@ -43,18 +43,12 @@ const SalesClinicalNotesList = () => {
 
   // Fetch from consultations as the single source of truth - same as consultation clinical notes
   const { data, loading, error, handleFetch } = useFetch(
-    "api/consultations",
+    "api/sales-management/clinical-notes",
     {
       search: searchTerm,
       status: statusFilter === "all" ? undefined : statusFilter,
       per_page: 50,
       with_diagnoses: "Yes",
-      with_items: "Yes",
-      with_visual_acuity: "Yes",
-      with_external_examination: "Yes",
-      with_functional_tests: "Yes",
-      with_refraction: "Yes",
-      with_fundoscopy: "Yes",
     },
     true,
     [],
@@ -87,8 +81,12 @@ const SalesClinicalNotesList = () => {
 
   const handleFilterChange = (event) => {
     setStatusFilter(event.target.value);
-    handleFetch();
   };
+
+  // Refetch when filter or search changes
+  useEffect(() => {
+    handleFetch();
+  }, [statusFilter, searchTerm]);
 
   const handleView = (note) => {
     // Navigate to glass patients clinical notes (sales section) if patient has require_glass

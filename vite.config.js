@@ -7,6 +7,8 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
+    https: false, // Force HTTP instead of HTTPS
+    cors: true,
     hmr: {
       host: 'localhost',
     },
@@ -57,6 +59,7 @@ export default defineConfig({
     laravel({
       input: ["resources/js/app.jsx"],
       refresh: true,
+      detectTls: false, // Disable TLS detection
     }),
     react({
       // Configure React Fast Refresh

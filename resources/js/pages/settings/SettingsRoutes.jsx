@@ -12,6 +12,7 @@ import Occupations from "./occupations/Occupations";
 import ClinicDetails from "./ClinicDetails";
 import Preferences from "./Preferences";
 import Clinics from "./clinics/Clinics";
+import PerformanceTargets from "./performance-targets/PerformanceTargets";
 
 const SettingsRoutes = () => {
   return (
@@ -59,6 +60,10 @@ const SettingsRoutes = () => {
       <Route
         path="/clinics"
         element={window.user && window.user.role === "Admin" ? <Clinics /> : null}
+      />
+      <Route
+        path="/performance-targets"
+        element={<PerformanceTargets />}
       />
     </Routes>
   );

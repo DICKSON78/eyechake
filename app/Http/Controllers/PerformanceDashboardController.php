@@ -30,9 +30,19 @@ class PerformanceDashboardController extends Controller
 
             $user = $request->user();
             
-            // Check access permissions
-            if (!$user || (!$user->is_admin && !in_array($user->role, ['Admin', 'Director']) && !isset($user->privileges['optometry_report_card']) && !isset($user->privileges['sales_report_card']) && !isset($user->privileges['crm_report_card']))) {
+            // Check access permissions - Admin and Director have full access
+            if (!$user) {
                 return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Access denied');
+            }
+            if (!in_array($user->role, ['Admin', 'Director']) && !$user->is_admin) {
+                $privileges = $user->privileges ?? null;
+                $privArray = is_object($privileges) ? (array) $privileges : (is_array($privileges) ? $privileges : []);
+                $hasAccess = !empty($privArray['optometry_report_card'])
+                    || !empty($privArray['sales_report_card'])
+                    || !empty($privArray['crm_report_card']);
+                if (!$hasAccess) {
+                    return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Access denied');
+                }
             }
 
             $start_date = $request->start_date ?? Carbon::today()->startOfMonth()->format('Y-m-d');
@@ -301,7 +311,7 @@ class PerformanceDashboardController extends Controller
             })
             ->whereDate('ppc.created_at', '>=', $start_date)
             ->whereDate('ppc.created_at', '<=', $end_date)
-            ->distinct('ppc.patient_id')
+            ->distinct('ppci.id')
             ->count();
 
         $conversionRatio = $totalPatients > 0 ? ($glassBuyers / $totalPatients) * 100 : 0;

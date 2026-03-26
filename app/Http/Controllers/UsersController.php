@@ -76,7 +76,7 @@ class UsersController extends Controller
             'job_title_id' => 'nullable|exists:job_titles,id',
             'employee_number' => 'nullable|string|unique:users,employee_number|max:50',
             'password' => 'required|string|min:6',
-            'role' => 'sometimes|in:Admin,Client',
+            'role' => 'sometimes|string|max:50',
             'privileges' => 'sometimes|array',
             'status' => 'sometimes|required|in:Active,Inactive',
         ];
@@ -143,7 +143,7 @@ class UsersController extends Controller
                 'job_title_id'    => 'sometimes|nullable|exists:job_titles,id',
                 'employee_number' => 'sometimes|nullable|unique:users,employee_number,' . $id,
                 'status'          => 'sometimes|required|in:Active,Inactive',
-                'role'            => 'sometimes|in:Admin,Client',
+                'role'            => 'sometimes|string|max:50',
                 'privileges'      => 'sometimes|array',
                 'password'        => 'sometimes|nullable|string|min:6',
             ]);
@@ -155,7 +155,7 @@ class UsersController extends Controller
             $input = $request->except(['privileges', 'password']);
 
             // Only update password when caller explicitly sends a non-empty value.
-            if ($request->filled('password')) {
+            if ($request->filled('password') && strlen($request->password) >= 6) {
                 $input['password'] = Hash::make($request->password);
             }
 
@@ -225,5 +225,34 @@ class UsersController extends Controller
         }
 
         return array_map('trim', $privileges);
+    }
+
+    /**
+     * Get default privileges based on role
+     */
+    private function getDefaultPrivilegesForRole(string $role): array
+    {
+        $rolePrivileges = [
+            'Admin'             => ['dashboard', 'reception', 'payment_center', 'consultation_room', 'optician_center', 'medicine_center', 'procedure_room', 'inventory_management', 'financial_management', 'employee_management', 'settings', 'marketing', 'sales_center', 'sales_management', 'director', 'office_calendar', 'dispensing', 'other_dispensing', 'receptionist_monthly_report', 'cashier_monthly_report', 'optometrist_monthly_report', 'sales_manager_monthly_report', 'marketing_operations_monthly_report', 'optometry_report_card', 'sales_report_card', 'crm_report_card', 'crm_reports', 'user_management', 'clear_pending_bill'],
+            'Director'          => ['dashboard', 'reception', 'payment_center', 'consultation_room', 'optician_center', 'medicine_center', 'procedure_room', 'inventory_management', 'financial_management', 'employee_management', 'settings', 'marketing', 'sales_center', 'sales_management', 'director', 'office_calendar', 'dispensing', 'other_dispensing', 'receptionist_monthly_report', 'cashier_monthly_report', 'optometrist_monthly_report', 'sales_manager_monthly_report', 'marketing_operations_monthly_report', 'optometry_report_card', 'sales_report_card', 'crm_report_card', 'crm_reports', 'user_management', 'clear_pending_bill'],
+            'Receptionist'      => ['dashboard', 'reception', 'receptionist_monthly_report'],
+            'Cashier'           => ['dashboard', 'payment_center', 'cashier_monthly_report', 'clear_pending_bill'],
+            'Doctor'            => ['dashboard', 'consultation_room', 'optometrist_monthly_report', 'optometry_report_card', 'consultation_reports'],
+            'Optometrist'       => ['dashboard', 'consultation_room', 'optometrist_monthly_report', 'optometry_report_card', 'consultation_reports'],
+            'Optician'          => ['dashboard', 'optician_center', 'dispensing'],
+            'Pharmacist'        => ['dashboard', 'medicine_center', 'dispensing'],
+            'Sales Manager'     => ['dashboard', 'sales_center', 'sales_management', 'sales_manager_monthly_report', 'sales_report_card'],
+            'Sales'             => ['dashboard', 'sales_center', 'sales_management', 'sales_report_card'],
+            'Storekeeper'       => ['dashboard', 'inventory_management'],
+            'Inventory Manager' => ['dashboard', 'inventory_management'],
+            'Accountant'        => ['dashboard', 'financial_management'],
+            'Finance Manager'   => ['dashboard', 'financial_management'],
+            'HR'                => ['dashboard', 'employee_management', 'user_management'],
+            'Marketing'         => ['dashboard', 'marketing', 'marketing_operations_monthly_report', 'office_calendar', 'crm_reports'],
+            'Marketing Manager' => ['dashboard', 'marketing', 'marketing_operations_monthly_report', 'office_calendar', 'crm_reports'],
+            'Client'            => ['dashboard'],
+        ];
+
+        return $rolePrivileges[$role] ?? ['dashboard'];
     }
 }

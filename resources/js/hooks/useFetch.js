@@ -23,14 +23,9 @@ const useFetch = (
     window.axios
       .get("/" + normalizedUri, { params: fetchParams })
       .then((response) => {
-        console.log('useFetch - Raw response:', response);
-        console.log('useFetch - Response data:', response?.data);
-        console.log('useFetch - Response data data:', response?.data?.data);
-        
         if (!ignore.current) {
           try {
             const result = callback ? callback(response) : response?.data;
-            console.log('useFetch - Callback result:', result);
             setData(result !== undefined && result !== null ? result : initialData);
           } catch (e) {
             setError(e);

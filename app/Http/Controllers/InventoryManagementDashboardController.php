@@ -836,7 +836,6 @@ class InventoryManagementDashboardController extends Controller
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
                 ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
-                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
                 ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->where('users.clinic_id', $clinic_id);
@@ -847,8 +846,6 @@ class InventoryManagementDashboardController extends Controller
                 ->where('patient_payment_cache_items.status', 'Served')
                 ->where('items.status', 'Active')
                 ->where('item_types.name', 'Frame')
-                ->where('consultation_types.name', 'Glass')
-                ->whereDate('patient_payment_cache.created_at', '>=', Carbon::today()->subDays(30))
                 ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_quantity'))
                 ->groupBy('items.id', 'items.name')
                 ->orderBy('total_quantity', 'desc')
@@ -870,7 +867,6 @@ class InventoryManagementDashboardController extends Controller
                 ->join('patient_payment_cache', 'patient_payment_cache_items.payment_cache_id', '=', 'patient_payment_cache.id')
                 ->join('items', 'patient_payment_cache_items.item_id', '=', 'items.id')
                 ->join('item_types', 'items.item_type_id', '=', 'item_types.id')
-                ->join('consultation_types', 'items.consultation_type_id', '=', 'consultation_types.id')
                 ->join('users', 'patient_payment_cache.created_by', '=', 'users.id')
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->where('users.clinic_id', $clinic_id);
@@ -881,8 +877,6 @@ class InventoryManagementDashboardController extends Controller
                 ->where('patient_payment_cache_items.status', 'Served')
                 ->where('items.status', 'Active')
                 ->where('item_types.name', 'Pharmaceutical')
-                ->where('consultation_types.name', 'Pharmacy')
-                ->whereDate('patient_payment_cache.created_at', '>=', Carbon::today()->subDays(30))
                 ->select('items.name', DB::raw('SUM(patient_payment_cache_items.quantity) as total_quantity'))
                 ->groupBy('items.id', 'items.name')
                 ->orderBy('total_quantity', 'desc')
@@ -893,7 +887,7 @@ class InventoryManagementDashboardController extends Controller
                 return [
                     'medicine_name' => $medicine->name,
                     'quantity_sold' => (int) $medicine->total_quantity,
-                    'percentage' => 0, // Will be calculated in frontend
+                    'percentage' => 0,
                 ];
             })->toArray();
         }, []);

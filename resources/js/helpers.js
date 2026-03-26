@@ -512,6 +512,14 @@ export const getPrivileges = (preferences) => {
         { label: "Sales Report Card", value: "sales_report_card" }
       ]
     },
+    { 
+      label: "Marketing", 
+      value: "marketing",
+      children: [
+        { label: "Marketing Operations Monthly Report", value: "marketing_operations_monthly_report" },
+        { label: "CRM Reports", value: "crm_reports" }
+      ]
+    },
     { label: "Financial Management", value: "financial_management" },
     { label: "Employee Management", value: "user_management" },
     { label: "Director", value: "director" },

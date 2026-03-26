@@ -251,11 +251,25 @@ const DailyCashCollection = ({ module }) => {
             headerName: "Transaction Type",
           },
         ]}
+        onFetch={(fetchedData) => {
+          // Calculate totals when data is fetched
+          if (fetchedData && Array.isArray(fetchedData.data)) {
+            window._cashReportTotals = fetchedData.data.reduce((acc, item) => {
+              const amount = parseFloat(item.amount) || 0;
+              const discount = parseFloat(item.discount) || 0;
+              return {
+                amount: acc.amount + amount,
+                discount: acc.discount + discount,
+                subtotal: acc.subtotal + Math.max(0, amount - discount),
+              };
+            }, { amount: 0, discount: 0, subtotal: 0 });
+          }
+        }}
         summationFooterColumns={[
           { value: "TOTAL", span: 4, index: 1 },
-          { totalKey: "amount", index: 4 },
-          { totalKey: "discount", index: 5 },
-          { totalKey: "net", index: 6 },
+          { reducer: (acc, item) => acc + (parseFloat(item.amount) || 0), index: 5 },
+          { reducer: (acc, item) => acc + (parseFloat(item.discount) || 0), index: 6 },
+          { reducer: (acc, item) => acc + Math.max(0, (parseFloat(item.amount) || 0) - (parseFloat(item.discount) || 0)), index: 7 },
         ]}
       />
     </Page>

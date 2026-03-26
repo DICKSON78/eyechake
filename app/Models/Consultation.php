@@ -112,6 +112,8 @@ class Consultation extends Model
         return $this->hasOne(Referral::class, 'consultation_id')->latest();
     }
 
+
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i');

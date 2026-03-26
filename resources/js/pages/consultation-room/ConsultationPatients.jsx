@@ -45,37 +45,27 @@ const ConsultationPatients = () => {
   const [params, setParams] = useState({
     page: 1,
     per_page: 25,
-    status: "Sent to Optician",
+    status: status === "consulted" ? "Consulted" : "Pending",
     patient_id: undefined,
     patient_name: undefined,
     patient_gender: undefined,
     patient_phone: undefined,
-    item_payment_mode_id: 'consultant', // This is what optician center expects for procedures
-    start_date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    item_payment_mode_id: status === "consulted" ? undefined : 'consultant',
+    start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     end_date: new Date(),
-    // Add consultation-specific filters for proper backend filtering
-    require_glass: "Yes",
-    patient_direction: undefined, // Will be set to "Direct to Optician" if needed
+    require_glass: status === "consulted" ? undefined : undefined,
+    patient_direction: undefined,
   });
 
   const { data, loading, error, handleFetch } = useFetch(
     "api/consultations",
     {
       ...params,
-      status: status ? capitalize(status) : params.status, // Use URL status if provided, otherwise use default
+      status: status === "consulted" ? "Consulted" : "Pending",
       start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-      // For pending status, remove require_glass filter to match notifications logic
-      require_glass: status === 'pending' ? undefined : params.require_glass,
-      // For pending status, use today's date to match notifications logic
-      ...(status === 'pending' && {
-        start_date: formatDateForDb(new Date()),
-        end_date: formatDateForDb(new Date()),
-      }),
-      // For pending status, remove item_payment_mode_id filter to match notifications logic
-      ...(status === 'pending' && {
-        item_payment_mode_id: undefined,
-      }),
+      require_glass: undefined,
+      item_payment_mode_id: undefined,
     },
     true,
     {

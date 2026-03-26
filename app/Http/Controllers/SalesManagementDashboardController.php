@@ -26,7 +26,8 @@ class SalesManagementDashboardController extends Controller
             $user = $request->user();
             
             // Check access permissions
-            if (!$user || (!$user->is_admin && !in_array($user->role, ['Sales Manager', 'Sales']) && !isset($user->privileges['sales_management']) && !isset($user->privileges['sales_center']))) {
+            $privArray = is_object($user->privileges ?? null) ? (array) $user->privileges : (is_array($user->privileges ?? null) ? $user->privileges : []);
+            if (!$user || (!$user->is_admin && !in_array($user->role, ['Admin', 'Director', 'Sales Manager', 'Sales']) && empty($privArray['sales_management']) && empty($privArray['sales_center']))) {
                 return $this->sendResponse(null, Response::HTTP_FORBIDDEN, 'Access denied');
             }
             
@@ -150,7 +151,7 @@ class SalesManagementDashboardController extends Controller
             // Items sold
             try {
                 $itemsSoldQuery = PatientPaymentCacheItem::query()
-                    ->where('status', 'Served')
+                    ->where('patient_payment_cache_items.status', 'Served')
                     ->whereNotNull('served_at')
                     ->where('served_at', '>=', $start_date . ' 00:00:00')
                     ->where('served_at', '<=', $end_date . ' 23:59:59');
@@ -209,7 +210,7 @@ class SalesManagementDashboardController extends Controller
                 // Clients consulted on this date
                 try {
                     $clientsConsultedQuery = Consultation::query()
-                        ->where('status', 'Consulted')
+                        ->where('consultations.status', 'Consulted')
                         ->whereNotNull('created_at')
                         ->whereDate('created_at', $dateStr);
                     
@@ -271,7 +272,7 @@ class SalesManagementDashboardController extends Controller
                         ->whereHas('consultation_type', function ($query) {
                             $query->where('name', 'Pharmacy');
                         })
-                        ->where('status', 'Served')
+                        ->where('patient_payment_cache_items.status', 'Served')
                         ->whereNotNull('served_at')
                         ->whereDate('served_at', $dateStr);
                     
@@ -300,7 +301,7 @@ class SalesManagementDashboardController extends Controller
             // Sales by category
             try {
                 $salesByCategoryQuery = PatientPaymentCacheItem::query()
-                    ->where('status', 'Served')
+                    ->where('patient_payment_cache_items.status', 'Served')
                     ->whereNotNull('served_at')
                     ->where('served_at', '>=', $start_date . ' 00:00:00')
                     ->where('served_at', '<=', $end_date . ' 23:59:59');

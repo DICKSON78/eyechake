@@ -37,7 +37,14 @@ const Report = ({
     },
     true,
     { total: 0, data: [] },
-    (response) => response.data.data
+    (response) => {
+      const responseData = response.data.data;
+      // Preserve totals in the returned data
+      if (responseData && responseData.totals) {
+        return responseData;
+      }
+      return responseData;
+    }
   );
 
   useEffect(() => {
@@ -53,37 +60,52 @@ const Report = ({
   }, [error]);
 
   const getFooterItems = () => {
-    let footerColumns = [];
-    if (Array.isArray(summationFooterColumns)) {
-      footerColumns = summationFooterColumns.map((col) => {
-        let total = 0;
+    if (!Array.isArray(summationFooterColumns)) return [];
 
-        if (col.totalKey && data && data.totals && typeof data.totals[col.totalKey] !== 'undefined') {
-          // Use grand total from backend if totalKey is provided
-          total = data.totals[col.totalKey];
-        } else if (typeof col.reducer === "function") {
-          // Fallback to client-side page summation
-          total = Array.isArray(data.data) ? data.data.reduce(col.reducer, 0) : 0;
-        } else if (typeof col.value !== 'undefined') {
-          // Static value (like "TOTAL" label)
-          return col;
-        }
+    // Find total number of columns (including S/N added by Report)
+    const totalCols = columns.length + 1; // +1 for S/N column
 
-        // Ensure the total is a valid number before formatting
+    // Build a map of index -> footer cell
+    const footerMap = {};
+    summationFooterColumns.forEach((col) => {
+      let total = 0;
+      let value;
+
+      if (col.totalKey && data && data.totals && typeof data.totals[col.totalKey] !== 'undefined') {
+        total = data.totals[col.totalKey];
         const numericTotal = typeof total === 'string' ? parseFloat(total) : total;
-        const validTotal = typeof numericTotal === 'number' && !isNaN(numericTotal) ? numericTotal : 0;
+        value = numberFormat(typeof numericTotal === 'number' && !isNaN(numericTotal) ? numericTotal : 0);
+      } else if (typeof col.reducer === "function") {
+        const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+        total = items.reduce(col.reducer, 0);
+        value = numberFormat(total);
+      } else if (typeof col.value !== 'undefined') {
+        value = col.value;
+      } else {
+        value = '';
+      }
 
-        const result = {
-          ...col,
-          value: numberFormat(validTotal)
-        };
+      const result = { ...col, value };
+      if (typeof col.span === "number") {
+        result.tableCellProps = { colSpan: col.span };
+      }
 
-        if (typeof col.span === "number") {
-          result.tableCellProps = { colSpan: col.span };
-        }
+      footerMap[col.index] = result;
+    });
 
-        return result;
-      });
+    // Build final array - place items at their index positions
+    const maxIndex = Math.max(...Object.keys(footerMap).map(Number), totalCols);
+    const footerColumns = [];
+    let i = 1;
+    while (i <= maxIndex) {
+      if (footerMap[i]) {
+        footerColumns.push(footerMap[i]);
+        const span = footerMap[i].tableCellProps?.colSpan || 1;
+        i += span;
+      } else {
+        footerColumns.push({ value: '' });
+        i++;
+      }
     }
 
     return footerColumns;
