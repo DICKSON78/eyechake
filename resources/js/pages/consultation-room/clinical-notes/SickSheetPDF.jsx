@@ -75,15 +75,15 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
             { label: "Address", value: patient.address },
             {
               label: "Payment Mode",
-              value: consultation.payment_cache_item?.payment_mode?.name || "N/A",
+              value: consultation.payment_cache_item?.payment_mode?.name || "-",
             },
             {
               label: "Consultation Item",
-              value: consultation.payment_cache_item?.item?.name || "N/A",
+              value: consultation.payment_cache_item?.item?.name || consultation.payment_cache_item?.consultation_type?.name || "-",
             },
             {
               label: "Consultant",
-              value: consultation.payment_cache_item?.consultant?.full_name || "N/A",
+              value: consultation.payment_cache_item?.consultant?.full_name || consultation.creator?.full_name || "-",
             },
             {
               label: "Consultation Date",
@@ -388,7 +388,7 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
                   {index + 1}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {diagnosis.disease?.name || "N/A"}
+                  {diagnosis.disease?.name || "-"}
                 </Text>
                 <Text
                   style={[
@@ -397,7 +397,7 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
                     { width: 48 },
                   ]}
                 >
-                  {diagnosis.disease?.code || "N/A"}
+                  {diagnosis.disease?.code || "-"}
                 </Text>
               </View>
             ))}
@@ -457,10 +457,10 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
                     {index + 1}
                   </Text>
                   <Text style={[styles.text, tableStyles.tableCell]}>
-                    {item.item?.name || "N/A"}
+                    {item.item?.name || "-"}
                   </Text>
                   <Text style={[styles.text, tableStyles.tableCell]}>
-                    {item.dosage || item.comments || "N/A"}
+                    {item.dosage || item.comments || "-"}
                   </Text>
                 </View>
               ))}
@@ -479,8 +479,8 @@ const SickSheetDocument = ({ consultation, patient, sickSheetData }) => {
               columns={2}
               items={[
                 { label: "Patient to Return", value: consultation.patient_to_return || "No" },
-                { label: "Return Date", value: consultation.to_return_date || "N/A" },
-                { label: "Return Reason", value: consultation.return_reason || "N/A" },
+                { label: "Return Date", value: consultation.to_return_date || "-" },
+                { label: "Return Reason", value: consultation.return_reason || "-" },
               ]}
               containerStyle={{
                 marginBottom: 8,

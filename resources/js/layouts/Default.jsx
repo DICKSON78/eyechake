@@ -139,7 +139,7 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
     if (hasToken) {
       const timer = setTimeout(() => {
         setShouldCheckAuth(true);
-      }, 100); // 100ms delay
+      }, 500); // 500ms delay to ensure token is set
       return () => clearTimeout(timer);
     } else {
       setShouldCheckAuth(false);

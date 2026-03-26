@@ -94,7 +94,7 @@ const Dashboard = () => {
             subtitle={`vs ${numberFormat(data.summary?.sales_target || 1500000)} target`}
             icon={<TrendingIcon />}
             color={salesPerformance >= 100 ? green[500] : salesPerformance >= 75 ? orange[500] : red[500]}
-            onClick={() => navigate('/sales-reports/performance-report-card')}
+  
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>

@@ -114,15 +114,15 @@ const PDFReportDocument = ({ consultation, patient }) => {
             { label: "Address", value: patient.address },
             {
               label: "Payment Mode",
-              value: consultation.payment_cache_item?.payment_mode?.name || "N/A",
+              value: consultation.payment_cache_item?.payment_mode?.name || "-",
             },
             {
               label: "Consultation Item",
-              value: consultation.payment_cache_item?.item?.name || "N/A",
+              value: consultation.payment_cache_item?.item?.name || consultation.payment_cache_item?.consultation_type?.name || "-",
             },
             {
               label: "Consultant",
-              value: consultation.payment_cache_item?.consultant?.full_name || "N/A",
+              value: consultation.payment_cache_item?.consultant?.full_name || consultation.creator?.full_name || "-",
             },
             {
               label: "Consultation Date",
@@ -133,7 +133,7 @@ const PDFReportDocument = ({ consultation, patient }) => {
             },
             { label: "Require Spectacle", value: consultation.require_glass || "No" },
             { label: "To Return", value: consultation.patient_to_return || "No" },
-            { label: "Return Date", value: consultation.to_return_date || "N/A" },
+            { label: "Return Date", value: consultation.to_return_date || "-" },
           ]}
           containerStyle={{
             marginBottom: 8,
@@ -145,12 +145,12 @@ const PDFReportDocument = ({ consultation, patient }) => {
         <Descriptions
           columns={2}
           items={[
-            { label: "Chief Complaint", value: consultation.chief_complaint || "N/A" },
-            { label: "History of Present Illness", value: consultation.history_present_illness || "N/A" },
-            { label: "Family History", value: consultation.family_history || "N/A" },
-            { label: "General Health", value: consultation.general_health || "N/A" },
-            { label: "Family Ocular History", value: consultation.family_ocular_history || "N/A" },
-            { label: "Family General History", value: consultation.family_general_history || "N/A" },
+            { label: "Chief Complaint", value: consultation.chief_complaint || "-" },
+            { label: "History of Present Illness", value: consultation.history_present_illness || "-" },
+            { label: "Family History", value: consultation.family_history || "-" },
+            { label: "General Health", value: consultation.general_health || "-" },
+            { label: "Family Ocular History", value: consultation.family_ocular_history || "-" },
+            { label: "Family General History", value: consultation.family_general_history || "-" },
             // REMARKS IS INTENTIONALLY EXCLUDED
           ]}
           containerStyle={{ marginBottom: 8 }}
@@ -203,13 +203,13 @@ const PDFReportDocument = ({ consultation, patient }) => {
               </View>
               <View style={tableStyles.tableRow}>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.chief_complaint || "N/A"}
+                  {consultation.chief_complaint || "-"}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.history_present_illness || "N/A"}
+                  {consultation.history_present_illness || "-"}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_history || "N/A"}
+                  {consultation.family_history || "-"}
                 </Text>
               </View>
               <View style={[tableStyles.tableRow, tableStyles.lightGrey]}>
@@ -243,13 +243,13 @@ const PDFReportDocument = ({ consultation, patient }) => {
               </View>
               <View style={tableStyles.tableRow}>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.general_health || "N/A"}
+                  {consultation.general_health || "-"}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_ocular_history || "N/A"}
+                  {consultation.family_ocular_history || "-"}
                 </Text>
                 <Text style={[styles.text, tableStyles.tableCell]}>
-                  {consultation.family_general_history || "N/A"}
+                  {consultation.family_general_history || "-"}
                 </Text>
               </View>
             </View>

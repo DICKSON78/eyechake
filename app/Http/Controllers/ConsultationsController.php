@@ -75,7 +75,10 @@ class ConsultationsController extends Controller
 
         // Default to today if no date filter is provided AND not viewing specific patient records
         // When viewing patient file (patient_id is set), show all consultations, not just today
-        if (!$start_date && !$end_date && !$patient_to_return && !$to_return_date && $view_period == 'daily' && !$patient_id) {
+        // When searching by patient_name, show all dates (no default)
+        $patient_name = $request->patient_name;
+        $search = $request->search;
+        if (!$start_date && !$end_date && !$patient_to_return && !$to_return_date && $view_period == 'daily' && !$patient_id && !$patient_name && !$search) {
              $start_date = Carbon::today()->format('Y-m-d');
              $end_date = Carbon::today()->format('Y-m-d');
         }
