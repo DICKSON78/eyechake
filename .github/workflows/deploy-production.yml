@@ -31,11 +31,6 @@ jobs:
             npm install --legacy-peer-deps --production
             npm run build
 
-            # Database operations - ONLY MIGRATIONS (NO SEEDERS TO PROTECT USER DATA)
-            docker compose exec app php artisan migrate --force
-            # ⚠️  SEEDERS DISABLED - They overwrite existing user data and privileges
-            # docker compose exec app php artisan db:seed --class=ProductionSeedDataSeeder --force
-
             # Clear and optimize caches
             php artisan cache:clear
             php artisan config:clear
