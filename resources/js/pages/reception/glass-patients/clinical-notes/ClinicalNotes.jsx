@@ -148,6 +148,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
   };
 
   const openSelectItemsModal = (title, type) => {
+    console.log('Opening SelectItems modal:', { title, type, consultation, items });
+    
     let component = (
       <SelectItems
         modal={modalRef.current}
@@ -158,6 +160,8 @@ const ClinicalNotes = ({ patient, consultation }) => {
       />
     );
 
+    console.log('Modal ref:', modalRef.current);
+    console.log('Calling modal.open...');
     modalRef.current.open(title, component, "lg");
   };
 
