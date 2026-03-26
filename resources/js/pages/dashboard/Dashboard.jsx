@@ -529,7 +529,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from New Consultations"
-                        count={numberFormat(directorData.summary?.total_revenue || 0)}
+                        count={numberFormat(directorData.summary?.consultation_new_revenue || 0)}
                         icon={<ConsultationsIcon />}
                         color={indigo[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -538,7 +538,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from Return Consultations"
-                        count={numberFormat(directorData.summary?.total_expenses || 0)}
+                        count={numberFormat(directorData.summary?.consultation_return_revenue || 0)}
                         icon={<PatientIcon />}
                         color={teal[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -548,7 +548,7 @@ const Dashboard = () => {
                       <InfoCard
                         title="Total Revenue from All Consultations"
                         count={numberFormat(
-                          (directorData.summary?.total_revenue || 0)
+                          (directorData.summary?.total_consultations || 0)
                         )}
                         icon={<RevenueIcon />}
                         color={lime[600]}
