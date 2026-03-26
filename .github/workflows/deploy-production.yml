@@ -56,7 +56,7 @@ jobs:
             sleep 20
 
             # Run production seeder if needed
-            docker exec eyechake_app php artisan db:seed --class=ProductionSeedDataSeeder --force || echo "Seeding skipped or failed"
+            # docker exec eyechake_app php artisan db:seed --class=ProductionSeedDataSeeder --force || echo "Seeding skipped or failed"
 
             echo "✅ Deployment complete!"
             echo "🌐 Application deployed to: https://sikafeyecare.com"

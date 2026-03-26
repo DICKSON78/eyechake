@@ -16,8 +16,8 @@ window.axios = axios;
 // For local development: use localhost:8000
 // For production: use the live server URL
 // For local development with Vite on port 5173 and Laravel on port 8000
-window.axios.defaults.baseURL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:8000' 
+window.axios.defaults.baseURL = import.meta.env.DEV
+  ? "http://localhost:8000"
   : window.location.origin;
 
 // Add timeout configuration to prevent hanging requests
@@ -40,18 +40,25 @@ window.axios.interceptors.response.use(
   (error) => {
     if (error?.response?.status === 401) {
       // Define public routes that don't require authentication
-      const publicRoutes = ["/", "/about", "/features", "/appointment", "/contact", "/login"];
+      const publicRoutes = [
+        "/",
+        "/about",
+        "/features",
+        "/appointment",
+        "/contact",
+        "/login",
+      ];
       const currentPath = window.location.pathname;
-      const isPublicRoute = publicRoutes.some(route => currentPath === route);
-      
+      const isPublicRoute = publicRoutes.some((route) => currentPath === route);
+
       // Only redirect to login if we're not already on a public route AND not already on login
       if (!isPublicRoute && window.location.href.indexOf("/login") === -1) {
         // Clear the invalid token
         localStorage.removeItem("token");
-        
+
         // Prevent multiple redirects by setting a flag
-        if (!window.sessionStorage.getItem('redirecting_to_login')) {
-          window.sessionStorage.setItem('redirecting_to_login', 'true');
+        if (!window.sessionStorage.getItem("redirecting_to_login")) {
+          window.sessionStorage.setItem("redirecting_to_login", "true");
           window.location.href = "/login";
         }
       }

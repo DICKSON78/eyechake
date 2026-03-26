@@ -80,7 +80,7 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
             
-            $paymentsSum = $paymentsQuery->sum('amount') ?? 0;
+            $paymentsSum = (float) ($paymentsQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating payments sum', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             $paymentsSum = 0;
@@ -159,7 +159,7 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
 
-            $cashItemPayments = $cashItemPaymentsQuery->sum('amount') ?? 0;
+            $cashItemPayments = (float) ($cashItemPaymentsQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating cash item payments', ['error' => $e->getMessage()]);
             $cashItemPayments = 0;
@@ -248,10 +248,12 @@ class PaymentCenterDashboardController extends Controller
                     $query->where('clinic_id', $clinic_id);
                 });
             }
-            
-            $data['summary']['pending_bills'] = $pendingBillsQuery->count();
+            // Count and Sum of pending bills created in date range
+            $data['summary']['pending_bills_count'] = $pendingBillsQuery->count();
+            $data['summary']['pending_bills'] = (float) $pendingBillsQuery->sum('amount');
         } catch (\Exception $e) {
             \Log::error('Error counting pending bills', ['error' => $e->getMessage()]);
+            $data['summary']['pending_bills_count'] = 0;
             $data['summary']['pending_bills'] = 0;
         }
             
@@ -349,7 +351,7 @@ class PaymentCenterDashboardController extends Controller
                 });
             }
             
-            $todayItems = $todayItemsQuery->sum('amount') ?? 0;
+            $todayItems = (float) ($todayItemsQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
         } catch (\Exception $e) {
             \Log::error('Error calculating today items', ['error' => $e->getMessage()]);
             $todayItems = 0;
@@ -650,17 +652,23 @@ class PaymentCenterDashboardController extends Controller
         }
 
         // Pending bills summary
-        $data['statistics']['pending_bills_summary'] = PatientItemBill::query()
+        // Filter by date range to avoid "all-time" totals
+        $pendingBillsSummaryQuery = PatientItemBill::query()
+            ->where('status', 'Pending')
             ->when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->where('status', 'Pending')
-            ->select('status', DB::raw('count(*) as count'), DB::raw('sum(amount) as total_amount'))
-            ->groupBy('status')
-            ->get()
-            ->toArray();
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date);
+
+        $data['statistics']['pending_bills_summary'] = $pendingBillsSummaryQuery
+            ->select('id', 'patient_id', 'amount', 'created_at')
+            ->with('patient:id,name')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
         // Ensure all numeric values are properly cast
         $data['summary']['total_revenue'] = (float) $data['summary']['total_revenue'];

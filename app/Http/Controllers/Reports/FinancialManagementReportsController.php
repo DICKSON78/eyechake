@@ -175,10 +175,10 @@ class FinancialManagementReportsController extends Controller
         $balanceSheetData = $balanceSheetResponse->getData()->data;
         
         // Get additional financial data for dashboard
-        $pendingBills = $this->getPendingBillsCount();
-        $runningCost = $this->getRunningCost();
-        $improvementCost = $this->getImprovementCost();
-        $expensePayments = $this->getExpensePayments();
+        $pendingBills = $this->getPendingBillsAmount($clinic_id, $start_date, $end_date);
+        $runningCost = $this->getRunningCost($clinic_id, $start_date, $end_date);
+        $improvementCost = $this->getImprovementCost($clinic_id, $start_date, $end_date);
+        $expensePayments = $this->getExpensePaymentsCount($clinic_id, $start_date, $end_date);
         
         // Create new summary object with additional fields
         $newSummaryFields = [
@@ -186,11 +186,11 @@ class FinancialManagementReportsController extends Controller
             'running_cost' => $runningCost,
             'improvement_cost' => $improvementCost,
             'expense_payments' => $expensePayments,
-            'daily_collections' => $this->getDailyCollections(),
+            'daily_collections' => $this->getDailyCollections($clinic_id, $start_date, $end_date),
             'statistics' => [
-                'top_expense_categories' => $this->getTopExpenseCategories(),
-                'payment_trends' => $this->getPaymentTrends(),
-                'expense_trends' => $this->getExpenseTrends(),
+                'top_expense_categories' => $this->getTopExpenseCategories($clinic_id, $start_date, $end_date),
+                'payment_trends' => $this->getPaymentTrends($clinic_id),
+                'expense_trends' => $this->getExpenseTrends($clinic_id),
             ],
         ];
         
@@ -205,9 +205,9 @@ class FinancialManagementReportsController extends Controller
     }
     
     /**
-     * Get count of pending bills
+     * Get amount of pending bills for selected date range
      */
-    private function getPendingBillsCount($clinic_id = null)
+    private function getPendingBillsAmount($clinic_id = null, $start_date = null, $end_date = null)
     {
         return \App\Models\PatientItemBill::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
@@ -215,29 +215,41 @@ class FinancialManagementReportsController extends Controller
                 });
             })
             ->where('status', 'Pending')
-            ->count();
+            ->when($start_date, function ($query) use ($start_date) {
+                $query->whereDate('created_at', '>=', $start_date);
+            })
+            ->when($end_date, function ($query) use ($end_date) {
+                $query->whereDate('created_at', '<=', $end_date);
+            })
+            ->sum('amount') ?: 0;
     }
     
     /**
-     * Get running cost (total expenses)
+     * Get running cost (total expenses) for selected date range
      */
-    private function getRunningCost($clinic_id = null)
+    private function getRunningCost($clinic_id = null, $start_date = null, $end_date = null)
     {
+        $start = $start_date ?? Carbon::today()->format('Y-m-d');
+        $end = $end_date ?? Carbon::today()->format('Y-m-d');
+        
         return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
-            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
             ->sum('amount') ?: 0;
     }
     
     /**
-     * Get improvement cost (total of specific improvement expenses)
+     * Get improvement cost (total of specific improvement expenses) for selected date range
      */
-    private function getImprovementCost($clinic_id = null)
+    private function getImprovementCost($clinic_id = null, $start_date = null, $end_date = null)
     {
+        $start = $start_date ?? Carbon::today()->format('Y-m-d');
+        $end = $end_date ?? Carbon::today()->format('Y-m-d');
+
         return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
@@ -248,38 +260,44 @@ class FinancialManagementReportsController extends Controller
                     $categoryQuery->where('name', 'Improvement');
                 });
             })
-            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
-            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
             ->sum('amount') ?: 0;
     }
     
     /**
-     * Get total expense payments
+     * Get count of expense payments for selected date range
      */
-    private function getExpensePayments($clinic_id = null)
+    private function getExpensePaymentsCount($clinic_id = null, $start_date = null, $end_date = null)
     {
+        $start = $start_date ?? Carbon::today()->format('Y-m-d');
+        $end = $end_date ?? Carbon::today()->format('Y-m-d');
+
         return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->whereDate('created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
-            ->whereDate('created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
             ->count();
     }
     
     /**
-     * Get top expense categories for the current month
+     * Get top expense categories for selected date range
      */
-    private function getTopExpenseCategories($clinic_id = null)
+    private function getTopExpenseCategories($clinic_id = null, $start_date = null, $end_date = null)
     {
+        $start = $start_date ?? Carbon::today()->format('Y-m-d');
+        $end = $end_date ?? Carbon::today()->format('Y-m-d');
+
         return \App\Models\ExpensePayment::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->whereDate('expense_payments.created_at', '>=', Carbon::today()->startOfMonth()->format('Y-m-d'))
-            ->whereDate('expense_payments.created_at', '<=', Carbon::today()->format('Y-m-d'))
+            ->whereDate('expense_payments.created_at', '>=', $start)
+            ->whereDate('expense_payments.created_at', '<=', $end)
             ->whereHas('expense', function ($query) {
                 $query->whereHas('category');
             })
@@ -333,16 +351,20 @@ class FinancialManagementReportsController extends Controller
     }
     
     /**
-     * Get daily collections (total patient payments for today)
+     * Get daily collections for selected date range
      */
-    private function getDailyCollections($clinic_id = null)
+    private function getDailyCollections($clinic_id = null, $start_date = null, $end_date = null)
     {
+        $start = $start_date ?? Carbon::today()->format('Y-m-d');
+        $end = $end_date ?? Carbon::today()->format('Y-m-d');
+
         return \App\Models\PatientPaymentCacheItem::when($clinic_id, function ($query) use ($clinic_id) {
                 $query->whereHas('creator', function ($query) use ($clinic_id) {
                     $query->where('clinic_id', $clinic_id);
                 });
             })
-            ->whereDate('created_at', Carbon::today()->format('Y-m-d'))
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
             ->selectRaw('SUM(unit_price * quantity) as total')
             ->value('total') ?: 0;
     }

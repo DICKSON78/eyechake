@@ -76,7 +76,8 @@ class SalesManagementDashboardController extends Controller
                     });
                 }
                 
-                $data['summary']['total_sales'] = $totalSalesQuery->sum('amount') ?? 0;
+                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                $data['summary']['total_sales'] = (float) ($totalSalesQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
             } catch (\Exception $e) {
                 \Log::error('Error calculating total sales', ['error' => $e->getMessage()]);
                 $data['summary']['total_sales'] = 0;
@@ -96,7 +97,8 @@ class SalesManagementDashboardController extends Controller
                     });
                 }
                 
-                $data['summary']['sales_today'] = $salesTodayQuery->sum('amount') ?? 0;
+                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                $data['summary']['sales_today'] = (float) ($salesTodayQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
             } catch (\Exception $e) {
                 \Log::error('Error calculating sales today', ['error' => $e->getMessage()]);
                 $data['summary']['sales_today'] = 0;

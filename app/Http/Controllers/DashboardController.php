@@ -89,50 +89,7 @@ class DashboardController extends Controller
             
             $billPaymentsSum = $billPaymentsQuery->sum('amount') ?? 0;
             
-            // Include medicine items from bills
-            $medicineItemsQuery = DB::table('patient_item_bill_payments as pibp')
-                ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-                ->select(DB::raw("'Medicine' as transaction_type"), 'pt.first_name', 'pt.middle_name', 'pt.last_name', 'pch.patient_id', 'pibp.channel_id', 'pibp.amount', DB::raw('0 as discount'), 'pibp.created_at', 'pibp.created_by', DB::raw('group_concat(it.name separator ", ") as items'))
-                ->where('it.category', 'Medicine') // Only include medicine items
-                ->where(function($query) use ($request) {
-                    if ($effective_clinic_id) {
-                        $query->whereExists(function($subQuery) use ($effective_clinic_id) {
-                            $subQuery->select(DB::raw(1))
-                                ->from('users')
-                                ->where('id', DB::raw('pibp.created_by'))
-                                ->where('clinic_id', $effective_clinic_id);
-                        });
-                    }
-                    if ($payment_channel_id) {
-                        $query->where('pibp.channel_id', $payment_channel_id);
-                    }
-                    if ($patient_name) {
-                        $query->whereRaw('concat(pt.first_name, coalesce(pt.middle_name, ""), pt.last_name) like ?', [str_replace(' ', '', '%' . $patient_name . '%')]);
-                    }
-                    if ($patient_id) {
-                        $query->where('pch.patient_id', $patient_id);
-                    }
-                    if ($patient_gender) {
-                        $query->where('pt.gender', $patient_gender);
-                    }
-                    if ($patient_phone) {
-                        $query->where('pt.phone', 'like', '%' . $patient_phone . '%');
-                    }
-                    if ($start_date) {
-                        $query->whereDate('pibp.created_at', '>=', $start_date);
-                    }
-                    if ($end_date) {
-                        $query->whereDate('pibp.created_at', '<=', $end_date);
-                    }
-                });
-            
-            $medicineItems = $medicineItemsQuery->sum('amount') ?? 0;
-            
-            $data['total_collections'] = ($paymentsSum + $billPaymentsSum + $medicineItems);
+            $data['total_collections'] = ($paymentsSum + $billPaymentsSum);
             $data['total_discounts'] = 0; // Could calculate if needed
             
             // Add other fields as needed
@@ -140,11 +97,21 @@ class DashboardController extends Controller
             $data['total_patient_visits'] = 0;
             $data['total_consulted_patients'] = 0;
             $data['total_glass'] = 0;
-            $data['total_medicine'] = $medicineItems;
+            $data['total_medicine'] = 0;
             $data['total_procedures'] = 0;
             $data['total_others'] = 0;
             $data['total_consultations'] = 0;
-            $data['total_pending_bills'] = 0;
+            // Pending bills for the date range
+            $data['total_pending_bills'] = (float) PatientItemBill::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Pending')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->sum('amount');
             $data['sms_balance'] = 0;
             
         } catch (\Exception $e) {
@@ -276,24 +243,7 @@ class DashboardController extends Controller
 
                     $billPaymentsSum = (float) $billPaymentsQuery->sum('patient_item_bill_payments.amount');
 
-                    // Include medicine items from bills (same logic as PaymentCenterReportsController)
-                    $medicineItemsQuery = DB::table('patient_item_bill_payments as pibp')
-                        ->join('patient_payment_cache_items as ppci', 'pibp.bill_id', '=', 'ppci.bill_id')
-                        ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                        ->where('it.category', 'Medicine')
-                        ->where('pibp.created_at', '>=', $start_date . ' 00:00:00')
-                        ->where('pibp.created_at', '<=', $end_date . ' 23:59:59')
-                        ->where('pibp.amount', '>', 0);
-                    
-                    if ($clinic_id) {
-                        $medicineItemsQuery->whereIn('pibp.created_by', function($q) use ($clinic_id) {
-                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                        });
-                    }
-                    
-                    $medicineItemsSum = (float) $medicineItemsQuery->sum('pibp.amount');
-
-                    return $paymentsSum + $billPaymentsSum + $medicineItemsSum;
+                    return $paymentsSum + $billPaymentsSum;
                 }, 0);
             });
 
