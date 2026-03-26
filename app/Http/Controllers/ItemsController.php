@@ -253,6 +253,8 @@ class ItemsController extends Controller
             'balance' => 'nullable|numeric|min:0',
             'new_balance' => 'nullable|numeric|min:0',
             'unit_buying_price' => 'nullable|numeric|min:0',
+            'generic_name' => 'nullable|string|max:255',
+            'brand_name' => 'nullable|string|max:255',
             'status' => 'sometimes|required|in:Active,Inactive',
         ]);
 

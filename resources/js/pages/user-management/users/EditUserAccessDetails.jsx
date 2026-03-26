@@ -62,13 +62,72 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
     return [];
   };
 
+  // Get suggested privileges based on role
+  const getPrivilegesForRole = (role) => {
+    const rolePrivileges = {
+      "Receptionist": ["dashboard", "reception", "receptionist_monthly_report"],
+      "Cashier": ["dashboard", "payment_center", "cashier_monthly_report"],
+      "Doctor": ["dashboard", "consultation_room", "optometrist_monthly_report", "optometry_report_card"],
+      "Optometrist": ["dashboard", "consultation_room", "optometrist_monthly_report", "optometry_report_card"],
+      "Optician": ["dashboard", "optician_center", "dispensing"],
+      "Pharmacist": ["dashboard", "medicine_center", "dispensing"],
+      "Sales Manager": ["dashboard", "sales_center", "sales_management", "sales_manager_monthly_report", "sales_report_card"],
+      "Sales": ["dashboard", "sales_center", "sales_management", "sales_report_card"],
+      "Storekeeper": ["dashboard", "inventory_management"],
+      "Inventory Manager": ["dashboard", "inventory_management"],
+      "Accountant": ["dashboard", "financial_management"],
+      "Finance Manager": ["dashboard", "financial_management"],
+      "HR": ["dashboard", "employee_management"],
+      "Marketing": ["dashboard", "marketing", "marketing_operations_monthly_report", "office_calendar", "crm_reports"],
+      "Marketing Manager": ["dashboard", "marketing", "marketing_operations_monthly_report", "office_calendar", "crm_reports"],
+      "Director": ["dashboard", "director", "reception", "payment_center", "consultation_room", "optician_center", "medicine_center", "inventory_management", "financial_management", "employee_management", "marketing", "sales_center", "sales_management"],
+      "Admin": [],
+      "Client": [],
+    };
+    return rolePrivileges[role] || [];
+  };
+
+  // Get initial privileges - merge role defaults with existing privileges
+  const getInitialPrivileges = () => {
+    const existingPrivileges = normalizePrivileges(item.privileges);
+    const roleDefaults = getPrivilegesForRole(item.role || "Client");
+    // Merge: role defaults + any extra privileges already assigned
+    return [...new Set([...roleDefaults, ...existingPrivileges])];
+  };
+
   const [formData, setFormData] = useState({
     username: item.username,
     password: undefined,
-    privileges: normalizePrivileges(item.privileges),
+    privileges: getInitialPrivileges(),
     status: item.status,
     role: item.role || "Client",
   });
+
+  // Auto-suggest privileges when role changes
+  const handleRoleChange = (newRole) => {
+    const suggestedPrivileges = getPrivilegesForRole(newRole);
+    
+    // Admin and Director get all privileges
+    if (newRole === "Admin" || newRole === "Director") {
+      const allPrivs = [];
+      getPrivileges(window.user?.clinic?.preferences || [])
+        .filter(e => typeof e.show === "undefined" || e.show)
+        .forEach(e => {
+          allPrivs.push(e.value);
+          if (e.children) {
+            e.children.forEach(c => allPrivs.push(c.value));
+          }
+        });
+      setFormData({ ...formData, role: newRole, privileges: allPrivs });
+    } else {
+      // Other roles get only their suggested privileges
+      setFormData({ 
+        ...formData, 
+        role: newRole,
+        privileges: suggestedPrivileges
+      });
+    }
+  };
 
   const { data, loading, error, handlePatch } = usePatch(
     `api/users/${item.id}`,
@@ -137,9 +196,20 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
   };
 
   const handleSubmit = () => {
-    if (formRef.current.validate()) {
-      handlePatch();
+    if (!formData.username || formData.username.trim() === '') {
+      addToast({ message: "Username is required", severity: "error" });
+      return;
     }
+    if (!formData.role) {
+      addToast({ message: "Role is required", severity: "error" });
+      return;
+    }
+    // Remove empty password before sending
+    const payload = { ...formData };
+    if (!payload.password || payload.password === '') {
+      delete payload.password;
+    }
+    handlePatch(null, payload);
   };
 
   // Toggle all privileges in a category
@@ -248,7 +318,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
     <React.Fragment>
       {loading && <LinearProgress />}
       <CardContent sx={{ pt: 3 }}>
-        <Form ref={formRef}>
+        <Box>
           {/* Account Status Alert */}
           <Alert 
             severity={formData.status === "Active" ? "success" : "warning"}
@@ -283,7 +353,6 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                     ref={usernameRef}
                     label="Username"
                     fullWidth
-                    required
                     defaultValue={formData.username}
                     onChange={(value) =>
                       setFormData({ ...formData, username: value })
@@ -349,17 +418,30 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
                   <Select
                     label="Role"
                     fullWidth
-                    required
-                    value={formData.role}
+                    value={formData.role || item.role || "Client"}
                     options={[
-                      { label: "Client (Standard)", value: "Client" },
                       { label: "Admin (Full Access)", value: "Admin" },
+                      { label: "Client (Standard)", value: "Client" },
+                      { label: "Receptionist", value: "Receptionist" },
+                      { label: "Cashier", value: "Cashier" },
+                      { label: "Doctor", value: "Doctor" },
+                      { label: "Optometrist", value: "Optometrist" },
+                      { label: "Optician", value: "Optician" },
+                      { label: "Pharmacist", value: "Pharmacist" },
+                      { label: "Sales Manager", value: "Sales Manager" },
+                      { label: "Sales", value: "Sales" },
+                      { label: "Storekeeper", value: "Storekeeper" },
+                      { label: "Inventory Manager", value: "Inventory Manager" },
+                      { label: "Accountant", value: "Accountant" },
+                      { label: "Finance Manager", value: "Finance Manager" },
+                      { label: "HR", value: "HR" },
+                      { label: "Marketing", value: "Marketing" },
+                      { label: "Marketing Manager", value: "Marketing Manager" },
+                      { label: "Director", value: "Director" },
                     ]}
                     optionsLabel="label"
                     optionsValue="value"
-                    onChange={(value) =>
-                      setFormData({ ...formData, role: value })
-                    }
+                    onChange={(value) => handleRoleChange(value)}
                     helperText="Admin users have access to all clinics and settings"
                   />
                 </Grid>
@@ -455,7 +537,7 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
               </Stack>
             </CardContent>
           </Card>
-        </Form>
+        </Box>
       </CardContent>
       <Divider />
       <CardActions sx={{ p: 2, justifyContent: "flex-end" }}>

@@ -198,8 +198,11 @@ class PatientCheckInsController extends Controller
                 // Get all users in the same clinic who have cashier privileges
                 $cashierUsers = \App\Models\User::where('clinic_id', $user->clinic_id)
                     ->whereHas('privileges', function ($query) {
-                        $query->where('privilege', 'payment_center')
-                            ->orWhere('payment_center', true); // Handle both old and new privilege structures
+                        $query->where('payment_center', 1);
+                    })
+                    ->orWhere(function($q) use ($user) {
+                        $q->where('clinic_id', $user->clinic_id)
+                          ->whereIn('role', ['Cashier', 'Admin', 'Director', 'Finance Manager']);
                     })
                     ->get();
                 

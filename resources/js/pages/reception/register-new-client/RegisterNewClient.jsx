@@ -84,7 +84,16 @@ const RegisterNewClient = () => {
     (response) => response.data.data.data
   );
 
-  const informationSources = [];
+  const { data: informationSources } = useFetch(
+    "api/marketing/information-sources",
+    {
+      status: "Active",
+      per_page: 500,
+    },
+    true,
+    [],
+    (response) => response.data.data.data
+  );
 
   const { data: occupations } = useFetch(
     "api/occupations",
@@ -832,6 +841,18 @@ const RegisterNewClient = () => {
                 </Grid>
 
 
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Select
+                    ref={informationSourceRef}
+                    label="Source of Information"
+                    fullWidth
+                    clearable
+                    options={informationSources}
+                    optionsLabel="name"
+                    optionsValue="id"
+                    onChange={(value) => setFormData({ ...formData, info_source_id: value })}
+                  />
+                </Grid>
                 {/* Section 5: Client Type */}
                 <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" sx={{ mt: 1.5, mb: 0.5 }}>

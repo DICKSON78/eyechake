@@ -58,6 +58,17 @@ const Dashboard = () => {
 
   usePrivilege('reception', '/dashboard');
 
+  // Safe navigate - only navigate if user has access
+  const safeNavigate = (path, requiredPrivilege) => {
+    if (isAdmin(window.user)) {
+      navigate(path);
+      return;
+    }
+    if (!requiredPrivilege || hasPrivilege(window.user, requiredPrivilege)) {
+      navigate(path);
+    }
+  };
+
   const modalRef = useRef();
 
   const [params, setParams] = useState({
@@ -103,16 +114,10 @@ const Dashboard = () => {
     (response) => response.data.data
   );
 
-  const { data: crmPerformanceData, loading: crmPerformanceLoading } = useFetch(
-    "api/performance-reports/crm",
-    {
-      start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
-      end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
-    },
-    true,
-    null,
-    (response) => response.data.data
-  );
+  // Only fetch CRM performance if user has access
+  const canViewPerformance = isAdmin(window.user) || 
+    hasPrivilege(window.user, 'crm_report_card') || 
+    hasPrivilege(window.user, 'director');
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -226,7 +231,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.clients_sent_to_doctor || 0)}
                 icon={<DoctorIcon />}
                 color={blue[500]}
-                onClick={() => navigate('/consultation-room/consultation-patients/pending')}
+                onClick={() => safeNavigate('/consultation-room/consultation-patients/pending', 'consultation_room')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -235,7 +240,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.clients_waiting_for_dispensing || 0)}
                 icon={<WaitingIcon />}
                 color={orange[500]}
-                onClick={() => navigate('/optician-center/glass-patients')}
+                onClick={() => safeNavigate('/optician-center/glass-patients', 'optician_center')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -244,7 +249,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.clients_already_served || 0)}
                 icon={<ServedIcon />}
                 color={green[500]}
-                onClick={() => navigate('/reception/patients')}
+                onClick={() => safeNavigate('/reception/patients', 'reception')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -253,7 +258,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.new_patients || 0)}
                 icon={<NewPatientIcon />}
                 color={cyan[500]}
-                onClick={() => navigate('/reception/register-new-client')}
+                onClick={() => safeNavigate('/reception/register-new-client', 'reception')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -262,7 +267,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.patient_visits || 0)}
                 icon={<VisitsIcon />}
                 color={indigo[400]}
-                onClick={() => navigate('/reception/patients')}
+                onClick={() => safeNavigate('/reception/patients', 'reception')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -271,7 +276,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.vip_patients || 0)}
                 icon={<VipIcon />}
                 color={theme.palette.warning.main}
-                onClick={() => navigate('/marketing/prestige-clients')}
+                onClick={() => safeNavigate('/marketing/prestige-clients', 'marketing')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -280,7 +285,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.patients_to_return || 0)}
                 icon={<ReturnIcon />}
                 color={teal[400]}
-                onClick={() => navigate('/reception/patients-scheduled-to-return')}
+                onClick={() => safeNavigate('/reception/patients-scheduled-to-return', 'reception')}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -289,7 +294,7 @@ const Dashboard = () => {
                 count={numberFormat(data.summary.completed_patients || 0)}
                 icon={<CompletedIcon />}
                 color={green[600]}
-                onClick={() => navigate('/reception/patients')}
+                onClick={() => safeNavigate('/reception/patients', 'reception')}
               />
             </Grid>
           </Grid>
@@ -388,6 +393,7 @@ const Dashboard = () => {
               </Card>
             </Grid>
 
+            {canViewPerformance && (
             <Grid size={{ xs: 12 }}>
               <PerformanceReportCard
                 department="CRM"
@@ -396,6 +402,7 @@ const Dashboard = () => {
                 refreshTrigger={params?.start_date}
               />
             </Grid>
+            )}
           </Grid>
         </React.Fragment>
       ) : (

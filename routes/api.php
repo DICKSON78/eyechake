@@ -1,4 +1,11 @@
 <?php
+use App\Http\Controllers\Reports\FinancialManagementReportsController;
+use App\Http\Controllers\Admin\DeleteTestUsersController;
+use App\Http\Controllers\DispensingDashboardController;
+use App\Http\Controllers\Reports\InventoryManagementReportsController;
+use App\Http\Controllers\PaymentCenterDashboardController;
+use App\Http\Controllers\Reports\PaymentCenterReportsController;
+use App\Http\Controllers\ReceptionDashboardController;
 
 use App\Http\Controllers\AppointmentsController;
 use App\Http\Controllers\AuthController;
@@ -146,12 +153,18 @@ Route::get('/test-auth', function (\Illuminate\Http\Request $request) {
     ]);
 })->middleware('auth:api');
 
+// Shared patient read routes - accessible by multiple roles
+Route::group(['middleware' => ['auth:api']], function ($router) {
+    $router->controller(PatientsController::class)->prefix('patients')->group(function ($router) {
+        $router->get('/', 'index');
+        $router->get('/{id}', 'show');
+    });
+});
+
 // Reception routes - require reception privilege
 Route::group(['middleware' => ['auth:api', 'privilege:reception']], function ($router) {
     $router->controller(PatientsController::class)->prefix('patients')->group(function ($router) {
-        $router->get('/', 'index');
         $router->post('/', 'store');
-        $router->get('/{id}', 'show');
         $router->put('/{id}', 'update');
         $router->delete('/{id}', 'destroy');
     });
@@ -539,6 +552,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     
     $router->prefix('sales-management')->group(function ($router) {
         $router->get('/dashboard', [SalesManagementDashboardController::class, '__invoke']);
+        $router->get('/clinical-notes', [ConsultationsController::class, 'index']);
+        $router->get('/patients-sent-to-sales', [PatientPaymentCacheController::class, 'index']);
     });
     
     $router->prefix('medicine-center')->group(function ($router) {

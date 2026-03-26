@@ -13,6 +13,9 @@ import UnreachableNumbers from "./unreachable-numbers/UnreachableNumbers";
 import PrestigeClients from "./prestige-clients/PrestigeClients";
 import ClientCallingStatus from "./client-calling-status/ClientCallingStatus";
 import MarketingGlassPatients from "./glass-patients/MarketingGlassPatients";
+import InformationSources from "./settings/information-sources/InformationSources";
+import CreateInformationSource from "./settings/information-sources/CreateInformationSource";
+import EditInformationSource from "./settings/information-sources/EditInformationSource";
 import HighValuePatients from "./high-value-patients/HighValuePatients";
 import SettingsRoutes from "./settings/SettingsRoutes";
 import ReportsRoutes from "./reports/ReportsRoutes";
@@ -76,6 +79,18 @@ const MarketingRoutes = () => {
       <Route
         path="/glass-patients"
         element={<MarketingGlassPatients />}
+      />
+      <Route
+        path="/information-sources"
+        element={<InformationSources />}
+      />
+      <Route
+        path="/information-sources/create"
+        element={<CreateInformationSource />}
+      />
+      <Route
+        path="/information-sources/:id/edit"
+        element={<EditInformationSource />}
       />
       <Route
         path="/settings/*"

@@ -9,7 +9,6 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Button,
 } from "@mui/material";
 import {
   Person2Rounded as PatientIcon,
@@ -43,11 +42,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const addToast = useToast();
 
-  // Set up date parameters for daily filtering (default to last 7 days to show more data)
-  const [dateParams, setDateParams] = useState({
-    start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days ago
-    end_date: new Date().toISOString().split('T')[0], // Today
-  });
+  // Fixed date params - no filters needed
+  const dateParams = {
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date().toISOString().split('T')[0],
+  };
 
   const { data, loading, error } = useFetch(
     "api/consultation-room/dashboard",
@@ -136,76 +135,7 @@ const Dashboard = () => {
         </Alert>
       )}
 
-      {/* Date Range Selector */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Date Range
-          </Typography>
-          <Grid container spacing={2} alignItems="center">
-            <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Start Date
-              </Typography>
-              <input
-                type="date"
-                value={dateParams.start_date}
-                onChange={(e) => setDateParams(prev => ({ ...prev, start_date: e.target.value }))}
-                style={{ 
-                  padding: '8px', 
-                  border: '1px solid #ccc', 
-                  borderRadius: '4px', 
-                  width: '100%',
-                  fontSize: '14px'
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                End Date
-              </Typography>
-              <input
-                type="date"
-                value={dateParams.end_date}
-                onChange={(e) => setDateParams(prev => ({ ...prev, end_date: e.target.value }))}
-                style={{ 
-                  padding: '8px', 
-                  border: '1px solid #ccc', 
-                  borderRadius: '4px', 
-                  width: '100%',
-                  fontSize: '14px'
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Quick Select
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => setDateParams({
-                  start_date: new Date().toISOString().split('T')[0],
-                  end_date: new Date().toISOString().split('T')[0]
-                })}
-                sx={{ mr: 1 }}
-              >
-                Today
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => setDateParams({
-                  start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                  end_date: new Date().toISOString().split('T')[0]
-                })}
-              >
-                Last 7 Days
-              </Button>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+
 
       {(!loading && data) ? (
         <React.Fragment>

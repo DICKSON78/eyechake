@@ -95,7 +95,26 @@ const Default = ({ setThemeMode, setUser, smsBalance }) => {
   const breakpointUpMedium = useMediaQuery(theme.breakpoints.up("md"));
 
   // Only fetch user if we have a token (user is logged in)
-  const hasToken = !!localStorage.getItem('token');
+  const [hasToken, setHasToken] = useState(!!localStorage.getItem('token'));
+  
+  // Listen for token changes
+  useEffect(() => {
+    const checkToken = () => {
+      const token = !!localStorage.getItem('token');
+      setHasToken(prev => prev !== token ? token : prev);
+    };
+    // Check immediately
+    checkToken();
+    // Listen for storage events only (no polling)
+    window.addEventListener('storage', checkToken);
+    // One-time check after short delay for same-tab login
+    const timer = setTimeout(checkToken, 200);
+    return () => {
+      window.removeEventListener('storage', checkToken);
+      clearTimeout(timer);
+    };
+  }, []);
+
   const { data: user, loading, error } = useFetch(
     hasToken ? "/api/auth/user" : null,
     null,

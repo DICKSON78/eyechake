@@ -353,10 +353,8 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
             return role === "Admin" || role === "Director" || role === "Cashier" || role === "Finance Manager" || hasPrivilege(user, 'payment_center') || isAdmin(user);
           case "CONSULTATION ROOM":
             return role === "Admin" || role === "Director" || role === "Doctor" || role === "Optometrist" || hasPrivilege(user, 'consultation_room') || isAdmin(user);
-          case "SALES TABLE":
-            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || isAdmin(user);
           case "SALES MANAGEMENT":
-            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasPrivilege(user, 'sales_management') || hasPrivilege(user, 'sales_center') || isAdmin(user);
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasPrivilege(user, 'sales_management') || hasPrivilege(user, 'sales_center') || hasPrivilege(user, 'sales_reports') || isAdmin(user);
           case "PHARMACY":
             return role === "Admin" || role === "Director" || role === "Pharmacist" || hasPrivilege(user, 'medicine_center') || isAdmin(user);
           case "WORKSHOP":
@@ -364,13 +362,17 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           case "STOCK MANAGEMENT":
             return role === "Admin" || role === "Director" || role === "Storekeeper" || role === "Inventory Manager" || hasPrivilege(user, 'inventory_management') || isAdmin(user);
           case "FINANCIAL MANAGEMENT":
-            return role === "Admin" || role === "Director" || role === "Accountant" || role === "Finance Manager" || hasPrivilege(user, 'financial_management') || isAdmin(user);
+            return role === "Admin" || role === "Director" || isAdmin(user);
           case "EMPLOYEE MANAGEMENT":
             return role === "Admin" || role === "Director" || role === "HR" || role === "Employee Manager" || hasPrivilege(user, 'employee_management') || isAdmin(user);
           case "DIRECTOR":
             return role === "Admin" || role === "Director" || hasPrivilege(user, 'director') || isAdmin(user);
           case "SETTINGS":
             return role === "Admin" || role === "Director" || hasPrivilege(user, 'settings') || isAdmin(user);
+          case "OPTOMETRY":
+            return role === "Admin" || role === "Director" || role === "Doctor" || role === "Optometrist" || hasPrivilege(user, 'consultation_room') || hasPrivilege(user, 'optometry_reports') || isAdmin(user);
+          case "SALES TABLE":
+            return role === "admin" || role === "director" || role === "sales manager" || role === "sales" || hasSalesCenterAccess || hasPrivilege(user, 'sales_reports') || isAdmin(user);
           case "MARKETING":
             return role === "Admin" || role === "Director" || role === "Marketing" || role === "Marketing Manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
           case "CRM REPORTS":
@@ -386,13 +388,13 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
         {
           title: "MENU",
           subheader: true,
-          show: getMenuVisibility('CALENDAR'),
+          show: isAdmin(user),
         },
         {
           title: "Dashboard",
           icon: <HomeIcon />,
           to: "/dashboard",
-          show: isPrivilegeGranted('dashboard') || isAdmin(user),
+          show: isAdmin(user),
         },
         {
           title: "1. RECEPTION",
@@ -521,7 +523,14 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           ],
         },
         {
-          title: "3. CONSULTATION ROOM",
+          title: "3. OPTOMETRY",
+          subheader: true,
+          show: getMenuVisibility('CONSULTATION ROOM'),
+        },
+
+
+        {
+          title: "5. CONSULTATION ROOM",
           subheader: true,
           show: getMenuVisibility('CONSULTATION ROOM'),
         },
@@ -556,22 +565,10 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
               to: "/consultation-room/reports/consultation",
               show: getMenuVisibility('CONSULTATION ROOM'),
             },
-            {
-              title: "Monthly Optometrist Report",
-              icon: <ReportsIcon />,
-              to: "/consultation-room/reports/optometrist-monthly-report",
-              show: false,
-            },
-            {
-              title: "Pharmacy & Consultation Report",
-              icon: <ReportsIcon />,
-              to: "/consultation-room/reports/pharmacy-consultation-report",
-              show: isPrivilegeGranted('consultation_room') || isPrivilegeGranted('medicine_center'),
-            },
           ],
         },
         {
-          title: "4. SALES TABLE",
+          title: "6. SALES TABLE",
           subheader: true,
           show: getMenuVisibility('SALES MANAGEMENT'),
         },
@@ -937,6 +934,18 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
+          title: "Glass Patients",
+          icon: <GlassPatientsIcon />,
+          to: "/marketing/glass-patients",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "Source of Information",
+          icon: <InfoIcon />,
+          to: "/marketing/information-sources",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
           title: "High Value Patients",
           icon: <VipIcon />,
           to: "/marketing/high-value-patients",
@@ -990,12 +999,6 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('CRM REPORTS'),
         },
         {
-          title: "CRM Report",
-          icon: <ReportsIcon />,
-          to: "/crm-reports/performance-report-card",
-          show: getMenuVisibility('CRM REPORTS'),
-        },
-        {
           title: "Marketing Contact Analytics",
           icon: <PhoneIcon />,
           to: "/crm-reports/marketing-contact-analytics",
@@ -1008,9 +1011,9 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('CRM REPORTS'),
         },
         {
-          title: "Optometry Report",
+          title: "Optometry Performance Report",
           icon: <EyeIcon />,
-          to: "/optometry-reports",
+          to: "/optometry-reports/performance-report-card",
           show: getMenuVisibility('CRM REPORTS'),
         },
         {
@@ -1409,6 +1412,12 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           icon: <ClinicsIcon />,
           to: "/settings/clinics",
           show: (hasPrivilege(user, 'settings') || isAdmin(user)) && isAdmin(user),
+        },
+        {
+          title: "Performance Targets",
+          icon: <PerformanceIcon />,
+          to: "/settings/performance-targets",
+          show: getMenuVisibility('SETTINGS'),
         },
       ]));
 

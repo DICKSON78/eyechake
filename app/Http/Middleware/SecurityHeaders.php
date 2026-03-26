@@ -31,7 +31,7 @@ class SecurityHeaders
             $csp = "default-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; font-src *; connect-src *; frame-ancestors *;";
         } else {
             // Strict CSP for production
-            $csp = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; frame-ancestors 'self';";
+            $csp = "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'self';";
         }
         $response->headers->set('Content-Security-Policy', $csp);
         $response->headers->set('Referrer-Policy', 'no-referrer-when-downgrade');

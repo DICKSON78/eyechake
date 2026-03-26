@@ -39,7 +39,7 @@ const PatientsSentToSales = () => {
   });
 
   const { data, loading, error, handleFetch } = useFetch(
-    "api/patient-payment-cache",
+    "api/sales-management/patients-sent-to-sales",
     {
       ...params,
       start_date: params.start_date
