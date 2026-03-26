@@ -19,7 +19,9 @@ jobs:
             cd /root/eyechake
 
             # Pull latest changes
+            git stash push -m "Stash local changes before pull"
             git pull origin master
+            git stash pop || echo "No stash to pop or conflicts resolved"
 
             # Use production environment
             cp .env.server .env
