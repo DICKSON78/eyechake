@@ -2,8 +2,8 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ master ]
-  workflow_dispatch:  # Manual trigger for safety
+    branches: [master]
+  workflow_dispatch: # Manual trigger for safety
 
 jobs:
   deploy:
@@ -17,22 +17,22 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /root/eyechake
-            
+
             # Pull latest changes
             git pull origin master
-            
+
             # Use production environment
             cp .env.server .env
-            
+
             # Install/update dependencies
             composer install --no-dev --optimize-autoloader
             npm install --legacy-peer-deps --production
             npm run build
-            
-            # Database operations
-            php artisan migrate --force
-            php artisan db:seed --class=ProductionSeedDataSeeder --force
-            
+
+            # Database operations (migrations are handled by Docker entrypoint)
+            # Seeding can be done via docker exec if needed
+            # docker exec eyechake_app php artisan db:seed --class=ProductionSeedDataSeeder --force
+
             # Clear and optimize caches
             php artisan cache:clear
             php artisan config:clear
@@ -41,20 +41,22 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            
+
             # Set permissions
             chown -R www-data:www-data /var/www
             chmod -R 755 /var/www
             chmod -R 777 /var/www/storage
             chmod -R 777 /var/www/bootstrap/cache
-            
-            # Restart services (if using Docker)
-            if [ -f "docker-compose.yml" ]; then
-              docker compose build --no-cache
-              docker compose up -d
-              sleep 15
-              docker compose restart
-            fi
-            
+
+            # Restart services
+            docker compose build --no-cache
+            docker compose up -d
+
+            # Wait for container to be ready 
+            sleep 20
+
+            # Run production seeder if needed
+            docker exec eyechake_app php artisan db:seed --class=ProductionSeedDataSeeder --force || echo "Seeding skipped or failed"
+
             echo "✅ Deployment complete!"
             echo "🌐 Application deployed to: https://sikafeyecare.com"

@@ -53,7 +53,7 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     ports:
-      - "3307:3307"
+      - "3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
       - ./sikaf.sql:/docker-entrypoint-initdb.d/init.sql
@@ -64,7 +64,17 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -88,7 +98,15 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9601/"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9601/",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -145,7 +163,7 @@ services:
       - eyechake-network
     profiles:
       - build
-    
+
   # Node.js for development with hot reload
   node:
     build:
@@ -164,7 +182,15 @@ services:
     profiles:
       - development
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:5173",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
