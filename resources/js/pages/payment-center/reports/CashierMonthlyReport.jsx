@@ -196,23 +196,24 @@ const CashierMonthlyReport = () => {
     setEndDate(end);
   };
 
-  const loadSavedReports = () => {
+  const loadSavedReports = async () => {
     try {
-      const reports = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("cashier_monthly_report_")) {
-          const reportData = JSON.parse(localStorage.getItem(key));
-          reports.push({
-            id: key,
-            timestamp: key.replace("cashier_monthly_report_", ""),
-            ...reportData,
-          });
-        }
-      }
-      // Sort by timestamp (newest first)
-      reports.sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp));
-      setSavedReports(reports);
+      const response = await window.axios.get("api/employee-reports", {
+        params: { report_type: "Monthly", per_page: 100 }
+      });
+      const reports = response?.data?.data?.data || [];
+      const cashierReports = reports.filter(r => {
+        try {
+          const d = typeof r.activities_completed === "string" ? JSON.parse(r.activities_completed) : r.activities_completed;
+          return d && d._report_type === "cashier_monthly_report";
+        } catch { return false; }
+      });
+      setSavedReports(cashierReports.map(r => {
+        try {
+          const d = typeof r.activities_completed === "string" ? JSON.parse(r.activities_completed) : r.activities_completed;
+          return { ...d, id: r.id, _api_id: r.id, timestamp: new Date(r.created_at).getTime() };
+        } catch { return { id: r.id, _api_id: r.id }; }
+      }));
     } catch (error) {
       console.error("Error loading saved reports:", error);
     }
@@ -308,18 +309,31 @@ const CashierMonthlyReport = () => {
     try {
       const reportData = {
         ...formData,
+        _report_type: "cashier_monthly_report",
         dateFilter,
-        selectedDate: selectedDate.toISOString(),
+        selectedDate: selectedDate?.toISOString(),
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
       };
 
-      const reportId = currentReportId || `cashier_monthly_report_${Date.now()}`;
-      localStorage.setItem(reportId, JSON.stringify(reportData));
+      const payload = {
+        report_type: "Monthly",
+        report_date: startDate ? startDate.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        end_date: endDate ? endDate.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        activities_completed: JSON.stringify(reportData),
+        achievements: formData.totalSales || "",
+        additional_notes: formData.observations?.join("\n") || "",
+      };
 
-      setCurrentReportId(reportId);
+      let response;
+      if (currentReportId) {
+        response = await window.axios.put(`api/employee-reports/${currentReportId}`, payload);
+      } else {
+        response = await window.axios.post("api/employee-reports", payload);
+        setCurrentReportId(response?.data?.data?.id);
+      }
+
       loadSavedReports();
-
       addToast({
         message: currentReportId ? "Report updated successfully!" : "Report saved successfully!",
         severity: "success",
@@ -446,7 +460,7 @@ const CashierMonthlyReport = () => {
         onCancel={() => modalRef.current.close()}
         onOk={async () => {
           try {
-            localStorage.removeItem(report.id);
+            await window.axios.delete(`api/employee-reports/${report._api_id || report.id}`);
             loadSavedReports();
             if (currentReportId === report.id) {
               setCurrentReportId(null);

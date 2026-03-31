@@ -158,7 +158,7 @@ const Dashboard = () => {
   const modalRef = useRef();
 
   const [params, setParams] = useState({
-    clinic_id: undefined,
+    clinic_id: window.user?.clinic_id || 1, // Use actual user's clinic_id with fallback
     start_date: new Date(), // Default to today for daily view
     end_date: new Date(),   // Default to today for daily view
   });
@@ -170,6 +170,7 @@ const Dashboard = () => {
   const { data: directorData, loading: directorLoading, error: directorError, handleFetch: fetchDirector } = useFetch(
     "api/director/dashboard",
     {
+      clinic_id: params.clinic_id,
       start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
       end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
     },
@@ -529,7 +530,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from New Consultations"
-                        count={numberFormat(directorData.summary?.consultation_new_revenue || 0)}
+                        count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
                         icon={<ConsultationsIcon />}
                         color={indigo[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -538,7 +539,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from Return Consultations"
-                        count={numberFormat(directorData.summary?.consultation_return_revenue || 0)}
+                        count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
                         icon={<PatientIcon />}
                         color={teal[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -548,7 +549,8 @@ const Dashboard = () => {
                       <InfoCard
                         title="Total Revenue from All Consultations"
                         count={numberFormat(
-                          (directorData.summary?.total_consultations || 0)
+                          (directorData.summary?.revenue_new_consultation || 0) +
+                          (directorData.summary?.revenue_return_consultation || 0)
                         )}
                         icon={<RevenueIcon />}
                         color={lime[600]}
@@ -692,7 +694,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Optical (Glass)"
-                      count={numberFormat(directorData.summary?.glass || 0)}
+                      count={numberFormat(directorData.summary?.glass || 0, 0)}
                       icon={<GlassIcon />}
                       color={purple[300]}
                     />
@@ -719,7 +721,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Consultation Sales"
-                      count={numberFormat(directorData.summary?.consultation || 0)}
+                      count={numberFormat(directorData.summary?.consultation || 0, 0)}
                       icon={<RevenueIcon />}
                       color={green[500]}
                     />
@@ -727,7 +729,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Consultation Purchases (COGS)"
-                      count={numberFormat(directorData.summary?.consultation_purchases || 0)}
+                      count={numberFormat(directorData.summary?.consultation_purchases || 0, 0)}
                       icon={<ExpensesIcon />}
                       color={orange[500]}
                     />
@@ -735,7 +737,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Profit from Consultation"
-                      count={numberFormat(directorData.summary?.consultation_profit || 0)}
+                      count={numberFormat(directorData.summary?.consultation_profit || 0, 0)}
                       icon={<NetProfitIcon />}
                       color={directorData.summary?.consultation_profit >= 0 ? green[500] : red[500]}
                     />
@@ -762,7 +764,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Medicine Sales"
-                      count={numberFormat(directorData.summary?.pharmacy || 0)}
+                      count={numberFormat(directorData.summary?.pharmacy || 0, 0)}
                       icon={<RevenueIcon />}
                       color={teal[500]}
                     />
@@ -770,7 +772,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Medicine Purchases (COGS)"
-                      count={numberFormat(directorData.summary?.pharmacy_purchases || 0)}
+                      count={numberFormat(directorData.summary?.pharmacy_purchases || 0, 0)}
                       icon={<ExpensesIcon />}
                       color={orange[500]}
                     />
@@ -778,7 +780,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={4}>
                     <InfoCard
                       title="Profit from Medicine"
-                      count={numberFormat(directorData.summary?.pharmacy_profit || 0)}
+                      count={numberFormat(directorData.summary?.pharmacy_profit || 0, 0)}
                       icon={<NetProfitIcon />}
                       color={directorData.summary?.pharmacy_profit >= 0 ? green[500] : red[500]}
                     />
@@ -805,7 +807,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Lens Sales"
-                      count={numberFormat(directorData.summary?.glass || 0)}
+                      count={numberFormat(directorData.summary?.glass || 0, 0)}
                       icon={<RevenueIcon />}
                       color={purple[500]}
                     />
@@ -813,7 +815,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Lens Purchases (COGS)"
-                      count={numberFormat(directorData.summary?.glass_purchases || 0)}
+                      count={numberFormat(directorData.summary?.glass_purchases || 0, 0)}
                       icon={<ExpensesIcon />}
                       color={orange[500]}
                     />
@@ -821,7 +823,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Profit from Lens"
-                      count={numberFormat(directorData.summary?.glass_profit || 0)}
+                      count={numberFormat(directorData.summary?.glass_profit || 0, 0)}
                       icon={<NetProfitIcon />}
                       color={directorData.summary?.glass_profit >= 0 ? green[500] : red[500]}
                     />
@@ -829,7 +831,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Frame Sales"
-                      count={numberFormat(directorData.summary?.frame || 0)}
+                      count={numberFormat(directorData.summary?.frame || 0, 0)}
                       icon={<RevenueIcon />}
                       color={cyan[500]}
                     />
@@ -837,7 +839,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Frame Purchases (COGS)"
-                      count={numberFormat(directorData.summary?.frame_purchases || 0)}
+                      count={numberFormat(directorData.summary?.frame_purchases || 0, 0)}
                       icon={<ExpensesIcon />}
                       color={deepOrange[500]}
                     />
@@ -845,7 +847,7 @@ const Dashboard = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoCard
                       title="Profit from Frame"
-                      count={numberFormat(directorData.summary?.frame_profit || 0)}
+                      count={numberFormat(directorData.summary?.frame_profit || 0, 0)}
                       icon={<NetProfitIcon />}
                       color={directorData.summary?.frame_profit >= 0 ? green[500] : red[500]}
                     />

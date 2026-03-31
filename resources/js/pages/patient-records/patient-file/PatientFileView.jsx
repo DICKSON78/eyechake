@@ -64,7 +64,7 @@ const DiagnosisCard = ({ title, diagnosisType, items }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {items
+              {(items || [])
                 .filter((e) => e.diagnosis_type === diagnosisType)
                 .map((item, index) => (
                   <TableRow key={index}>
@@ -126,8 +126,8 @@ const ConsultationItemsCard = ({ title, consultationType, items }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {items
-                .filter((e) => e.consultation_type.name === consultationType)
+              {(items || [])
+                .filter((e) => e.consultation_type && e.consultation_type.name === consultationType)
                 .map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
@@ -162,6 +162,7 @@ const PatientFileView = ({ consultationId, patient, ...rest }) => {
   const {
     data: consultation,
     loading: loadingConsultation,
+    error: consultationError,
     handleFetch,
   } = useFetch(
     `api/consultations/${consultationId}`,
@@ -169,18 +170,42 @@ const PatientFileView = ({ consultationId, patient, ...rest }) => {
       with_diagnoses: "Yes",
       with_items: "Yes",
       with_item_templates: "Yes",
+      with_visual_acuity: "Yes",
+      with_external_examination: "Yes",
+      with_refraction: "Yes",
+      with_fundoscopy: "Yes",
+      with_referral: "Yes",
+      with_visual_acuity: "Yes",
+      with_external_examination: "Yes",
+      with_refraction: "Yes",
+      with_fundoscopy: "Yes",
+      with_referral: "Yes",
     },
     false,
     null,
-    (response) => response.data.data
+    (response) => {
+      console.log('PatientFileView API Response:', response);
+      const result = response?.data?.data ?? response?.data;
+      console.log('PatientFileView Consultation Data:', result);
+      return result;
+    }
   );
 
   // Auto-fetch consultation data when component mounts
   useEffect(() => {
-    if (consultationId && patient?.id && !consultation && !loadingConsultation) {
+    console.log('PatientFileView - useEffect triggered', { consultationId, patientId: patient?.id, consultation, loadingConsultation, consultationError });
+    if (consultationId && !consultation && !loadingConsultation) {
+      console.log('PatientFileView - Calling handleFetch');
       handleFetch();
     }
   }, [consultationId, patient?.id, consultation, loadingConsultation, handleFetch]);
+
+  // Debug logging for consultation data
+  useEffect(() => {
+    console.log('PatientFileView - Consultation data updated:', consultation);
+    console.log('PatientFileView - Loading state:', loadingConsultation);
+    console.log('PatientFileView - Error state:', consultationError);
+  }, [consultation, loadingConsultation, consultationError]);
 
   const renderHistoryTaking = () => {
     if (!consultation) return null;
@@ -650,8 +675,15 @@ const PatientFileView = ({ consultationId, patient, ...rest }) => {
     return (
       <Box sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>
         <Typography variant="body1">
-          {loadingConsultation ? 'Loading consultation data...' : 'No consultation data available'}
+          {loadingConsultation ? 'Loading consultation data...' : 
+           consultationError ? `Error: ${consultationError.message || 'Something went wrong'}` :
+           'No consultation data available'}
         </Typography>
+        {consultationError && (
+          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+            Please try again or contact support if the problem persists.
+          </Typography>
+        )}
       </Box>
     );
   }
@@ -712,22 +744,22 @@ const PatientFileView = ({ consultationId, patient, ...rest }) => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                <strong>Payment Mode:</strong> {consultation.payment_cache_item.payment_mode.name}
+                <strong>Payment Mode:</strong> {consultation.payment_cache_item?.payment_mode?.name || consultation.payment_cache_item?.payment_cache?.check_in?.payment_mode?.name || "Not Assigned"}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                <strong>Consultation Item:</strong> {consultation.payment_cache_item.item.name}
+                <strong>Consultation Item:</strong> {consultation.payment_cache_item?.item?.name || "Not Assigned"}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
-                <strong>Consultant:</strong> {consultation.payment_cache_item.consultant?.full_name}
+                <strong>Consultant:</strong> {consultation.payment_cache_item?.consultant?.full_name || "Not Assigned"}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Typography variant="body2">
-                <strong>Date:</strong> {consultation.payment_cache_item.served_at || consultation.created_at}
+                <strong>Date:</strong> {consultation.payment_cache_item?.served_at || consultation.created_at}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>

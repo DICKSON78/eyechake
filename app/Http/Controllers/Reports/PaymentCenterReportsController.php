@@ -34,8 +34,8 @@ class PaymentCenterReportsController extends Controller
         $patient_id = $request->patient_id;
         $patient_gender = $request->patient_gender;
         $patient_phone = $request->patient_phone;
-        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+        $start_date = $request->start_date ?? null;
+        $end_date = $request->end_date ?? null;
         $item_payments = PatientItemPayment::with(['channel', 'creator'])
             ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
             ->join('items as it', 'ppci.item_id', '=', 'it.id')
@@ -140,8 +140,8 @@ class PaymentCenterReportsController extends Controller
         $category_id = $request->category_id;
         $status = $request->status;
         $created_by = $request->created_by;
-        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
-        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+        $start_date = $request->start_date ?? null;
+        $end_date = $request->end_date ?? null;
 
         $data = ExpensePayment::with(['expense.category', 'channel', 'creator'])
             ->join('expenses as e', 'expense_payments.expense_id', '=', 'e.id');

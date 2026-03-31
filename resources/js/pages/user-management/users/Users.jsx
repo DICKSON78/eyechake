@@ -48,22 +48,29 @@ const Users = () => {
     clinic_id: undefined,
     employee_number: undefined,
     name: undefined,
-    is_test_user: false, // Add filter for test users
-    gender: undefined,
-    department_id: undefined,
-    job_title_id: undefined,
+    status: undefined,
+    role: undefined,
   });
 
-  const { data, loading, error, handleFetch } = useFetch(
-    "api/users",
+  const {
+    data,
+    loading,
+    error,
+    handleFetch,
+  } = useFetch(
+    `api/users`,
     params,
     true,
-    {
-      data: [],
-      total: 0,
-      page: 1,
-    },
-    (response) => response.data.data
+    { data: [], total: 0, page: 1, per_page: 25 },
+    (response) => {
+      const apiData = response?.data?.data || response?.data || [];
+      return {
+        data: apiData.data || [],
+        total: apiData.total || 0,
+        page: apiData.current_page || 1,
+        per_page: apiData.per_page || 25,
+      };
+    }
   );
 
   useEffect(() => {
@@ -90,7 +97,13 @@ const Users = () => {
 
   const openEditUserAccessDetailsModal = (userItem) => {
     const targetItem = userItem || item;
-    if (!targetItem) return;
+    console.log('DEBUG - User item passed:', userItem);
+    console.log('DEBUG - Target item:', targetItem);
+    console.log('DEBUG - Target item privileges:', targetItem?.privileges);
+    
+    if (!targetItem) {
+      return;
+    }
     
     let component = (
       <EditUserAccessDetails
@@ -104,7 +117,9 @@ const Users = () => {
       "Access & Security Settings",
       component,
       "md",
-      targetItem.full_name
+      targetItem?.first_name && targetItem?.last_name 
+        ? `${targetItem.first_name} ${targetItem.last_name}`
+        : targetItem?.username || 'User'
     );
   };
 
@@ -354,7 +369,10 @@ const Users = () => {
                     <Tooltip title="Access & Security">
                       <IconButton
                         size="small"
-                        onClick={() => openEditUserAccessDetailsModal(item)}
+                        onClick={() => {
+                          console.log('DEBUG - Clicked access for item:', item);
+                          openEditUserAccessDetailsModal(item);
+                        }}
                         sx={{
                           color: "secondary.main",
                           "&:hover": {

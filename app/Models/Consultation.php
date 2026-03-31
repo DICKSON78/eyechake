@@ -112,6 +112,21 @@ class Consultation extends Model
         return $this->hasOne(Referral::class, 'consultation_id')->latest();
     }
 
+    /**
+     * Get the items for the consultation through payment cache.
+     */
+    public function items()
+    {
+        return $this->hasManyThrough(
+            PatientPaymentCacheItem::class,
+            PatientPaymentCache::class,
+            'consultation_id', // Foreign key on payment_cache table
+            'payment_cache_id', // Foreign key on patient_payment_cache_items table
+            'id', // Local key on consultations table
+            'id' // Local key on payment_cache table
+        );
+    }
+
 
 
     protected function serializeDate(DateTimeInterface $date)

@@ -257,10 +257,9 @@ const EditUserAccessDetails = ({ item, modal, fetchUsers }) => {
     }
     // Remove empty password before sending
     const payload = { ...formData };
-    if (!payload.password || payload.password === '' || payload.password.length < 6) {
+    if (!payload.password || payload.password === '') {
       delete payload.password;
     }
-    payload.privileges = Array.isArray(userPrivileges) ? userPrivileges : [];
     handlePatch(null, payload);
   };
 

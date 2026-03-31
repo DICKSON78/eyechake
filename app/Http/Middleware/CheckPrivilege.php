@@ -20,6 +20,30 @@ class CheckPrivilege
             return $next($request);
         }
 
+        // Check if user has privileges as array/object
+        $hasPrivilegesAttribute = array_key_exists('privileges', $user->attributes);
+        $privileges = $hasPrivilegesAttribute ? $user->privileges : [];
+        
+        // For backward compatibility, also check old string privilege format
+        $hasStringPrivilege = !empty($user->privilege);
+        
+        // Check if user has the required privilege (either as string or in array)
+        $hasRequiredPrivilege = $hasStringPrivilege ? $user->hasPrivilege($privilege) : in_array($privilege, $privileges);
+        
+        if (!$hasRequiredPrivilege) {
+            return response()->json([
+                'message' => 'Access denied. Insufficient privileges.',
+                'required_privilege' => $privilege,
+                'user_privileges' => $privileges,
+                'user_privilege' => $user->privilege,
+                'debug' => [
+                    'has_privileges_attribute' => $hasPrivilegesAttribute,
+                    'privileges_type' => gettype($privileges),
+                    'checking_privilege' => $privilege
+                ]
+            ], 403);
+        }
+        
         // Check role-based privileges first
         $rolePrivileges = $this->getRoleFallbackPrivileges($user->role);
         if (in_array($privilege, $rolePrivileges)) {

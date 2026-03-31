@@ -51,9 +51,7 @@ const ConsultationPatients = () => {
     patient_gender: undefined,
     patient_phone: undefined,
     item_payment_mode_id: status === "consulted" ? undefined : 'consultant',
-    start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    end_date: new Date(),
-    require_glass: status === "consulted" ? undefined : undefined,
+start_date: status === "pending" ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : undefined,    end_date: status === "pending" ? new Date() : undefined,
     patient_direction: undefined,
   });
 
@@ -77,9 +75,7 @@ const ConsultationPatients = () => {
       // Debug logging
       console.log('ConsultationPatients API params:', {
         status: status ? capitalize(status) : params.status,
-        start_date: status === 'pending' ? formatDateForDb(new Date()) : (params.start_date ? formatDateForDb(params.start_date) : undefined),
-        end_date: status === 'pending' ? formatDateForDb(new Date()) : (params.end_date ? formatDateForDb(params.end_date) : undefined),
-        require_glass: status === 'pending' ? undefined : params.require_glass,
+start_date: params.start_date ? formatDateForDb(params.start_date) : undefined,
         item_payment_mode_id: status === 'pending' ? undefined : params.item_payment_mode_id,
       });
       

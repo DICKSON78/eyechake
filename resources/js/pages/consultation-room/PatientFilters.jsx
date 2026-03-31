@@ -106,7 +106,7 @@ const PatientFilters = ({
               }}
               onChange={(value) =>
                 throttle(
-                  () => setParams({ ...params, patient_name: value }),
+                  () => setParams(prev => ({ ...prev, patient_name: value })),
                   1000
                 )
               }
@@ -131,7 +131,7 @@ const PatientFilters = ({
               }}
               onChange={(value) =>
                 throttle(
-                  () => setParams({ ...params, patient_id: value }),
+                  () => setParams(prev => ({ ...prev, patient_id: value })),
                   1000
                 )
               }
@@ -156,7 +156,7 @@ const PatientFilters = ({
               }}
               onChange={(value) =>
                 throttle(
-                  () => setParams({ ...params, patient_phone: value }),
+                  () => setParams(prev => ({ ...prev, patient_phone: value })),
                   1000
                 )
               }

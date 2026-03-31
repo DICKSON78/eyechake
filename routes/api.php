@@ -209,7 +209,7 @@ Route::group(['middleware' => ['auth:api', 'privilege:consultation_room']], func
     $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
         $router->get('/', 'index');
         $router->post('/', 'store');
-        $router->get('/{id}', 'show');
+        // Note: show method moved to main auth group for receptionist access
         $router->put('/{id}', 'update');
     });
     
@@ -269,7 +269,10 @@ Route::group(['middleware' => ['auth:api', 'privilege:marketing']], function ($r
 
 // Employee management routes - require employee_management privilege
 Route::group(['middleware' => ['auth:api', 'privilege:employee_management']], function ($router) {
-    // Routes will be added when controllers are created
+    $router->apiResource('/users', UsersController::class);
+    $router->apiResource('/job-titles', JobTitlesController::class);
+    $router->apiResource('/departments', DepartmentsController::class);
+    $router->apiResource('/clinics', ClinicsController::class);
 });
 
 // Settings routes - require settings privilege (Admin and Director only)
@@ -337,10 +340,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
     });
     $router->get('/performance-reports/{department}', [PerformanceDashboardController::class, '__invoke']);
-    $router->apiResource('/clinics', ClinicsController::class);
-    $router->apiResource('/departments', DepartmentsController::class);
-    $router->apiResource('/job-titles', JobTitlesController::class);
-    $router->apiResource('/users', UsersController::class);
     $router->apiResource('/appointments', AppointmentsController::class)->except(['store']);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/payment-channels', PaymentChannelsController::class);
@@ -444,6 +443,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
 
     $router->apiResource('/consultations', ConsultationsController::class);
     $router->controller(ConsultationsController::class)->prefix('consultations')->group(function ($router) {
+        $router->get('/{id}', 'show'); // Explicitly add show method for receptionist access
         $router->post('/add-item', 'addItem');
         $router->patch('/{id}/auto-save-clinical-notes', 'autoSaveClinicalNotes');
         $router->patch('/{id}/complete-clinical-notes', 'completeClinicalNotes');

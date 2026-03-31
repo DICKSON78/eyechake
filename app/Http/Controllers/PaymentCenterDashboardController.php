@@ -664,8 +664,7 @@ class PaymentCenterDashboardController extends Controller
             ->whereDate('created_at', '<=', $end_date);
 
         $data['statistics']['pending_bills_summary'] = $pendingBillsSummaryQuery
-            ->select('id', 'patient_id', 'amount', 'created_at')
-            ->with('patient:id,name')
+            ->select('id', 'amount', 'created_at')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();

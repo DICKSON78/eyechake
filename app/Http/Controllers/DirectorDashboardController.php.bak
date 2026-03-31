@@ -362,7 +362,7 @@ class DirectorDashboardController extends Controller
                 
                 if ($name === 'General Consultation - New') {
                     $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return' || $name === 'General Consultation - Verify') {
+                } elseif ($name === 'General Consultation - Return') {
                     $consultation_return_total += $amount;
                 }
             }
@@ -379,7 +379,7 @@ class DirectorDashboardController extends Controller
                 
                 if ($name === 'General Consultation - New') {
                     $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return' || $name === 'General Consultation - Verify') {
+                } elseif ($name === 'General Consultation - Return') {
                     $consultation_return_total += $amount;
                 }
             }
@@ -521,13 +521,13 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
                 ->first()->net ?? 0);
 
             // Bill payments - proportional allocation
             $consultationBill = (float) (DB::table('patient_payment_cache_items as ppci')
                 ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
-                
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
                 ->where('ppci.consultation_type_id', 4)
                 ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
@@ -536,7 +536,7 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
                 ->first()->net ?? 0);
 
             $data['summary']['consultation'] = $consultationCash + $consultationBill;
@@ -580,14 +580,14 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
                 ->first()->net ?? 0);
 
             // Bill payments
             $pharmacyBill = (float) (DB::table('patient_payment_cache_items as ppci')
                 ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
-                
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
                 ->whereRaw('LOWER(ct.name) = ?', ['pharmacy'])
                 ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
@@ -596,7 +596,7 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
                 ->first()->net ?? 0);
 
             $data['summary']['pharmacy'] = $pharmacyCash + $pharmacyBill;
@@ -643,7 +643,7 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
                 ->first()->net ?? 0);
 
             // Bill payments
@@ -651,7 +651,7 @@ class DirectorDashboardController extends Controller
                 ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
                 ->join('consultation_types as ct', 'ppci.consultation_type_id', '=', 'ct.id')
-                
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
                 ->whereRaw('LOWER(ct.name) = ?', ['glass'])
                 ->where('it.item_type_id', '!=', 4)
                 ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
@@ -661,7 +661,7 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
                 ->first()->net ?? 0);
 
             $data['summary']['glass'] = $glassCash + $glassBill;
@@ -707,14 +707,14 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pmt.amount - COALESCE(pmt.discount, 0))) as net')
                 ->first()->net ?? 0);
 
             // Bill payments
             $frameBill = (float) (DB::table('patient_payment_cache_items as ppci')
                 ->join('patient_item_bill_payments as pmt', 'ppci.bill_id', '=', 'pmt.bill_id')
                 ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                
+                ->join(DB::raw('(SELECT bill_id, SUM(unit_price * quantity) as gross_total FROM patient_payment_cache_items WHERE bill_id IS NOT NULL GROUP BY bill_id) as totals'), 'ppci.bill_id', '=', 'totals.bill_id')
                 ->where('it.item_type_id', 4)
                 ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
                 ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
@@ -723,7 +723,7 @@ class DirectorDashboardController extends Controller
                         $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                     });
                 })
-                ->selectRaw('SUM(ppci.unit_price * ppci.quantity) as net')
+                ->selectRaw('SUM((ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pmt.amount) as net')
                 ->first()->net ?? 0);
 
             $data['summary']['frame'] = $frameCash + $frameBill;
@@ -878,7 +878,7 @@ class DirectorDashboardController extends Controller
                     -- Cash payments with proportional allocation
                     SELECT 
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
                     INNER JOIN items as it ON ppci.item_id = it.id
@@ -897,7 +897,7 @@ class DirectorDashboardController extends Controller
                     -- Bill payments with proportional allocation
                     SELECT 
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
                     INNER JOIN items as it ON ppci.item_id = it.id
@@ -924,7 +924,7 @@ class DirectorDashboardController extends Controller
                     -- Cash payments with proportional allocation
                     SELECT 
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
                     INNER JOIN items as it ON ppci.item_id = it.id
@@ -942,7 +942,7 @@ class DirectorDashboardController extends Controller
                     -- Bill payments with proportional allocation
                     SELECT 
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
                     INNER JOIN items as it ON ppci.item_id = it.id
@@ -980,7 +980,7 @@ class DirectorDashboardController extends Controller
                         it.id as item_id,
                         it.name as item_name,
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount,
                         ppci.quantity as qty
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
@@ -1002,7 +1002,7 @@ class DirectorDashboardController extends Controller
                         it.id as item_id,
                         it.name as item_name,
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount,
                         ppci.quantity as qty
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id
@@ -1035,7 +1035,7 @@ class DirectorDashboardController extends Controller
                         it.id as item_id,
                         it.name as item_name,
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * (pip.amount - COALESCE(pip.discount, 0)) as net_amount,
                         ppci.quantity as qty
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_payments as pip ON ppci.item_payment_id = pip.id
@@ -1056,7 +1056,7 @@ class DirectorDashboardController extends Controller
                         it.id as item_id,
                         it.name as item_name,
                         itt.name as category_name,
-                        ppci.unit_price * ppci.quantity as net_amount,
+                        (ppci.unit_price * ppci.quantity) / NULLIF(totals.gross_total, 0) * pibp.amount as net_amount,
                         ppci.quantity as qty
                     FROM patient_payment_cache_items as ppci
                     INNER JOIN patient_item_bill_payments as pibp ON ppci.bill_id = pibp.bill_id

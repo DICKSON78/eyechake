@@ -7,6 +7,7 @@ import BusinessIcon from "@mui/icons-material/BusinessRounded";
 import SchoolIcon from "@mui/icons-material/SchoolRounded";
 import TextField from "../../../components/TextField";
 import Select from "../../../components/Select";
+import DatePicker from "../../../components/DatePicker";
 import useFetch from "../../../hooks/useFetch";
 
 import { throttle } from "../../../helpers";
@@ -111,6 +112,29 @@ const Filters = ({ params, setParams, ...rest }) => {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DatePicker
+            fullWidth
+            label="Start Date"
+            value={params.start_date || null}
+            onChange={(value) =>
+              setParams({
+                ...params,
+                start_date: !isNaN(value) ? value : null,
+              })
+            }
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <DatePicker
+            fullWidth
+            label="End Date"
+            value={params.end_date || null}
+            onChange={(value) =>
+              setParams({ ...params, end_date: !isNaN(value) ? value : null })
+            }
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Select
             label="Gender"
             fullWidth
@@ -129,24 +153,6 @@ const Filters = ({ params, setParams, ...rest }) => {
             clearable
             onChange={(value) =>
               setParams({ ...params, payment_mode_id: value })
-            }
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Select
-            label="Client Type"
-            fullWidth
-            options={[
-              { label: "VIP", value: "vip", icon: <StarIcon sx={{ fontSize: 16, color: '#FFD700' }} /> },
-              { label: "Business", value: "business", icon: <BusinessIcon sx={{ fontSize: 16 }} /> },
-              { label: "Student", value: "student", icon: <SchoolIcon sx={{ fontSize: 16 }} /> },
-              { label: "Outreach", value: "outreach" },
-            ]}
-            optionsLabel="label"
-            optionsValue="value"
-            clearable
-            onChange={(value) =>
-              setParams({ ...params, client_type: value, page: 1 })
             }
           />
         </Grid>

@@ -39,22 +39,19 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+            php artisan queue:restart
 
             # Set permissions
-            chown -R www-data:www-data /var/www
-            chmod -R 755 /var/www
-            chmod -R 777 /var/www/storage
-            chmod -R 777 /var/www/bootstrap/cache
+            chown -R www-data:www-data /var/www/storage
+            chmod -R 755 /var/www/storage
+            chmod -R 755 /var/www/bootstrap/cache
 
-            # Restart services
-            docker compose build --no-cache
-            docker compose up -d
+            # Database operations - ONLY MIGRATIONS (NO SEEDERS TO PROTECT USER DATA)
+            docker compose exec app php artisan migrate --force
+            # ⚠️  SEEDERS DISABLED - They overwrite existing user data and privileges
+            # docker compose exec app php artisan db:seed --class=ProductionSeedDataSeeder --force
 
-            # Wait for container to be ready 
-            sleep 20
+            # Restart services to apply changes
+            docker compose restart app
 
-            # ⚠️  NO SEEDERS - User data and privileges are preserved
-            # docker exec eyechake_app php artisan db:seed --class=ProductionSeedDataSeeder --force || echo "Seeding skipped or failed"
-
-            echo "✅ Deployment complete!"
-            echo "🌐 Application deployed to: https://sikafeyecare.com"
+            echo "✅ Deployment completed successfully!"

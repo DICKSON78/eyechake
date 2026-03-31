@@ -151,20 +151,26 @@ const CustomerRelationshipMonthlyReport = () => {
     setEndDate(end);
   };
 
-  const loadSavedReports = () => {
+    const loadSavedReports = async () => {
     try {
-      const reports = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(STORAGE_KEY_PREFIX)) {
-          const data = JSON.parse(localStorage.getItem(key));
-          reports.push({ id: key, timestamp: key.replace(STORAGE_KEY_PREFIX, ""), ...data });
-        }
-      }
-      reports.sort((a, b) => parseInt(b.timestamp, 10) - parseInt(a.timestamp, 10));
-      setSavedReports(reports);
-    } catch (e) {
-      console.error(e);
+      const response = await window.axios.get("api/employee-reports", {
+        params: { report_type: "Monthly", per_page: 100 }
+      });
+      const reports = response?.data?.data?.data || [];
+      const filtered = reports.filter(r => {
+        try {
+          const d = typeof r.activities_completed === "string" ? JSON.parse(r.activities_completed) : r.activities_completed;
+          return d && d._report_type === "customer_relationship_report";
+        } catch { return false; }
+      });
+      setSavedReports(filtered.map(r => {
+        try {
+          const d = typeof r.activities_completed === "string" ? JSON.parse(r.activities_completed) : r.activities_completed;
+          return { ...d, id: r.id, _api_id: r.id, timestamp: new Date(r.created_at).getTime() };
+        } catch { return { id: r.id, _api_id: r.id }; }
+      }));
+    } catch (error) {
+      console.error("Error loading saved reports:", error);
     }
   };
 
@@ -235,7 +241,7 @@ const CustomerRelationshipMonthlyReport = () => {
         message={`Delete report for ${report.employeeName || "Unknown"} (${report.month || "Unknown"})?`}
         onCancel={() => modalRef.current.close()}
         onOk={() => {
-          localStorage.removeItem(report.id);
+          await window.axios.delete(`api/employee-reports/${report._api_id || report.id}`);
           loadSavedReports();
           if (currentReportId === report.id) {
             setCurrentReportId(null);

@@ -18,12 +18,19 @@ const PatientFile = ({ patient }) => {
     page: 1,
     per_page: 25,
     patient_id: patient?.id,
+    with_items: "Yes",
+    with_diagnoses: "Yes",
   });
 
   // Update params when patient changes
   useEffect(() => {
     if (patient?.id) {
-      setParams(prev => ({ ...prev, patient_id: patient.id }));
+      setParams(prev => ({ 
+        ...prev, 
+        patient_id: patient.id,
+        with_items: "Yes",
+        with_diagnoses: "Yes",
+      }));
     }
   }, [patient?.id]);
 
@@ -37,14 +44,33 @@ const PatientFile = ({ patient }) => {
       page: 1,
     },
     (response) => {
+      // Debug logging
+      console.log('PatientFile API Response:', response);
+      
       // Handle paginated response from Laravel
-      const paginatedData = response?.data?.data || response?.data || {};
-      return {
-        data: paginatedData.data || [],
-        total: paginatedData.total || 0,
-        page: paginatedData.current_page || paginatedData.page || 1,
-        per_page: paginatedData.per_page || 25,
+      // API returns: {"message":"Success.","data":{"current_page":1,"data":[...]}}
+      const apiData = response?.data?.data;
+      console.log('PatientFile API Data:', apiData);
+      
+      if (!apiData || !apiData.data || apiData.data.length === 0) {
+        console.log('PatientFile: No API data or empty data, returning empty');
+        return {
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 25,
+        };
+      }
+      
+      const result = {
+        data: apiData.data || [],
+        total: apiData.total || 0,
+        page: apiData.current_page || 1,
+        per_page: apiData.per_page || 25,
       };
+      
+      console.log('PatientFile Final Result:', result);
+      return result;
     }
   );
 
@@ -57,6 +83,19 @@ const PatientFile = ({ patient }) => {
       addToast({ message: formatError(error), severity: "error" });
     }
   }, [error]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('PatientFile - Data changed:', data);
+    console.log('PatientFile - Data type:', typeof data);
+    console.log('PatientFile - Is array:', Array.isArray(data));
+    console.log('PatientFile - Data length:', data?.length);
+    console.log('PatientFile - Data.data:', data?.data);
+    console.log('PatientFile - Data.data type:', typeof data?.data);
+    console.log('PatientFile - Data.data is array:', Array.isArray(data?.data));
+    console.log('PatientFile - Data.data length:', data?.data?.length);
+    console.log('PatientFile - Params:', params);
+  }, [data, params]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -94,7 +133,7 @@ const PatientFile = ({ patient }) => {
                 field: "consultant",
                 headerName: "Consultant",
                 valueGetter: (item, index) =>
-                  item.payment_cache_item.consultant?.full_name,
+                  item.payment_cache_item.consultant?.full_name || 'Not Assigned',
               },
               {
                 field: "created_at",

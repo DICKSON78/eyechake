@@ -123,7 +123,7 @@ class UserPrivilege extends Model
         }
 
         // Column-based schema: one row per user, boolean columns
-        $record = self::where('user_id', $userId)->first();
+        $record = DB::table("user_privileges")->where("user_id", $userId)->first();
         if (!$record) {
             return [];
         }

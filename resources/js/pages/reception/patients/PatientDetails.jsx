@@ -88,34 +88,35 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
   };
 
   const getPatientInfoRows = () => {
-    if (!data) return [];
+    try {
+      if (!data) return [];
 
-    const rows = [
-      { 
-        label: "Patient Name", 
-        value: data.full_name, 
-        isVip: data.is_vip,
-        icon: <PersonIcon />,
-        priority: 1
-      },
-      { 
-        label: "Patient Number", 
-        value: data.id,
-        icon: <PersonIcon />,
-        priority: 1
-      },
-      { 
-        label: "Age", 
-        value: getAge(data.date_of_birth),
-        icon: <PersonIcon />,
-        priority: 2
-      },
-      { 
-        label: "Gender", 
-        value: data.gender,
-        icon: <PersonIcon />,
-        priority: 2
-      },
+      const rows = [
+        { 
+          label: "Patient Name", 
+          value: data.full_name || 'N/A', 
+          isVip: data.is_vip,
+          icon: <PersonIcon />,
+          priority: 1
+        },
+        { 
+          label: "Patient Number", 
+          value: data.id || 'N/A',
+          icon: <PersonIcon />,
+          priority: 1
+        },
+        { 
+          label: "Age", 
+          value: getAge(data.date_of_birth) || 'N/A',
+          icon: <PersonIcon />,
+          priority: 2
+        },
+        { 
+          label: "Gender", 
+          value: data.gender || 'N/A',
+          icon: <PersonIcon />,
+          priority: 2
+        },
       { 
         label: "Phone Number", 
         value: data.phone,
@@ -207,6 +208,10 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
     }
 
     return rows;
+    } catch (error) {
+      console.error('PatientDetails: Error in getPatientInfoRows():', error);
+      return [];
+    }
   };
 
   const getResponsiveColumns = () => {
@@ -216,13 +221,23 @@ const PatientDetails = ({ patientId, setLoading, onLoadSuccess }) => {
   };
 
   const getGroupedRows = () => {
-    const items = getPatientInfoRows();
-    const columnsPerRow = getResponsiveColumns();
-    const grouped = [];
-    for (let i = 0; i < items.length; i += columnsPerRow) {
-      grouped.push(items.slice(i, i + columnsPerRow));
+    try {
+      const items = getPatientInfoRows();
+      if (!items || !Array.isArray(items)) {
+        console.warn('PatientDetails: getPatientInfoRows() returned invalid data:', items);
+        return [];
+      }
+      
+      const columnsPerRow = getResponsiveColumns();
+      const grouped = [];
+      for (let i = 0; i < items.length; i += columnsPerRow) {
+        grouped.push(items.slice(i, i + columnsPerRow));
+      }
+      return grouped;
+    } catch (error) {
+      console.error('PatientDetails: Error in getGroupedRows():', error);
+      return [];
     }
-    return grouped;
   };
 
   const renderInfoCard = (row) => (

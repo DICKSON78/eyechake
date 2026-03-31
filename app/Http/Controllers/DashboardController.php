@@ -3,391 +3,167 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponse;
-use App\Models\Consultation;
-use App\Models\ExpensePayment;
-use App\Models\Patient;
-use App\Models\PatientCheckIn;
+use App\Models\PatientItemPayment;
 use App\Models\PatientItemBill;
 use App\Models\PatientItemBillPayment;
-use App\Models\PatientItemPayment;
-use App\Models\PatientPaymentCacheItem;
-use App\Models\Marketing\InformationSource;
+use App\Models\ExpensePayment;
+use App\Models\Patient;
+use App\Models\Appointment;
+use App\Models\Consultation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     use ApiResponse;
 
     /**
-     * Safely execute a query and return default value on error
+     * Safe query wrapper to handle database errors
      */
-    protected function safeQuery($callback, $default = 0)
+    private function safeQuery($callback, $default = 0)
     {
         try {
             return $callback();
         } catch (\Exception $e) {
-            \Log::error('Dashboard query error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            \Log::error('Dashboard query error', ['error' => $e->getMessage()]);
             return $default;
         }
     }
 
-    /**
-     * Get daily cash collection data for main dashboard
-     * This method mirrors the logic from PaymentCenterReportsController
-     */
-    protected function getDailyCashCollectionData($user, $clinic_id, $start_date, $end_date)
-    {
-        $data = [
-            'total_collections' => 0,
-            'total_discounts' => 0,
-            'total_patients' => 0,
-            'total_patient_visits' => 0,
-            'total_consulted_patients' => 0,
-            'total_glass' => 0,
-            'total_medicine' => 0,
-            'total_procedures' => 0,
-            'total_others' => 0,
-            'total_consultations' => 0,
-            'total_pending_bills' => 0,
-            'sms_balance' => 0,
-        ];
-        
-        // Use the exact same logic as PaymentCenterReportsController::getCashCollectionReport
-        try {
-            // Item payments query - same as PaymentCenterReportsController
-            $item_payments = PatientItemPayment::with(['channel', 'creator'])
-                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'patient_item_payments.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_payments.amount', '>', 0);
-            
-            if ($clinic_id) {
-                $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            // Bill payments query - same as PaymentCenterReportsController
-            $bill_payments = PatientItemBillPayment::with(['channel', 'creator'])
-                ->join('patient_item_bills as pib', 'patient_item_bill_payments.bill_id', '=', 'pib.id')
-                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pib.id')
-                ->join('items as it', 'ppci.item_id', '=', 'it.id')
-                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
-                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
-                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
-                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bill_payments.amount', '>', 0);
-            
-            if ($clinic_id) {
-                $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            // Calculate total collections - sum of both item and bill payments
-            $item_payments_sum = $item_payments->sum('patient_item_payments.amount') ?? 0;
-            $bill_payments_sum = $bill_payments->sum('patient_item_bill_payments.amount') ?? 0;
-            $data['total_collections'] = ($item_payments_sum + $bill_payments_sum);
-            
-            // Calculate total patients (unique patients who made payments)
-            $item_patients = $item_payments->distinct('pt.id')->pluck('pt.id');
-            $bill_patients = $bill_payments->distinct('pt.id')->pluck('pt.id');
-            $all_patients = $item_patients->merge($bill_patients)->unique();
-            $data['total_patients'] = $all_patients->count();
-            
-            // Calculate total patient visits (check-ins with payments)
-            $item_visits = $item_payments->distinct('pch.id')->pluck('pch.id');
-            $bill_visits = $bill_payments->distinct('pch.id')->pluck('pch.id');
-            $all_visits = $item_visits->merge($bill_visits)->unique();
-            $data['total_patient_visits'] = $all_visits->count();
-            
-            // Calculate totals by item category and specific consultation types
-            $item_categories = $item_payments
-                ->selectRaw('it.category, it.name, SUM(patient_item_payments.amount) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
-                ->groupBy('it.category', 'it.name')
-                ->get();
-            
-            $bill_categories = $bill_payments
-                ->selectRaw('it.category, it.name, SUM(patient_item_bill_payments.amount) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
-                ->groupBy('it.category', 'it.name')
-                ->get();
-            
-            // Merge category and item totals
-            $all_categories = [];
-            $consultation_new_total = 0;
-            $consultation_return_total = 0;
-            $consultation_verify_total = 0;
-            
-            foreach ($item_categories as $item) {
-                $category = $item->category;
-                $name = $item->name;
-                $amount = $item->total_amount;
-                
-                // Track consultation revenue separately by type
-                if ($name === 'General Consultation - New') {
-                    $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return') {
-                    $consultation_return_total += $amount;
-                } elseif ($name === 'General Consultation - Verify') {
-                    $consultation_verify_total += $amount;
-                }
-                
-                // Track by category
-                if ($category) {
-                    $all_categories[$category] = ($all_categories[$category] ?? 0) + $amount;
-                }
-            }
-            
-            foreach ($bill_categories as $item) {
-                $category = $item->category;
-                $name = $item->name;
-                $amount = $item->total_amount;
-                
-                // Track consultation revenue separately by type
-                if ($name === 'General Consultation - New') {
-                    $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return') {
-                    $consultation_return_total += $amount;
-                } elseif ($name === 'General Consultation - Verify') {
-                    $consultation_verify_total += $amount;
-                }
-                
-                // Track by category
-                if ($category) {
-                    $all_categories[$category] = ($all_categories[$category] ?? 0) + $amount;
-                }
-            }
-            
-            // Assign to specific categories
-            $data['total_glass'] = $all_categories['Glass'] ?? 0;
-            $data['total_medicine'] = $all_categories['Medicine'] ?? 0;
-            $data['total_procedures'] = $all_categories['Procedure'] ?? 0;
-            $data['total_others'] = $all_categories['Others'] ?? 0;
-            
-            // New consultation revenue fields separated by type
-            $data['consultation_new_revenue'] = $consultation_new_total;
-            $data['consultation_return_revenue'] = $consultation_return_total + $consultation_verify_total; // Return + Verify combined
-            $data['consultation_verify_revenue'] = $consultation_verify_total;
-            $data['consultation_other_revenue'] = $consultation_return_total + $consultation_verify_total;
-            $data['total_consultations'] = $consultation_new_total + $consultation_return_total + $consultation_verify_total;
-            
-            // Calculate consulted patients for the date range
-            $consulted_patients_query = \App\Models\Consultation::query()
-                ->where('consultations.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('consultations.created_at', '<=', $end_date . ' 23:59:59');
-            
-            if ($clinic_id) {
-                $consulted_patients_query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $data['total_consulted_patients'] = $consulted_patients_query->distinct('patient_id')->count('patient_id');
-            
-            // Calculate pending bills for the date range (only bills created on this date)
-            $pending_bills_query = \App\Models\PatientItemBill::query()
-                ->where('patient_item_bills.created_at', '>=', $start_date . ' 00:00:00')
-                ->where('patient_item_bills.created_at', '<=', $end_date . ' 23:59:59')
-                ->where('patient_item_bills.balance', '>', 0);
-            
-            if ($clinic_id) {
-                $pending_bills_query->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
-                });
-            }
-            
-            $data['total_pending_bills'] = $pending_bills_query->sum('balance');
-            
-            // Get SMS balance from clinic
-            if ($clinic_id) {
-                $clinic = \App\Models\Clinic::find($clinic_id);
-                $data['sms_balance'] = $clinic->sms_balance ?? 0;
-            } else {
-                // If no clinic restriction, get total SMS balance across all clinics
-                $data['sms_balance'] = \App\Models\Clinic::sum('sms_balance') ?? 0;
-            }
-            
-        } catch (\Exception $e) {
-            \Log::error('Dashboard getDailyCashCollectionData error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
-        
-        return $data;
-    }
-    
     public function __invoke(Request $request)
     {
+        $request->validate([
+            'start_date' => 'sometimes|date_format:Y-m-d',
+            'end_date' => 'sometimes|date_format:Y-m-d'
+        ]);
+
+        $user = $request->user();
+        
+        // Default to today if no dates provided
+        $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
+
+        // Default allow: if user missing or role unspecified, do not restrict by clinic
+        if (!$user || $user->is_admin) {
+            $clinic_id = $request->clinic_id;
+        } else {
+            $clinic_id = $user->clinic_id;
+        }
+
+        $data = [
+            'summary' => [],
+            'statistics' => [],
+        ];
+
+        // Today's Patients count (Active check-ins in date range)
+        $data['summary']['today_patients'] = \App\Models\PatientCheckIn::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->distinct('patient_id')
+            ->count('patient_id');
+
+        // Total Patients Registered in date range
+        $data['summary']['total_patients_registered'] = Patient::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('check_ins', function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                });
+            })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->count();
+
+        // Web Appointment Bookings in date range
+        $data['summary']['web_appointment_bookings'] = Appointment::query()
+            ->when($clinic_id, function ($query) use ($clinic_id) {
+                $query->whereHas('repliedBy', function ($q) use ($clinic_id) {
+                    $q->where('clinic_id', $clinic_id);
+                });
+            })
+            ->whereDate('created_at', '>=', $start_date)
+            ->whereDate('created_at', '<=', $end_date)
+            ->count();
+
+        // Total Revenue (actual payments linked to cache items, no orphans)
         try {
-            $request->validate([
-                'start_date' => 'sometimes|date_format:Y-m-d',
-                'end_date' => 'sometimes|date_format:Y-m-d',
-                'sales_expenses_period' => 'sometimes|in:daily,monthly,yearly',
-                'patient_registration_period' => 'sometimes|in:daily,monthly,yearly',
-                'load_statistics' => 'sometimes|in:true,false,1,0',
-            ]);
-
-            $user = $request->user();
-            $today = Carbon::today()->format('Y-m-d');
-
-            // Default allow: if user missing or role unspecified, do not restrict by clinic
-            if (!$user || ($user->is_admin ?? false)) {
-                $clinic_id = $request->clinic_id;
-            } else {
-                $clinic_id = $user->clinic_id ?? null;
-            }
-
-            // Default to current day if no dates provided
-            $start_date = $request->start_date ?? Carbon::today()->format('Y-m-d');
-            $end_date = $request->end_date ?? Carbon::today()->format('Y-m-d');
-
-            // Get actual data from Daily Cash Collection Report logic
-            // This ensures main dashboard matches the Daily Cash Collected Report
-            $dailyCollectionData = $this->getDailyCashCollectionData($user, $clinic_id, $start_date, $end_date);
+            $revenueQuery = PatientItemPayment::query()
+                ->whereNotNull('patient_item_payments.created_at')
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
-            $data = [
-                'summary' => [
-                    'total_sales' => $dailyCollectionData['total_collections'] ?? 0,
-                    'discount' => $dailyCollectionData['total_discounts'] ?? 0,
-                    'expenses' => $dailyCollectionData['total_expenses'] ?? 0,
-                    'new_patients' => $dailyCollectionData['total_patients'] ?? 0,
-                    'patient_visits' => $dailyCollectionData['total_patient_visits'] ?? 0,
-                    'consulted_patients' => $dailyCollectionData['total_consulted_patients'] ?? 0,
-                    'glass' => $dailyCollectionData['total_glass'] ?? 0,
-                    'pharmacy' => $dailyCollectionData['total_medicine'] ?? 0,
-                    'procedure' => $dailyCollectionData['total_procedures'] ?? 0,
-                    'others' => $dailyCollectionData['total_others'] ?? 0,
-                    'consultation' => $dailyCollectionData['total_consultations'] ?? 0,
-                    'consultation_new_revenue' => $dailyCollectionData['consultation_new_revenue'] ?? 0,
-                    'consultation_return_revenue' => $dailyCollectionData['consultation_return_revenue'] ?? 0,
-                    'consultation_verify_revenue' => $dailyCollectionData['consultation_verify_revenue'] ?? 0,
-                    'consultation_other_revenue' => $dailyCollectionData['consultation_other_revenue'] ?? 0,
-                    'pending_bills' => $dailyCollectionData['total_pending_bills'] ?? 0,
-                    'sms_balance' => $dailyCollectionData['sms_balance'] ?? 0,
-                ],
-                'statistics' => [
-                    'expenses_by_category' => [],
-                    'payments_by_channel' => [],
-                    'consultations_by_item' => [],
-                    'top_diagnosis' => [],
-                    'yearly' => [],
-                    'sales_expenses' => [],
-                    'patient_registration' => [],
-                    'client_statistics' => [],
-                ],
-            ];
-
-            // Handle period parameters - can be string or array/object
-            $salesExpensesPeriodInput = $request->sales_expenses_period ?? 'yearly';
-            $salesExpensesPeriod = is_array($salesExpensesPeriodInput) 
-                ? ($salesExpensesPeriodInput['value'] ?? $salesExpensesPeriodInput[0] ?? 'yearly')
-                : (is_string($salesExpensesPeriodInput) ? $salesExpensesPeriodInput : 'yearly');
-            
-            // Validate and sanitize
-            if (!in_array($salesExpensesPeriod, ['daily', 'monthly', 'yearly'])) {
-                $salesExpensesPeriod = 'yearly';
+            if ($clinic_id) {
+                $revenueQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
             }
             
-            $patientRegistrationPeriodInput = $request->patient_registration_period ?? 'yearly';
-            $patientRegistrationPeriod = is_array($patientRegistrationPeriodInput)
-                ? ($patientRegistrationPeriodInput['value'] ?? $patientRegistrationPeriodInput[0] ?? 'yearly')
-                : (is_string($patientRegistrationPeriodInput) ? $patientRegistrationPeriodInput : 'yearly');
+            $data['summary']['total_revenue'] = (float) $revenueQuery->sum('patient_item_payments.amount');
+        } catch (\Exception $e) {
+            \Log::error('Error calculating total revenue', ['error' => $e->getMessage()]);
+            $data['summary']['total_revenue'] = 0;
+        }
+
+        // Daily Collections (same logic as PaymentCenterReportsController)
+        try {
+            // Item payments query
+            $dailyQuery = PatientItemPayment::query()
+                ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
+                });
             
-            // Validate and sanitize - also handle cases like "yearly:1" from checkboxes
-            $patientRegistrationPeriod = preg_replace('/:.*$/', '', $patientRegistrationPeriod); // Remove ":1" suffix if present
-            if (!in_array($patientRegistrationPeriod, ['daily', 'monthly', 'yearly'])) {
-                $patientRegistrationPeriod = 'yearly';
+            if ($clinic_id) {
+                $dailyQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
             }
+            
+            $dailyCollections = (float) $dailyQuery->sum('patient_item_payments.amount');
 
-            $cacheKey = "dashboard_total_sales_{$clinic_id}_{$start_date}_{$end_date}";
-            $data['summary']['total_sales'] = Cache::remember($cacheKey, 300, function() use ($clinic_id, $start_date, $end_date) {
-                return $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                    // Use whereExists to avoid row multiplication from JOINs
-                    $paymentsQuery = PatientItemPayment::query()
-                        ->whereNotNull('patient_item_payments.created_at')
-                        ->where('patient_item_payments.created_at', '>=', $start_date . ' 00:00:00')
-                        ->where('patient_item_payments.created_at', '<=', $end_date . ' 23:59:59')
-                        ->where('patient_item_payments.amount', '>', 0)
-                        ->whereExists(function($q) {
-                            $q->select(DB::raw(1))
-                              ->from('patient_payment_cache_items as ppci')
-                              ->whereColumn('ppci.item_payment_id', 'patient_item_payments.id');
-                        });
+            // Bill payments query
+            $dailyBillQuery = PatientItemBillPayment::query()
+                ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('patient_item_bill_payments.amount', '>', 0)
+                ->whereExists(function($q) {
+                    $q->select(DB::raw(1))
+                      ->from('patient_payment_cache_items as ppci')
+                      ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.id');
+                });
+            
+            if ($clinic_id) {
+                $dailyBillQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $billPaymentsCollections = (float) $dailyBillQuery->sum('patient_item_bill_payments.amount');
+            $data['summary']['daily_collections'] = $dailyCollections + $billPaymentsCollections;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating daily collections', ['error' => $e->getMessage()]);
+            $data['summary']['daily_collections'] = 0;
+        }
 
-                    if ($clinic_id) {
-                        $paymentsQuery->whereIn('patient_item_payments.created_by', function($q) use ($clinic_id) {
-                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                        });
-                    }
-
-                    // Use net amount (amount - discount) to match Daily Cash Collection subtotal
-                    $paymentsSum = (float) ($paymentsQuery->selectRaw('SUM(patient_item_payments.amount - COALESCE(patient_item_payments.discount, 0)) as net')->first()->net ?? 0);
-
-                    $billPaymentsQuery = PatientItemBillPayment::query()
-                        ->whereNotNull('patient_item_bill_payments.created_at')
-                        ->where('patient_item_bill_payments.created_at', '>=', $start_date . ' 00:00:00')
-                        ->where('patient_item_bill_payments.created_at', '<=', $end_date . ' 23:59:59')
-                        ->where('patient_item_bill_payments.amount', '>', 0)
-                        ->whereExists(function($q) {
-                            $q->select(DB::raw(1))
-                              ->from('patient_payment_cache_items as ppci')
-                              ->whereColumn('ppci.bill_id', 'patient_item_bill_payments.bill_id');
-                        });
-
-                    if ($clinic_id) {
-                        $billPaymentsQuery->whereIn('patient_item_bill_payments.created_by', function($q) use ($clinic_id) {
-                            $q->select('id')->from('users')->where('clinic_id', $clinic_id);
-                        });
-                    }
-
-                    $billPaymentsSum = (float) $billPaymentsQuery->sum('patient_item_bill_payments.amount');
-
-                    return $paymentsSum + $billPaymentsSum;
-                }, 0);
-            });
-
-            $cacheKey = "dashboard_discount_{$clinic_id}_{$start_date}_{$end_date}";
-            $data['summary']['discount'] = Cache::remember($cacheKey, 300, function() use ($clinic_id, $start_date, $end_date) {
-                return $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                    return PatientItemPayment::query()
-                        ->when($clinic_id, function ($query) use ($clinic_id) {
-                            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                                $query->where('clinic_id', $clinic_id);
-                            });
-                        })
-                        ->whereDate('created_at', '>=', $start_date)
-                        ->whereDate('created_at', '<=', $end_date)
-                        ->sum('discount');
-                }, 0);
-            });
-
-            $cacheKey = "dashboard_expenses_{$clinic_id}_{$start_date}_{$end_date}";
-            $data['summary']['expenses'] = Cache::remember($cacheKey, 300, function() use ($clinic_id, $start_date, $end_date) {
-                return $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                    return ExpensePayment::query()
-                        ->when($clinic_id, function ($query) use ($clinic_id) {
-                            $query->whereHas('creator', function ($query) use ($clinic_id) {
-                                $query->where('clinic_id', $clinic_id);
-                            });
-                        })
-                        ->whereDate('created_at', '>=', $start_date)
-                        ->whereDate('created_at', '<=', $end_date)
-                        ->sum('amount');
-                }, 0);
-            });
+        // Total Expenses in date range
 
             // Running Cost & Improvement Cost (by explicit flag OR category name match)
             // Running costs = ongoing operational expenses (maintenance, software)
@@ -682,19 +458,24 @@ class DashboardController extends Controller
                 return $cashSales + $billSales;
             }, 0);
 
-            // Pending bills: total outstanding amount of bills with status 'Pending' created in date range (amount - discount - payments > 0)
-            $data['summary']['pending_bills'] = $this->safeQuery(function() use ($clinic_id, $start_date, $end_date) {
-                return PatientItemBill::query()
-                    ->when($clinic_id, function ($query) use ($clinic_id) {
-                        $query->whereHas('creator', function ($query) use ($clinic_id) {
-                            $query->where('clinic_id', $clinic_id);
-                        });
-                    })
+            // Pending bills: total amount of bills with status 'Pending' created in date range (daily)
+            try {
+                $pendingBillsQuery = PatientItemBill::query()
                     ->where('status', 'Pending')
                     ->whereDate('created_at', '>=', $start_date)
-                    ->whereDate('created_at', '<=', $end_date)
-                    ->sum('amount');
-            }, 0);
+                    ->whereDate('created_at', '<=', $end_date);
+                    
+                if ($clinic_id) {
+                    $pendingBillsQuery->whereHas('creator', function ($query) use ($clinic_id) {
+                        $query->where('clinic_id', $clinic_id);
+                    });
+                }
+                
+                $data['summary']['pending_bills'] = $pendingBillsQuery->sum('amount');
+            } catch (\Exception $e) {
+                \Log::error('Error calculating pending bills', ['error' => $e->getMessage()]);
+                $data['summary']['pending_bills'] = 0;
+            }
 
             $data['summary']['sms_balance'] = ($user && $user->clinic) ? $user->clinic->sms_balance : 0;
 
@@ -865,19 +646,163 @@ class DashboardController extends Controller
                 $data['statistics']['yearly'] = [];
             }
 
-            return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
-        } catch (\Exception $e) {
-            \Log::error('DashboardController error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all(),
-            ]);
+            // Consultation Room Department Metrics (same as DirectorDashboardController)
+        try {
+            // Total consultations in date range
+            $data['summary']['total_consultations'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
 
-            return $this->sendError(
-                'An error occurred while fetching dashboard data. Please try again later.',
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+            // Consultations today
+            $data['summary']['consultations_today'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereDate('created_at', Carbon::today()->format('Y-m-d'))
+                ->count();
+
+            // Pending consultations
+            $data['summary']['pending_consultations'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Pending')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+
+            // Completed consultations
+            $data['summary']['completed_consultations'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->where('status', 'Consulted')
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->count();
+
+            // Total patients consulted (distinct patients)
+            $data['summary']['total_patients_consulted'] = Consultation::query()
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                })
+                ->whereDate('created_at', '>=', $start_date)
+                ->whereDate('created_at', '<=', $end_date)
+                ->distinct()
+                ->count('payment_cache_item_id');
+
+        } catch (\Exception $e) {
+            \Log::error('Error calculating consultation room metrics', ['error' => $e->getMessage()]);
+            $data['summary']['total_consultations'] = 0;
+            $data['summary']['consultations_today'] = 0;
+            $data['summary']['pending_consultations'] = 0;
+            $data['summary']['completed_consultations'] = 0;
+            $data['summary']['total_patients_consulted'] = 0;
         }
+
+        // Revenue from New Consultation - same as DirectorDashboardController
+        try {
+            // Use exact same logic as DirectorDashboardController
+            $item_payments = DB::table('patient_item_payments as pmt')
+                ->join('patient_payment_cache_items as ppci', 'ppci.item_payment_id', '=', 'pmt.id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('pmt.amount', '>', 0);
+            
+            if ($clinic_id) {
+                $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            $bill_payments = DB::table('patient_item_bill_payments as pmt')
+                ->join('patient_item_bills as pib', 'pmt.bill_id', '=', 'pib.id')
+                ->join('patient_payment_cache_items as ppci', 'ppci.bill_id', '=', 'pmt.bill_id')
+                ->join('items as it', 'ppci.item_id', '=', 'it.id')
+                ->join('patient_payment_cache as ppc', 'ppci.payment_cache_id', '=', 'ppc.id')
+                ->join('patient_check_ins as pch', 'ppc.check_in_id', '=', 'pch.id')
+                ->join('patients as pt', 'pch.patient_id', '=', 'pt.id')
+                ->where('pmt.created_at', '>=', $start_date . ' 00:00:00')
+                ->where('pmt.created_at', '<=', $end_date . ' 23:59:59')
+                ->where('pmt.amount', '>', 0);
+            
+            if ($clinic_id) {
+                $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
+                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                });
+            }
+            
+            // Calculate consultation revenue by item name - exact same logic as DirectorDashboardController
+            $consultation_new_total = 0;
+            $consultation_return_total = 0;
+            
+            // Process item payments
+            $item_categories = $item_payments
+                ->selectRaw('it.category, it.name, SUM(pmt.amount - COALESCE(pmt.discount, 0)) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
+                ->groupBy('it.category', 'it.name')
+                ->get();
+            
+            foreach ($item_categories as $item) {
+                $name = $item->name;
+                $amount = $item->total_amount;
+                
+                if ($name === 'General Consultation - New') {
+                    $consultation_new_total += $amount;
+                } elseif ($name === 'General Consultation - Return') {
+                    $consultation_return_total += $amount;
+                }
+            }
+            
+            // Process bill payments
+            $bill_categories = $bill_payments
+                ->selectRaw('it.category, it.name, SUM(pmt.amount) as total_amount, COUNT(DISTINCT pt.id) as patient_count')
+                ->groupBy('it.category', 'it.name')
+                ->get();
+            
+            foreach ($bill_categories as $item) {
+                $name = $item->name;
+                $amount = $item->total_amount;
+                
+                if ($name === 'General Consultation - New') {
+                    $consultation_new_total += $amount;
+                } elseif ($name === 'General Consultation - Return') {
+                    $consultation_return_total += $amount;
+                }
+            }
+            
+            $data['summary']['consultation_new_revenue'] = $consultation_new_total;
+            $data['summary']['consultation_return_revenue'] = $consultation_return_total;
+            $data['summary']['revenue_new_consultation'] = $consultation_new_total;
+            $data['summary']['revenue_return_consultation'] = $consultation_return_total;
+            $data['summary']['revenue_all_consultations'] = $consultation_new_total + $consultation_return_total;
+        } catch (\Exception $e) {
+            \Log::error('Error calculating revenue from consultations', ['error' => $e->getMessage()]);
+            $data['summary']['consultation_new_revenue'] = 0;
+            $data['summary']['consultation_return_revenue'] = 0;
+            $data['summary']['revenue_new_consultation'] = 0;
+            $data['summary']['revenue_return_consultation'] = 0;
+            $data['summary']['revenue_all_consultations'] = 0;
+        }
+
+        return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
 
     private function generateSalesExpensesData($clinic_id, $period)

@@ -178,15 +178,16 @@ class ConsultationsController extends Controller
             });
         }
 
+        // Simplified relationship loading for patient records
         if ($patient_id) {
             $data->whereHas('payment_cache_item.payment_cache.check_in', function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);
             });
         }
-
+        
         if ($patient_name) {
             $data->whereHas('payment_cache_item.payment_cache.check_in.patient', function ($query) use ($patient_name) {
-                $query->fullName('%' . $patient_name . '%');
+                $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $patient_name . '%']);
             });
         }
 
@@ -621,7 +622,7 @@ class ConsultationsController extends Controller
             $data = Consultation::with(['payment_cache_item' => function ($query) {
                 $query->with(['payment_cache.check_in.patient' => function ($query2) {
                     $query2->with(['region', 'district', 'ward']);
-                }]);
+                }, 'payment_mode', 'item', 'consultant']);
             }]);
 
             $data->with([

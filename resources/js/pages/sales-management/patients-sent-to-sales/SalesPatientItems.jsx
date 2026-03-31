@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
   CardContent,
   Divider,
+  Grid,
   Stack,
   Typography,
   Skeleton,
@@ -18,6 +19,9 @@ import {
 import Page, { Header as PageHeader } from "../../../components/Page";
 import PatientDetails from "../../reception/patients/PatientDetails";
 import Table from "../../../components/Table";
+import Modal from "../../../components/Modal";
+import ConsultationItemsCard from "../../consultation-room/clinical-notes/ConsultationItemsCard";
+import SelectItems from "../../consultation-room/clinical-notes/SelectItems";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat } from "../../../helpers";
 
@@ -25,6 +29,7 @@ const SalesPatientItems = () => {
   const { patientId, paymentCacheId } = useParams();
   const navigate = useNavigate();
   const addToast = useToast();
+  const modalRef = useRef();
   const [loadingPatient, setLoadingPatient] = useState(true);
 
   const {
@@ -43,8 +48,25 @@ const SalesPatientItems = () => {
     }
   );
 
+  // Fetch items separately so we can refresh after adding glass
+  const {
+    data: items,
+    loading: loadingItems,
+    handleFetch: fetchItems,
+  } = useFetch(
+    "api/patient-payment-cache-items",
+    { consultation_id: paymentCache?.consultation?.id },
+    !!paymentCache?.consultation?.id,
+    [],
+    (response) => {
+      const payload = response?.data?.data;
+      return Array.isArray(payload) ? payload : (payload?.data ?? []);
+    }
+  );
+
   const patient = paymentCache?.check_in?.patient;
-  const items = paymentCache?.items ?? [];
+  const consultation = paymentCache?.consultation;
+  const allItems = items?.length > 0 ? items : (paymentCache?.items ?? []);
 
   useEffect(() => {
     document.title = `Manage Patient - ${window.APP_NAME}`;
@@ -56,28 +78,39 @@ const SalesPatientItems = () => {
     }
   }, [error, addToast]);
 
+  useEffect(() => {
+    if (paymentCache?.consultation?.id) {
+      fetchItems();
+    }
+  }, [paymentCache?.consultation?.id]);
+
   const handleBack = () => {
     navigate("/sales-management/patients-sent-to-sales");
   };
 
-  // Check if there are any unpaid items
-  const hasUnpaidItems = items.some(item => 
-    item?.status === 'Pending' || item?.status === 'Billed'
-  );
-
-  // Check if patient has glass items (needs to go to optician)
-  const hasGlassItems = items.some(item => 
-    item?.consultation_type?.name === 'Glass'
+  const hasUnpaidItems = allItems.some(
+    (item) => item?.status === "Pending" || item?.status === "Billed"
   );
 
   const handleSendToCashier = () => {
     navigate(`/payment-center/pending-cash-patients/${patientId}/${paymentCacheId}`);
   };
 
-  const handleSendToOptician = () => {
-    // Navigate to optician center - patient is ready for dispensing
-    navigate(`/optician-center/glass-patients`);
-    addToast({ message: 'Patient sent to optician for dispensing', severity: 'success' });
+  const openSelectItemsModal = (title, type) => {
+    if (!consultation) {
+      addToast({ message: "No consultation found for this patient", severity: "error" });
+      return;
+    }
+    const component = (
+      <SelectItems
+        modal={modalRef.current}
+        consultation={consultation}
+        consultationType={type}
+        selected={Array.isArray(allItems) ? allItems.filter((e) => e.consultation_type?.name === type) : []}
+        fetchItems={() => { fetchItems(); handleFetch(); }}
+      />
+    );
+    modalRef.current.open(title, component, "md");
   };
 
   if (!paymentCacheId) {
@@ -93,7 +126,9 @@ const SalesPatientItems = () => {
       >
         <Card>
           <CardContent>
-            <Typography color="text.secondary">Missing payment cache. Please go back and try again.</Typography>
+            <Typography color="text.secondary">
+              Missing payment cache. Please go back and try again.
+            </Typography>
             <Button startIcon={<BackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
               Back to list
             </Button>
@@ -109,7 +144,11 @@ const SalesPatientItems = () => {
         { title: "Home" },
         { title: "Sales Table" },
         { title: "Patients Sent to Sales", onClick: handleBack },
-        { title: patient ? (patient.full_name || `${patient.first_name || ''} ${patient.last_name || ''}`).trim() || "Manage" : "Manage" },
+        {
+          title: patient
+            ? (patient.full_name || `${patient.first_name || ""} ${patient.last_name || ""}`).trim() || "Manage"
+            : "Manage",
+        },
       ]}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -117,35 +156,14 @@ const SalesPatientItems = () => {
           Back to list
         </Button>
         <Stack direction="row" spacing={2}>
-          {/* Show appropriate button based on payment status */}
-          {hasUnpaidItems ? (
-            <Button
-              variant="contained"
-              startIcon={<SendToCashierIcon />}
-              onClick={handleSendToCashier}
-              disabled={loadingCache || !paymentCache}
-            >
-              Send to Cashier
-            </Button>
-          ) : hasGlassItems ? (
-            <Button
-              variant="contained"
-              startIcon={<BackIcon />}
-              onClick={handleBack}
-              disabled={loadingCache || !paymentCache}
-            >
-              Done
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              startIcon={<SendToCashierIcon />}
-              onClick={handleSendToCashier}
-              disabled={loadingCache || !paymentCache}
-            >
-              Complete
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            startIcon={<SendToCashierIcon />}
+            onClick={handleSendToCashier}
+            disabled={loadingCache || !paymentCache}
+          >
+            {hasUnpaidItems ? "Send to Cashier" : "Complete"}
+          </Button>
         </Stack>
       </Stack>
 
@@ -155,22 +173,55 @@ const SalesPatientItems = () => {
         onLoadSuccess={() => {}}
       />
 
-      {loadingPatient ? (
-        <Skeleton variant="rounded" height={120} sx={{ mt: 2 }} />
-      ) : null}
+      {loadingPatient ? <Skeleton variant="rounded" height={120} sx={{ mt: 2 }} /> : null}
 
+      {/* Glass & Others Cards with Add functionality */}
+      {consultation && (
+        <Box sx={{ mt: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <ConsultationItemsCard
+                title="Glass"
+                consultationType="Glass"
+                loading={loadingItems}
+                items={allItems}
+                consultation={consultation}
+                onClickAdd={(title, consultationType) =>
+                  openSelectItemsModal(title, consultationType)
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <ConsultationItemsCard
+                title="Others"
+                consultationType="Others"
+                loading={loadingItems}
+                items={allItems}
+                consultation={consultation}
+                onClickAdd={(title, consultationType) =>
+                  openSelectItemsModal(title, consultationType)
+                }
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
+      {/* All Items Summary Table */}
       <Card sx={{ mt: 2 }}>
         <PageHeader
           title="Items in this visit"
-          subtitle={paymentCache ? `${items.length} item(s)` : "Loading…"}
+          subtitle={paymentCache ? `${allItems.length} item(s)` : "Loading…"}
         />
         <Divider />
         <CardContent>
           {loadingCache && !paymentCache ? (
             <Skeleton variant="rounded" height={200} />
           ) : error && !paymentCache ? (
-            <Typography color="error">Failed to load items. {formatError(error)}</Typography>
-          ) : !Array.isArray(items) || items.length === 0 ? (
+            <Typography color="error">
+              Failed to load items. {formatError(error)}
+            </Typography>
+          ) : !Array.isArray(allItems) || allItems.length === 0 ? (
             <Typography color="text.secondary">No items in this visit.</Typography>
           ) : (
             <Table
@@ -185,6 +236,11 @@ const SalesPatientItems = () => {
                   field: "item_name",
                   headerName: "Item",
                   valueGetter: (item) => item?.item?.name ?? "—",
+                },
+                {
+                  field: "consultation_type",
+                  headerName: "Type",
+                  valueGetter: (item) => item?.consultation_type?.name ?? "—",
                 },
                 {
                   field: "payment_mode",
@@ -213,10 +269,10 @@ const SalesPatientItems = () => {
                   valueGetter: (item) => item?.status ?? "—",
                 },
               ]}
-              items={items}
-              itemCount={items.length}
+              items={allItems}
+              itemCount={allItems.length}
               page={1}
-              pageSize={items.length || 25}
+              pageSize={allItems.length || 25}
               onPageChange={() => {}}
               onPageSizeChange={() => {}}
               hidePaginationFooter
@@ -224,6 +280,7 @@ const SalesPatientItems = () => {
           )}
         </CardContent>
       </Card>
+      <Modal ref={modalRef} />
     </Page>
   );
 };

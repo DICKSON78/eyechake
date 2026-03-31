@@ -47,7 +47,6 @@ class UsersController extends Controller
             })
             ->orderBy('first_name', 'asc')
             ->paginate($per_page);
-        $data->getCollection()->transform(function ($user) { $user->append('privileges'); return $user; });
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
@@ -117,7 +116,6 @@ class UsersController extends Controller
     public function show($id)
     {
         $data = User::with(['job_title', 'creator'])->findOrFail($id);
-        $data->append('privileges');
         // Privileges are returned as array via the getPrivilegesAttribute accessor
         return $this->sendResponse($data, Response::HTTP_OK, 'Success.');
     }
