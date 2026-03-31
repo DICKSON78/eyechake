@@ -12,6 +12,7 @@ import { green, pink, orange, red } from '@mui/material/colors';
 
 import Page from '../../../components/Page';
 import InfoCard from '../../dashboard/InfoCard';
+import KPIReportCardTable from '../../../components/reports/KPIReportCardTable';
 import { useFetch, useToast } from '../../../hooks';
 import { formatError, numberFormat, formatDateForDb } from '../../../helpers';
 
@@ -52,6 +53,14 @@ const Dashboard = () => {
 
   const { data: kpiData, loading: kpiLoading } = useFetch(
     'api/performance-reports/sales',
+    { start_date: today, end_date: today },
+    true,
+    null,
+    (response) => response.data.data
+  );
+
+  const { data: crmKpiData, loading: crmKpiLoading } = useFetch(
+    'api/performance-reports/crm',
     { start_date: today, end_date: today },
     true,
     null,
@@ -109,27 +118,9 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      <Card>
-        <CardHeader title="Key Performance Indicators" titleTypographyProps={{ variant: 'h6', fontWeight: 700 }} />
-        <Divider />
-        <CardContent>
-          {kpiLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress size={32} /></Box>
-          ) : kpis.length > 0 ? (
-            <Grid container spacing={2}>
-              {kpis.map((kpi) => (
-                <Grid key={kpi.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                  <KPICard kpi={kpi} />
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
-            <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
-              No KPI data available. Please set targets in Settings → Performance Targets.
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
+      {/* KPI Report Cards */}
+      {kpis.length>0 && <KPIReportCardTable title="SALES DEPARTMENT REPORT CARD" kpis={kpis} loading={kpiLoading} />}
+      {crmKpiData?.kpis && <KPIReportCardTable title="CUSTOMER RELATION MANAGEMENT DEPARTMENT REPORT CARD" kpis={crmKpiData.kpis} loading={crmKpiLoading} />}
     </Page>
   );
 };

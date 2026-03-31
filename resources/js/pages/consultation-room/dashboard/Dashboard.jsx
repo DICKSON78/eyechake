@@ -87,6 +87,14 @@ const Dashboard = () => {
     (response) => response.data.data
   );
 
+  const { data: crmData, loading: crmLoading } = useFetch(
+    "api/performance-reports/crm",
+    dateParams,
+    true,
+    null,
+    (response) => response.data.data
+  );
+
 
   useEffect(() => {
     document.title = `Consultation Room Dashboard - ${window.APP_NAME}`;
@@ -291,6 +299,10 @@ const Dashboard = () => {
               </Card>
             </Grid>
           </Grid>
+          
+          {/* KPI Report Cards */}
+          {performanceData?.kpis && <KPIReportCardTable title="OPTOMETRY DEPARTMENT REPORT CARD" kpis={performanceData.kpis} loading={performanceLoading} />}
+          {crmData?.kpis && <KPIReportCardTable title="CUSTOMER RELATION MANAGEMENT DEPARTMENT REPORT CARD" kpis={crmData.kpis} loading={crmLoading} />}
         </React.Fragment>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>

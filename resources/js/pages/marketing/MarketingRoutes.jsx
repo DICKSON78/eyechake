@@ -19,6 +19,7 @@ import EditInformationSource from "./settings/information-sources/EditInformatio
 import HighValuePatients from "./high-value-patients/HighValuePatients";
 import SettingsRoutes from "./settings/SettingsRoutes";
 import ReportsRoutes from "./reports/ReportsRoutes";
+import MarketingContactAnalytics from "../crm-reports/marketing-contact-analytics/MarketingContactAnalytics";
 
 const MarketingRoutes = () => {
   return (
@@ -99,6 +100,10 @@ const MarketingRoutes = () => {
       <Route
         path="/reports/*"
         element={<ReportsRoutes />}
+      />
+      <Route
+        path="/marketing-contact-analytics"
+        element={<MarketingContactAnalytics />}
       />
     </Routes>
   );

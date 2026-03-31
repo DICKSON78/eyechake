@@ -473,7 +473,9 @@ export const getPrivileges = (preferences) => {
       value: "consultation_room",
       children: [
         { label: "Optometrist Monthly Report", value: "optometrist_monthly_report" },
-        { label: "Optometry Performance Report Card", value: "optometry_report_card" }
+        { label: "Optometry Performance Report Card", value: "optometry_report_card" },
+        { label: "Optometry KPI Report Card", value: "optometry_kpi_report_card" },
+        { label: "CRM KPI Report Card", value: "crm_kpi_report_card" }
       ]
     },
     { label: "Optician Center", value: "optician_center" },
@@ -485,6 +487,8 @@ export const getPrivileges = (preferences) => {
       value: "sales_center",
       children: [
         { label: "Sales Manager Monthly Report", value: "sales_manager_monthly_report" },
+        { label: "Sales KPI Report Card", value: "sales_kpi_report_card" },
+        { label: "CRM KPI Report Card", value: "crm_kpi_report_card" }
       ]
     },
     { label: "Inventory Management", value: "inventory_management" },

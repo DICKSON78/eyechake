@@ -376,7 +376,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           case "MARKETING":
             return role === "Admin" || role === "Director" || role === "Marketing" || role === "Marketing Manager" || hasPrivilege(user, 'marketing') || isAdmin(user);
           case "CRM REPORTS":
-            return role === "admin" || role === "director" || role === "marketing manager" || role === "marketing" || hasPrivilege(user, 'crm_reports') || hasPrivilege(user, 'marketing') || isAdmin(user);
+            return isAdmin(user) || hasPrivilege(user, 'crm_reports');
           case "CALENDAR":
             return hasPrivilege(user, 'office_calendar') || isAdmin(user);
           default:
@@ -994,14 +994,14 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           show: getMenuVisibility('MARKETING'),
         },
         {
-          title: "10. CRM REPORTS",
-          subheader: true,
-          show: getMenuVisibility('CRM REPORTS'),
-        },
-        {
           title: "Marketing Contact Analytics",
           icon: <PhoneIcon />,
-          to: "/crm-reports/marketing-contact-analytics",
+          to: "/marketing/marketing-contact-analytics",
+          show: getMenuVisibility('MARKETING'),
+        },
+        {
+          title: "10. CRM REPORTS",
+          subheader: true,
           show: getMenuVisibility('CRM REPORTS'),
         },
         {
