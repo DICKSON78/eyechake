@@ -44,6 +44,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 
 import Page from "../../../components/Page";
+import OptometryDepartmentReportCard from "../../../components/reports/OptometryDepartmentReportCard";
 import ChartWrapper from "../../../components/ChartWrapper";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
@@ -88,6 +89,102 @@ const Dashboard = () => {
     },
     (response) => response.data.data
   );
+
+  const { data: medicineSalesData, loading: medicineSalesLoading } = useFetch(
+    "api/patient-payment-cache-items",
+    { ...dateParams, consultation_type: "Pharmacy" },
+    true,
+    null,
+    (response) => response.data.data
+  );
+
+  const { data: targetsData, loading: targetsLoading } = useFetch(
+    "api/department-performance/medicine-center/targets",
+    {},
+    true,
+    null,
+    (response) => response.data.data
+  );
+
+  // Transform medicine sales data to KPI format
+  const transformMedicineSalesToKPIs = (pharmacyData) => {
+    console.log('=== PHARMACY MEDICINE SALES DEBUG ==='); // Debug log
+    console.log('Pharmacy Medicine Sales Data Debug:', pharmacyData); // Debug log
+    console.log('Pharmacy Performance Targets:', targetsData); // Debug log
+    
+    if (!pharmacyData || !Array.isArray(pharmacyData)) {
+      console.log('No medicine data found');
+      return [];
+    }
+    
+    // Get medicine sales target from performance targets (units per month)
+    const medicineSalesTarget = targetsData?.targets?.medicine_sales?.monthly_target || 1000; // Default to 1000 units
+    console.log('Pharmacy Medicine Sales Target (units):', medicineSalesTarget); // Debug log
+    
+    // Group by medicine name and sum quantities
+    const medicineGroups = {};
+    pharmacyData.forEach(item => {
+      const medicineName = item.item?.name || item.medicine_name || 'Unknown Medicine';
+      const quantity = item.quantity || 0;
+      
+      if (!medicineGroups[medicineName]) {
+        medicineGroups[medicineName] = 0;
+      }
+      medicineGroups[medicineName] += quantity;
+    });
+    
+    console.log('Pharmacy Medicine Groups:', medicineGroups); // Debug log
+    
+    // Convert to array and get top medicines
+    const topMedicines = Object.entries(medicineGroups)
+      .map(([name, totalSold]) => ({ name, totalSold }))
+      .sort((a, b) => b.totalSold - a.totalSold)
+      .slice(0, 5);
+    
+    console.log('Pharmacy Top Medicines:', topMedicines); // Debug log
+    
+    // Create individual KPIs for each medicine with actual sales data
+    return topMedicines.map((medicine, index) => {
+      const sold = medicine.totalSold || 0;
+      const target = medicineSalesTarget; // Target in units per month
+      const medicineName = medicine.name;
+      
+      console.log(`📊 Pharmacy Medicine ${index + 1}:`, { 
+        name: medicineName, 
+        sold, 
+        target,
+        hasSales: sold > 0
+      }); // Debug log
+      
+      // Calculate progress percentage based on units sold
+      const progressPercentage = target > 0 ? Math.min((sold / target) * 100, 100) : 0;
+      
+      // Determine status based on actual sales progress
+      let status;
+      if (sold === 0) {
+        status = 'default'; // Zero sales - grey (no sales at all)
+      } else if (progressPercentage >= 75) {
+        status = 'success'; // Above average - green (75%+)
+      } else if (progressPercentage >= 50) {
+        status = 'warning'; // Average - purple (50-74%)
+      } else {
+        status = 'error'; // Below average - red (1-49%)
+      }
+      
+      const result = {
+        description: medicineName,
+        target: `${numberFormat(target)} units`, // Target in units
+        results: `${numberFormat(sold)} units`, // Results in units sold
+        status: status,
+        _r: sold, // Raw units sold for progress calculation
+        _t: target // Raw target value for progress calculation
+      };
+      
+      console.log(`🎯 Final KPI ${index + 1}:`, result); // Debug log
+      
+      return result;
+    });
+  };
 
   const handleRefresh = () => {
     handleFetch();
@@ -144,7 +241,6 @@ const Dashboard = () => {
       {loading && <div>Loading...</div>}
       {!loading && data ? (
         <React.Fragment>
-
 
           {/* Stock Alerts Cards */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -678,6 +774,11 @@ const Dashboard = () => {
               </Card>
             </Grid>
           </Grid>
+          
+          {/* OPTOMETRY DEPARTMENT REPORT CARD */}
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <OptometryDepartmentReportCard />
+          </Box>
         </React.Fragment>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>

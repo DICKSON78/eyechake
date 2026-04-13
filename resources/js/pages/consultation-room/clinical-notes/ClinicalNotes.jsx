@@ -83,7 +83,7 @@ const Subheader = ({ title, sx }) => {
 };
 
 const ClinicalNotes = ({ patient, consultation }) => {
-  const addToast = useToast();
+  const { showSuccess, showError, addToast } = useToast();
   const navigate = useNavigate();
   const { refreshNotificationsImmediately } = useNotificationContext();
 
@@ -214,19 +214,19 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   useEffect(() => {
     if (data) {
-      addToast({ message: data.message, severity: "success" });
+      showSuccess(data.message);
     }
   }, [data]);
 
   useEffect(() => {
     if (error) {
-      addToast({ message: formatError(error), severity: "error" });
+      showError(formatError(error));
     }
   }, [error]);
 
   useEffect(() => {
     if (referralData) {
-      addToast({ message: 'Referral created successfully', severity: 'success' });
+      showSuccess('Referral created successfully');
       
       // Download clinical note with the newly created referral (with delay to ensure data is ready)
       setTimeout(() => {
@@ -244,7 +244,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   useEffect(() => {
     if (referralError) {
-      addToast({ message: formatError(referralError), severity: 'error' });
+      showError(formatError(referralError));
     }
   }, [referralError]);
 
@@ -360,11 +360,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
 
   const handleCreateReferralSubmit = () => {
     if (!referralFormData.referral_reason || !referralFormData.referral_reason.trim()) {
-      addToast({ message: 'Please enter the reason for referral', severity: 'error' });
+      showError('Please enter reason for referral');
       return;
     }
     if (!referralFormData.clinical_summary || !referralFormData.clinical_summary.trim()) {
-      addToast({ message: 'Please enter action taken', severity: 'error' });
+      showError('Please enter action taken');
       return;
     }
 
@@ -416,7 +416,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 100);
-      addToast({ message: 'Clinical note with referral downloaded successfully', severity: 'success' });
+      showSuccess('Clinical note with referral downloaded successfully');
     } catch (error) {
       console.error('Failed to generate/download clinical note with referral:', error);
       console.error('Consultation data:', consultation);
@@ -492,7 +492,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
         window.URL.revokeObjectURL(url);
       }, 100);
       
-      addToast({ message: 'Sick sheet downloaded successfully', severity: 'success' });
+      showSuccess('Sick sheet downloaded successfully');
       
       // Reset form and hide it
       setSickSheetFormData({
@@ -501,7 +501,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
       setShowSickSheetForm(false);
     } catch (error) {
       console.error('Failed to generate/download sick sheet:', error);
-      addToast({ message: `Failed to download sick sheet: ${error.message}`, severity: 'error' });
+      showError(`Failed to download sick sheet: ${error.message}`);
     }
   };
 
@@ -536,7 +536,7 @@ const ClinicalNotes = ({ patient, consultation }) => {
                 printWindow.print();
               } catch (e2) {
                 console.error('Print failed after retry:', e2);
-                addToast({ message: 'Print dialog could not be opened. PDF downloaded instead.', severity: 'info' });
+                showInfo('Print dialog could not be opened. PDF downloaded instead.');
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = `clinical-note-referral-${resolvedPatient?.full_name || 'patient'}-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -579,11 +579,11 @@ const ClinicalNotes = ({ patient, consultation }) => {
           }
           window.URL.revokeObjectURL(url);
         }, 100);
-        addToast({ message: 'Popup blocked. PDF downloaded instead. Please open the file to print.', severity: 'info' });
+        showInfo('Popup blocked. PDF downloaded instead. Please open the file to print.');
       }
     } catch (error) {
       console.error('Failed to generate/print referral PDF:', error);
-      addToast({ message: 'Failed to print referral PDF', severity: 'warning' });
+      showError('Failed to print referral PDF');
     }
   };
 

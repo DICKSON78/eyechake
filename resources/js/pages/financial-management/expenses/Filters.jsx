@@ -49,6 +49,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             sm={6}
             xs={12}
           >
+            {/* Commented out: Start Date filter
             <DatePicker
               fullWidth
               label="Start Date"
@@ -60,6 +61,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                 })
               }
             />
+            */}
           </Grid>
           <Grid
             item
@@ -67,6 +69,7 @@ const Filters = ({ params, setParams, ...rest }) => {
             sm={6}
             xs={12}
           >
+            {/* Commented out: End Date filter
             <DatePicker
               fullWidth
               label="End Date"
@@ -75,6 +78,7 @@ const Filters = ({ params, setParams, ...rest }) => {
                 setParams({ ...params, end_date: !isNaN(value) ? value : null })
               }
             />
+            */}
           </Grid>
           <Grid
             item

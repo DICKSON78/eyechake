@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Box,
   Card,
@@ -25,14 +26,20 @@ import {
   Container,
   TextField,
   InputAdornment,
-  Stack
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
+  Fab
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
   TrendingUp as TrendingIcon,
-  TrendingDown as TrendingDownIcon,
   TrendingFlat as TrendingFlatIcon,
   Phone as PhoneIcon,
   People as PeopleIcon,
@@ -41,12 +48,18 @@ import {
   EmojiEvents as EmojiEventsIcon,
   Assessment as ReportIcon,
   Refresh as RefreshIcon,
-  CheckCircle as CheckIcon
+  CheckCircle as CheckIcon,
+  Download as DownloadIcon,
+  FilterList as FilterIcon,
+  DateRange as DateRangeIcon,
+  Add as AddIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import InfoCard from '../../dashboard/InfoCard';
 import { useFetch, useToast, usePatch } from '../../../hooks';
 import { numberFormat, formatDate } from '../../../helpers';
 import Page from '../../../components/Page';
+import KPIReportCardTable from '../../../components/reports/KPIReportCardTable';
 import {
   green,
   orange,
@@ -69,8 +82,17 @@ const CRMPerformanceReportCard = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTargets, setEditedTargets] = useState({});
+  const [editedRemarks, setEditedRemarks] = useState('');
+  const [editedRecommendations, setEditedRecommendations] = useState('');
   const { patch, loading: patchLoading } = usePatch('/api/performance-reports/crm/targets');
   const { showSuccess, showError } = useToast();
+
+  // Enhanced filtering states
+  const [filterType, setFilterType] = useState('week');
+  const [selectedWeek, setSelectedWeek] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const {
     data: performanceData,
@@ -78,6 +100,15 @@ const CRMPerformanceReportCard = ({
     error: performanceError,
     handleFetch: fetchData
   } = useFetch('/api/performance-reports/crm', {
+    dependencies: [refreshTrigger, filterType, selectedWeek, selectedMonth, selectedYear]
+  });
+
+  // Fetch CRM targets from database
+  const {
+    data: targetsData,
+    loading: targetsLoading,
+    error: targetsError
+  } = useFetch('/api/department-performance/crm/targets', {
     dependencies: [refreshTrigger]
   });
 
@@ -87,31 +118,45 @@ const CRMPerformanceReportCard = ({
     
     const apiData = performanceData.data;
     const calculatedKpis = apiData.kpis?.map(kpi => {
-      // Calculate achievement rate
-      const achievementRate = kpi.target > 0 ? Math.round((kpi.result / kpi.target) * 100) : 0;
+      // Find matching target from database
+      const targetRecord = targetsData?.find(target => 
+        target.kpi_name?.toLowerCase() === kpi.name?.toLowerCase()
+      );
       
-      // Calculate trend (simulated for demo - in real app this would come from historical data)
-      const trend = Math.round(((kpi.result - kpi.target) / kpi.target) * 100);
+      // Use database target or fallback to current target
+      const finalTarget = targetRecord?.target_value || kpi.target || 0;
+      
+      // Calculate achievement rate
+      const achievementRate = finalTarget > 0 ? Math.round((kpi.result / finalTarget) * 100) : 0;
       
       // Determine performance status
-      let performanceStatus = 'Below Target';
-      let statusColor = orange[700];
-      if (achievementRate >= 100) {
-        performanceStatus = 'Above Target';
-        statusColor = blue[700];
-      } else if (achievementRate >= 90) {
-        performanceStatus = 'Target Achieved';
-        statusColor = green[700];
-      }
+      let performanceStatus = 'Please set targets';
+      let statusColor = grey[600];
       
+      if (finalTarget > 0) {
+        if (achievementRate >= 100) {
+          performanceStatus = 'Target Achieved';
+          statusColor = green[600];
+        } else if (achievementRate >= 80) {
+          performanceStatus = 'On Track';
+          statusColor = blue[600];
+        } else if (achievementRate >= 50) {
+          performanceStatus = 'Below Target';
+          statusColor = orange[600];
+        } else {
+          performanceStatus = 'Critical';
+          statusColor = red[600];
+        }
+      }
+
       return {
         ...kpi,
+        target: finalTarget, // Use database target
         achievement_rate: achievementRate,
         performance_status: performanceStatus,
         status_color: statusColor,
-        calculated_trend: trend,
-        formatted_result: kpi.unit === 'TZS' ? numberFormat(kpi.result) : `${kpi.result}${kpi.unit || ''}`,
-        formatted_target: kpi.unit === 'TZS' ? numberFormat(kpi.target) : `${kpi.target}${kpi.unit || ''}`
+        formatted_result: `${numberFormat(kpi.result)}${kpi.unit || ''}`,
+        formatted_target: `${numberFormat(finalTarget)}${kpi.unit || ''}`
       };
     }) || [];
     
@@ -155,83 +200,7 @@ const CRMPerformanceReportCard = ({
       ],
       calculated_at: new Date().toISOString()
     };
-  }, [performanceData]);
-
-  useEffect(() => {
-    if (performanceData) {
-      console.log('CRM Performance Data:', performanceData);
-      // Backend returns: {message, data: {...}} - we need the nested data
-      console.log('Performance data received successfully');
-    }
-  }, [performanceData]);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    const targets = {};
-    if (calculatedData?.kpis) {
-      calculatedData.kpis.forEach(kpi => {
-        targets[kpi.id] = kpi.target;
-      });
-    }
-    setEditedTargets(targets);
-  };
-
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await patch('/api/performance-reports/crm/targets', {
-        targets: editedTargets
-      });
-      addToast('Targets updated successfully', 'success');
-      setIsEditing(false);
-      // Refresh data
-      fetchData();
-    } catch (error) {
-      addToast('Failed to update targets', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedTargets({});
-  };
-
-  const handleTargetChange = (kpiId, value) => {
-    setEditedTargets(prev => ({
-      ...prev,
-      [kpiId]: value
-    }));
-  };
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    fetchData();
-    setTimeout(() => setIsRefreshing(false), 1000);
-  };
-
-  const getPerformanceColor = (result, target) => {
-    if (target === 0) return grey[500];
-    const percentage = (result / target) * 100;
-    if (percentage < 100) return orange[500]; // Below Target
-    if (percentage === 100) return green[500]; // Target Achieved
-    return blue[500]; // Above Target
-  };
-
-  const getIndicatorColor = (result, target) => {
-    if (target === 0) return 'default';
-    const percentage = (result / target) * 100;
-    if (percentage < 100) return 'warning'; // Yellow
-    if (percentage === 100) return 'success'; // Green
-    return 'info'; // Blue
-  };
-
-  const getTrendIcon = (trend) => {
-    if (trend > 0) return <TrendingIcon sx={{ color: green[500] }} />;
-    if (trend < 0) return <TrendingDownIcon sx={{ color: red[500] }} />;
-    return <TrendingFlatIcon sx={{ color: grey[500] }} />;
-  };
+  }, [performanceData, targetsData]);
 
   if (performanceLoading && !performanceData) {
     return (
@@ -259,6 +228,103 @@ const CRMPerformanceReportCard = ({
       </Page>
     );
   }
+
+  useEffect(() => {
+    if (performanceData) {
+      console.log('CRM Performance Data:', performanceData);
+      // Backend returns: {message, data: {...}} - we need the nested data
+    }
+  }, [performanceData]);
+
+  const handleEdit = () => {
+    const targets = {};
+    calculatedData?.kpis?.forEach(kpi => {
+      targets[kpi.id] = kpi.target;
+    });
+    setEditedTargets(targets);
+    setEditedRemarks(calculatedData?.remarks || '');
+    setEditedRecommendations(calculatedData?.recommendations || '');
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      // 1. Save Targets
+      await patch({ targets: editedTargets });
+      
+      // 2. Save Remarks/Recommendations if changed
+      await axios.patch(`/api/performance-reports/crm/report`, {
+        remarks: editedRemarks,
+        recommendations: editedRecommendations,
+        date: new Date().toISOString()
+      });
+
+      showSuccess('Report analysis updated successfully');
+      setIsEditing(false);
+      if (refreshTrigger && typeof refreshTrigger === 'function') {
+        refreshTrigger();
+      }
+      if (fetchData && typeof fetchData === 'function') {
+        fetchData();
+      }
+    } catch (err) {
+      showError('Failed to update analysis: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedTargets({});
+    setEditedRemarks('');
+    setEditedRecommendations('');
+  };
+
+  // Transform CRM data to KPI format for KPIReportCardTable
+  const transformCRMDataToKPIs = (data) => {
+    if (!data?.kpis) return [];
+    
+    return data.kpis.map(kpi => {
+      const achievementRate = kpi.achievement_rate || 0;
+      let status = 'default';
+      
+      if (achievementRate >= 100) {
+        status = 'success';
+      } else if (achievementRate >= 75) {
+        status = 'warning';
+      } else if (achievementRate > 0) {
+        status = 'error';
+      }
+      
+      return {
+        description: kpi.name,
+        target: `${kpi.formatted_target || numberFormat(kpi.target)} ${kpi.unit || ''}`,
+        results: `${kpi.formatted_result || numberFormat(kpi.result)} ${kpi.unit || ''}`,
+        status: status,
+        _r: kpi.result, // Raw result for progress calculation
+        _t: kpi.target  // Raw target for progress calculation
+      };
+    });
+  };
+
+  const handleTargetChange = (kpiId, value) => {
+    setEditedTargets(prev => ({
+      ...prev,
+      [kpiId]: value
+    }));
+  };
+
+  const handleRefresh = () => {
+    fetchData();
+  };
+
+  const getPerformanceColor = (result, target) => {
+    if (target === 0) return grey[500];
+    const percentage = (result / target) * 100;
+    if (percentage < 100) return orange[500]; // Below Target
+    if (percentage === 100) return green[500]; // Target Achieved
+    return blue[500]; // Above Target
+  };
+
 
   return (
     <Page title="CRM Report Card">
@@ -310,8 +376,8 @@ const CRMPerformanceReportCard = ({
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-              {editable && !isEditing && (
-                <Tooltip title="Edit Targets">
+              {calculatedData?.can_edit && !isEditing && (
+                <Tooltip title="Edit Analysis & Targets">
                   <IconButton 
                     onClick={handleEdit}
                     sx={{ 
@@ -329,7 +395,7 @@ const CRMPerformanceReportCard = ({
                   <Tooltip title="Save Changes">
                     <IconButton 
                       onClick={handleSave} 
-                      disabled={loading}
+                      disabled={patchLoading}
                       sx={{ 
                         bgcolor: 'rgba(255,255,255,0.1)', 
                         color: 'white',
@@ -356,11 +422,6 @@ const CRMPerformanceReportCard = ({
             </Box>
           </Box>
         </Paper>
-
-        {/* Loading Indicator */}
-        {performanceLoading && (
-          <LinearProgress sx={{ mb: 3, borderRadius: 2, height: 6 }} />
-        )}
 
         {/* Summary Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -395,193 +456,16 @@ const CRMPerformanceReportCard = ({
         </Grid>
 
         {/* KPI Table */}
-        <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, mb: 4 }}>
-          <CardHeader 
-            title="Key Performance Indicators" 
-            titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-            action={
-              editable && !isEditing && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={handleEdit}
-                >
-                  Edit Targets
-                </Button>
-              )
-            }
-          />
-          <Divider />
-          <CardContent sx={{ p: 2 }}>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell><strong>KPI</strong></TableCell>
-                    <TableCell align="right"><strong>Target</strong></TableCell>
-                    <TableCell align="right"><strong>Result</strong></TableCell>
-                    <TableCell align="center"><strong>Performance</strong></TableCell>
-                    <TableCell align="center"><strong>Trend</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {calculatedData?.kpis?.map((kpi, index) => {
-                    const calculatedTrend = kpi.calculated_trend || 0;
-                    const performanceStatus = kpi.performance_status || 'Below Target';
-                    
-                    return (
-                      <TableRow key={kpi.id}>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Avatar
-                              sx={{
-                                width: 32,
-                                height: 32,
-                                bgcolor: `${getPerformanceColor(kpi.result, kpi.target)}20`,
-                                color: getPerformanceColor(kpi.result, kpi.target),
-                                fontSize: 14
-                              }}
-                            >
-                              {kpi.id.includes('contact') && <PhoneIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('lead') && <PeopleIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('success') && <CheckIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('conversion') && <EmojiEventsIcon sx={{ fontSize: 16 }} />}
-                            </Avatar>
-                            <Typography variant="body2" fontWeight={500}>
-                              {kpi.name}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="right">
-                          {isEditing ? (
-                            <TextField
-                              type="number"
-                              value={editedTargets[kpi.id] || kpi.target}
-                              onChange={(e) => handleTargetChange(kpi.id, e.target.value)}
-                              size="small"
-                              sx={{ width: '100px' }}
-                              InputProps={{
-                                endAdornment: kpi.unit && <InputAdornment position="end">{kpi.unit}</InputAdornment>
-                              }}
-                            />
-                          ) : (
-                            <Typography variant="body2" fontWeight={500}>
-                              {kpi.formatted_target || numberFormat(kpi.target)} {kpi.unit}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="body2" fontWeight={600}>
-                            {kpi.formatted_result || numberFormat(kpi.result)} {kpi.unit}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={performanceStatus}
-                            size="small"
-                            sx={{
-                              bgcolor: 
-                                kpi.achievement_rate < 80 ? orange[50] :
-                                kpi.achievement_rate === 100 ? green[50] :
-                                blue[50],
-                              color: 
-                                kpi.achievement_rate < 80 ? orange[700] :
-                                kpi.achievement_rate === 100 ? green[700] :
-                                blue[700],
-                              fontWeight: 500
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                            {calculatedTrend > 0 && (
-                              <TrendingIcon fontSize="small" sx={{ color: green[600] }} />
-                            )}
-                            {calculatedTrend < 0 && (
-                              <TrendingDownIcon fontSize="small" sx={{ color: red[600] }} />
-                            )}
-                            {calculatedTrend === 0 && (
-                              <TrendingFlatIcon fontSize="small" sx={{ color: grey[600] }} />
-                            )}
-                            <Chip
-                              label={`${calculatedTrend > 0 ? '+' : ''}${calculatedTrend}%`}
-                              size="small"
-                              sx={{ 
-                                bgcolor: 
-                                  calculatedTrend > 0 ? green[50] :
-                                  calculatedTrend < 0 ? red[50] :
-                                  grey[50],
-                                color: 
-                                  calculatedTrend > 0 ? green[700] :
-                                  calculatedTrend < 0 ? red[700] :
-                                  grey[700],
-                                fontWeight: 500,
-                                minWidth: '60px'
-                              }}
-                            />
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-
-          {/* Recommendations */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, height: '100%' }}>
-              <CardHeader 
-                title="Recommendations" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                avatar={
-                  <Avatar sx={{ bgcolor: teal[100], color: teal[700] }}>
-                    <CampaignIcon />
-                  </Avatar>
-                }
-              />
-              <Divider />
-              <CardContent>
-                <Typography variant="body1" paragraph>
-                  {calculatedData?.summary?.overall_performance || 'Continue following up with pending contacts and focus on converting marketing leads to sales.'}
-                </Typography>
-                <Stack spacing={1} sx={{ mt: 2 }}>
-                  {calculatedData?.recommendations_list?.map((rec, index) => (
-                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar sx={{ width: 24, height: 24, bgcolor: blue[50], color: blue[700] }}>
-                        <CheckIcon sx={{ fontSize: 14 }} />
-                      </Avatar>
-                      <Typography variant="body2">{rec}</Typography>
-                    </Box>
-                  )) || (
-                    <>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: blue[50], color: blue[700] }}>
-                          <CheckIcon sx={{ fontSize: 14 }} />
-                        </Avatar>
-                        <Typography variant="body2">Focus on calling unreachable leads during peak hours</Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: blue[50], color: blue[700] }}>
-                          <CheckIcon sx={{ fontSize: 14 }} />
-                        </Avatar>
-                        <Typography variant="body2">Increase follow-up attempts for warm leads</Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: blue[50], color: blue[700] }}>
-                          <CheckIcon sx={{ fontSize: 14 }} />
-                        </Avatar>
-                        <Typography variant="body2">Schedule appointments for interested prospects</Typography>
-                      </Box>
-                    </>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
+        <KPIReportCardTable 
+          title="CUSTOMER RELATION MANAGEMENT DEPARTMENT WEEKLY REPORT CARD"
+          kpis={transformCRMDataToKPIs(calculatedData)}
+          loading={performanceLoading || targetsLoading}
+          canEdit={true}
+          department="crm"
+          date={new Date().toISOString()}
+          remarks={calculatedData?.remarks || ''}
+          recommendations={calculatedData?.recommendations || ''}
+        />
 
         {/* Summary Section */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -599,49 +483,39 @@ const CRMPerformanceReportCard = ({
               />
               <Divider />
               <CardContent sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Overall Performance
-                    </Typography>
-                    <Chip
-                      label={calculatedData?.summary?.overall_performance || 'On Track'}
-                      size="small"
-                      sx={{ 
-                        bgcolor: calculatedData?.summary?.overall_performance === 'Excellent' ? green[50] :
-                                calculatedData?.summary?.overall_performance === 'Good' ? blue[50] :
-                                calculatedData?.summary?.overall_performance === 'On Track' ? orange[50] :
-                                red[50],
-                        color: calculatedData?.summary?.overall_performance === 'Excellent' ? green[700] :
-                                calculatedData?.summary?.overall_performance === 'Good' ? blue[700] :
-                                calculatedData?.summary?.overall_performance === 'On Track' ? orange[700] :
-                                red[700],
-                        fontWeight: 500
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Targets Achieved
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {calculatedData?.summary?.targets_achieved || 0} out of {calculatedData?.kpis?.length || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Completion Rate
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {calculatedData?.summary?.completion_rate || 0}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={calculatedData?.summary?.completion_rate || 0}
-                    sx={{ mt: 1, height: 8, borderRadius: 4 }}
+                {/* Display current recommendations */}
+                <Typography variant="h6" sx={{ mb: 2, color: 'text.primary' }}>
+                  Recommendations
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                  color: 'text.secondary', 
+                  fontStyle: 'italic', 
+                  lineHeight: 1.6,
+                  mb: 3,
+                  p: 2,
+                  bgcolor: 'grey.50',
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'grey.200'
+                }}>
+                  {calculatedData?.recommendations || 'No recommendations available for this period.'}
+                </Typography>
+                
+                {isEditing ? (
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    value={editedRemarks}
+                    onChange={(e) => setEditedRemarks(e.target.value)}
+                    placeholder="Enter overall performance remarks..."
+                    variant="outlined"
                   />
-                </Stack>
+                ) : (
+                  <Typography variant="body1" sx={{ color: 'text.secondary', fontStyle: 'italic', lineHeight: 1.6 }}>
+                    {calculatedData?.remarks || 'No remarks provided for this period.'}
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           </Grid>

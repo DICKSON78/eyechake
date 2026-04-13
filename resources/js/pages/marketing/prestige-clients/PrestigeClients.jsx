@@ -35,7 +35,7 @@ const PrestigeClients = () => {
   const { setNotificationField, refreshNotifications, lockNotificationKey, unlockNotificationKey } = useNotificationContext();
 
   // Check marketing privilege
-  usePrivilege('marketing', '/marketing/prestige-clients');
+  usePrivilege('marketing', '/dashboard');
 
   const [item, setItem] = useState();
   const [anchorEl, setAnchorEl] = useState();

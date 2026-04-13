@@ -1,12 +1,12 @@
 {
-  "debug": true,
+  "debug": false,
   "host": "0.0.0.0",
   "port": 6001,
   "appManager.array.apps": [
     {
       "id": "eyechake-app",
-      "key": "eyechake-key-local",
-      "secret": "eyechake-secret-local",
+      "key": "eyechake-key-prod",
+      "secret": "eyechake-secret-prod",
       "maxConnections": 1000,
       "enableClientMessages": false,
       "enabled": true,

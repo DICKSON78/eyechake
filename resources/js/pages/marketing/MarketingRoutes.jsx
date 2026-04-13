@@ -102,6 +102,10 @@ const MarketingRoutes = () => {
         element={<ReportsRoutes />}
       />
       <Route
+        path="/prestige-clients"
+        element={<PrestigeClients />}
+      />
+      <Route
         path="/marketing-contact-analytics"
         element={<MarketingContactAnalytics />}
       />

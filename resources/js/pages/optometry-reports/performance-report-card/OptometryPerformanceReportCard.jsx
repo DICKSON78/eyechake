@@ -1,271 +1,205 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Avatar,
-  Chip,
-  IconButton,
-  Tooltip,
-  Button,
-  Alert,
-  CircularProgress,
-  Divider,
-  Stack,
-  LinearProgress,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  Box, Grid, Card, CardContent, CardHeader, Typography, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Avatar, Chip, IconButton,
+  Tooltip, Button, Alert, CircularProgress, Divider, Stack, LinearProgress,
+  TextField, InputAdornment, Paper
 } from '@mui/material';
 import {
-  Visibility as EyeIcon,
-  People as PeopleIcon,
-  CheckCircle as CheckIcon,
-  Assessment as ReportIcon,
-  Refresh as RefreshIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  TrendingUp as TrendingIcon,
-  TrendingDown as TrendingDownIcon,
-  TrendingFlat as TrendingFlatIcon,
-  HealthAndSafety as HealthIcon,
-  Timeline as TimelineIcon
+  Visibility as EyeIcon, People as PeopleIcon, CheckCircle as CheckIcon,
+  Assessment as ReportIcon, Refresh as RefreshIcon, Edit as EditIcon,
+  Save as SaveIcon, Cancel as CancelIcon, TrendingUp as TrendingIcon,
+  TrendingDown as TrendingDownIcon, TrendingFlat as TrendingFlatIcon,
+  HealthAndSafety as HealthIcon, Medication as MedicineIcon,
+  EmojiEvents as EmojiEventsIcon, Campaign as CampaignIcon
 } from '@mui/icons-material';
 import InfoCard from '../../dashboard/InfoCard';
-import ChartWrapper from '../../../components/ChartWrapper';
 import { useFetch, useToast, usePatch } from '../../../hooks';
 import { numberFormat, formatDate } from '../../../helpers';
 import Page from '../../../components/Page';
-import {
-  green,
-  orange,
-  red,
-  blue,
-  purple,
-  cyan,
-  teal,
-  deepOrange,
-  pink,
-  indigo,
-  yellow,
-  grey
-} from '@mui/material/colors';
+import KPIReportCardTable from '../../../components/reports/KPIReportCardTable';
+import { green, orange, red, blue, purple, cyan, teal, grey } from '@mui/material/colors';
 
-const OptometryPerformanceReportCard = ({ 
-  user, 
-  editable = false,
-  refreshTrigger = null 
-}) => {
-  const [period, setPeriod] = useState('30days');
-  const [customWeeks, setCustomWeeks] = useState(1);
-  
-  // Mock data for demonstration
-  const mockData = {
-    kpis: [
-      {
-        id: 'patient_satisfaction',
-        name: 'Patient Satisfaction',
-        target: 95,
-        result: 87,
-        unit: '%',
-        trend: -8,
-        formatted_target: '95%',
-        formatted_result: '87%'
-      },
-      {
-        id: 'treatment_success',
-        name: 'Treatment Success Rate',
-        target: 90,
-        result: 92,
-        unit: '%',
-        trend: 2,
-        formatted_target: '90%',
-        formatted_result: '92%'
-      },
-      {
-        id: 'service_quality',
-        name: 'Service Quality',
-        target: 85,
-        result: 78,
-        unit: '%',
-        trend: -7,
-        formatted_target: '85%',
-        formatted_result: '78%'
-      },
-      {
-        id: 'appointment_efficiency',
-        name: 'Appointment Efficiency',
-        target: 80,
-        result: 75,
-        unit: '%',
-        trend: -5,
-        formatted_target: '80%',
-        formatted_result: '75%'
-      }
-    ],
-    summary: {
-      targets_achieved: 1,
-      total_kpis: 4,
-      completion_rate: 25
-    },
-    recommendations: [
-      'Focus on improving patient satisfaction scores to meet target goals',
-      'Enhance treatment protocols to increase success rates',
-      'Optimize appointment scheduling for better efficiency'
-    ]
-  };
+// Safe toast helper - prevents "W is not a function" after minification
+const safeToast = (fn, message) => {
+  if (fn && typeof fn === 'function') {
+    try { fn(message); } catch (e) { console.warn('Toast failed:', e); }
+  }
+};
 
-  const [data, setData] = useState(mockData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const { patch, loading: patchLoading } = usePatch('/api/performance-reports/optometry/targets');
-  const { showSuccess, showError } = useToast();
-
-  // Auto-refresh when period changes
-  useEffect(() => {
-    if (period === 'custom') {
-      // Simulate data refresh for custom weeks
-      setLoading(true);
-      setTimeout(() => {
-        // Update data based on custom weeks
-        const updatedData = {
-          ...mockData,
-          kpis: mockData.kpis.map(kpi => ({
-            ...kpi,
-            result: Math.round(kpi.result * (customWeeks / 4)), // Scale by weeks
-            formatted_target: kpi.formatted_target,
-            formatted_result: kpi.unit === 'TZS' 
-              ? numberFormat(Math.round(kpi.result * (customWeeks / 4)))
-              : `${Math.round(kpi.result * (customWeeks / 4))}${kpi.unit || ''}`
-          }))
-        };
-        setData(updatedData);
-        setLoading(false);
-        console.log('Optometry data refreshed for ' + customWeeks + ' weeks');
-      }, 1000);
-    } else {
-      // Simulate data refresh for fixed periods
-      setLoading(true);
-      setTimeout(() => {
-        setData(mockData);
-        setLoading(false);
-        console.log('Optometry data refreshed for ' + period);
-      }, 1000);
-    }
-  }, [period, customWeeks]);
-
+const OptometryPerformanceReportCard = ({ user, editable = false, refreshTrigger = null }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTargets, setEditedTargets] = useState({});
+  const [editedRemarks, setEditedRemarks] = useState('');
+  const [editedRecommendations, setEditedRecommendations] = useState('');
+  const [patchLoading, setPatchLoading] = useState(false);
+
+  // Safe toast destructuring
+  const toastHook = useToast();
+  const showSuccess = toastHook?.showSuccess || null;
+  const showError = toastHook?.showError || null;
+
+  // Fetch real data from API - same endpoint as CRM/Sales
+  const {
+    data: performanceData,
+    loading: performanceLoading,
+    error: performanceError,
+    handleFetch: fetchData
+  } = useFetch('/api/performance-reports/optometry', {
+    dependencies: [refreshTrigger]
+  });
+
+  // Fetch saved targets
+  const {
+    data: targetsData,
+    loading: targetsLoading,
+  } = useFetch('/api/performance-reports/optometry/targets', {
+    dependencies: [refreshTrigger]
+  });
+
+  // Build calculated data from API response - same pattern as CRM
+  const calculatedData = React.useMemo(() => {
+    if (!performanceData?.data) return null;
+
+    const apiData = performanceData.data;
+
+    const calculatedKpis = (apiData.kpis || []).map(kpi => {
+      // Try to match saved target from department_kpi_targets table
+      const targetRecord = targetsData?.find(t =>
+        t.kpi_name?.toLowerCase() === kpi.name?.toLowerCase()
+      );
+      const finalTarget = targetRecord?.target_value ?? kpi.target ?? 0;
+
+      // achievement = result / target * 100
+      const achievementRate = finalTarget > 0 ? Math.round((kpi.result / finalTarget) * 100) : 0;
+
+      let performanceStatus = 'Below Target';
+      let statusColor = orange[700];
+      if (achievementRate >= 100) { performanceStatus = 'Above Target'; statusColor = blue[700]; }
+      else if (achievementRate >= 90) { performanceStatus = 'Target Achieved'; statusColor = green[700]; }
+
+      return {
+        ...kpi,
+        target: finalTarget,
+        achievement_rate: achievementRate,
+        performance_status: performanceStatus,
+        status_color: statusColor,
+        formatted_result: kpi.unit === '%'
+          ? `${Number(kpi.result).toFixed(1)}%`
+          : kpi.unit === 'TZS'
+            ? `${numberFormat(kpi.result)} TZS`
+            : numberFormat(kpi.result),
+        formatted_target: kpi.unit === '%'
+          ? `${Number(finalTarget).toFixed(1)}%`
+          : kpi.unit === 'TZS'
+            ? `${numberFormat(finalTarget)} TZS`
+            : numberFormat(finalTarget),
+      };
+    });
+
+    const targetsAchieved = calculatedKpis.filter(k => k.achievement_rate >= 100).length;
+    const totalKpis = calculatedKpis.length;
+    const completionRate = totalKpis > 0 ? Math.round((targetsAchieved / totalKpis) * 100) : 0;
+
+    return {
+      ...apiData,
+      kpis: calculatedKpis,
+      summary: { targets_achieved: targetsAchieved, total_kpis: totalKpis, completion_rate: completionRate },
+    };
+  }, [performanceData, targetsData]);
+
+  // Transform to KPIReportCardTable format
+  // result% = achievement_rate (count/target*100)
+  const transformToKPIs = (data) => {
+    if (!data?.kpis) return [];
+    return data.kpis.map(kpi => {
+      const pct = kpi.achievement_rate || 0;
+      let status = 'default';
+      
+      // If target is set (not default 50), calculate proper status
+      if (kpi.target && kpi.target !== 50) {
+        if (pct >= 75) status = 'success';
+        else if (pct >= 50) status = 'warning';
+        else if (pct > 0) status = 'error';
+        else status = 'error'; // 0% achievement with target set
+      }
+
+      return {
+        description: kpi.name,
+        // Show the actual count as target and result
+        target: kpi.formatted_target || String(kpi.target),
+        results: `${pct}%`,   // percentage for progress bar
+        status,
+        _r: kpi.result,       // raw count
+        _t: kpi.target,       // raw target
+      };
+    });
+  };
 
   const handleEdit = () => {
-    setIsEditing(true);
     const targets = {};
-    data?.kpis?.forEach(kpi => {
-      targets[kpi.id] = kpi.target;
-    });
+    calculatedData?.kpis?.forEach(kpi => { targets[kpi.id] = kpi.target; });
     setEditedTargets(targets);
+    setEditedRemarks(calculatedData?.remarks || '');
+    setEditedRecommendations(
+      Array.isArray(calculatedData?.recommendations)
+        ? calculatedData.recommendations.join('\n')
+        : (calculatedData?.recommendations || '')
+    );
+    setIsEditing(true);
   };
 
   const handleSave = async () => {
-    // Mock save - just update local state
-    const updatedKpis = data.kpis.map(kpi => ({
-      ...kpi,
-      target: editedTargets[kpi.id] || kpi.target
-    }));
-    setData(prev => ({ ...prev, kpis: updatedKpis }));
-    setIsEditing(false);
+    setPatchLoading(true);
+    try {
+      // 1. Save targets - send as {kpi_id: value} object
+      await axios.patch('/api/performance-reports/optometry/targets', {
+        targets: editedTargets
+      });
+
+      // 2. Save remarks & recommendations
+      await axios.patch('/api/performance-reports/optometry/report', {
+        remarks: editedRemarks,
+        recommendations: editedRecommendations,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      safeToast(showSuccess, 'Report updated successfully');
+      setIsEditing(false);
+      fetchData();
+    } catch (err) {
+      safeToast(showError, 'Failed to update: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setPatchLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditedTargets({});
+    setEditedRemarks('');
+    setEditedRecommendations('');
   };
 
-  const handleTargetChange = (kpiId, value) => {
-    setEditedTargets(prev => ({
-      ...prev,
-      [kpiId]: value
-    }));
-  };
+  const handleRefresh = () => fetchData();
 
-  const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (period === 'custom') {
-        // Update data based on custom weeks
-        const updatedData = {
-          ...mockData,
-          kpis: mockData.kpis.map(kpi => ({
-            ...kpi,
-            result: Math.round(kpi.result * (customWeeks / 4)), // Scale by weeks
-            formatted_target: kpi.formatted_target,
-            formatted_result: kpi.unit === 'TZS' 
-              ? numberFormat(Math.round(kpi.result * (customWeeks / 4)))
-              : `${Math.round(kpi.result * (customWeeks / 4))}${kpi.unit || ''}`
-          }))
-        };
-        setData(updatedData);
-        console.log('Optometry data refreshed for ' + customWeeks + ' weeks');
-      } else {
-        setData(mockData);
-        console.log('Optometry data refreshed for ' + period);
-      }
-      setLoading(false);
-    }, 1000);
-  };
-
-  const getPerformanceColor = (result, target) => {
-    if (target === 0) return grey[500];
-    const percentage = (result / target) * 100;
-    if (percentage >= 100) return green[500];
-    if (percentage >= 80) return blue[500];
-    if (percentage >= 60) return orange[500];
-    return red[500];
-  };
-
-  const getTrendIcon = (trend) => {
-    if (trend > 0) return <TrendingIcon sx={{ color: green[500] }} />;
-    if (trend < 0) return <TrendingDownIcon sx={{ color: red[500] }} />;
-    return <TrendingFlatIcon sx={{ color: grey[500] }} />;
-  };
-
-  if (loading && !data) {
+  if (performanceLoading && !performanceData) {
     return (
       <Page title="Optometry Report Card">
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-            <CircularProgress />
-          </Box>
+        <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
         </Box>
       </Page>
     );
   }
 
-  if (error || !data) {
+  if (performanceError || !performanceData) {
     return (
       <Page title="Optometry Report Card">
         <Box sx={{ p: 3 }}>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Failed to load optometry performance data. Please try again.
-          </Alert>
-          <Button variant="contained" onClick={handleRefresh} startIcon={<RefreshIcon />}>
-            Retry
-          </Button>
+          <Alert severity="error" sx={{ mb: 2 }}>Failed to load optometry performance data.</Alert>
+          <Button variant="contained" onClick={handleRefresh} startIcon={<RefreshIcon />}>Retry</Button>
         </Box>
       </Page>
     );
@@ -274,110 +208,51 @@ const OptometryPerformanceReportCard = ({
   return (
     <Page title="Optometry Report Card">
       <Box sx={{ p: 3 }}>
+
         {/* Header */}
-        <Paper sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'white', 
-          p: 4, 
-          mb: 4, 
-          borderRadius: 2,
-          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)'
+        <Paper elevation={3} sx={{
+          p: 4, mb: 4, borderRadius: 2,
+          background: 'linear-gradient(135deg, #1976d2 0%, #2196f3 100%)',
+          color: 'white'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Box>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-              Optometry Report Card
-              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Optometry Report Card</Typography>
               <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600 }}>
-                Track optometry performance metrics, patient outcomes, and service quality with real-time updates
+                Medicine sales, return patient rate — real data from the system
               </Typography>
-              <Chip
-                label={`${data?.kpis?.length || 0} KPIs tracked`}
-                size="small"
-                sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
-              />
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
+                <Chip label={`Updated: ${formatDate(new Date())}`} size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }} />
+                <Chip label="Real-time Data" color="info" size="small" sx={{ fontWeight: 'bold' }} />
+              </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel sx={{ color: 'white' }}>Period</InputLabel>
-                <Select
-                  value={period}
-                  onChange={(e) => setPeriod(e.target.value)}
-                  sx={{ color: 'white' }}
-                >
-                  <MenuItem value="7days">7 Days</MenuItem>
-                  <MenuItem value="30days">30 Days</MenuItem>
-                  <MenuItem value="custom">Custom</MenuItem>
-                </Select>
-              </FormControl>
-              {period === 'custom' && (
-                <TextField
-                  size="small"
-                  type="number"
-                  label="Weeks"
-                  value={customWeeks}
-                  onChange={(e) => setCustomWeeks(e.target.value)}
-                  sx={{ 
-                    inputProps: { min: 1, max: 52 },
-                    '& .MuiInputLabel-root': { color: 'white' },
-                    '& .MuiInputBase-input': { color: 'white' },
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'rgba(255,255,255,0.5)' }
-                    }
-                  }}
-                />
-              )}
-              <Tooltip title="Refresh Data">
-                <IconButton 
-                  onClick={handleRefresh} 
-                  disabled={loading}
-                  sx={{ 
-                    bgcolor: loading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', 
-                    color: 'white',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
-                  }}
-                >
-                  {loading ? <CircularProgress size={20} /> : <RefreshIcon />}
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Tooltip title="Refresh">
+                <IconButton onClick={handleRefresh} disabled={performanceLoading}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
+                  <RefreshIcon />
                 </IconButton>
               </Tooltip>
-              {editable && !isEditing && (
-                <Tooltip title="Edit Targets">
-                  <IconButton 
-                    onClick={handleEdit}
-                    sx={{ 
-                      bgcolor: 'rgba(255,255,255,0.1)', 
-                      color: 'white',
-                      '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
-                    }}
-                  >
+              {calculatedData?.can_edit && !isEditing && (
+                <Tooltip title="Edit Targets & Analysis">
+                  <IconButton onClick={handleEdit}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
                     <EditIcon />
                   </IconButton>
                 </Tooltip>
               )}
               {isEditing && (
                 <>
-                  <Tooltip title="Save Changes">
-                    <IconButton 
-                      onClick={handleSave} 
-                      disabled={patchLoading}
-                      sx={{ 
-                        bgcolor: 'rgba(255,255,255,0.1)', 
-                        color: 'white',
-                        '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
-                      }}
-                    >
-                      <SaveIcon />
+                  <Tooltip title="Save">
+                    <IconButton onClick={handleSave} disabled={patchLoading}
+                      sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
+                      {patchLoading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Cancel">
-                    <IconButton 
-                      onClick={handleCancel}
-                      sx={{ 
-                        bgcolor: 'rgba(255,255,255,0.1)', 
-                        color: 'white',
-                        '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
-                      }}
-                    >
+                    <IconButton onClick={handleCancel}
+                      sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
                       <CancelIcon />
                     </IconButton>
                   </Tooltip>
@@ -387,30 +262,21 @@ const OptometryPerformanceReportCard = ({
           </Box>
         </Paper>
 
-        {/* Loading Indicator */}
-        {loading && (
-          <LinearProgress sx={{ mb: 3, borderRadius: 2, height: 6 }} />
-        )}
-
         {/* Summary Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {data?.kpis?.map((kpi, index) => {
+          {calculatedData?.kpis?.map((kpi) => {
             const icons = {
-              'patient_satisfaction': <PeopleIcon />,
-              'treatment_success': <CheckIcon />,
-              'service_quality': <HealthIcon />,
-              'appointment_efficiency': <TimelineIcon />
+              medicine_sales: <MedicineIcon />,
+              softdrop_sales: <MedicineIcon />,
+              return_patient_percentage: <PeopleIcon />,
             };
-            
             const colors = {
-              'patient_satisfaction': green[500],
-              'treatment_success': blue[500],
-              'service_quality': teal[500],
-              'appointment_efficiency': purple[500]
+              medicine_sales: green[500],
+              softdrop_sales: teal[500],
+              return_patient_percentage: blue[500],
             };
-
             return (
-              <Grid item xs={12} sm={6} md={3} key={kpi.id}>
+              <Grid item xs={12} sm={6} md={4} key={kpi.id}>
                 <InfoCard
                   title={kpi.name}
                   count={kpi.formatted_result || numberFormat(kpi.result)}
@@ -422,473 +288,106 @@ const OptometryPerformanceReportCard = ({
           })}
         </Grid>
 
-        {/* Charts Section - Two charts per row like dashboard */}
+        {/* KPI Table - medicines only */}
+        <KPIReportCardTable
+          title="OPTOMETRY DEPARTMENT REPORT CARD"
+          kpis={transformToKPIs(calculatedData?.kpis?.filter(kpi => !kpi.is_separate_card) || [])}
+          loading={performanceLoading || targetsLoading}
+          canEdit={calculatedData?.can_edit || false}
+          department="optometry"
+          date={new Date().toISOString().split('T')[0]}
+          onRefresh={handleRefresh}
+          recommendations={
+            Array.isArray(calculatedData?.recommendations)
+              ? calculatedData.recommendations.join('\n')
+              : (calculatedData?.recommendations || '')
+          }
+        />
+
+        {/* Return Patient Separate Card */}
+        {calculatedData?.kpis?.filter(kpi => kpi.is_separate_card).map((kpi) => {
+          const percentage = (kpi.result / kpi.target) * 100;
+          const progressColor = percentage >= 50 ? 'success' : percentage >= 25 ? 'warning' : 'error';
+          
+          return (
+            <Card key={kpi.id} sx={{ mb: 3 }}>
+              <CardHeader 
+                title={kpi.name}
+                titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                avatar={<Avatar sx={{ bgcolor: blue[100], color: blue[700] }}><PeopleIcon /></Avatar>}
+              />
+              <CardContent>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Target: {kpi.formatted_target} | Result: {kpi.formatted_result}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={Math.min(percentage, 100)}
+                        color={progressColor}
+                        sx={{ height: 10, borderRadius: 5 }}
+                      />
+                    </Box>
+                    <Typography variant="body2" sx={{ minWidth: 50, textAlign: 'right' }}>
+                      {percentage.toFixed(1)}%
+                    </Typography>
+                  </Box>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {percentage >= 50 ? 'Target achieved!' : percentage >= 25 ? 'Progressing towards target' : 'Below target'}
+                </Typography>
+              </CardContent>
+            </Card>
+          );
+        })}
+
+        {/* Recommendations edit section (when editing from header) */}
+        {isEditing && (
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} md={12}>
+              <Card>
+                <CardHeader title="Recommendations" titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                  avatar={<Avatar sx={{ bgcolor: teal[100], color: teal[700] }}><CampaignIcon /></Avatar>} />
+                <Divider />
+                <CardContent>
+                  <TextField fullWidth multiline rows={4} value={editedRecommendations}
+                    onChange={(e) => setEditedRecommendations(e.target.value)}
+                    placeholder="Enter recommendations..." variant="outlined" />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        )}
+
+        {/* Recommendations Section */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* First Row - Two Charts */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, height: '100%' }}>
-              <CardHeader 
-                title="Patient Satisfaction Trends" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
-              <Divider />
-              <CardContent sx={{ p: 2 }}>
-                <ChartWrapper
-                  options={{
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    chart: {
-                      fontFamily: 'inherit',
-                      background: 'transparent',
-                      toolbar: { show: false }
-                    },
-                    xaxis: {
-                      categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4']
-                    },
-                    yaxis: {
-                      title: {
-                        text: 'Satisfaction Rate (%)'
-                      },
-                      max: 100
-                    },
-                    dataLabels: {
-                      enabled: true,
-                      formatter: function (val) {
-                        return val + '%';
-                      }
-                    }
-                  }}
-                  series={[
-                    {
-                      name: 'Patient Satisfaction',
-                      data: period === '7days' ? [
-                        85, 88, 86, data?.kpis?.find(k => k.id === 'patient_satisfaction')?.result || 87
-                      ] : period === '30days' ? [
-                        90, 92, 88, data?.kpis?.find(k => k.id === 'patient_satisfaction')?.result || 87
-                      ] : period === 'custom' ? [
-                        Math.round(85 * (customWeeks / 4)),
-                        Math.round(88 * (customWeeks / 4)),
-                        Math.round(86 * (customWeeks / 4)),
-                        Math.round((data?.kpis?.find(k => k.id === 'patient_satisfaction')?.result || 87) * (customWeeks / 4))
-                      ] : [
-                        85, 88, 86, data?.kpis?.find(k => k.id === 'patient_satisfaction')?.result || 87
-                      ]
-                    }
-                  ]}
-                  type="area"
-                  height={280}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, height: '100%' }}>
-              <CardHeader 
-                title="Treatment Success Rate" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
-              <Divider />
-              <CardContent sx={{ p: 2 }}>
-                <ChartWrapper
-                  options={{
-                    labels: ['Successful', 'In Progress', 'Cancelled'],
-                    chart: {
-                      fontFamily: 'inherit',
-                      background: 'transparent',
-                      toolbar: { show: false }
-                    },
-                    dataLabels: {
-                      enabled: true,
-                      formatter: function (val) {
-                        return val + '%';
-                      }
-                    }
-                  }}
-                  series={[
-                    period === '7days' ? [
-                      data?.kpis?.find(k => k.id === 'treatment_success')?.result || 92,
-                      5, 3
-                    ] : period === '30days' ? [
-                      (data?.kpis?.find(k => k.id === 'treatment_success')?.result || 92) + 3,
-                      4, 2
-                    ] : period === 'custom' ? [
-                      Math.round((data?.kpis?.find(k => k.id === 'treatment_success')?.result || 92) * (customWeeks / 4)),
-                      Math.round(5 * (customWeeks / 4)),
-                      Math.round(3 * (customWeeks / 4))
-                    ] : [
-                      data?.kpis?.find(k => k.id === 'treatment_success')?.result || 92,
-                      5, 3
-                    ]
-                  ]}
-                  type="pie"
-                  height={280}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Second Row - Two Charts */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, height: '100%' }}>
-              <CardHeader 
-                title="Service Quality Metrics" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
-              <Divider />
-              <CardContent sx={{ p: 2 }}>
-                <ChartWrapper
-                  options={{
-                    labels: ['Excellent', 'Good', 'Fair', 'Poor'],
-                    chart: {
-                      fontFamily: 'inherit',
-                      background: 'transparent',
-                      toolbar: { show: false }
-                    },
-                    xaxis: {
-                      categories: ['Excellent', 'Good', 'Fair', 'Poor']
-                    },
-                    yaxis: {
-                      title: {
-                        text: 'Service Quality (%)'
-                      },
-                      max: 100
-                    },
-                    dataLabels: {
-                      enabled: true,
-                      formatter: function (val) {
-                        return val + '%';
-                      }
-                    }
-                  }}
-                  series={[
-                    {
-                      name: 'Service Quality',
-                      data: period === '7days' ? [
-                        65, 20, 10, 5
-                      ] : period === '30days' ? [
-                        data?.kpis?.find(k => k.id === 'service_quality')?.result || 78,
-                        15, 5, 2
-                      ] : period === 'custom' ? [
-                        Math.round((data?.kpis?.find(k => k.id === 'service_quality')?.result || 78) * (customWeeks / 4)),
-                        Math.round(15 * (customWeeks / 4)),
-                        Math.round(5 * (customWeeks / 4)),
-                        Math.round(2 * (customWeeks / 4))
-                      ] : [
-                        data?.kpis?.find(k => k.id === 'service_quality')?.result || 78,
-                        15, 5, 2
-                      ]
-                    }
-                  ]}
-                  type="bar"
-                  height={280}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, height: '100%' }}>
-              <CardHeader 
-                title="Appointment Efficiency" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
-              <Divider />
-              <CardContent sx={{ p: 2 }}>
-                <ChartWrapper
-                  options={{
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                    chart: {
-                      fontFamily: 'inherit',
-                      background: 'transparent',
-                      toolbar: { show: false }
-                    },
-                    xaxis: {
-                      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-                    },
-                    yaxis: {
-                      title: {
-                        text: 'Efficiency Rate (%)'
-                      },
-                      max: 100
-                    },
-                    dataLabels: {
-                      enabled: true,
-                      formatter: function (val) {
-                        return val + '%';
-                      }
-                    }
-                  }}
-                  series={[
-                    {
-                      name: 'Appointment Efficiency',
-                      data: period === '7days' ? [
-                        70, 75, 72, 78, data?.kpis?.find(k => k.id === 'appointment_efficiency')?.result || 75
-                      ] : period === '30days' ? [
-                        80, 82, 78, 85, data?.kpis?.find(k => k.id === 'appointment_efficiency')?.result || 75
-                      ] : period === 'custom' ? [
-                        Math.round(70 * (customWeeks / 4)),
-                        Math.round(75 * (customWeeks / 4)),
-                        Math.round(72 * (customWeeks / 4)),
-                        Math.round(78 * (customWeeks / 4)),
-                        Math.round((data?.kpis?.find(k => k.id === 'appointment_efficiency')?.result || 75) * (customWeeks / 4))
-                      ] : [
-                        70, 75, 72, 78, data?.kpis?.find(k => k.id === 'appointment_efficiency')?.result || 75
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={280}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* KPI Table */}
-        <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2, mb: 4 }}>
-          <CardHeader 
-            title="Key Performance Indicators" 
-            titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-            action={
-              editable && !isEditing && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={handleEdit}
-                >
-                  Edit Targets
-                </Button>
-              )
-            }
-          />
-          <Divider />
-          <CardContent sx={{ p: 2 }}>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell><strong>KPI</strong></TableCell>
-                    <TableCell align="right"><strong>Target</strong></TableCell>
-                    <TableCell align="right"><strong>Result</strong></TableCell>
-                    <TableCell align="center"><strong>Performance</strong></TableCell>
-                    <TableCell align="center"><strong>Trend</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.kpis?.map((kpi, index) => {
-                    const calculatedTrend = kpi.trend || Math.round(((kpi.result - kpi.target) / kpi.target) * 100);
-                    const performanceStatus = kpi.result < kpi.target ? 'Below Target' : kpi.result === kpi.target ? 'Target Achieved' : 'Above Target';
-                    
-                    return (
-                      <TableRow key={kpi.id}>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Avatar
-                              sx={{
-                                width: 32,
-                                height: 32,
-                                bgcolor: `${getPerformanceColor(kpi.result, kpi.target)}20`,
-                                color: getPerformanceColor(kpi.result, kpi.target),
-                                fontSize: 14
-                              }}
-                            >
-                              {kpi.id.includes('patient') && <PeopleIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('treatment') && <CheckIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('service') && <HealthIcon sx={{ fontSize: 16 }} />}
-                              {kpi.id.includes('appointment') && <TimelineIcon sx={{ fontSize: 16 }} />}
-                            </Avatar>
-                            <Typography variant="body2" fontWeight={500}>
-                              {kpi.name}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="right">
-                          {isEditing ? (
-                            <TextField
-                              type="number"
-                              value={editedTargets[kpi.id] || kpi.target}
-                              onChange={(e) => handleTargetChange(kpi.id, e.target.value)}
-                              size="small"
-                              sx={{ width: '100px' }}
-                              InputProps={{
-                                endAdornment: kpi.unit && <InputAdornment position="end">{kpi.unit}</InputAdornment>
-                              }}
-                            />
-                          ) : (
-                            <Typography variant="body2" fontWeight={500}>
-                              {kpi.formatted_target || numberFormat(kpi.target)} {kpi.unit}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography variant="body2" fontWeight={600}>
-                            {kpi.formatted_result || numberFormat(kpi.result)} {kpi.unit}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={performanceStatus}
-                            size="small"
-                            sx={{
-                              bgcolor: 
-                                kpi.result < kpi.target ? orange[50] :
-                                kpi.result === kpi.target ? green[50] :
-                                blue[50],
-                              color: 
-                                kpi.result < kpi.target ? orange[700] :
-                                kpi.result === kpi.target ? green[700] :
-                                blue[700],
-                              fontWeight: 500
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                            {calculatedTrend > 0 && (
-                              <TrendingIcon fontSize="small" sx={{ color: green[600] }} />
-                            )}
-                            {calculatedTrend < 0 && (
-                              <TrendingDownIcon fontSize="small" sx={{ color: red[600] }} />
-                            )}
-                            {calculatedTrend === 0 && (
-                              <TrendingFlatIcon fontSize="small" sx={{ color: grey[600] }} />
-                            )}
-                            <Chip
-                              label={`${calculatedTrend > 0 ? '+' : ''}${calculatedTrend}%`}
-                              size="small"
-                              sx={{ 
-                                bgcolor: 
-                                  calculatedTrend > 0 ? green[50] :
-                                  calculatedTrend < 0 ? red[50] :
-                                  grey[50],
-                                color: 
-                                  calculatedTrend > 0 ? green[700] :
-                                  calculatedTrend < 0 ? red[700] :
-                                  grey[700],
-                                fontWeight: 500,
-                                minWidth: '60px'
-                              }}
-                            />
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-
-        {/* Summary and Recommendations */}
-        <Grid container spacing={3}>
-          {/* Summary */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
-              <CardHeader 
-                title="Report Summary" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
+          <Grid item xs={12} md={12}>
+            <Card sx={{ height: '100%' }}>
+              <CardHeader title="Recommendations" titleTypographyProps={{ variant: 'h6', fontWeight: 600 }}
+                avatar={<Avatar sx={{ bgcolor: teal[100], color: teal[700] }}><CampaignIcon /></Avatar>} />
               <Divider />
               <CardContent>
                 <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Overall Performance
-                    </Typography>
-                    <Chip
-                      label="Good"
-                      size="small"
-                      sx={{ bgcolor: blue[50], color: blue[700], fontWeight: 500 }}
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Targets Achieved
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {data?.summary?.targets_achieved || 0} out of {data?.kpis?.length || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Completion Rate
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {data?.summary?.completion_rate || 0}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={data?.summary?.completion_rate || 0}
-                    sx={{ mt: 1, height: 8, borderRadius: 4 }}
-                  />
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Recommendations */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', borderRadius: 2 }}>
-              <CardHeader 
-                title="Recommendations" 
-                titleTypographyProps={{ variant: "h6", fontWeight: 600 }}
-                sx={{ pb: 0 }}
-              />
-              <Divider />
-              <CardContent>
-                <Stack spacing={2}>
-                  {data?.recommendations?.length > 0 ? (
-                    data.recommendations.map((rec, index) => (
-                      <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: cyan[100], color: cyan[600], fontSize: 12 }}>
-                          {index + 1}
-                        </Avatar>
-                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-                          {rec}
-                        </Typography>
+                  {(() => {
+                    const recs = calculatedData?.recommendations;
+                    const list = Array.isArray(recs)
+                      ? recs
+                      : recs ? [recs] : ['No recommendations yet.'];
+                    return list.map((rec, i) => (
+                      <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <Avatar sx={{ width: 24, height: 24, bgcolor: teal[100], color: teal[600], fontSize: 12 }}>{i + 1}</Avatar>
+                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>{rec}</Typography>
                       </Box>
-                    ))
-                  ) : (
-                    <>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: green[100], color: green[600], fontSize: 12 }}>
-                          1
-                        </Avatar>
-                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-                          Focus on improving patient satisfaction scores to meet target goals
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: blue[100], color: blue[600], fontSize: 12 }}>
-                          2
-                        </Avatar>
-                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-                          Enhance treatment protocols to increase success rates
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, bgcolor: orange[100], color: orange[600], fontSize: 12 }}>
-                          3
-                        </Avatar>
-                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-                          Optimize appointment scheduling for better efficiency
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
+                    ));
+                  })()}
                 </Stack>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
+
       </Box>
     </Page>
   );

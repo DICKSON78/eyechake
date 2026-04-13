@@ -529,7 +529,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from New Consultations"
-                        count={numberFormat(directorData.summary?.total_revenue || 0)}
+                        count={numberFormat(directorData.summary?.revenue_new_consultation || 0)}
                         icon={<ConsultationsIcon />}
                         color={indigo[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -538,7 +538,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Revenue from Return Consultations"
-                        count={numberFormat(directorData.summary?.total_expenses || 0)}
+                        count={numberFormat(directorData.summary?.revenue_return_consultation || 0)}
                         icon={<PatientIcon />}
                         color={teal[500]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -547,9 +547,7 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Total Revenue from All Consultations"
-                        count={numberFormat(
-                          (directorData.summary?.total_revenue || 0)
-                        )}
+                        count={numberFormat(directorData.summary?.revenue_all_consultations || 0)}
                         icon={<RevenueIcon />}
                         color={lime[600]}
                         onClick={() => navigate('/consultation-room/dashboard')}
@@ -558,25 +556,25 @@ const Dashboard = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Consulted Patients"
-                        count={numberFormat(directorData.summary?.total_patients_consulted || 0)}
+                        count={numberFormat(directorData.summary?.consulted_patients || 0)}
                         icon={<DoneIcon />}
                         color={green[500]}
                         onClick={() => navigate('/consultation-room/reports/consultation')}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
+                      <InfoCard
+                        title="Consultations Today"
+                        count={numberFormat(directorData.summary?.consultations_today || 0)}
+                        icon={<ConsultationsIcon />}
+                        color={cyan[400]}
+                        onClick={navigateToConsultationRoom}
                       />
                     </Grid>
                   </>
                 )}
                 {consultationData && (
                   <>
-                    <Grid item xs={12} sm={6} md={4} lg={3}>
-                      <InfoCard
-                        title="Total Patients Seen"
-                        count={numberFormat(consultationData.summary?.total_patients_consulted || 0)}
-                        icon={<PatientIcon />}
-                        color={green[400]}
-                        onClick={() => navigate('/consultation-room/patients-seen')}
-                      />
-                    </Grid>
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                       <InfoCard
                         title="Patients Waiting"
@@ -587,15 +585,6 @@ const Dashboard = () => {
                         icon={<PeopleIcon />}
                         color={orange[400]}
                         onClick={() => navigate('/consultation-room/patients-waiting')}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4} lg={3}>
-                      <InfoCard
-                        title="Consultations Today"
-                        count={numberFormat(consultationData.summary?.consultations_today || 0)}
-                        icon={<ConsultationsIcon />}
-                        color={cyan[400]}
-                        onClick={navigateToConsultationRoom}
                       />
                     </Grid>
                   </>

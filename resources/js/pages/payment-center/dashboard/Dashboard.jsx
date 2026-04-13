@@ -320,6 +320,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/payment-center/pending-cash-patients')}
               />
             </Grid>
+            {/* Commented out: Credit Payments card
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Credit Payments"
@@ -329,6 +330,8 @@ const Dashboard = () => {
                 onClick={() => navigate('/payment-center/pending-credit-patients')}
               />
             </Grid>
+            */}
+            {/* Commented out: Total Revenue card
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Total Revenue"
@@ -338,6 +341,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/payment-center/reports/daily-cash-collection')}
               />
             </Grid>
+            */}
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Today's Collections"

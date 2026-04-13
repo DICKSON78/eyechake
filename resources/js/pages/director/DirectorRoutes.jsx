@@ -7,21 +7,21 @@ import ReportsRoutes from "./reports/ReportsRoutes";
 const DirectorRoutes = () => {
   return (
     <Routes>
-      <Route
+      {/* <Route
         path="dashboard"
         element={<Dashboard />}
-      />
+      /> */}
       <Route
         path="employee-performance"
         element={<EmployeePerformance />}
       />
-      <Route
+      {/* <Route
         path="reports/*"
         element={<ReportsRoutes />}
-      />
+      /> */}
       <Route
         path=""
-        element={<Navigate to="dashboard" />}
+        element={<Navigate to="employee-performance" />}
       />
     </Routes>
   );

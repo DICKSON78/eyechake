@@ -5,6 +5,7 @@ namespace App\Models;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentKpiTarget extends Model
 {
@@ -32,24 +33,44 @@ class DepartmentKpiTarget extends Model
     }
 
     /**
-     * Get target value for a specific KPI
+     * Get target value for a specific KPI from the consolidated performance_targets table
      */
     public static function getTarget($department, $kpiName, $clinicId = null)
     {
-        $target = self::where('department', $department)
-            ->where('kpi_name', $kpiName)
-            ->where('status', 'Active')
+        // Mapping from descriptive report card names to kpi_id in performance_targets
+        $kpiMapping = [
+            'Medicine Sales' => 'medicine_sales',
+            'Return Patient % (Monthly)' => 'return_patient_percentage',
+            'Average Glass Daily Sales' => 'average_glass_daily_sales',
+            'Glass Customer Conversion Ratio (Daily)' => 'glass_conversion_ratio',
+            'Patient Contact Status' => 'called_contacts',
+            'Marketing Glass Leads' => 'marketing_glass_leads',
+        ];
+
+        $kpiId = $kpiMapping[$kpiName] ?? str_replace(' ', '_', strtolower($kpiName));
+
+        $target = DB::table('performance_targets')
+            ->where('department', strtolower($department))
+            ->where('kpi_id', $kpiId)
             ->when($clinicId, function ($query) use ($clinicId) {
                 $query->where('clinic_id', $clinicId);
             })
-            ->first();
+            ->value('target');
 
-        return $target ? [
-            'value' => (float) $target->target_value,
-            'unit' => $target->target_unit,
-        ] : [
-            'value' => 0,
-            'unit' => 'currency',
+        // Fallback to internal department_kpi_targets if not found in performance_targets
+        if ($target === null) {
+            $target = self::where('department', $department)
+                ->where('kpi_name', $kpiName)
+                ->where('status', 'Active')
+                ->when($clinicId, function ($query) use ($clinicId) {
+                    $query->where('clinic_id', $clinicId);
+                })
+                ->value('target_value');
+        }
+
+        return [
+            'value' => (float) ($target ?? 0),
+            'unit' => str_contains(strtolower($kpiName), 'percentage') || str_contains(strtolower($kpiName), '%') ? 'percentage' : (str_contains(strtolower($kpiName), 'sales') ? 'currency' : 'count'),
         ];
     }
 

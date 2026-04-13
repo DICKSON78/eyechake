@@ -33,6 +33,7 @@ import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
 import PerformanceReportCard from "../../../components/PerformanceReportCard";
+import CustomerRelationManagementReportCard from "../../../components/reports/CustomerRelationManagementReportCard";
 import notificationEvents from "../../../utils/notificationEvents";
 import { hasPrivilege, isAdmin } from "../../../helpers/privileges";
 import { useTheme } from "@mui/material/styles";
@@ -114,10 +115,87 @@ const Dashboard = () => {
     (response) => response.data.data
   );
 
-  // Only fetch CRM performance if user has access
-  const canViewPerformance = isAdmin(window.user) || 
-    hasPrivilege(window.user, 'crm_report_card') || 
-    hasPrivilege(window.user, 'director');
+  // Fetch CRM KPI data from marketing API (same as Marketing module)
+  const { data: crmData, loading: crmLoading } = useFetch(
+    "api/marketing/client-calling-status",
+    { ...params, per_page: 1000 }, // Fetch more data to get better statistics
+    true,
+    null,
+    (response) => {
+      console.log('Marketing API Response:', response);
+      return response.data.data;
+    }
+  );
+
+  // Show CRM KPI table to all users
+  const canViewPerformance = true;
+
+  // Transform marketing data to KPI format
+  const transformToKPIs = (data) => {
+    console.log('CRM Data Debug:', data); // Debug log
+    
+    if (!data || !data.data) {
+      console.log('No data or data.data found');
+      return [];
+    }
+    
+    const total = data.total || 0;
+    const patients = data.data || [];
+    
+    console.log('Total patients:', total);
+    console.log('Patients array:', patients);
+    
+    // Check first patient structure
+    if (patients.length > 0) {
+      console.log('First patient structure:', patients[0]);
+      console.log('First patient calling_status:', patients[0].calling_status);
+    }
+    
+    // Count statuses with fallback for missing calling_status
+    const called = patients.filter(item => {
+      const status = item.calling_status?.status || item.status || 'need_to_call';
+      return status === 'called';
+    }).length;
+    
+    const notCalled = patients.filter(item => {
+      const status = item.calling_status?.status || item.status || 'need_to_call';
+      return status === 'need_to_call';
+    }).length;
+    
+    const unreachable = patients.filter(item => {
+      const status = item.calling_status?.status || item.status || 'need_to_call';
+      return status === 'unreachable';
+    }).length;
+    
+    console.log('Called:', called, 'Not Called:', notCalled, 'Unreachable:', unreachable);
+    
+    return [
+      {
+        description: "Patient Contact Status - Called",
+        target: "100%",
+        results: total > 0 ? `${Math.round((called / total) * 100)}%` : "0%",
+        status: called > 0 ? "success" : "pending"
+      },
+      {
+        description: "Patient Contact Status - Not Called",
+        target: "0%",
+        results: total > 0 ? `${Math.round((notCalled / total) * 100)}%` : "0%",
+        status: notCalled > 0 ? "warning" : "success"
+      },
+      {
+        description: "Patient Contact Status - Unreachable",
+        target: "0%",
+        results: total > 0 ? `${Math.round((unreachable / total) * 100)}%` : "0%",
+        status: unreachable > 0 ? "error" : "success"
+      },
+      {
+        description: "Marketing Glass Leads",
+        target: "50+",
+        results: total.toString(),
+        status: total >= 50 ? "success" : total >= 30 ? "warning" : "error"
+      }
+    ];
+  };
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -243,6 +321,7 @@ const Dashboard = () => {
                 onClick={() => safeNavigate('/optician-center/glass-patients', 'optician_center')}
               />
             </Grid>
+            {/* Commented out: Clients Ready Served card
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Clients Ready Served"
@@ -252,6 +331,8 @@ const Dashboard = () => {
                 onClick={() => safeNavigate('/reception/patients', 'reception')}
               />
             </Grid>
+            */}
+            {/* Commented out: New Patients card
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="New Patients"
@@ -261,6 +342,7 @@ const Dashboard = () => {
                 onClick={() => safeNavigate('/reception/register-new-client', 'reception')}
               />
             </Grid>
+            */}
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Patient Visits"
@@ -288,6 +370,7 @@ const Dashboard = () => {
                 onClick={() => safeNavigate('/reception/patients-scheduled-to-return', 'reception')}
               />
             </Grid>
+            {/* Commented out: Completed Patients card
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
               <InfoCard
                 title="Completed Patients"
@@ -297,6 +380,7 @@ const Dashboard = () => {
                 onClick={() => safeNavigate('/reception/patients', 'reception')}
               />
             </Grid>
+            */}
           </Grid>
 
           <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mt: 2 }}>
@@ -395,11 +479,13 @@ const Dashboard = () => {
 
             {canViewPerformance && (
             <Grid size={{ xs: 12 }}>
-              <PerformanceReportCard
-                department="CRM"
-                user={window.user}
-                editable={hasPrivilege(window.user, 'crm_performance_report') || isAdmin(window.user)}
-                refreshTrigger={params?.start_date}
+              <CustomerRelationManagementReportCard 
+                dateParams={{
+                  start_date: params.start_date
+                    ? formatDateForDb(params.start_date)
+                    : undefined,
+                  end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+                }} 
               />
             </Grid>
             )}

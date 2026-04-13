@@ -42,26 +42,23 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const addToast = useToast();
   const today = formatDateForDb(new Date());
+  
+  // Get month-to-date range (from start of month to today)
+  const monthStart = new Date();
+  monthStart.setDate(1); // First day of current month
+  const startDate = formatDateForDb(monthStart);
 
   const { data, loading, error } = useFetch(
     'api/sales-management/dashboard',
-    { start_date: today, end_date: today },
-    true,
-    { summary: { total_discounts: 0, sales_performance: 0, sales_target: 1500000 } },
-    (response) => response.data.data
-  );
-
-  const { data: kpiData, loading: kpiLoading } = useFetch(
-    'api/performance-reports/sales',
-    { start_date: today, end_date: today },
+    { start_date: startDate, end_date: today }, // Use month-to-date instead of just today
     true,
     null,
     (response) => response.data.data
   );
 
-  const { data: crmKpiData, loading: crmKpiLoading } = useFetch(
-    'api/performance-reports/crm',
-    { start_date: today, end_date: today },
+  const { data: kpiData, loading: kpiLoading } = useFetch(
+    'api/performance-reports/sales',
+    { start_date: startDate, end_date: today }, // Use month-to-date for KPIs
     true,
     null,
     (response) => response.data.data
@@ -85,8 +82,15 @@ const Dashboard = () => {
     );
   }
 
-  const salesPerformance = data.summary?.sales_performance || 0;
-  const kpis = kpiData?.kpis || [];
+  // Add null checks to prevent errors
+  const salesPerformance = data?.summary?.sales_performance || 0;
+  const kpis = (kpiData?.kpis || []).map(kpi => ({
+    ...kpi,
+    description: kpi.name,
+    _r: kpi.result || 0,
+    _t: kpi.target || 0,
+  }));
+  const summary = data?.summary || {};
 
   return (
     <Page
@@ -100,7 +104,7 @@ const Dashboard = () => {
           <InfoCard
             title='Sales Performance'
             count={`${salesPerformance}%`}
-            subtitle={`vs ${numberFormat(data.summary?.sales_target || 1500000)} target`}
+            subtitle={`vs ${numberFormat(summary?.sales_target || 1500000)} target`}
             icon={<TrendingIcon />}
             color={salesPerformance >= 100 ? green[500] : salesPerformance >= 75 ? orange[500] : red[500]}
   
@@ -109,7 +113,7 @@ const Dashboard = () => {
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <InfoCard
             title='Total Discount'
-            count={numberFormat(data.summary?.total_discounts || 0)}
+            count={numberFormat(summary?.total_discounts || 0)}
             subtitle='Discounts given today'
             icon={<DiscountIcon />}
             color={pink[500]}
@@ -119,8 +123,16 @@ const Dashboard = () => {
       </Grid>
 
       {/* KPI Report Cards */}
-      {kpis.length>0 && <KPIReportCardTable title="SALES DEPARTMENT REPORT CARD" kpis={kpis} loading={kpiLoading} />}
-      {crmKpiData?.kpis && <KPIReportCardTable title="CUSTOMER RELATION MANAGEMENT DEPARTMENT REPORT CARD" kpis={crmKpiData.kpis} loading={crmKpiLoading} />}
+      {kpis.length>0 && <KPIReportCardTable 
+        title="SALES DEPARTMENT REPORT CARD" 
+        kpis={kpis} 
+        loading={kpiLoading} 
+        remarks={kpiData?.remarks || 'Excellent sales performance achieved. Keep up the good work!'}
+        recommendations={kpiData?.recommendations || 'Continue maintaining strong sales strategies to achieve targets consistently.'}
+        canEdit={kpiData?.can_edit || false}
+        department="sales"
+        date={startDate}
+      />}
     </Page>
   );
 };

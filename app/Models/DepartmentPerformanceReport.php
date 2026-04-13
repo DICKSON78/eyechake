@@ -203,14 +203,17 @@ class DepartmentPerformanceReport extends Model
             })
             ->first();
 
-        // Marketing Glass Leads
-        $glassLeads = DB::table('patients as p')
-            ->join('users as u', 'p.created_by', '=', 'u.id')
-            ->where('p.is_glass_prospect', true)
-            ->when($clinicId, function ($query) use ($clinicId) {
-                $query->where('u.clinic_id', $clinicId);
-            })
-            ->count();
+        // Marketing Glass Leads - check if column exists
+        $glassLeads = 0;
+        if (\Illuminate\Support\Facades\Schema::hasColumn('patients', 'is_glass_prospect')) {
+            $glassLeads = DB::table('patients as p')
+                ->join('users as u', 'p.created_by', '=', 'u.id')
+                ->where('p.is_glass_prospect', true)
+                ->when($clinicId, function ($query) use ($clinicId) {
+                    $query->where('u.clinic_id', $clinicId);
+                })
+                ->count();
+        }
 
         return [
             'patient_contact_status' => [

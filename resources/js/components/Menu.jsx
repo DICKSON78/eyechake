@@ -471,13 +471,14 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           badge: notifications && typeof notifications.patients_sent_to_cashier !== 'undefined' && notifications.patients_sent_to_cashier != null ? (Number(notifications.patients_sent_to_cashier) || 0) : 0,
           show: getMenuVisibility('CASHIER'),
         },
-        {
-          title: "Credit Patients Approval",
-          icon: <WaitingIcon />,
-          to: "/payment-center/pending-credit-patients",
-          badge: notifications && typeof notifications.credit_patients_approval !== 'undefined' && notifications.credit_patients_approval != null ? (Number(notifications.credit_patients_approval) || 0) : 0,
-          show: getMenuVisibility('CASHIER'),
-        },
+        // Credit Patients Approval menu item commented out
+        // {
+        //   title: "Credit Patients Approval",
+        //   icon: <WaitingIcon />,
+        //   to: "/payment-center/pending-credit-patients",
+        //   badge: notifications && typeof notifications.credit_patients_approval !== 'undefined' && notifications.credit_patients_approval != null ? (Number(notifications.credit_patients_approval) || 0) : 0,
+        //   show: getMenuVisibility('CASHIER'),
+        // },
         {
           title: "Pending Patient Bills",
           icon: <WaitingIcon />,
@@ -993,12 +994,15 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/marketing/ideas",
           show: getMenuVisibility('MARKETING'),
         },
+        /*
         {
           title: "Marketing Contact Analytics",
           icon: <PhoneIcon />,
           to: "/marketing/marketing-contact-analytics",
           show: getMenuVisibility('MARKETING'),
         },
+        */
+        /*
         {
           title: "10. CRM REPORTS",
           subheader: true,
@@ -1022,6 +1026,7 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           to: "/sales-reports",
           show: getMenuVisibility('CRM REPORTS'),
         },
+        */
         {
           title: "11. EMPLOYEE MANAGEMENT",
           subheader: true,
@@ -1038,272 +1043,278 @@ const Menu = ({ drawerOpen, setDrawerOpen, user, ...rest }) => {
           subheader: true,
           show: getMenuVisibility('DIRECTOR'),
         },
-        {
-          title: "Director Dashboard",
-          icon: <DirectorIcon />,
-          to: "/director/dashboard",
-          show: getMenuVisibility('DIRECTOR'),
-        },
+        // {
+          // title: "Director Dashboard",
+          // icon: <DirectorIcon />,
+          // to: "/director/dashboard",
+          // show: getMenuVisibility('DIRECTOR'),
+        // },
         {
           title: "Employee Performance",
           icon: <PerformanceIcon />,
           to: "/director/employee-performance",
           show: getMenuVisibility('DIRECTOR'),
         },
-        {
-          title: "All Reports",
-          icon: <ReportsIcon />,
-          to: "/director/reports",
-          show: isPrivilegeGranted('director'),
-          items: [
-            {
-              title: "Reception Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/reception",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Patient Registration Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/reception/patient-registration",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Payment Center Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/payment-center",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Daily Cash Collection Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/payment-center/daily-cash-collection",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Daily Cash Collection Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/payment-center/daily-credit-collection",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Expenses Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/payment-center/expenses",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Consultation Room Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/consultation-room",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Consultation Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/consultation-room/consultation",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Optometrist Monthly Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/consultation-room/optometrist-monthly-report",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Sales Center Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/sales-center",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Sales Manager Monthly Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/sales-center/sales-manager-monthly-report",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Financial Management Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/financial-management",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Cash Collection Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/cash-collection",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Credit Collection Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/credit-collection",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Pending Patient Bills",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/pending-patient-bills",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Cleared Patient Bills",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/cleared-patient-bills",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Patient Bill Payments",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/patient-bill-payments",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Expenses Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/expenses",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Expense Payments",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/expense-payments",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Balance Sheet",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/financial-management/balance-sheet",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Medicine Center Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/medicine-center",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Medicines Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/medicine-center/dispensing/medicines-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Medicines Not Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/medicine-center/dispensing/medicines-not-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Item Balance",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/medicine-center/stock-management/item-balance",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Item Quantity Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/medicine-center/stock-management/item-quantity-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Medicine Alerts",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/medicine-center/medicine-alerts",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Stock Management Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/inventory-management",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Item Balance Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/inventory-management/stock-management/item-balance",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Quantity Dispensed Report",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/inventory-management/stock-management/item-quantity-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Stock Alerts",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/inventory-management/stock-alerts",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Dispensing Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/dispensing",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Items Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/dispensing/items-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Items Not Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/dispensing/items-not-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Item Balance",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/dispensing/item-balance",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-            {
-              title: "Optician Center Reports",
-              icon: <ReportsIcon />,
-              to: "/director/reports/optician-center",
-              show: isPrivilegeGranted('director'),
-              items: [
-                {
-                  title: "Items Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/optician-center/items-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Items Not Dispensed",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/optician-center/items-not-dispensed",
-                  show: isPrivilegeGranted('director'),
-                },
-                {
-                  title: "Item Balance",
-                  icon: <ReportsIcon />,
-                  to: "/director/reports/optician-center/item-balance",
-                  show: isPrivilegeGranted('director'),
-                },
-              ],
-            },
-          ],
-        },
+        // {
+        //   title: "All Reports",
+        //   icon: <ReportsIcon />,
+        //   to: "/director/reports",
+        //   show: isPrivilegeGranted('director'),
+        //   items: [
+        //     {
+        //       title: "Reception Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/reception",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Patient Registration Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/reception/patient-registration",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Payment Center Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/payment-center",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Daily Cash Collection Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/payment-center/daily-cash-collection",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Daily Cash Collection Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/payment-center/daily-credit-collection",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Expenses Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/payment-center/expenses",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Consultation Room Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/consultation-room",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Consultation Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/consultation-room/consultation",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Optometrist Monthly Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/consultation-room/optometrist-monthly-report",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Sales Center Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/sales-center",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Sales Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/sales-center/sales",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Sales Manager Monthly Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/sales-center/sales-manager-monthly-report",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Financial Management Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/financial-management",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Cash Collection Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/cash-collection",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Credit Collection Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/credit-collection",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Pending Patient Bills Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/pending-patient-bills",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Cleared Patient Bills Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/cleared-patient-bills",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Patient Bill Payments Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/patient-bill-payments",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Expenses Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/expenses",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Expense Payments Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/expense-payments",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Balance Sheet Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/financial-management/balance-sheet",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Medicine Center Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/medicine-center",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Medicines Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/medicine-center/dispensing/medicines-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Medicines Not Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/medicine-center/dispensing/medicines-not-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Item Balance Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/medicine-center/stock-management/item-balance",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Item Quantity Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/medicine-center/stock-management/item-quantity-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Medicine Alerts",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/medicine-center/medicine-alerts",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Inventory Management Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/inventory-management",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Item Balance Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/inventory-management/stock-management/item-balance",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Item Quantity Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/inventory-management/stock-management/item-quantity-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Stock Alerts",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/inventory-management/stock-alerts",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Dispensing Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/dispensing",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Items Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/dispensing/items-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Items Not Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/dispensing/items-not-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Item Balance Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/dispensing/item-balance",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       title: "Optician Center Reports",
+        //       icon: <ReportsIcon />,
+        //       to: "/director/reports/optician-center",
+        //       show: isPrivilegeGranted('director'),
+        //       items: [
+        //         {
+        //           title: "Items Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/optician-center/items-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Items Not Dispensed Report",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/optician-center/items-not-dispensed",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //         {
+        //           title: "Item Balance",
+        //           icon: <ReportsIcon />,
+        //           to: "/director/reports/optician-center/item-balance",
+        //           show: isPrivilegeGranted('director'),
+        //         },
+        //       ],
+        //     },
+        //   ],
+        // },
         {
           title: "Calendar",
           icon: <AppointmentsIcon />,

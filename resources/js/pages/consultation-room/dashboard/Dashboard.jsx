@@ -32,7 +32,8 @@ import {
 
 import Page from "../../../components/Page";
 import InfoCard from "../../dashboard/InfoCard";
-import PerformanceReportCard from "../../../components/PerformanceReportCard";
+import OptometryDepartmentReportCard from "../../../components/reports/OptometryDepartmentReportCard";
+import ChartWrapper from "../../../components/ChartWrapper";
 import { useFetch, useToast } from "../../../hooks";
 import { formatError, numberFormat, getWeekStartDate, getWeekEndDate } from "../../../helpers";
 // ✅ IMPORT hasPrivilege
@@ -87,13 +88,96 @@ const Dashboard = () => {
     (response) => response.data.data
   );
 
-  const { data: crmData, loading: crmLoading } = useFetch(
-    "api/performance-reports/crm",
-    dateParams,
+  const { data: targetsData, loading: targetsLoading } = useFetch(
+    "api/department-performance/consultation-room/targets",
+    {},
     true,
     null,
     (response) => response.data.data
   );
+
+  const { data: medicineSalesData, loading: medicineSalesLoading } = useFetch(
+    "api/patient-payment-cache-items",
+    { ...dateParams, consultation_type: "Pharmacy" },
+    true,
+    null,
+    (response) => response.data.data
+  );
+
+  // Transform medicine sales data to KPI format
+  const transformMedicineSalesToKPIs = (data) => {
+    console.log('=== CONSULTATION ROOM MEDICINE SALES DEBUG ==='); // Debug log
+    console.log('Medicine Sales Data Debug:', data); // Debug log
+    console.log('Performance Targets:', targetsData); // Debug log
+    
+    if (!data || !Array.isArray(data)) {
+      console.log('No medicine data found');
+      return [];
+    }
+    
+    // Get medicine sales target from performance targets (units per month)
+    const medicineSalesTarget = targetsData?.targets?.medicine_sales?.monthly_target || 1000; // Default to 1000 units
+    console.log('Consultation Medicine Sales Target (units):', medicineSalesTarget); // Debug log
+    
+    // Group by medicine name and sum quantities
+    const medicineGroups = {};
+    data.forEach(item => {
+      const medicineName = item.item?.name || item.medicine_name || 'Unknown Medicine';
+      const quantity = item.quantity || 0;
+      
+      if (!medicineGroups[medicineName]) {
+        medicineGroups[medicineName] = 0;
+      }
+      medicineGroups[medicineName] += quantity;
+    });
+    
+    console.log('Consultation Medicine Groups:', medicineGroups); // Debug log
+    
+    // Convert to array and get top medicines
+    const topMedicines = Object.entries(medicineGroups)
+      .map(([name, totalSold]) => ({ name, totalSold }))
+      .sort((a, b) => b.totalSold - a.totalSold)
+      .slice(0, 5);
+    
+    console.log('Consultation Top Medicines:', topMedicines); // Debug log
+    
+    // Create individual KPIs for each medicine with actual sales data
+    return topMedicines.map((medicine, index) => {
+      const sold = medicine.totalSold || 0;
+      const target = medicineSalesTarget; // Each medicine has same target in units
+      
+      console.log(`Consultation Medicine ${index + 1}:`, { 
+        name: medicine.name, 
+        sold, 
+        target,
+        hasSales: sold > 0
+      }); // Debug log
+      
+      // Calculate progress percentage based on actual sales
+      const progressPercentage = target > 0 ? Math.min((sold / target) * 100, 100) : 0;
+      
+      // Determine status based on actual sales progress
+      let status;
+      if (sold === 0) {
+        status = 'default'; // Zero sales - grey (no sales at all)
+      } else if (progressPercentage >= 75) {
+        status = 'success'; // Above average - green (75%+)
+      } else if (progressPercentage >= 50) {
+        status = 'warning'; // Average - purple (50-74%)
+      } else {
+        status = 'error'; // Below average - red (1-49%)
+      }
+      
+      return {
+        description: medicine.name,
+        target: `${numberFormat(target)} units`, // Target in units (not TZS)
+        results: `${numberFormat(sold)} units`, // Results in units sold (not TZS)
+        status: status,
+        _r: sold, // Raw sold value for progress calculation
+        _t: target // Raw target value for progress calculation
+      };
+    });
+  };
 
 
   useEffect(() => {
@@ -301,8 +385,9 @@ const Dashboard = () => {
           </Grid>
           
           {/* KPI Report Cards */}
-          {performanceData?.kpis && <KPIReportCardTable title="OPTOMETRY DEPARTMENT REPORT CARD" kpis={performanceData.kpis} loading={performanceLoading} />}
-          {crmData?.kpis && <KPIReportCardTable title="CUSTOMER RELATION MANAGEMENT DEPARTMENT REPORT CARD" kpis={crmData.kpis} loading={crmLoading} />}
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <OptometryDepartmentReportCard />
+          </Box>
         </React.Fragment>
       ) : (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>

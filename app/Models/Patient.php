@@ -97,10 +97,22 @@ class Patient extends Model
         return implode(' ', $parts);
     }
 
+    // Mutator to handle both boolean and string input for is_vip
+    public function setIsVipAttribute($value)
+    {
+        if (is_bool($value)) {
+            $this->attributes['is_vip'] = $value ? 'Yes' : 'No';
+        } elseif (is_numeric($value)) {
+            $this->attributes['is_vip'] = (int)$value === 1 ? 'Yes' : 'No';
+        } else {
+            $this->attributes['is_vip'] = $value === 'Yes' ? 'Yes' : 'No';
+        }
+    }
+
     // Custom accessor to properly convert enum 'Yes'/'No' to boolean
     public function getIsVipAttribute($value)
     {
-        return $value === 'Yes' || $value === true || $value === 1;
+        return $value === 'Yes' || $value === true || $value === 1 || $value === '1';
     }
 
     public function scopeFullName($query, $value)

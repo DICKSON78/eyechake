@@ -10,10 +10,12 @@ use App\Models\ExpensePayment;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\Consultation;
+use App\Models\PatientCheckIn;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -693,7 +695,7 @@ class DashboardController extends Controller
                 ->whereDate('created_at', '<=', $end_date)
                 ->count();
 
-            // Total patients consulted (distinct patients)
+            // Total patients consulted (distinct patients) - in selected date range
             $data['summary']['total_patients_consulted'] = Consultation::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($q) use ($clinic_id) {
@@ -766,7 +768,7 @@ class DashboardController extends Controller
                 
                 if ($name === 'General Consultation - New') {
                     $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return') {
+                } elseif ($name === 'General Consultation - Return' || $name === 'General Consultation - Verify') {
                     $consultation_return_total += $amount;
                 }
             }
@@ -783,7 +785,7 @@ class DashboardController extends Controller
                 
                 if ($name === 'General Consultation - New') {
                     $consultation_new_total += $amount;
-                } elseif ($name === 'General Consultation - Return') {
+                } elseif ($name === 'General Consultation - Return' || $name === 'General Consultation - Verify') {
                     $consultation_return_total += $amount;
                 }
             }

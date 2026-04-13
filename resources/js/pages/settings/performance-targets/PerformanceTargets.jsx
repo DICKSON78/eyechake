@@ -50,7 +50,7 @@ const PerformanceTargets = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await window.axios.patch("/api/performance/" + department + "/targets", { targets });
+      await window.axios.patch("/api/performance-reports/" + department + "/targets", { targets });
       addToast({ message: "Targets saved successfully!", severity: "success" });
       handleFetch();
     } catch (err) {

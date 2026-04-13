@@ -156,23 +156,35 @@ class BulkSmsController extends Controller
             return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Campaign is already being sent.');
         }
 
+        if ($campaign->status === 'completed') {
+            return $this->sendResponse(null, Response::HTTP_BAD_REQUEST, 'Campaign has already been sent.');
+        }
+
         $campaign->status = 'sending';
         $campaign->save();
 
-        // Here you would integrate with your SMS provider
-        // For now, we'll just mark them as sent
+        $smsService = new \App\Http\Services\SmsService();
         $sentCount = 0;
         $failedCount = 0;
 
         foreach ($campaign->recipients as $recipient) {
             try {
-                // TODO: Integrate with SMS provider API
-                // $result = $smsProvider->send($recipient->phone_number, $campaign->message);
-                
-                $recipient->status = 'sent';
-                $recipient->sent_at = now();
-                $recipient->save();
-                $sentCount++;
+                $result = $smsService->sendToPhone(
+                    $recipient->phone_number,
+                    $campaign->message
+                );
+
+                if ($result) {
+                    $recipient->status = 'sent';
+                    $recipient->sent_at = now();
+                    $recipient->save();
+                    $sentCount++;
+                } else {
+                    $recipient->status = 'failed';
+                    $recipient->error_message = 'SMS service returned empty response';
+                    $recipient->save();
+                    $failedCount++;
+                }
             } catch (\Exception $e) {
                 $recipient->status = 'failed';
                 $recipient->error_message = $e->getMessage();
@@ -183,10 +195,10 @@ class BulkSmsController extends Controller
 
         $campaign->sent_count = $sentCount;
         $campaign->failed_count = $failedCount;
-        $campaign->status = 'completed';
+        $campaign->status = $failedCount === count($campaign->recipients) ? 'failed' : 'completed';
         $campaign->save();
 
-        return $this->sendResponse($campaign, Response::HTTP_OK, 'SMS campaign sent successfully.');
+        return $this->sendResponse($campaign->fresh()->load('recipients'), Response::HTTP_OK, "SMS campaign sent. {$sentCount} sent, {$failedCount} failed.");
     }
 
     private function generateRecipients($filters, $user)

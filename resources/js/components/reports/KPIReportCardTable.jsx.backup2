@@ -89,37 +89,43 @@ const pdfStyles = StyleSheet.create({
   },
 });
 
-const getProgressColor = (status, r, t) => {
-  const rn = parseFloat(r) || 0;
-  const tn = parseFloat(t) || 0;
-  if (rn === 0) return "#e0e0e0";
-  if (tn === 0) return "#e0e0e0";
-  const pct = Math.round((rn / tn) * 100);
-  if (pct >= 75) return "#2e7d32";
-  else if (pct >= 50) return "#7b1fa2";
-  else return "#c62828";
+const getProgressColor = (status, result) => {
+  if (result === 0 || result === '0') return grey[300];
+  let percentage = 0;
+  if (typeof result === 'string' && result.includes('%')) {
+    percentage = parseInt(result.replace('%', ''));
+  } else if (typeof result === 'number') {
+    percentage = result;
+  }
+  if (percentage >= 75) return green[600];
+  else if (percentage >= 50) return purple[600];
+  else return red[600];
 };
 
-const getStatusFromResult = (r, t) => {
-  const rn = parseFloat(r) || 0;
-  const tn = parseFloat(t) || 0;
-  if (rn === 0) return 'default';
-  if (tn === 0) return 'default';
-  const pct = Math.round((rn / tn) * 100);
-  if (pct >= 75) return 'success';
-  else if (pct >= 50) return 'warning';
+const getStatusFromResult = (result) => {
+  if (result === 0 || result === '0') return 'default';
+  let percentage = 0;
+  if (typeof result === 'string' && result.includes('%')) {
+    percentage = parseInt(result.replace('%', ''));
+  } else if (typeof result === 'number') {
+    percentage = result;
+  }
+  if (percentage >= 75) return 'success';
+  else if (percentage >= 50) return 'warning';
   else return 'error';
 };
 
-const getStatusLabel = (r, t) => {
-  const rn = parseFloat(r) || 0;
-  const tn = parseFloat(t) || 0;
-  if (rn === 0) return 'No count';
-  if (tn === 0) return 'No target';
-  const pct = Math.round((rn / tn) * 100);
-  if (pct >= 100) return 'Excellent';
-  else if (pct >= 75) return 'Above';
-  else if (pct >= 50) return 'Average';
+const getStatusLabel = (result, status) => {
+  if (result === 0 || result === '0') return '—';
+  if (status === 'default') return 'Please set target';
+  let percentage = 0;
+  if (typeof result === 'string' && result.includes('%')) {
+    percentage = parseInt(result.replace('%', ''));
+  } else if (typeof result === 'number') {
+    percentage = result;
+  }
+  if (percentage >= 75) return 'Above';
+  else if (percentage >= 50) return 'Average';
   else return 'Below';
 };
 
@@ -203,11 +209,15 @@ const KPIReportCardTable = ({
       }
 
       const kpiName = selectedKPI.label || selectedKPI.description || 'Unknown KPI';
-      const kpiId = selectedKPI.id || kpiName;
-      console.log('Using KPI id:', kpiId);
+      console.log('Using KPI name:', kpiName);
 
       const response = await axios.patch(`/api/performance-reports/${department}/targets`, {
-        targets: { [kpiId]: parseFloat(targetValue) || 0 }
+        targets: [{
+          kpi_name: kpiName,
+          target_value: parseFloat(targetValue) || 0,
+          target_unit: 'units',
+          department: department
+        }]
       });
       
       addToast({ message: 'Target saved successfully', severity: 'success' });
@@ -428,12 +438,11 @@ const KPIReportCardTable = ({
   const tableRows = kpis.length > 0 ? 
     kpis.map((k, index) => ({
       label: k.description || k.name || k.label || 'KPI', 
-      id: k.id || null,
       target: k.target, 
-      results: k.results || k.formatted_result || '', 
+      results: k.results, 
       status: k.status,
-      _r: k._r !== undefined ? k._r : (parseFloat(k.results) || 0), 
-      _t: k._t !== undefined ? k._t : (parseFloat(k.target) || 0),
+      _r: k.results, 
+      _t: k.target,
       index: index
     })) : 
     [];
@@ -522,14 +531,13 @@ const KPIReportCardTable = ({
                         <Box sx={{ flex: 1 }}>
                           <LinearProgress 
                             variant="determinate" 
-                            value={Math.max(getProgressValue(row._r, row._t), row._r > 0 ? 25 : 0)}
+                            value={getProgressValue(row.results, row.target)}
                             sx={{ 
-                              height: 10, 
+                              height: 8, 
                               borderRadius: 4,
-                              backgroundColor: '#e0e0e0',
+                              backgroundColor: 'grey.200',
                               '& .MuiLinearProgress-bar': {
-                                backgroundColor: getProgressColor(row.status, row._r, row._t),
-                                minWidth: row._r > 0 ? '8px' : '0px'
+                                backgroundColor: getProgressColor(row.status, row.results)
                               }
                             }}
                           />
@@ -541,9 +549,9 @@ const KPIReportCardTable = ({
                     </TableCell>
                     <TableCell>
                       <Chip 
-                        label={getStatusLabel(row._r, row._t)}
+                        label={getStatusLabel(row.results, row.status)}
                         size="small"
-                        color={getStatusFromResult(row._r, row._t)}
+                        color={getStatusFromResult(row.results)}
                         sx={{ minWidth: 60 }}
                       />
                     </TableCell>

@@ -3,8 +3,9 @@ import { Route, Routes } from "react-router-dom";
 import Dashboard from "./dashboard/Dashboard";
 import PendingCashPayments from "./pending-cash-patients/PendingCashPatients";
 import PendingCashPatientItems from "./pending-cash-patients/PendingPatientItems";
-import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatients";
-import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
+// Commented out: Credit Patient Approval
+// import PendingCreditPatients from "./pending-credit-patients/PendingCreditPatients";
+// import PendingCreditPatientItems from "./pending-credit-patients/PendingPatientItems";
 import PatientBills from "./patient-bills/PatientBills";
 import PatientBill from "./patient-bills/PatientBill";
 import Expenses from "../financial-management/expenses/Expenses";
@@ -29,6 +30,7 @@ const PaymentCenterRoutes = () => {
         path="/pending-cash-patients/:patientId/:paymentCacheId"
         element={<PendingCashPatientItems />}
       />
+      {/* Commented out: Credit Patient Approval routes
       <Route
         path="/pending-credit-patients"
         exact
@@ -38,6 +40,7 @@ const PaymentCenterRoutes = () => {
         path="/pending-credit-patients/:patientId/:paymentCacheId"
         element={<PendingCreditPatientItems />}
       />
+      */}
       <Route
         path="/patient-bills/:status"
         exact

@@ -16,10 +16,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import {
-  CalendarToday as CalendarIcon,
-  AccessTime as TimeIcon,
   Person as PersonIcon,
-  Email as EmailIcon,
   Phone as PhoneIcon,
   Send as SendIcon,
   CheckCircle as CheckIcon,
@@ -52,11 +49,8 @@ const Appointment = () => {
 
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
     appointmentType: '',
-    preferredDate: '',
-    preferredTime: '',
     message: '',
   });
 
@@ -75,12 +69,6 @@ const Appointment = () => {
           error = 'Name must be at least 2 characters';
         }
         break;
-      case 'email':
-        // Email is optional, but if provided, it must be valid
-        if (value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Please enter a valid email address';
-        }
-        break;
       case 'phone':
         if (!value.trim()) {
           error = 'Phone number is required';
@@ -91,23 +79,6 @@ const Appointment = () => {
       case 'appointmentType':
         if (!value) {
           error = 'Please select an appointment type';
-        }
-        break;
-      case 'preferredDate':
-        if (!value) {
-          error = 'Preferred date is required';
-        } else {
-          const selectedDate = new Date(value);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          if (selectedDate < today) {
-            error = 'Please select a future date';
-          }
-        }
-        break;
-      case 'preferredTime':
-        if (!value) {
-          error = 'Preferred time is required';
         }
         break;
       default:
@@ -165,11 +136,8 @@ const Appointment = () => {
     setErrors(newErrors);
     setTouched({
       name: true,
-      email: true,
       phone: true,
       appointmentType: true,
-      preferredDate: true,
-      preferredTime: true,
     });
     
     return isValid;
@@ -193,11 +161,8 @@ const Appointment = () => {
       
     setFormData({
       name: '',
-      email: '',
       phone: '',
       appointmentType: '',
-      preferredDate: '',
-      preferredTime: '',
       message: '',
     });
       setErrors({});
@@ -497,7 +462,7 @@ const Appointment = () => {
                     },
                   }}
                 >
-                  <CalendarIcon sx={{ fontSize: { xs: 36, sm: 44, md: 52 }, mb: { xs: 1, sm: 1.5, md: 2 }, color: 'white', opacity: 0.95 }} />
+                  <PersonIcon sx={{ fontSize: { xs: 36, sm: 44, md: 52 }, mb: { xs: 1, sm: 1.5, md: 2 }, color: 'white', opacity: 0.95 }} />
                   <Typography
                     variant="h4"
                     sx={{
@@ -525,89 +490,41 @@ const Appointment = () => {
                 <CardContent sx={{ p: { xs: 2.5, sm: 3, md: 4 }, bgcolor: '#fafafa' }}>
                   <form onSubmit={handleSubmit}>
                     <Stack spacing={{ xs: 2.5, sm: 3 }}>
-                      <Grid container spacing={{ xs: 2, sm: 2 }}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label="Full Name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
-                            variant="outlined"
-                            error={!!errors.name}
-                            helperText={errors.name || ''}
-                            InputProps={{
-                              startAdornment: <PersonIcon sx={{ mr: 1.5, color: errors.name ? '#d32f2f' : colors.primaryGold, fontSize: '1.2rem' }} />,
-                            }}
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '12px',
-                                bgcolor: 'white',
-                                '& fieldset': {
-                                  borderColor: errors.name ? '#d32f2f' : colors.borderLight,
-                                  borderWidth: errors.name ? 2 : 1,
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: errors.name ? '#d32f2f' : colors.primaryGold,
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: errors.name ? '#d32f2f' : colors.primaryGold,
-                                  borderWidth: 2,
-                                },
-                              },
-                              '& .MuiInputLabel-root.Mui-focused': {
-                                color: errors.name ? '#d32f2f' : colors.primaryGold,
-                              },
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label="Email Address (Optional)"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            required={false}
-                            variant="outlined"
-                            error={!!errors.email}
-                            helperText={errors.email || ''}
-                            InputLabelProps={{
-                              required: false,
-                            }}
-                            InputProps={{
-                              startAdornment: <EmailIcon sx={{ mr: 1.5, color: errors.email ? '#d32f2f' : colors.primaryGold, fontSize: '1.2rem' }} />,
-                            }}
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '12px',
-                                bgcolor: 'white',
-                                '& fieldset': {
-                                  borderColor: errors.email ? '#d32f2f' : colors.borderLight,
-                                  borderWidth: errors.email ? 2 : 1,
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: errors.email ? '#d32f2f' : colors.primaryGold,
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: errors.email ? '#d32f2f' : colors.primaryGold,
-                                  borderWidth: 2,
-                                },
-                              },
-                              '& .MuiInputLabel-root.Mui-focused': {
-                                color: errors.email ? '#d32f2f' : colors.primaryGold,
-                              },
-                              '& .MuiInputLabel-asterisk': {
-                                display: 'none',
-                              },
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
+                      <TextField
+                        fullWidth
+                        label="Full Name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        required
+                        variant="outlined"
+                        error={!!errors.name}
+                        helperText={errors.name || ''}
+                        InputProps={{
+                          startAdornment: <PersonIcon sx={{ mr: 1.5, color: errors.name ? '#d32f2f' : colors.primaryGold, fontSize: '1.2rem' }} />,
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '12px',
+                            bgcolor: 'white',
+                            '& fieldset': {
+                              borderColor: errors.name ? '#d32f2f' : colors.borderLight,
+                              borderWidth: errors.name ? 2 : 1,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: errors.name ? '#d32f2f' : colors.primaryGold,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: errors.name ? '#d32f2f' : colors.primaryGold,
+                              borderWidth: 2,
+                            },
+                          },
+                          '& .MuiInputLabel-root.Mui-focused': {
+                            color: errors.name ? '#d32f2f' : colors.primaryGold,
+                          },
+                        }}
+                      />
 
                       <TextField
                         fullWidth
@@ -683,90 +600,6 @@ const Appointment = () => {
                           </Typography>
                         )}
                       </FormControl>
-
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label="Preferred Date"
-                            name="preferredDate"
-                            type="date"
-                            value={formData.preferredDate}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
-                            variant="outlined"
-                            error={!!errors.preferredDate}
-                            helperText={errors.preferredDate || ''}
-                            InputLabelProps={{ shrink: true }}
-                            inputProps={{
-                              min: new Date().toISOString().split('T')[0],
-                            }}
-                            InputProps={{
-                              startAdornment: <CalendarIcon sx={{ mr: 1.5, color: errors.preferredDate ? '#d32f2f' : colors.primaryGold, fontSize: '1.2rem' }} />,
-                            }}
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '12px',
-                                bgcolor: 'white',
-                                '& fieldset': {
-                                  borderColor: errors.preferredDate ? '#d32f2f' : colors.borderLight,
-                                  borderWidth: errors.preferredDate ? 2 : 1,
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: errors.preferredDate ? '#d32f2f' : colors.primaryGold,
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: errors.preferredDate ? '#d32f2f' : colors.primaryGold,
-                                  borderWidth: 2,
-                                },
-                              },
-                              '& .MuiInputLabel-root.Mui-focused': {
-                                color: errors.preferredDate ? '#d32f2f' : colors.primaryGold,
-                              },
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <TextField
-                            fullWidth
-                            label="Preferred Time"
-                            name="preferredTime"
-                            type="time"
-                            value={formData.preferredTime}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            required
-                            variant="outlined"
-                            error={!!errors.preferredTime}
-                            helperText={errors.preferredTime || ''}
-                            InputLabelProps={{ shrink: true }}
-                            InputProps={{
-                              startAdornment: <TimeIcon sx={{ mr: 1.5, color: errors.preferredTime ? '#d32f2f' : colors.primaryGold, fontSize: '1.2rem' }} />,
-                            }}
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '12px',
-                                bgcolor: 'white',
-                                '& fieldset': {
-                                  borderColor: errors.preferredTime ? '#d32f2f' : colors.borderLight,
-                                  borderWidth: errors.preferredTime ? 2 : 1,
-                                },
-                                '&:hover fieldset': {
-                                  borderColor: errors.preferredTime ? '#d32f2f' : colors.primaryGold,
-                                },
-                                '&.Mui-focused fieldset': {
-                                  borderColor: errors.preferredTime ? '#d32f2f' : colors.primaryGold,
-                                  borderWidth: 2,
-                                },
-                              },
-                              '& .MuiInputLabel-root.Mui-focused': {
-                                color: errors.preferredTime ? '#d32f2f' : colors.primaryGold,
-                              },
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
 
                       <TextField
                         fullWidth

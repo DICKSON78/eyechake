@@ -324,8 +324,8 @@ class DirectorDashboardController extends Controller
                 ->where('pmt.amount', '>', 0);
             
             if ($clinic_id) {
-                $item_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $item_payments->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
@@ -341,8 +341,8 @@ class DirectorDashboardController extends Controller
                 ->where('pmt.amount', '>', 0);
             
             if ($clinic_id) {
-                $bill_payments->whereHas('creator', function ($query) use ($clinic_id) {
-                    $query->select('id')->from('users')->where('clinic_id', $clinic_id);
+                $bill_payments->whereIn('pmt.created_by', function($q) use ($clinic_id) {
+                    $q->select('id')->from('users')->where('clinic_id', $clinic_id);
                 });
             }
             
@@ -826,15 +826,14 @@ class DirectorDashboardController extends Controller
                 ->whereDate('created_at', '<=', $end_date)
                 ->count();
 
-            // Total patients consulted (distinct patients)
+            // Total patients consulted (distinct patients) - today only
             $data['summary']['total_patients_consulted'] = Consultation::query()
                 ->when($clinic_id, function ($query) use ($clinic_id) {
                     $query->whereHas('creator', function ($q) use ($clinic_id) {
                         $q->where('clinic_id', $clinic_id);
                     });
                 })
-                ->whereDate('created_at', '>=', $start_date)
-                ->whereDate('created_at', '<=', $end_date)
+                ->whereDate('created_at', Carbon::today()->format('Y-m-d'))
                 ->distinct()
                 ->count('payment_cache_item_id');
 

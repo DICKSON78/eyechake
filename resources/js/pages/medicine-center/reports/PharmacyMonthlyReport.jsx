@@ -190,12 +190,12 @@ const PharmacyMonthlyReport = () => {
     addToast({ message: "Report loaded for editing", severity: "success" });
   };
 
-  const handleDelete = (report) => {
+  const handleDelete = async (report) => {
     const component = (
       <ConfirmationDialog
         message={`Delete report for ${report.employeeName || "Unknown"} (${report.month || "Unknown"})?`}
         onCancel={() => modalRef.current.close()}
-        onOk={() => {
+        onOk={async () => {
           await window.axios.delete(`api/employee-reports/${report._api_id || report.id}`);
           loadSavedReports();
           if (currentReportId === report.id) {

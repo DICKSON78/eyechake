@@ -13,20 +13,15 @@ import {
 import {
   CheckCircle as CheckIcon,
   Person as PersonIcon,
-  Email as EmailIcon,
   Phone as PhoneIcon,
-  CalendarToday as CalendarIcon,
-  AccessTime as TimeIcon,
-  Description as DescriptionIcon,
   Message as MessageIcon,
 } from "@mui/icons-material";
 import Navbar from "../../Navbar";
 import Footer from "../../Footer";
 import Form from "../../components/Form";
 import TextField from "../../components/TextField";
-import DatePicker from "../../components/DatePicker";
 import { usePost, useToast } from "../../hooks";
-import { formatDateForDb, formatError, getValidationRules } from "../../helpers";
+import { formatError, getValidationRules } from "../../helpers";
 
 const validationRules = getValidationRules();
 
@@ -37,20 +32,13 @@ const Appointment = () => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
-    email: "",
     phone: "",
-    preferred_date: null,
-    preferred_time: "",
-    reason: "",
     message: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
 
-  const { data, loading, error, handlePost } = usePost("api/appointments", {
-    ...formData,
-    preferred_date: formData.preferred_date ? formatDateForDb(formData.preferred_date) : null,
-  });
+  const { data, loading, error, handlePost } = usePost("api/appointments", formData);
 
   useEffect(() => {
     document.title = `Book Appointment - SIKAF Eye Care`;
@@ -64,11 +52,7 @@ const Appointment = () => {
       setFormData({
         first_name: "",
         last_name: "",
-        email: "",
         phone: "",
-        preferred_date: null,
-        preferred_time: "",
-        reason: "",
         message: "",
       });
       if (formRef.current) {
@@ -90,10 +74,10 @@ const Appointment = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa", pt: { xs: '56px', sm: '64px', md: '70px' } }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa", pt: { xs: '56px', sm: '64px', md: '70px' }, display: 'flex', flexDirection: 'column' }}>
       <Navbar />
       
-      <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 } }}>
+      <Container maxWidth="md" sx={{ py: { xs: 4, md: 6 }, mb: 0, flex: 1 }}>
         {/* Appointment Form - Centered */}
         <Box sx={{ maxWidth: 800, mx: "auto" }}>
           <Card 
@@ -203,42 +187,6 @@ const Appointment = () => {
                     />
                   </Grid>
 
-                  {/* Email */}
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      label="Email"
-                      fullWidth
-                      type="email"
-                      rules={[validationRules.optionalEmail]}
-                      value={formData.email}
-                      onChange={(value) =>
-                        setFormData({ ...formData, email: value })
-                      }
-                      containerProps={{
-                        sx: {
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "& fieldset": {
-                              borderColor: "#e0e0e0",
-                              borderWidth: "1.5px",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "#1A4A6B",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#1A4A6B",
-                              borderWidth: "2px",
-                            },
-                          },
-                          "& .MuiInputBase-input": {
-                            py: 1.25,
-                            fontSize: "0.95rem",
-                          },
-                        },
-                      }}
-                    />
-                  </Grid>
-
                   {/* Phone */}
                   <Grid size={{ xs: 12 }}>
                     <TextField
@@ -268,115 +216,6 @@ const Appointment = () => {
                           "& .MuiInputBase-input": {
                             py: 1.25,
                             fontSize: "0.95rem",
-                          },
-                        },
-                      }}
-                    />
-                  </Grid>
-
-                  {/* Preferred Date */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <DatePicker
-                      label="Preferred Date"
-                      fullWidth
-                      value={formData.preferred_date}
-                      onChange={(value) =>
-                        setFormData({
-                          ...formData,
-                          preferred_date: !isNaN(value) ? value : null,
-                        })
-                      }
-                      containerProps={{
-                        sx: {
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "& fieldset": {
-                              borderColor: "#e0e0e0",
-                              borderWidth: "1.5px",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "#1A4A6B",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#1A4A6B",
-                              borderWidth: "2px",
-                            },
-                          },
-                          "& .MuiInputBase-input": {
-                            py: 1.25,
-                            fontSize: "0.95rem",
-                          },
-                        },
-                      }}
-                    />
-                  </Grid>
-
-                  {/* Preferred Time */}
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      label="Preferred Time"
-                      fullWidth
-                      placeholder="e.g., 10:00 AM"
-                      value={formData.preferred_time}
-                      onChange={(value) =>
-                        setFormData({ ...formData, preferred_time: value })
-                      }
-                      containerProps={{
-                        sx: {
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "& fieldset": {
-                              borderColor: "#e0e0e0",
-                              borderWidth: "1.5px",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "#1A4A6B",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#1A4A6B",
-                              borderWidth: "2px",
-                            },
-                          },
-                          "& .MuiInputBase-input": {
-                            py: 1.25,
-                            fontSize: "0.95rem",
-                          },
-                        },
-                      }}
-                    />
-                  </Grid>
-
-                  {/* Reason for Visit */}
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      label="Reason for Visit"
-                      fullWidth
-                      multiline
-                      rows={4}
-                      value={formData.reason}
-                      onChange={(value) =>
-                        setFormData({ ...formData, reason: value })
-                      }
-                      containerProps={{
-                        sx: {
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "& fieldset": {
-                              borderColor: "#e0e0e0",
-                              borderWidth: "1.5px",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "#1A4A6B",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#1A4A6B",
-                              borderWidth: "2px",
-                            },
-                          },
-                          "& .MuiInputBase-input": {
-                            py: 1.5,
-                            fontSize: "0.95rem",
-                            lineHeight: 1.6,
                           },
                         },
                       }}

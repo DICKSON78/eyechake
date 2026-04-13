@@ -38,6 +38,7 @@ import LoadingSkeleton from "./LoadingSkeleton";
 import InfoCard from "../../dashboard/InfoCard";
 import Filters from "../../dashboard/Filters";
 import ChartWrapper from "../../../components/ChartWrapper";
+import CustomerRelationManagementReportCard from "../../../components/reports/CustomerRelationManagementReportCard";
 
 import { useTheme } from "@mui/material/styles";
 import {
@@ -450,6 +451,22 @@ const Dashboard = () => {
                     height="500"
                   />
                 </Card>
+              </Grid>
+            </Grid>
+
+            {/* CRM Report Card Section - Below Charts */}
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{ mt: 4, width: '100%' }}
+            >
+              <Grid size={{ xs: 12 }}>
+                <CustomerRelationManagementReportCard dateParams={{
+                  start_date: params.start_date
+                    ? formatDateForDb(params.start_date)
+                    : undefined,
+                  end_date: params.end_date ? formatDateForDb(params.end_date) : undefined,
+                }} />
               </Grid>
             </Grid>
 

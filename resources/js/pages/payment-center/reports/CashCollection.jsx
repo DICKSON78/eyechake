@@ -96,6 +96,7 @@ const CashCollection = ({ module }) => {
                     sm={6}
                     xs={12}
                   >
+                    {/* Commented out: Start Date filter
                     <DatePicker
                       fullWidth
                       label="Start Date"
@@ -107,6 +108,7 @@ const CashCollection = ({ module }) => {
                         })
                       }
                     />
+                    */}
                   </Grid>
                   <Grid
                     item
@@ -114,6 +116,7 @@ const CashCollection = ({ module }) => {
                     sm={6}
                     xs={12}
                   >
+                    {/* Commented out: End Date filter
                     <DatePicker
                       fullWidth
                       label="End Date"
@@ -125,6 +128,7 @@ const CashCollection = ({ module }) => {
                         })
                       }
                     />
+                    */}
                   </Grid>
                   <Grid
                     item

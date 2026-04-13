@@ -6,7 +6,7 @@ use App\Http\Controllers\Reports\InventoryManagementReportsController;
 use App\Http\Controllers\PaymentCenterDashboardController;
 use App\Http\Controllers\Reports\PaymentCenterReportsController;
 use App\Http\Controllers\ReceptionDashboardController;
-use App\Http\Controllers\DirectorDashboardController;
+
 use App\Http\Controllers\AppointmentsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CataractSurgeryRecordsController;
@@ -84,6 +84,7 @@ use App\Http\Controllers\OpticianCenterDashboardController;
 use App\Http\Controllers\SalesCenterDashboardController;
 use App\Http\Controllers\SalesCenterPrescriptionsController;
 use App\Http\Controllers\SalesManagementDashboardController;
+use App\Http\Controllers\DirectorDashboardController;
 use App\Http\Controllers\EmployeePerformanceController;
 use App\Http\Controllers\OfficeCalendarController;
 use App\Http\Controllers\OfficeCalendarSubscribersController;
@@ -93,7 +94,6 @@ use App\Http\Controllers\ReferralsController;
 use App\Http\Controllers\ExternalLinksEmailAlertsController;
 use App\Http\Controllers\ExternalLinksWebsiteAppointmentsController;
 use App\Http\Controllers\PerformanceDashboardController;
-use App\Http\Controllers\Marketing\CrmReportCardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -297,9 +297,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/user', 'getAuthUser');
     });
 
-    // Main Dashboard Route - moved inside auth group
-    $router->get('/dashboard', [DashboardController::class, '__invoke']);
-
      // VIP Patients - move this inside the main auth group
     $router->get('/patients/vip', [PatientsController::class, 'vipPatients']);
     
@@ -327,9 +324,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/{id}/start', [DoctorTasksController::class, 'startTask']);
         $router->post('/{id}/complete', [DoctorTasksController::class, 'completeTask']);
     });
+    */
     
-    // Main Dashboard Route - no authentication required
     $router->get('/dashboard', [DashboardController::class, '__invoke']);
+    // Temporarily moved outside auth to test
     // $router->get('/notifications', [NotificationsController::class, '__invoke']);
     // $router->get('/notifications/dynamic', [NotificationsController::class, 'getDynamicNotifications']);
     
@@ -341,7 +339,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/mark-all-as-read', [PatientNotificationsController::class, 'markAllAsRead']);
         $router->delete('/{id}', [PatientNotificationsController::class, 'destroy']);
     });
-    */
+    $router->get('/performance-reports/{department}', [PerformanceDashboardController::class, '__invoke']);
+    $router->post('/performance-reports/{department}/remarks', [PerformanceDashboardController::class, 'updateRemarksAndRecommendations']);
     $router->apiResource('/appointments', AppointmentsController::class)->except(['store']);
     $router->apiResource('/payment-modes', PaymentModesController::class);
     $router->apiResource('/payment-channels', PaymentChannelsController::class);
@@ -598,10 +597,9 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/employee-performance', [EmployeePerformanceController::class, 'index']);
     });
 
-    $router->prefix('performance-reports')->group(function ($router) {
-        $router->get('/{department}', [PerformanceDashboardController::class, 'getDepartmentKPIs']);
-        $router->patch('/{department}/targets', [PerformanceDashboardController::class, 'updateTargets']);
-        $router->patch('/{department}/report', [PerformanceDashboardController::class, 'updateReport']);
+    $router->prefix('dashboard')->group(function ($router) {
+        $router->get('/performance/{department}', [PerformanceDashboardController::class, 'getDepartmentKPIs']);
+        $router->patch('/performance/{department}/targets', [PerformanceDashboardController::class, 'updateTargets']);
     });
 
     $router->prefix('marketing')->group(function ($router) {
@@ -653,20 +651,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/{department}/audit-logs', [\App\Http\Controllers\DepartmentPerformanceController::class, 'getAuditLogs']);
         $router->post('/initialize', [\App\Http\Controllers\DepartmentPerformanceController::class, 'initialize']);
     });
-});
-
-// Test endpoint for debugging medicines
-Route::get('/test-medicines', function () {
-    $medicines = \Illuminate\Support\Facades\DB::table('items as i')
-        ->where('i.category', 'Medicine')
-        ->distinct()
-        ->pluck('i.name')
-        ->toArray();
-    
-    return response()->json([
-        'medicines_count' => count($medicines),
-        'medicines_list' => array_slice($medicines, 0, 10)
-    ]);
 });
 
 Route::get('/restore', function (\Illuminate\Http\Request $request) {

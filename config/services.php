@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'macksms' => [
+        'api_key' => env('MACKSMS_API_KEY'),
+        'secret_key' => env('MACKSMS_SECRET_KEY'),
+        'sender_id' => env('MACKSMS_SENDER_ID', 'Sikaf'),
+        'api_url' => env('MACKSMS_API_URL', 'https://macksms.co.tz/portal/api/text'),
+    ],
+
 ];

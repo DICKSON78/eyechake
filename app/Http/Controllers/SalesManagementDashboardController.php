@@ -62,9 +62,9 @@ class SalesManagementDashboardController extends Controller
                 ],
             ];
 
-            // Total sales from patient payments
+            // Total sales from patient_item_bills (real data source)
             try {
-                $totalSalesQuery = PatientItemPayment::query()
+                $totalSalesQuery = DB::table('patient_item_bills')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -76,7 +76,7 @@ class SalesManagementDashboardController extends Controller
                     });
                 }
                 
-                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                // Use net amount (amount - discount) to match real sales
                 $data['summary']['total_sales'] = (float) ($totalSalesQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
             } catch (\Exception $e) {
                 \Log::error('Error calculating total sales', ['error' => $e->getMessage()]);
@@ -86,7 +86,7 @@ class SalesManagementDashboardController extends Controller
             // Sales today
             try {
                 $today = Carbon::today()->format('Y-m-d');
-                $salesTodayQuery = PatientItemPayment::query()
+                $salesTodayQuery = DB::table('patient_item_bills')
                     ->whereNotNull('created_at')
                     ->whereDate('created_at', $today)
                     ->where('amount', '>', 0);
@@ -97,7 +97,7 @@ class SalesManagementDashboardController extends Controller
                     });
                 }
                 
-                // Use net amount (amount - discount) to match Daily Cash Collection subtotal
+                // Use net amount (amount - discount) to match real sales
                 $data['summary']['sales_today'] = (float) ($salesTodayQuery->selectRaw('SUM(amount - COALESCE(discount, 0)) as net')->first()->net ?? 0);
             } catch (\Exception $e) {
                 \Log::error('Error calculating sales today', ['error' => $e->getMessage()]);
@@ -107,9 +107,9 @@ class SalesManagementDashboardController extends Controller
             // Total revenue (same as total sales for now)
             $data['summary']['total_revenue'] = $data['summary']['total_sales'];
 
-            // Total transactions
+            // Total transactions from patient_item_bills
             try {
-                $transactionsQuery = PatientItemPayment::query()
+                $transactionsQuery = DB::table('patient_item_bills')
                     ->whereNotNull('created_at')
                     ->where('created_at', '>=', $start_date . ' 00:00:00')
                     ->where('created_at', '<=', $end_date . ' 23:59:59')
@@ -132,15 +132,15 @@ class SalesManagementDashboardController extends Controller
                 $data['summary']['average_transaction'] = $data['summary']['total_sales'] / $data['summary']['total_transactions'];
             }
 
-            // Get sales target from performance_targets table
-            try {
-                $salesTarget = DB::table('performance_targets')
-                    ->where('department', 'sales')
-                    ->where('kpi_key', 'daily_sales_target')
-                    ->value('target_value') ?? 1500000; // Default fallback
-            } catch (\Exception $e) {
-                $salesTarget = 1500000; // Default fallback
-            }
+            // Get performance targets from consolidated table
+            $targets = DB::table('performance_targets')
+                ->where('department', 'sales')
+                ->when($clinic_id, function ($query) use ($clinic_id) {
+                    $query->where('clinic_id', $clinic_id);
+                })
+                ->pluck('target', 'kpi_id');
+
+            $salesTarget = $targets['revenue_generated'] ?? 5000000;
 
             // Calculate sales performance percentage
             $salesPerformance = $data['summary']['total_sales'] > 0 
@@ -150,13 +150,13 @@ class SalesManagementDashboardController extends Controller
             $data['summary']['sales_target'] = $salesTarget;
             $data['summary']['sales_performance'] = round($salesPerformance, 1);
 
-            // Items sold
+            // Items sold from patient_item_bills
             try {
-                $itemsSoldQuery = PatientPaymentCacheItem::query()
-                    ->where('patient_payment_cache_items.status', 'Served')
-                    ->whereNotNull('served_at')
-                    ->where('served_at', '>=', $start_date . ' 00:00:00')
-                    ->where('served_at', '<=', $end_date . ' 23:59:59');
+                $itemsSoldQuery = DB::table('patient_item_bills')
+                    ->whereNotNull('created_at')
+                    ->where('created_at', '>=', $start_date . ' 00:00:00')
+                    ->where('created_at', '<=', $end_date . ' 23:59:59')
+                    ->where('amount', '>', 0);
                 
                 if ($clinic_id) {
                     $itemsSoldQuery->whereHas('creator', function ($q) use ($clinic_id) {
@@ -164,21 +164,38 @@ class SalesManagementDashboardController extends Controller
                     });
                 }
                 
-                $data['summary']['items_sold'] = $itemsSoldQuery->sum('quantity') ?? 0;
+                $data['summary']['items_sold'] = $itemsSoldQuery->count() ?? 0;
             } catch (\Exception $e) {
                 \Log::error('Error calculating items sold', ['error' => $e->getMessage()]);
                 $data['summary']['items_sold'] = 0;
             }
 
-            // Total discounts (if available in the data model)
-            $data['summary']['total_discounts'] = 0;
+            // Total discounts from patient_item_bills
+            try {
+                $discountsQuery = DB::table('patient_item_bills')
+                    ->whereNotNull('created_at')
+                    ->where('created_at', '>=', $start_date . ' 00:00:00')
+                    ->where('created_at', '<=', $end_date . ' 23:59:59')
+                    ->where('discount', '>', 0);
+                
+                if ($clinic_id) {
+                    $discountsQuery->whereHas('creator', function ($q) use ($clinic_id) {
+                        $q->where('clinic_id', $clinic_id);
+                    });
+                }
+                
+                $data['summary']['total_discounts'] = (float) ($discountsQuery->sum('discount') ?? 0);
+            } catch (\Exception $e) {
+                \Log::error('Error calculating total discounts', ['error' => $e->getMessage()]);
+                $data['summary']['total_discounts'] = 0;
+            }
 
             // Sales trend (last 7 days)
             $data['statistics']['sales_trend'] = [];
             for ($i = 6; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i)->format('Y-m-d');
                 try {
-                    $salesQuery = PatientItemPayment::query()
+                    $salesQuery = DB::table('patient_item_bills')
                         ->whereNotNull('created_at')
                         ->whereDate('created_at', $date)
                         ->where('amount', '>', 0);

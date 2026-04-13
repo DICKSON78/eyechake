@@ -314,4 +314,74 @@ class ReceptionDashboardController extends Controller
 
         return $this->sendResponse($data, Response::HTTP_OK, 'Reception dashboard data retrieved successfully.');
     }
+
+    /**
+     * Get return patient percentage for optometry department
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getReturnPatientPercentage(Request $request)
+    {
+        try {
+            $request->validate([
+                'start_date' => 'sometimes|date_format:Y-m-d',
+                'end_date' => 'sometimes|date_format:Y-m-d',
+            ]);
+
+            $user = $request->user();
+            
+            // Default to month-to-date if no dates provided
+            $start_date = $request->start_date ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+            $end_date = $request->end_date ?? Carbon::now()->format('Y-m-d');
+
+            $clinic_id = ($user && ($user->is_admin ?? false)) ? $request->clinic_id : ($user->clinic_id ?? null);
+
+            // Get new patients (created in the period)
+            $newPatients = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+                return Patient::query()
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereHas('creator', function ($query) use ($clinic_id) {
+                            $query->where('clinic_id', $clinic_id);
+                        });
+                    })
+                    ->whereDate('created_at', '>=', $start_date)
+                    ->whereDate('created_at', '<=', $end_date)
+                    ->count();
+            }, 0);
+
+            // Get return patients (consultations with patient_to_return = 'Yes')
+            $returnPatients = $this->safe(function () use ($clinic_id, $start_date, $end_date) {
+                return Consultation::query()
+                    ->when($clinic_id, function ($query) use ($clinic_id) {
+                        $query->whereHas('creator', function ($query) use ($clinic_id) {
+                            $query->where('clinic_id', $clinic_id);
+                        });
+                    })
+                    ->where('status', 'Consulted')
+                    ->where('patient_to_return', 'Yes')
+                    ->whereNotNull('to_return_date')
+                    ->whereDate('to_return_date', '>=', $start_date)
+                    ->whereDate('to_return_date', '<=', $end_date)
+                    ->count();
+            }, 0);
+
+            // Calculate percentage
+            $percentage = $newPatients > 0 ? round(($returnPatients / $newPatients) * 100, 2) : 0;
+
+            $data = [
+                'new_patients' => $newPatients,
+                'return_patients' => $returnPatients,
+                'percentage' => $percentage,
+                'period' => [
+                    'start_date' => $start_date,
+                    'end_date' => $end_date
+                ]
+            ];
+
+            return $this->sendResponse($data, Response::HTTP_OK, 'Return patient percentage calculated successfully.');
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to calculate return patient percentage', Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+        }
+    }
 }

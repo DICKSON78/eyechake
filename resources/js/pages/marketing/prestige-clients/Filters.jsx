@@ -36,9 +36,9 @@ const Filters = ({ params, setParams, ...rest }) => {
                 ),
               }}
               value={params.q || ""}
-              onChange={(value) =>
-                throttle(() => setParams({ ...params, q: value, page: 1 }), 1000)
-              }
+              onChange={(value) => {
+                setParams({ ...params, q: value, page: 1 });
+              }}
             />
           </Grid>
           <Grid item md={3} sm={6} xs={12}>
